@@ -1,0 +1,11 @@
+[
+  {
+    "id": "123456789_1790886819",
+    "product_id": "123456789",
+    "store_key": "brk_fishing",
+    "timestamp": "2026-10-01T17:33:39.954269",
+    "status": "dry_run_success",
+    "previous_html": "",
+    "new_html": "<p>Teste de Descrição Segura</p>"
+  }
+]

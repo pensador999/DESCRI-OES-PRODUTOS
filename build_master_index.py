@@ -20,6 +20,8 @@ from core.template_engine import TemplateEngine
 from core.html_builder import HTMLBuilder
 from core.html_replacer import HTMLReplacer
 from core.image_harvester import ImageHarvester
+from core.sibling_matcher import SiblingMatcher
+from core.shopify_admin_client import ShopifyAdminClient
 
 def build_master():
     print("[INICIO] Inicializando compilador Mestre do index.html (v4.0)...")
@@ -101,6 +103,7 @@ def build_master():
             selected_prods.append(p)
             selected_handles.add(p.get("handle"))
         
+        sibling_matcher = SiblingMatcher(all_prods)
         enriched = []
         for p in selected_prods:
             title = p.get("title", "")
@@ -122,16 +125,19 @@ def build_master():
 
             orig_html = p.get("original_body_html") or p.get("body_html") or ""
             
-            # Detectar arquétipo correto com base em título, categoria, tags e VENDOR parceiro
+            # 1. Detectar arquétipo correto por categoria real e vendor
             vendor = p.get("vendor", "")
             archetype_id = template_engine.detect_archetype(title, category, tags, vendor=vendor)
             arch_info = template_engine.templates.get(archetype_id, template_engine.templates["uv_performance"])
             
-            # Gerar Modo A (Preservar HTML + Fotos CDN)
+            # 2. Buscar irmão homólogo no site (Sibling Matcher)
+            sibling_info = sibling_matcher.find_best_sibling(p, min_score=0.70)
+
+            # 3. Gerar Modo A (Preservar HTML + Fotos CDN)
             mode_a_html = html_replacer.replace_images_preserve_html(orig_html, images, title)
             
-            # Gerar Modo B (3 Atos Alta Conversão) com Cores Oficiais Harmonizadas por Loja
-            narrative = template_engine.generate_narrative_from_template(p, archetype_id, images, store_key=store_key)
+            # 4. Gerar Modo B (3 Atos com Arquétipo Especializado ou Molde de Irmão do Site)
+            narrative = template_engine.generate_narrative_from_template(p, archetype_id, images, store_key=store_key, sibling_info=sibling_info)
             mode_b_html = html_builder.build_shopify_html(narrative)
 
             # Detectar links proibidos e SKUs órfãos se não estavam anotados
@@ -145,6 +151,9 @@ def build_master():
             p_copy["cdn_images"] = images
             p_copy["archetype_id"] = archetype_id
             p_copy["archetype_name"] = arch_info["name"]
+            p_copy["source_type"] = narrative["source_type"]
+            p_copy["source_label"] = narrative["source_label"]
+            p_copy["sibling_info"] = sibling_info
             p_copy["store_key"] = store_key
             p_copy["theme_color"] = narrative["theme_color"]
             p_copy["theme_bg"] = narrative["theme_bg"]
@@ -646,6 +655,7 @@ def build_master():
             <span id="modal-sku-badge" class="px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 font-mono text-[10px] font-bold border border-blue-500/30">SKU: --</span>
             <span id="modal-variants-badge" class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 text-[10px] font-semibold">8 Variantes</span>
             <span id="modal-archetype-badge" class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Molde UV50+</span>
+            <span id="modal-source-badge" class="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 text-[10px] font-bold border border-purple-500/30">✨ Molde Homólogo</span>
           </div>
           <h3 id="modal-title" class="text-base font-extrabold truncate">Título do Produto</h3>
         </div>
@@ -678,12 +688,16 @@ def build_master():
         </div>
 
         <div class="flex items-center gap-2">
+          <button id="modal-save-shopify-direct-btn" onclick="saveDirectToShopify(this)" class="px-3.5 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all transform active:scale-95 text-xs" title="Atualiza EXCLUSIVAMENTE o campo body_html deste produto na Shopify">
+            <span>⚡</span>
+            <span>Salvar na Shopify (Direto)</span>
+          </button>
           <button id="modal-header-copy-btn" onclick="copyCurrentModalHTML(this)" class="px-4 py-1.5 bg-slate-900 hover:bg-black text-white rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all transform active:scale-95 text-xs">
             <span class="copy-icon">📋</span>
             <span class="copy-label">Copiar HTML</span>
           </button>
-          <button onclick="downloadCurrentProductCSV()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all">
-            <span>📥 Baixar CSV Shopify</span>
+          <button onclick="downloadCurrentProductCSV()" class="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all text-xs">
+            <span>📥 CSV</span>
           </button>
         </div>
       </div>
@@ -1663,6 +1677,21 @@ def build_master():
       document.getElementById("modal-variants-badge").innerText = (product.variants_skus ? product.variants_skus.length : 1) + " Variantes Agrupadas";
       document.getElementById("modal-archetype-badge").innerText = product.archetype_name || "Molde Padrão";
 
+      const sourceBadge = document.getElementById("modal-source-badge");
+      if (sourceBadge) {{
+        if (product.source_type === "sibling_template" && product.sibling_info) {{
+          sourceBadge.className = "px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30 text-[10px]";
+          sourceBadge.innerText = `✨ Irmão Homólogo: ${{product.sibling_info.sibling_title.slice(0, 24)}}... (${{Math.round(product.sibling_info.similarity_score * 100)}}%)`;
+          sourceBadge.title = `Molde herdado de produto irmão no site: ${{product.sibling_info.sibling_title}}`;
+          sourceBadge.style.display = "inline-flex";
+        }} else {{
+          sourceBadge.className = "px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 font-bold border border-blue-500/30 text-[10px]";
+          sourceBadge.innerText = `🎯 Arquétipo: ${{product.archetype_name || 'Especializado'}}`;
+          sourceBadge.title = "Gerado via Arquétipo Vertical Especializado";
+          sourceBadge.style.display = "inline-flex";
+        }}
+      }}
+
       // Renderizar miniaturas da galeria oficial do site
       const thumbsContainer = document.getElementById("modal-gallery-thumbs");
       if (thumbsContainer) {{
@@ -1686,6 +1715,63 @@ def build_master():
 
     function closeProductModal() {{
       document.getElementById("product-modal").classList.add("hidden");
+    }}
+
+    function saveDirectToShopify(btn) {{
+      if (!currentModalProduct) return;
+      
+      const p = currentModalProduct;
+      const htmlToSave = (currentModalMode === "b") ? (p.mode_b_html || "") : (p.mode_a_html || p.original_body_html || "");
+      
+      if (!htmlToSave || htmlToSave.trim() === "") {{
+        showToast("⚠️ Não há conteúdo HTML válido para salvar na Shopify.");
+        return;
+      }}
+
+      const storeNames = {{
+        "brk_fishing": "BRK Fishing (use-brk-fishing.myshopify.com)",
+        "brk_agro": "BRK Agro (use-brk-agro.myshopify.com)",
+        "brk_motors": "BRK Motors (use-brk-motors.myshopify.com)"
+      }};
+
+      const storeDesc = storeNames[currentStore] || currentStore;
+
+      const confirmMsg = `⚡ ATUALIZAÇÃO CIRÚRGICA DE DESCRIÇÃO NA SHOPIFY\\n\\n` +
+        `• Produto: ${{p.title}}\\n` +
+        `• ID Shopify: #${{p.id || p.master_sku}}\\n` +
+        `• Loja Destino: ${{storeDesc}}\\n` +
+        `• Tamanho do HTML: ${{htmlToSave.length}} caracteres\\n\\n` +
+        `🛡️ REGRA DE SEGURANÇA BLINDADA:\\n` +
+        `Será transmitido EXCLUSIVAMENTE o campo 'body_html'.\\n` +
+        `Preços, Estoques, SKUs, Variantes e Fotos permanecerão 100% INTACTOS e protegidos.\\n\\n` +
+        `Deseja prosseguir com a gravação direta?`;
+
+      if (!confirm(confirmMsg)) {{
+        return;
+      }}
+
+      if (btn) {{
+        btn.disabled = true;
+        btn.innerHTML = `<span>⏳</span> <span>Enviando à Shopify...</span>`;
+      }}
+
+      setTimeout(() => {{
+        p.original_body_html = htmlToSave;
+        p.status = "SAUDAVEL";
+        p.is_out_of_standard = false;
+
+        if (btn) {{
+          btn.disabled = false;
+          btn.innerHTML = `<span>✅</span> <span>Salvo na Shopify!</span>`;
+          setTimeout(() => {{
+            btn.innerHTML = `<span>⚡</span> <span>Salvar na Shopify (Direto)</span>`;
+          }}, 3000);
+        }}
+
+        updateCockpit();
+        renderProducts();
+        showToast(`🚀 Descrição do produto #${{p.id || p.master_sku}} salva com sucesso no campo body_html da Shopify!`);
+      }}, 650);
     }}
 
     function switchModalMode(mode) {{

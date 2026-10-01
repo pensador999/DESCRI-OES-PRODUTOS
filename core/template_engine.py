@@ -1,25 +1,39 @@
 """
-Motor de Moldes Mestres e Extração de Especificações Técnicas (Pilar 2).
-Mapeia os melhores padrões de descrições para 5 arquétipos:
-1. UV50+ Performance (Pesca / Proteção Solar)
-2. Agro & Campo (Resistência na lida / Algodão & Conforto)
-3. Motors & Trilha (Jerseys Off-road / Velocidade / Respirabilidade)
-4. Bonés & Acessórios (Trucker / Snapback / Ajuste / Alta definição)
-5. Cutelaria & Peças Únicas (Facas artesanais / Retenção de fio / Exclusividade)
+Motor de Moldes Mestres, Arquétipos Especializados e Extração de Especificações Técnicas.
+Padrão Autêntico BRK Group (Fishing, Agro, Motors).
+
+Arquétipos Especializados por Categoria Real:
+1. uv_performance: Camisas de Pesca / Manga Longa UV50+ Dry Fit
+2. agro_field: Camisetas e Vestuário Agro & Campo
+3. motors_speed: Jerseys e Vestuário Trilha, Velocidade & Off-Road
+4. hats_safari_outdoor: Chapéus de Pesca, Safári, Australiano com Aba 360° e Protetor de Nuca
+5. caps_trucker_snapback: Bonés Trucker, Snapback e Aba Curva
+6. fishing_lures: Iscas Artificiais (Superfície, Meia-Água, Fundo, Plugs, Jigs, Softs)
+7. neck_gaiters_balaclavas: Bandanas, Tubenecks, Buffs e Balaclavas Tubulares Seamless
+8. sun_sleeves_manguitos: Manguitos Anatômicos de Proteção Solar com Silicone no Bíceps
+9. footwear_sandals_boaonda: Sandálias, Babuches, Clogs e Chinelos Ortopédicos/Antiderrapantes
+10. closed_footwear_sneakers: Tênis e Calçados Fechados de Alta Tração
+11. drinkware_thermo: Copos, Garrafas e Canecas Térmicas em Inox 18/8 com Vácuo
+12. tackle_boxes_storage: Caixas de Pesca, Maletas, Estojos e Organização de Tralhas
+13. overalls_workwear: Macacões, Jardineiras e Vestuário Operacional/Trilha
+14. books_publications: Livros, Guias de Fauna/Pesca e Publicações Editoriais
+15. cutlery_unique: Cutelaria, Facas Artesanais e Lâminas
+16. fishing_tackle_gear: Varas, Carretilhas, Molinetes, Linhas e Alicates de Precisão
 
 Preserva rigorosamente 100% dos dados técnicos reais da peça sem alucinar especificações.
 """
 
 import re
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 class TemplateEngine:
     def __init__(self):
         self.templates = {
+            # 1. Camisas UV Performance
             "uv_performance": {
                 "id": "uv_performance",
-                "name": "UV50+ Performance & Pesca",
-                "fa_icon": "fa-solid fa-fish",
+                "name": "Camisas UV50+ Performance & Pesca",
+                "fa_icon": "fa-solid fa-shirt",
                 "theme_color": "#0284c7",
                 "theme_bg": "#f0f9ff",
                 "category_keywords": ["camisa", "pesca", "uv", "manga longa", "dry", "solar", "fishing"],
@@ -52,6 +66,8 @@ class TemplateEngine:
                 ],
                 "care_tips": "Lavar à mão ou em máquina no ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar)."
             },
+
+            # 2. Agro & Campo
             "agro_field": {
                 "id": "agro_field",
                 "name": "Força, Campo & Tradição",
@@ -87,6 +103,8 @@ class TemplateEngine:
                 ],
                 "care_tips": "Lavar com cores semelhantes. Não alvejar. Secar ao ar livre e passar em temperatura média pelo avesso para preservar a estampa intacta."
             },
+
+            # 3. Motors & Off-Road
             "motors_speed": {
                 "id": "motors_speed",
                 "name": "Trilha, Velocidade & Off-Road",
@@ -121,41 +139,415 @@ class TemplateEngine:
                 ],
                 "care_tips": "Após a trilha ou pista, remover o excesso de barro com água antes da lavagem. Não lavar a seco nem utilizar ferro sobre as áreas sublimadas."
             },
-            "caps_accessories": {
-                "id": "caps_accessories",
-                "name": "Bonés, Chapéus & Acessórios",
+
+            # 4. Chapéus de Pesca / Safári / Australiano
+            "hats_safari_outdoor": {
+                "id": "hats_safari_outdoor",
+                "name": "Chapéus de Pesca, Safári & Outdoor",
                 "fa_icon": "fa-solid fa-hat-cowboy-side",
                 "theme_color": "#d97706",
                 "theme_bg": "#fffbeb",
-                "category_keywords": ["bone", "chapeu", "trucker", "snapback", "bandana", "faixa", "copa"],
-                "default_tagline": "Design Anatômico, Estrutura Firme e Ventilação",
+                "category_keywords": ["chapeu", "chapéu", "safari", "safári", "australiano", "pescador", "nuca", "palha"],
+                "default_tagline": "Proteção Solar Panorâmica 360° e Fixação Firme contra o Vento",
+                "act1": {
+                    "tag": "Aba 360° & Cobertura",
+                    "fa_icon": "fa-solid fa-hat-cowboy-side",
+                    "title": "PROTEÇÃO SOLAR PANORÂMICA DE ROSTO, ORELHAS E NUCA",
+                    "desc_tmpl": "Projetado para longas horas sob sol intenso nas pescarias e expedições, o(a) {title} oferece cobertura circular ampla que evita queimaduras solares e reduz a fadiga visual."
+                },
+                "act2": {
+                    "tag": "Conforto & Fixação",
+                    "fa_icon": "fa-solid fa-wind",
+                    "title": "CORDÃO JUGULAR COM TRAVA AJUSTÁVEL ANTI-VENTO",
+                    "desc_tmpl": "Equipado com cordão ajustável com presilha de travamento no queixo, garantindo que o chapéu permaneça firme mesmo durante a navegação em alta velocidade ou rajadas de vento."
+                },
+                "act3": {
+                    "tag": "Ventilação & Secagem",
+                    "fa_icon": "fa-solid fa-shield-halved",
+                    "title": "TECIDO LEVE COM ILHOSES DE RESPIRAÇÃO",
+                    "desc_tmpl": "Estrutura maleável e respirável que dissipa o calor da cabeça, não retém umidade e pode ser dobrado com facilidade para transporte na mochila ou tralha."
+                },
+                "base_specs": [
+                    {"label": "Modelo da Aba", "default": "Aba larga 360° reforçada com costuras de sustentação"},
+                    {"label": "Proteção Solar", "default": "Fator UV50+ bloqueador de radiação solar nociva"},
+                    {"label": "Fixação", "default": "Cordão jugular com regulador de pressão tipo tanca"},
+                    {"label": "Ventilação", "default": "Ilhoses laterais para circulação e troca térmica"},
+                    {"label": "Ajuste de Tamanho", "default": "Circunferência ajustável de 56 a 60 cm"}
+                ],
+                "care_tips": "Lavar à mão com sabão neutro e água fria. Não torcer a aba para não deformar a estrutura. Secar à sombra."
+            },
+
+            # 5. Bonés Trucker & Aba Curva
+            "caps_trucker_snapback": {
+                "id": "caps_trucker_snapback",
+                "name": "Bonés Trucker & Snapback",
+                "fa_icon": "fa-solid fa-hat-baseball",
+                "theme_color": "#d97706",
+                "theme_bg": "#fffbeb",
+                "category_keywords": ["bone", "boné", "trucker", "snapback", "aba curva", "aba reta", "viseira"],
+                "default_tagline": "Design Anatômico, Copa Estruturada e Tela Respirável",
                 "act1": {
                     "tag": "Estrutura & Copa",
-                    "fa_icon": "fa-solid fa-hat-cowboy-side",
-                    "title": "COPA ESTRUTURADA COM BORDADO DE ALTA PRECISÃO",
+                    "fa_icon": "fa-solid fa-hat-baseball",
+                    "title": "COPA ESTRUTURADA COM BORDADO DE ALTA DEFINIÇÃO",
                     "desc_tmpl": "O {title} destaca-se pela frente firme e acabamento impecável, mantendo o formato clássico intacto em qualquer situação."
                 },
                 "act2": {
                     "tag": "Ventilação & Conforto",
                     "fa_icon": "fa-solid fa-wind",
-                    "title": "TELA RESPIRÁVEL E CARNEIRA INTERNA ACOLCHOADA",
-                    "desc_tmpl": "Garante circulação constante de ar para evitar suor excessivo na cabeça, aliado à carneira interna macia para uso contínuo o dia todo."
+                    "title": "TELA RESPIRÁVEL E CARNEIRA INTERNA MACIA",
+                    "desc_tmpl": "Garante circulação constante de ar para evitar suor excessivo na cabeça, aliado à carneira interna acolchoada para uso contínuo o dia todo."
                 },
                 "act3": {
                     "tag": "Ajuste Personalizado",
                     "fa_icon": "fa-solid fa-sliders",
                     "title": "FECHO REGULÁVEL DE ALTA DURABILIDADE",
-                    "desc_tmpl": "Ajuste sob medida para diferentes circunferências cranianas, com pinos ou fecho de engate seguro e aba com curvatura milimétrica."
+                    "desc_tmpl": "Ajuste sob medida para diferentes circunferências cranianas com fecho tipo snapback seguro e aba com curvatura milimétrica."
                 },
                 "base_specs": [
-                    {"label": "Modelo", "default": "Trucker com lateral e traseira telada respirável"},
-                    {"label": "Aba", "default": "Curva com 6 costuras de sustentação"},
-                    {"label": "Fechamento", "default": "Snapback regulável em polímero virgem"},
-                    {"label": "Bordado / Aplique", "default": "Bordado em alto relevo com linha especial"},
+                    {"label": "Modelo", "default": "Trucker clássico com lateral e traseira em tela respirável"},
+                    {"label": "Aba", "default": "Aba curva com 6 costuras de reforço"},
+                    {"label": "Fechamento", "default": "Snapback regulável em polímero virgem de alta resistência"},
+                    {"label": "Acabamento Frontal", "default": "Bordado / aplique em alto relevo termo fixado"},
                     {"label": "Tamanho", "default": "Único ajustável (54 a 60 cm de circunferência)"}
                 ],
-                "care_tips": "Limpar com pano úmido e sabão neutro. Não mergulhar a copa em água nem lavar em máquina para manter a estrutura e a curvatura da aba perfeitas."
+                "care_tips": "Limpar com pano úmido e sabão neutro. Não mergulhar a copa em água nem lavar em máquina para manter a curvatura da aba perfeita."
             },
+
+            # 6. Iscas Artificiais
+            "fishing_lures": {
+                "id": "fishing_lures",
+                "name": "Iscas Artificiais & Alta Atratividade",
+                "fa_icon": "fa-solid fa-fish-fins",
+                "theme_color": "#0ea5e9",
+                "theme_bg": "#f0f9ff",
+                "category_keywords": ["isca", "iscas", "plug", "jig", "frog", "soft", "meia-água", "superfície", "superficie", "popper", "stick", "twitch", "crankbait", "minnow", "spinnerbait"],
+                "default_tagline": "Nado Ultra Realista, Rattling Irresistível e Garatéias Afiadas a Laser",
+                "act1": {
+                    "tag": "Ação & Nado Errático",
+                    "fa_icon": "fa-solid fa-fish-fins",
+                    "title": "NADO REALISTA QUE ESTIMULA O ATAQUE DE PREDADORES",
+                    "desc_tmpl": "Desenvolvida com hidrodinâmica refinada, a {title} produz vibrações e movimentação errática na água, provocando ataques ferozes por agressividade e territorialidade."
+                },
+                "act2": {
+                    "tag": "Sonoridade & Balanceamento",
+                    "fa_icon": "fa-solid fa-bell",
+                    "title": "SISTEMA DE RATTLING COM ESFERAS SONORAS INTERNAS",
+                    "desc_tmpl": "Possui esferas calibradas que emitem frequências sonoras atrativas a longas distâncias, além de concentrar o peso no centro de gravidade para arremessos longos e precisos."
+                },
+                "act3": {
+                    "tag": "Poder de Fisgada",
+                    "fa_icon": "fa-solid fa-shield-halved",
+                    "title": "GARATÉIAS DE ALTA RESISTÊNCIA E PINTURA HOLOGRÁFICA",
+                    "desc_tmpl": "Armada com garatéias afiadas quimicamente para penetração instantânea na boca dos predadores, combinada a acabamento com cores holográficas ultra reflexivas."
+                },
+                "base_specs": [
+                    {"label": "Ação do Trabalho", "default": "Trabalho atrativo de superfície/meia-água com nado provocante"},
+                    {"label": "Garatéias", "default": "Aço carbono reforçado afiadas quimicamente"},
+                    {"label": "Sistema Sonoro", "default": "Rattling interno com esferas sonoras vibratórias"},
+                    {"label": "Corpo", "default": "Polímero ABS virgem reforçado imune a mordidas severas"},
+                    {"label": "Peixes Indicados", "default": "Tucunaré, Robalo, Traíra, Dourado, Black Bass e predadores esportivos"}
+                ],
+                "care_tips": "Após uso em água salobra ou salgada, lavar em água doce corrente e secar completamente antes de guardar no estojo."
+            },
+
+            # 7. Bandanas, Tubenecks, Buffs e Balaclavas
+            "neck_gaiters_balaclavas": {
+                "id": "neck_gaiters_balaclavas",
+                "name": "Bandanas, Tubenecks & Balaclavas",
+                "fa_icon": "fa-solid fa-mask-face",
+                "theme_color": "#0284c7",
+                "theme_bg": "#f0f9ff",
+                "category_keywords": ["bandana", "balaclava", "tubeneck", "buff", "mascara de protecao", "máscara de proteção", "gaiter"],
+                "default_tagline": "Barreira Solar UV50+, Tecido Seamless Tubular e Conforto Respiratório",
+                "act1": {
+                    "tag": "Proteção Facial & Nuca",
+                    "fa_icon": "fa-solid fa-mask-face",
+                    "title": "ESCUDO COMPLETO CONTRA SOL, VENTO, MOSQUITOS E POEIRA",
+                    "desc_tmpl": "O(a) {title} envolve o pescoço e a face com barreira física e fator UV permanente, protegendo a pele durante pescarias embarcadas, trilhas e pilotagem."
+                },
+                "act2": {
+                    "tag": "Construção Seamless",
+                    "fa_icon": "fa-solid fa-feather",
+                    "title": "TECIDO ELÁSTICO TUBULAR SEM COSTURA ANTI-ATRITO",
+                    "desc_tmpl": "Estrutura elástica com microfibra respirável de alta elasticidade que se molda confortavelmente ao rosto sem pinicar, apertar ou deixar marcas de pressão."
+                },
+                "act3": {
+                    "tag": "Versatilidade de Uso",
+                    "fa_icon": "fa-solid fa-arrows-spin",
+                    "title": "MÚLTIPLAS FORMAS DE USO EM QUALQUER AVENTURA",
+                    "desc_tmpl": "Pode ser utilizado como máscara facial, protetor de pescoço, faixa de cabeça, capuz ou gorro, secando instantaneamente com o suor ou respingos d'água."
+                },
+                "base_specs": [
+                    {"label": "Proteção Solar", "default": "Fator UV50+ bloqueador permanente de radiação"},
+                    {"label": "Construção", "default": "Tubular inteiriço sem costuras (Seamless anti-atrito)"},
+                    {"label": "Elasticidade", "default": "Multidirecional 4-Way Stretch com memória de forma"},
+                    {"label": "Respirabilidade", "default": "Tecido microperfurado que facilita a respiração e fala"},
+                    {"label": "Tamanho", "default": "Único anatômico adaptável a qualquer formato de cabeça"}
+                ],
+                "care_tips": "Lavar à mão com sabão neutro. Seca em minutos no varal e não necessita de ferro de passar."
+            },
+
+            # 8. Manguitos de Proteção Solar
+            "sun_sleeves_manguitos": {
+                "id": "sun_sleeves_manguitos",
+                "name": "Manguitos de Proteção Solar UV50+",
+                "fa_icon": "fa-solid fa-hand-holding-hand",
+                "theme_color": "#0284c7",
+                "theme_bg": "#f0f9ff",
+                "category_keywords": ["manguito", "manguitos", "sleeve", "manga avulsa"],
+                "default_tagline": "Proteção UV50+ Anatômica com Silicone Antiderrapante no Bíceps",
+                "act1": {
+                    "tag": "Proteção Solar Anatômica",
+                    "fa_icon": "fa-solid fa-hand-holding-hand",
+                    "title": "COBERTURA TOTAL DOS BRAÇOS COM PRATICIDADE",
+                    "desc_tmpl": "Desenvolvido para oferecer máxima proteção solar UV50+ para os braços, o(a) {title} é essencial para pesca, ciclismo e atividades outdoor, substituindo o protetor solar com conforto."
+                },
+                "act2": {
+                    "tag": "Fixação Antiderrapante",
+                    "fa_icon": "fa-solid fa-grip",
+                    "title": "ELÁSTICO DE SILICONE NO BÍCEPS QUE NÃO DESLIZA",
+                    "desc_tmpl": "Possui faixa interna de silicone na extremidade superior que impede que a manga escorregue pelo braço durante os movimentos de arremesso, pedalada ou corrida."
+                },
+                "act3": {
+                    "tag": "Conforto Térmico & Compressão",
+                    "fa_icon": "fa-solid fa-bolt",
+                    "title": "COMPRESSÃO SUAVE E DISSIPAÇÃO TÉRMICA CONTÍNUA",
+                    "desc_tmpl": "Tecido tecnológico com elastano que reduz a fadiga muscular e dissipa o calor rapidamente, mantendo os braços frescos e protegidos o dia inteiro."
+                },
+                "base_specs": [
+                    {"label": "Proteção Solar", "default": "Fator UV50+ permanente certificado"},
+                    {"label": "Composição", "default": "Poliamida com Elastano de toque aveludado e flexível"},
+                    {"label": "Fixação Superior", "default": "Borda com fita interna de silicone antiderrapante no bíceps"},
+                    {"label": "Secagem", "default": "Tecnologia Dry Fit com evaporação instantânea de suor"},
+                    {"label": "Conteúdo da Embalagem", "default": "1 Par de Manguitos (braço direito e esquerdo)"}
+                ],
+                "care_tips": "Lavar com água fria e sabão neutro. Não usar amaciante nem alvejante. Secar à sombra."
+            },
+
+            # 9. Sandálias, Chinelos, Babuches e Clogs Boaonda
+            "footwear_sandals_boaonda": {
+                "id": "footwear_sandals_boaonda",
+                "name": "Sandálias, Chinelos & Babuches Boaonda",
+                "fa_icon": "fa-solid fa-shoe-prints",
+                "theme_color": "#0d9488",
+                "theme_bg": "#f0fdfa",
+                "category_keywords": ["sandalia", "sandália", "chinelo", "boaonda", "babuche", "clog", "slide", "pantufa", "crocs", "papete"],
+                "default_tagline": "Palmilha Anatômica Anti-Impacto e Solado Antiderrapante para Embarcações",
+                "act1": {
+                    "tag": "Ergonomia & Conforto",
+                    "fa_icon": "fa-solid fa-shoe-prints",
+                    "title": "PALMILHA ANATÔMICA COM AMORTECIMENTO ANTI-IMPACTO",
+                    "desc_tmpl": "Projetada para garantir descanso prolongado aos pés, a {title} alivia a pressão nos calcanhares e articulações em longos dias de pescaria e caminhada."
+                },
+                "act2": {
+                    "tag": "Aderência & Drenagem",
+                    "fa_icon": "fa-solid fa-water",
+                    "title": "SOLADO ANTIDERRAPANTE COM CANAIS DE DRENAGEM",
+                    "desc_tmpl": "Ranhuras de alta tração que garantem passos firmes e seguros em decks molhados de barcos, pedras e bordas de piscina."
+                },
+                "act3": {
+                    "tag": "Material Impermeável",
+                    "fa_icon": "fa-solid fa-shield-halved",
+                    "title": "TERMOMOLDADO IMPERMEÁVEL QUE NÃO RETÉM ODORES",
+                    "desc_tmpl": "Confeccionada em polímero nobre leve, macio e 100% à prova d'água, secando instantaneamente e facilitando a higienização."
+                },
+                "base_specs": [
+                    {"label": "Material do Cabedal", "default": "EVA / Termoplástico nobre Boaonda macio e flexível"},
+                    {"label": "Palmilha", "default": "Anatômica anti-impacto (alívio para esporão e fascite)"},
+                    {"label": "Solado", "default": "Borracha antiderrapante com canais de escoamento de água"},
+                    {"label": "Resistência", "default": "100% impermeável e imune a deformações térmicas"},
+                    {"label": "Indicação de Uso", "default": "Embarcações, pesqueiros, praia, piscina e uso casual"}
+                ],
+                "care_tips": "Lavar com sabão neutro e água corrente. Não expor ao sol direto intenso para preservar o elastômero."
+            },
+
+            # 10. Tênis & Calçados Fechados
+            "closed_footwear_sneakers": {
+                "id": "closed_footwear_sneakers",
+                "name": "Tênis & Calçados Fechados",
+                "fa_icon": "fa-solid fa-socks",
+                "theme_color": "#0d9488",
+                "theme_bg": "#f0fdfa",
+                "category_keywords": ["tenis", "tênis", "sapato", "botina", "sneaker", "calcado fechado", "calçado fechado"],
+                "default_tagline": "Estrutura Firme, Cabedal Respirável e Solado de Alta Tração",
+                "act1": {
+                    "tag": "Estabilidade & Suporte",
+                    "fa_icon": "fa-solid fa-socks",
+                    "title": "ESTRUTURA REFORÇADA COM ENCAIXE ANATÔMICO SEGURO",
+                    "desc_tmpl": "O {title} entrega estabilidade e firmeza para longas jornadas de trabalho ou aventura, protegendo os pés contra atritos e irregularidades do solo."
+                },
+                "act2": {
+                    "tag": "Amortecimento & Ventilação",
+                    "fa_icon": "fa-solid fa-cloud",
+                    "title": "ENTRESOLA MACIA E CABEDAL COM CIRCULAÇÃO DE AR",
+                    "desc_tmpl": "Sistema de amortecimento que reduz o cansaço nas pernas, aliado a materiais que evitam o aquecimento excessivo e a umidade interna."
+                },
+                "act3": {
+                    "tag": "Tração Segura",
+                    "fa_icon": "fa-solid fa-shoe-prints",
+                    "title": "SOLADO DE ALTA RESISTÊNCIA À ABRASÃO",
+                    "desc_tmpl": "Desenvolvido com compostos resistentes ao desgaste com travas de aderência para diversos tipos de terrenos urbanos e rurais."
+                },
+                "base_specs": [
+                    {"label": "Cabedal", "default": "Material respirável com reforços laterais estruturais"},
+                    {"label": "Fechamento", "default": "Cadarço ajustável com passadores reforçados"},
+                    {"label": "Palmilha", "default": "Conforto anatômico com espuma de alta densidade"},
+                    {"label": "Solado", "default": "Borracha de alta tração antiderrapante"},
+                    {"label": "Uso Recomendado", "default": "Caminhada, dia a dia, trabalho rural e atividades ao ar livre"}
+                ],
+                "care_tips": "Limpar com pano úmido e sabão neutro. Secar à sombra em local ventilado."
+            },
+
+            # 11. Copos, Garrafas e Canecas Térmicas
+            "drinkware_thermo": {
+                "id": "drinkware_thermo",
+                "name": "Copos, Garrafas & Térmicos",
+                "fa_icon": "fa-solid fa-mug-hot",
+                "theme_color": "#0891b2",
+                "theme_bg": "#ecfeff",
+                "category_keywords": ["copo", "garrafa", "caneca", "cantil", "termico", "térmico", "cooler", "elber", "geladeira"],
+                "default_tagline": "Retenção Térmica a Vácuo em Aço Inox 18/8 Livre de BPA",
+                "act1": {
+                    "tag": "Retenção Térmica a Vácuo",
+                    "fa_icon": "fa-solid fa-snowflake",
+                    "title": "BEBIDAS GELADAS POR HORAS MESMO SOB SOL INTENSO",
+                    "desc_tmpl": "Com parede dupla de aço inoxidável e isolamento a vácuo, o(a) {title} preserva sua bebida na temperatura perfeita da primeira à última gota."
+                },
+                "act2": {
+                    "tag": "Zero Condensação Externa",
+                    "fa_icon": "fa-solid fa-droplet-slash",
+                    "title": "PAREDE EXTERNA SECA QUE NÃO TRANSPIRA",
+                    "desc_tmpl": "A tecnologia térmica impede a condensação externa, permitindo segurar o copo confortavelmente sem molhar as mãos, porta-copos ou móveis."
+                },
+                "act3": {
+                    "tag": "Construção em Inox 18/8",
+                    "fa_icon": "fa-solid fa-shield-halved",
+                    "title": "AÇO INOXIDÁVEL DE GRAU ALIMENTÍCIO LIVRE DE BPA",
+                    "desc_tmpl": "Material atóxico, imune a ferrugem e que não transfere nem absorve sabores, com tampa de alta vedação contra respingos."
+                },
+                "base_specs": [
+                    {"label": "Material", "default": "Aço Inoxidável 18/8 (Grau Alimentício atóxico)"},
+                    {"label": "Isolamento", "default": "Parede dupla com vácuo térmico de alta eficiência"},
+                    {"label": "Tampa", "default": "Acrílico livre de BPA com vedação hermética em silicone"},
+                    {"label": "Eficiência Térmica", "default": "Mantém gelado por até 12h (com gelo) / quente por até 4h"},
+                    {"label": "Acabamento Externo", "default": "Pintura eletrostática a pó anti-risco e anti-deslizante"}
+                ],
+                "care_tips": "Lavar com detergente neutro e esponja macia. Não levar ao micro-ondas nem ao congelador."
+            },
+
+            # 12. Caixas de Pesca & Organização
+            "tackle_boxes_storage": {
+                "id": "tackle_boxes_storage",
+                "name": "Caixas, Estojos & Organização",
+                "fa_icon": "fa-solid fa-box-archive",
+                "theme_color": "#1d4ed8",
+                "theme_bg": "#eff6ff",
+                "category_keywords": ["caixa de pesca", "caixa pesca", "estojo", "maleta", "organizador", "bolsa de pesca", "tubo de vara"],
+                "default_tagline": "Estrutura Reforçada e Compartimentação Inteligente para sua Tralha",
+                "act1": {
+                    "tag": "Organização & Espaço",
+                    "fa_icon": "fa-solid fa-box-archive",
+                    "title": "DIVISÓRIAS MODULARES E COMPARTIMENTAÇÃO INTELIGENTE",
+                    "desc_tmpl": "Projetada para acomodar iscas, anzóis, chumbadas e equipamentos com total organização, a {title} permite ajustar o espaço interno de acordo com a sua necessidade."
+                },
+                "act2": {
+                    "tag": "Segurança & Travamento",
+                    "fa_icon": "fa-solid fa-lock",
+                    "title": "TRAVAS DUPLAS REFORÇADAS ANTI-ABERTURA",
+                    "desc_tmpl": "Equipada com fechos de alta pressão que garantem travamento firme e seguro, impedindo aberturas acidentais mesmo durante impactos e movimentação intensa na embarcação."
+                },
+                "act3": {
+                    "tag": "Proteção & Durabilidade",
+                    "fa_icon": "fa-solid fa-shield-halved",
+                    "title": "POLÍMERO VIRGEM DE ALTA RESISTÊNCIA COM PROTEÇÃO UV",
+                    "desc_tmpl": "Construção robusta resistente a quedas, choques mecânicos e à degradação solar, preservando suas tralhas protegidas da água e do sol por muito mais tempo."
+                },
+                "base_specs": [
+                    {"label": "Material", "default": "Polipropileno virgem de alto impacto com proteção UV"},
+                    {"label": "Divisórias", "default": "Removíveis e reposicionáveis sob medida"},
+                    {"label": "Travas", "default": "Sistema duplo reforçado de alta pressão"},
+                    {"label": "Vedação", "default": "Resistente a respingos d'água e poeira"},
+                    {"label": "Aplicação", "default": "Organização de tralhas em barcos, caiaques, pesqueiros e camping"}
+                ],
+                "care_tips": "Lavar periodicamente com água doce após uso em ambiente salino e secar antes de fechar."
+            },
+
+            # 13. Macacões & Jardineiras
+            "overalls_workwear": {
+                "id": "overalls_workwear",
+                "name": "Macacões, Jardineiras & Operacional",
+                "fa_icon": "fa-solid fa-vest",
+                "theme_color": "#475569",
+                "theme_bg": "#f8fafc",
+                "category_keywords": ["macacao", "macacão", "jardineira", "jardineiras", "salopete", "wader"],
+                "default_tagline": "Proteção Integral, Alças Reguláveis e Bolsos Utilitários de Alta Resistência",
+                "act1": {
+                    "tag": "Proteção Integral & Robustez",
+                    "fa_icon": "fa-solid fa-vest",
+                    "title": "COBERTURA COMPLETA CONTRA ABRASÃO E SUJEIRA",
+                    "desc_tmpl": "Projetado para trabalhos intensos, trilhas ou operações rurais, o(a) {title} oferece proteção de corpo inteiro com visual imponente e funcional."
+                },
+                "act2": {
+                    "tag": "Mobilidade & Ajuste",
+                    "fa_icon": "fa-solid fa-sliders",
+                    "title": "ALÇAS REGULÁVEIS E ARTICULAÇÃO LIVRE",
+                    "desc_tmpl": "Possui fechamentos laterais e alças com fivelas de engate rápido que permitem regulagem milimétrica para conforto em agachamentos e movimentos amplos."
+                },
+                "act3": {
+                    "tag": "Bolsos Utilitários",
+                    "fa_icon": "fa-solid fa-box-open",
+                    "title": "COMPARTIMENTAÇÃO PRÁTICA PARA FERRAMENTAS E ACESSÓRIOS",
+                    "desc_tmpl": "Equipado com múltiplos bolsos reforçados para acomodar ferramentas, celulares e equipamentos com segurança e acesso rápido."
+                },
+                "base_specs": [
+                    {"label": "Material", "default": "Tecido de alta tenacidade com costuras duplas e triplas"},
+                    {"label": "Alças", "default": "Reguláveis com engate rápido e elástico de suporte"},
+                    {"label": "Bolsos", "default": "Bolsos frontais, laterais e traseiros reforçados"},
+                    {"label": "Fechamento", "default": "Zíper resistente ou botões de pressão de alta pressão"},
+                    {"label": "Uso Recomendado", "default": "Operacional, campo, oficinas, trilhas e atividades pesadas"}
+                ],
+                "care_tips": "Lavar com água fria e sabão neutro. Não alvejar. Secar à sombra."
+            },
+
+            # 14. Livros & Publicações
+            "books_publications": {
+                "id": "books_publications",
+                "name": "Livros, Guias & Publicações",
+                "fa_icon": "fa-solid fa-book-open",
+                "theme_color": "#7c3aed",
+                "theme_bg": "#f5f3ff",
+                "category_keywords": ["livro", "livros", "guia", "cartilha", "revista", "publicacao", "colorir"],
+                "default_tagline": "Conteúdo Exclusivo, Educação Ambiental e Valorização da Fauna",
+                "act1": {
+                    "tag": "Conteúdo & Conhecimento",
+                    "fa_icon": "fa-solid fa-book-open",
+                    "title": "IMERSÃO NO UNIVERSO DA PESCA E DA NATUREZA",
+                    "desc_tmpl": "O {title} traz conteúdo rico e envolvente sobre a fauna, técnicas de pesca e preservação, conectando leitores de todas as idades ao universo do ar livre."
+                },
+                "act2": {
+                    "tag": "Qualidade Editorial",
+                    "fa_icon": "fa-solid fa-palette",
+                    "title": "IMPRESSÃO EM ALTA DEFINIÇÃO E PAPEL DE ALTA GRAMATURA",
+                    "desc_tmpl": "Produzido com acabamento gráfico de alta qualidade, ilustrações detalhadas e páginas resistentes que valorizam a leitura e atividades lúdicas."
+                },
+                "act3": {
+                    "tag": "Coleção & Presente",
+                    "fa_icon": "fa-solid fa-gift",
+                    "title": "EXCELENTE OPÇÃO PARA PRESENTEAR E COLECIONAR",
+                    "desc_tmpl": "Uma obra indispensável para a biblioteca de amantes da pesca esportiva e da vida ao ar livre, estimulando a curiosidade e o aprendizado."
+                },
+                "base_specs": [
+                    {"label": "Formato", "default": "Editorial impresso com encadernação de alta qualidade"},
+                    {"label": "Acabamento", "default": "Capa colorida com laminação e papel especial resistente"},
+                    {"label": "Tema Principal", "default": "Pesca esportiva, natureza, fauna brasileira e recreação"},
+                    {"label": "Idioma", "default": "Português"},
+                    {"label": "Público Indicado", "default": "Amantes do ar livre, pescadores, jovens e famílias"}
+                ],
+                "care_tips": "Armazenar em local seco e arejado, protegido de umidade e luz solar direta."
+            },
+
+            # 15. Cutelaria & Facas
             "cutlery_unique": {
                 "id": "cutlery_unique",
                 "name": "Cutelaria & Peças Artesanais",
@@ -188,85 +580,17 @@ class TemplateEngine:
                     {"label": "Fio de Corte", "default": "Geometria Razor com polimento espelhado"},
                     {"label": "Acompanhamento", "default": "Bainha reforçada com passador para cinto"}
                 ],
-                "care_tips": "Lavar com água e esponja macia logo após o uso. Secar imediatamente para evitar oxidação. Aplicar leve camada de óleo mineral na lâmina periodicamente."
+                "care_tips": "Lavar com água e esponja macia logo após o uso. Secar imediatamente para evitar oxidação. Aplicar leve camada de óleo mineral periodicamente."
             },
-            "footwear_sandals": {
-                "id": "footwear_sandals",
-                "name": "Calçados & Sandálias",
-                "fa_icon": "fa-solid fa-shoe-prints",
-                "theme_color": "#0d9488",
-                "theme_bg": "#f0fdfa",
-                "category_keywords": ["sandalia", "sandália", "chinelo", "pantufa", "bota", "boaonda", "tenis", "tênis", "sapato", "crocs"],
-                "default_tagline": "Conforto Anatômico e Solado Antiderrapante para Uso em Embarcações e Lazer",
-                "act1": {
-                    "tag": "Conforto & Ergonomia",
-                    "fa_icon": "fa-solid fa-shoe-prints",
-                    "title": "DESIGN ANATÔMICO COM PALMILHA ANTI-IMPACTO",
-                    "desc_tmpl": "Desenvolvida para proporcionar amortecimento suave e alívio de pressão na pisada, a {title} garante descanso aos pés durante longos períodos em pé na pescaria ou no dia a dia."
-                },
-                "act2": {
-                    "tag": "Aderência & Drenagem",
-                    "fa_icon": "fa-solid fa-water",
-                    "title": "SOLADO ANTIDERRAPANTE COM DRENAGEM RÁPIDA",
-                    "desc_tmpl": "Possui frisos e canais de escoamento especialmente projetados para pisos molhados, decks de barcos e bordas de piscina, oferecendo tração segura e passos firmes."
-                },
-                "act3": {
-                    "tag": "Durabilidade & Higiene",
-                    "fa_icon": "fa-solid fa-shield-halved",
-                    "title": "MATERIAL ANTIMICROBIANO E SECAGEM INSTANTÂNEA",
-                    "desc_tmpl": "Confeccionada em polímero nobre impermeável que não absorve umidade nem odores, sendo extremamente fácil de lavar e secar rapidamente para o próximo uso."
-                },
-                "base_specs": [
-                    {"label": "Material do Cabedal", "default": "EVA Termomoldado macio e flexível"},
-                    {"label": "Solado", "default": "Borracha antiderrapante com ranhuras de tração e escoamento"},
-                    {"label": "Palmilha", "default": "Anatômica com amortecimento anti-impacto"},
-                    {"label": "Resistência", "default": "100% à prova d'água, secagem instantânea"},
-                    {"label": "Uso Recomendado", "default": "Embarcações, pesqueiros, praia, piscina e uso casual"}
-                ],
-                "care_tips": "Lavar com água corrente e sabão neutro. Não expor ao sol excessivo direto para evitar deformação do EVA."
-            },
-            "tackle_boxes_storage": {
-                "id": "tackle_boxes_storage",
-                "name": "Caixas, Estojos & Organização",
-                "fa_icon": "fa-solid fa-box-archive",
-                "theme_color": "#1d4ed8",
-                "theme_bg": "#eff6ff",
-                "category_keywords": ["caixa", "estojo", "maleta", "organizador", "bolsa", "mochila", "tubo", "porta-vara", "case", "tralha"],
-                "default_tagline": "Estrutura Reforçada e Compartimentação Inteligente para sua Tralha",
-                "act1": {
-                    "tag": "Organização & Espaço",
-                    "fa_icon": "fa-solid fa-box-archive",
-                    "title": "DIVISÓRIAS MODULARES E COMPARTIMENTAÇÃO INTELIGENTE",
-                    "desc_tmpl": "Projetada para acomodar iscas, anzóis, chumbadas e equipamentos com total organização, a {title} permite ajustar o espaço interno de acordo com a sua necessidade."
-                },
-                "act2": {
-                    "tag": "Segurança & Travamento",
-                    "fa_icon": "fa-solid fa-lock",
-                    "title": "TRAVAS DUPLAS REFORÇADAS ANTI-ABERTURA",
-                    "desc_tmpl": "Equipada com fechos de alta pressão que garantem travamento firme e seguro, impedindo aberturas acidentais mesmo durante impactos e movimentação intensa na embarcação."
-                },
-                "act3": {
-                    "tag": "Proteção & Durabilidade",
-                    "fa_icon": "fa-solid fa-shield-halved",
-                    "title": "POLÍMERO VIRGEM DE ALTA RESISTÊNCIA COM PROTEÇÃO UV",
-                    "desc_tmpl": "Construção robusta resistente a quedas, choques mecânicos e à degradação solar, preservando suas tralhas protegidas da água e do sol por muito mais tempo."
-                },
-                "base_specs": [
-                    {"label": "Material", "default": "Polipropileno virgem de alto impacto com proteção UV"},
-                    {"label": "Divisórias", "default": "Removíveis e reposicionáveis sob medida"},
-                    {"label": "Travas", "default": "Sistema duplo reforçado de alta pressão"},
-                    {"label": "Vedação", "default": "Resistente a respingos d'água e poeira"},
-                    {"label": "Aplicação", "default": "Organização de tralhas em barcos, caiaques, pesqueiros e camping"}
-                ],
-                "care_tips": "Lavar periodicamente com água doce após uso em ambiente salino e secar antes de fechar."
-            },
+
+            # 16. Equipamentos de Pesca & Revenda (Varas, Carretilhas, Molinetes)
             "fishing_tackle_gear": {
                 "id": "fishing_tackle_gear",
                 "name": "Equipamentos de Pesca & Revenda",
                 "fa_icon": "fa-solid fa-gear",
                 "theme_color": "#4338ca",
                 "theme_bg": "#eef2ff",
-                "category_keywords": ["vara", "carretilha", "molinete", "isca", "linha", "anzol", "alicate", "passagua", "passaguá", "girador", "snap", "chumbada", "boia", "marine sports", "shimano", "daiwa", "albatroz", "rapala", "nakamura", "yara", "maruri"],
+                "category_keywords": ["vara", "carretilha", "molinete", "linha", "anzol", "alicate", "passagua", "passaguá"],
                 "default_tagline": "Engenharia de Precisão e Alta Performance para Pesca Esportiva",
                 "act1": {
                     "tag": "Engenharia & Precisão",
@@ -294,91 +618,96 @@ class TemplateEngine:
                     {"label": "Origem / Distribuição", "default": "Produto original com procedência e garantia"}
                 ],
                 "care_tips": "Após uso em água salgada, lavar levemente com água doce corrente, secar e aplicar óleo lubrificante nos pontos móveis recomendados."
-            },
-            "thermal_gear": {
-                "id": "thermal_gear",
-                "name": "Térmicos, Camping & Hidratação",
-                "fa_icon": "fa-solid fa-snowflake",
-                "theme_color": "#0891b2",
-                "theme_bg": "#ecfeff",
-                "category_keywords": ["copo", "garrafa", "cooler", "termico", "térmico", "elber", "geladeira", "cantil", "caneca"],
-                "default_tagline": "Retenção Térmica Eficiente e Construção Robusta para o Ar Livre",
-                "act1": {
-                    "tag": "Isolamento Térmico",
-                    "fa_icon": "fa-solid fa-snowflake",
-                    "title": "RETENÇÃO TÉRMICA PROLONGADA SOB CALOR EXTREMO",
-                    "desc_tmpl": "Desenvolvido para manter suas bebidas ou alimentos na temperatura ideal por muito mais tempo, o(a) {title} é essencial para suas pescarias e acampamentos."
-                },
-                "act2": {
-                    "tag": "Construção & Vedação",
-                    "fa_icon": "fa-solid fa-shield-halved",
-                    "title": "PAREDES REFORÇADAS E VEDAÇÃO HERMÉTICA",
-                    "desc_tmpl": "Estrutura robusta à prova de vazamentos com isolamento de alta densidade que não transpira externamente e resiste ao transporte em estradas e barcos."
-                },
-                "act3": {
-                    "tag": "Praticidade & Higiene",
-                    "fa_icon": "fa-solid fa-droplet",
-                    "title": "FÁCIL HIGIENIZAÇÃO E MATERIAIS LIVRES DE BPA",
-                    "desc_tmpl": "Superfície interna lisa que não retém odores nem sabores, fácil de limpar e pronta para acompanhar qualquer jornada."
-                },
-                "base_specs": [
-                    {"label": "Material", "default": "Aço Inox 18/8 / Polímero de alta densidade livre de BPA"},
-                    {"label": "Isolamento", "default": "Parede dupla com isolamento a vácuo / PU injetado"},
-                    {"label": "Vedação", "default": "Hermética à prova de vazamentos acidentais"},
-                    {"label": "Uso Recomendado", "default": "Pesca embarcada, camping, viagens, trabalho rural e dia a dia"}
-                ],
-                "care_tips": "Lavar com água e sabão neutro. Não utilizar esponjas de aço ou abrasivos na parte externa."
             }
         }
 
     def detect_archetype(self, title: str, category: str = "", tags: List[str] = None, vendor: str = "") -> str:
         """
-        Detecta com rigor o arquétipo correto do produto, evitando que calçados,
-        caixas, equipamentos de revenda ou térmicos caiam em vestuário/camisas.
+        Detecta com máxima precisão e prioridade estrita o arquétipo correto do produto,
+        eliminando categorizações incorretas (ex: chapéus como bonés, iscas como camisas,
+        manguitos com zíper, etc.).
         """
         text = f"{title} {category} {vendor} {' '.join(tags or [])}".lower()
         
-        # 1. Calçados & Sandálias (Prioridade Máxima)
-        if any(w in text for w in ["sandalia", "sandália", "chinelo", "pantufa", "boaonda", "calcado", "calçado", "bota", "tenis", "tênis", "crocs", "papete"]):
-            return "footwear_sandals"
-            
-        # 2. Caixas, Estojos & Organização de Tralha
-        if any(w in text for w in ["caixa de pesca", "caixa pesca", "estojo", "maleta", "organizador", "porta-vara", "porta vara", "tubo de vara", "case pesca", "bolsa de pesca"]) or (any(w in text for w in ["caixa", "estojo", "maleta"]) and not any(w in text for w in ["camisa", "camiseta", "termica", "térmica"])):
+        # 1. Livros & Publicações (Prioridade Absoluta)
+        if any(w in text for w in ["livro", "livros", "livro de colorir", "guia de bolso", "guia ilustrado", "cartilha", "publicacao", "publicação"]):
+            return "books_publications"
+
+        # 2. Macacões & Jardineiras
+        if any(w in text for w in ["macacao", "macacão", "jardineira", "jardineiras", "salopete", "wader"]):
+            return "overalls_workwear"
+
+        # 3. Manguitos (Manga avulsa de proteção)
+        if any(w in text for w in ["manguito", "manguitos", "manga avulsa", "sleeves"]):
+            return "sun_sleeves_manguitos"
+
+        # 4. Bandanas, Tubenecks, Balaclavas & Buffs
+        if any(w in text for w in ["bandana", "balaclava", "tubeneck", "buff", "gaiter", "mascara facial", "máscara facial", "protetor de pescoço", "protetor de pescoco"]):
+            return "neck_gaiters_balaclavas"
+
+        # 5. Chapéus de Pesca / Safári / Australiano / Palha / Nuca
+        if any(w in text for w in ["chapeu", "chapéu", "safari", "safári", "australiano", "pescador", "nuca", "palha"]):
+            return "hats_safari_outdoor"
+
+        # 6. Bonés Trucker & Snapback (Somente bonés reais)
+        if any(w in text for w in ["bone", "boné", "trucker", "snapback", "aba curva", "aba reta", "viseira"]):
+            return "caps_trucker_snapback"
+
+        # 7. Iscas Artificiais (Plugs, Jigs, Softs, etc.)
+        if any(w in text for w in ["isca artificial", "isca de pesca", "iscas artificiais", "plug", "jig", "frog", "soft bait", "meia agua", "meia-água", "superficie", "superfície", "crankbait", "minnow", "popper", "stick", "twitch", "spinnerbait"]) or (
+            any(w in text for w in ["isca", "iscas"]) and not any(w in text for w in ["camisa", "camiseta", "bone", "boné"])
+        ):
+            return "fishing_lures"
+
+        # 8. Térmicos, Copos, Garrafas e Canecas
+        if any(w in text for w in ["copo termico", "copo térmico", "garrafa termica", "garrafa térmica", "caneca termica", "caneca térmica", "copo", "garrafa", "caneca", "cantil", "cooler", "geladeira", "caixa termica", "caixa térmica", "elber"]):
+            return "drinkware_thermo"
+
+        # 9. Tênis & Calçados Fechados
+        if any(w in text for w in ["tenis", "tênis", "sapato", "botina", "sneaker", "calcado fechado", "calçado fechado"]):
+            return "closed_footwear_sneakers"
+
+        # 10. Sandálias, Chinelos, Babuches e Clogs Boaonda
+        if any(w in text for w in ["sandalia", "sandália", "chinelo", "boaonda", "babuche", "clog", "slide", "pantufa", "crocs", "papete", "calcado", "calçado"]):
+            return "footwear_sandals_boaonda"
+
+        # 11. Caixas, Estojos & Organização de Tralha
+        if any(w in text for w in ["caixa de pesca", "caixa pesca", "estojo", "maleta", "organizador", "porta-vara", "porta vara", "tubo de vara", "bolsa de pesca"]) or (
+            any(w in text for w in ["caixa", "estojo", "maleta"]) and not any(w in text for w in ["camisa", "camiseta", "termica", "térmica"])
+        ):
             return "tackle_boxes_storage"
-            
-        # 3. Térmicos & Geladeiras Portáteis
-        if any(w in text for w in ["copo termico", "copo térmico", "garrafa termica", "garrafa térmica", "cooler", "geladeira", "caixa termica", "caixa térmica", "elber", "cantil"]):
-            return "thermal_gear"
 
-        # 4. Equipamentos de Pesca & Revenda de Marcas Parceiras
-        gear_keywords = ["vara de pesca", "vara para", "carretilha", "molinete", "isca artificial", "isca de pesca", "anzol", "alicate de bico", "alicate de contenção", "passagua", "passaguá", "linha multifilamento", "linha monofilamento", "girador", "snap", "chumbada", "boia cevadeira", "boia de pesca"]
-        resale_vendors = ["marine sports", "shimano", "daiwa", "deyu", "albatroz", "rapala", "lucky nelson nakamura", "maruri", "yara", "sumax"]
-        if any(w in text for w in gear_keywords) or any(v in text for v in resale_vendors) or any(w in text for w in ["vara", "carretilha", "molinete", "isca"]) and not any(w in text for w in ["camisa", "camiseta", "bone", "boné"]):
-            return "fishing_tackle_gear"
-
-        # 5. Cutelaria & Facas
+        # 12. Cutelaria & Facas
         if any(w in text for w in ["faca", "cutelaria", "lamina", "lâmina", "bainha", "churrasco", "canivete"]):
             return "cutlery_unique"
 
-        # 6. Bonés, Chapéus & Acessórios de Cabeça
-        if any(w in text for w in ["bone", "boné", "chapeu", "chapéu", "trucker", "snapback", "bandana", "balaclava", "viseira"]):
-            return "caps_accessories"
+        # 13. Equipamentos de Pesca & Revenda (Varas, Carretilhas, Molinetes, Linhas)
+        gear_keywords = ["vara de pesca", "vara para", "carretilha", "molinete", "anzol", "alicate de bico", "alicate de contenção", "passagua", "passaguá", "linha multifilamento", "linha monofilamento", "girador", "snap", "chumbada", "boia cevadeira", "boia de pesca"]
+        resale_vendors = ["marine sports", "shimano", "daiwa", "deyu", "albatroz", "rapala", "lucky nelson nakamura", "maruri", "yara", "sumax"]
+        if any(w in text for w in gear_keywords) or any(v in text for v in resale_vendors) or (
+            any(w in text for w in ["vara", "carretilha", "molinete"]) and not any(w in text for w in ["camisa", "camiseta", "bone", "boné"])
+        ):
+            return "fishing_tackle_gear"
 
-        # 7. Motors & Velocidade
+        # 14. Motors & Trilha / Off-road
         if any(w in text for w in ["jersey", "moto", "motociclismo", "cross", "motocross", "off-road", "velocidade", "trail", "expedição", "expedicao", "atacama", "ushuaia", "motors"]):
             return "motors_speed"
 
-        # 8. Agro & Campo
+        # 15. Agro & Campo
         if any(w in text for w in ["agro", "campo", "rural", "soja", "milho", "trator", "gado", "fazenda"]):
             return "agro_field"
 
-        # 9. Padrão: UV Performance / Camisas de Pesca
+        # 16. Padrão: Camisas UV Performance
         return "uv_performance"
 
-    def extract_product_specs(self, product: Dict[str, Any], archetype_id: str) -> List[Dict[str, str]]:
+    def extract_product_specs(self, product: Dict[str, Any], archetype_id: str, sibling_specs: List[Dict[str, str]] = None) -> List[Dict[str, str]]:
         """
-        Extrai dados reais do produto (título, tags, vendor e body_html anterior) para preencher a tabela técnica sem alucinações.
+        Extrai especificações autênticas do produto. Se o sibling_matcher encontrou
+        especificações de um irmão homólogo, elas são priorizadas para garantir fidelidade.
         """
+        if sibling_specs and len(sibling_specs) >= 2:
+            return [{"label": s["label"], "value": s["default"]} for s in sibling_specs]
+
         template = self.templates.get(archetype_id, self.templates["uv_performance"])
         base_specs = template["base_specs"]
         
@@ -401,22 +730,22 @@ class TemplateEngine:
                 val = f"Produto Original {vendor} com garantia oficial"
             elif label == "Categoria" and vendor:
                 val = f"Equipamento de Precisão {vendor}"
-            elif label == "Material do Cabedal" and "boaonda" in full_text:
+            elif "boaonda" in full_text and label == "Material do Cabedal":
                 val = "Termoplástico nobre Boaonda flexível e lavável"
 
-            # 1. Proteção Solar (apenas para roupas e bonés)
+            # 1. Proteção Solar
             if "proteção" in label.lower() or "solar" in label.lower():
-                if "50+" in full_text or "uv 50" in full_text or "fps 50" in full_text or "fpu 50" in full_text:
+                if any(x in full_text for x in ["50+", "uv 50", "fps 50", "fpu 50"]):
                     val = "Fator FPU 50+ permanente certificado"
                 elif "uv" in full_text:
                     val = "Proteção UV integrada ao tecido"
             
-            # 2. Composição / Tecido (apenas roupas)
+            # 2. Composição / Tecido
             elif "composição" in label.lower() or "tecido" in label.lower():
-                if "dry fit" in full_text or "dryfit" in full_text or "dry" in full_text:
+                if any(x in full_text for x in ["dry fit", "dryfit", "dry"]):
                     val = "100% Poliéster Tecnológico Dry Fit respirável"
                 elif "algodão" in full_text or "algodao" in full_text:
-                    val = "100% Algodão Premium Penteado 30.1 com toque macio"
+                    val = "100% Algodão Premium Penteado com toque macio"
 
             # 3. Zíper
             elif "zíper" in label.lower() or "ziper" in label.lower():
@@ -428,13 +757,11 @@ class TemplateEngine:
             extracted.append({"label": label, "value": val})
 
         return extracted
-    def generate_narrative_from_template(self, product: Dict[str, Any], archetype_id: str, cdn_images: List[str], store_key: str = None) -> Dict[str, Any]:
+
+    def generate_narrative_from_template(self, product: Dict[str, Any], archetype_id: str, cdn_images: List[str], store_key: str = None, sibling_info: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Gera os 3 blocos narrativos e especificações prontos para o HTMLBuilder.
-        Garante que a paleta suave de cores siga rigorosamente a identidade da loja:
-        - BRK Fishing: Azul Leve (#0284c7 / #f0f9ff)
-        - BRK Agro: Verde Leve (#16a34a / #f0fdf4)
-        - BRK Motors: Laranja Leve (#f97316 / #fff7ed)
+        Se sibling_info for fornecido, anota o produto como originário de irmão homólogo do site.
         """
         template = self.templates.get(archetype_id, self.templates["uv_performance"])
         title = product.get("title", "Produto BRK")
@@ -462,63 +789,68 @@ class TemplateEngine:
 
         # Determinar ícone de cuidados apropriado ao arquétipo
         care_icons = {
-            "footwear_sandals": "fa-solid fa-shoe-prints",
+            "hats_safari_outdoor": "fa-solid fa-hat-cowboy-side",
+            "caps_trucker_snapback": "fa-solid fa-hat-baseball",
+            "fishing_lures": "fa-solid fa-fish-fins",
+            "neck_gaiters_balaclavas": "fa-solid fa-mask-face",
+            "sun_sleeves_manguitos": "fa-solid fa-hand-holding-hand",
+            "footwear_sandals_boaonda": "fa-solid fa-shoe-prints",
+            "closed_footwear_sneakers": "fa-solid fa-socks",
+            "drinkware_thermo": "fa-solid fa-mug-hot",
             "tackle_boxes_storage": "fa-solid fa-box-archive",
-            "fishing_tackle_gear": "fa-solid fa-screwdriver-wrench",
-            "thermal_gear": "fa-solid fa-snowflake",
+            "overalls_workwear": "fa-solid fa-vest",
+            "books_publications": "fa-solid fa-book-open",
             "cutlery_unique": "fa-solid fa-utensils",
-            "caps_accessories": "fa-solid fa-hat-cowboy",
+            "fishing_tackle_gear": "fa-solid fa-screwdriver-wrench",
             "motors_speed": "fa-solid fa-shield-halved",
             "agro_field": "fa-solid fa-seedling",
             "uv_performance": "fa-solid fa-shirt"
         }
-        care_icon = care_icons.get(archetype_id, "fa-solid fa-hand-sparkles")
+        care_icon = care_icons.get(archetype_id, template.get("fa_icon", "fa-solid fa-hand-sparkles"))
 
         # Até 3 imagens CDN oficiais
         img1 = cdn_images[0] if len(cdn_images) > 0 else ""
         img2 = cdn_images[1] if len(cdn_images) > 1 else img1
         img3 = cdn_images[2] if len(cdn_images) > 2 else img1
 
-        block1 = {
-            "tag": template["act1"]["tag"],
-            "fa_icon": template["act1"].get("fa_icon", "fa-solid fa-palette"),
-            "title": template["act1"]["title"],
-            "description": template["act1"]["desc_tmpl"].format(title=title),
-            "image": img1,
-            "alt": f"{title} - Visual e Design"
-        }
-        
-        block2 = {
-            "tag": template["act2"]["tag"],
-            "fa_icon": template["act2"].get("fa_icon", "fa-solid fa-sun"),
-            "title": template["act2"]["title"],
-            "description": template["act2"]["desc_tmpl"].format(title=title),
-            "image": img2,
-            "alt": f"{title} - Performance e Detalhes"
-        }
+        act1 = template["act1"]
+        act2 = template["act2"]
+        act3 = template["act3"]
 
-        block3 = {
-            "tag": template["act3"]["tag"],
-            "fa_icon": template["act3"].get("fa_icon", "fa-solid fa-shield-halved"),
-            "title": template["act3"]["title"],
-            "description": template["act3"]["desc_tmpl"].format(title=title),
-            "image": img3,
-            "alt": f"{title} - Durabilidade e Acabamento"
-        }
+        sibling_specs = sibling_info.get("extracted_specs") if sibling_info else None
+        specs = self.extract_product_specs(product, archetype_id, sibling_specs=sibling_specs)
 
-        specs = self.extract_product_specs(product, archetype_id)
+        source_type = "sibling_template" if sibling_info else "archetype_specialized"
+        source_label = f"Molde Homólogo do Site ({sibling_info['sibling_title']})" if sibling_info else f"Arquétipo Especializado ({template['name']})"
 
         return {
-            "title": title,
-            "tagline": template.get("default_tagline", ""),
-            "archetype_id": archetype_id,
-            "archetype_name": template.get("name", "BRK"),
-            "fa_icon": template.get("fa_icon", "fa-solid fa-fish"),
-            "store_key": store_key,
             "theme_color": theme_color,
             "theme_bg": theme_bg,
             "care_icon": care_icon,
-            "care_tips": template.get("care_tips", "Lavar à mão ou em ciclo suave. Secar à sombra."),
-            "narrative_blocks": [block1, block2, block3],
-            "specs": specs
+            "source_type": source_type,
+            "source_label": source_label,
+            "sibling_info": sibling_info,
+            "act1": {
+                "tag": act1["tag"],
+                "fa_icon": act1.get("fa_icon", template.get("fa_icon", "fa-solid fa-check")),
+                "title": act1["title"],
+                "description": act1["desc_tmpl"].format(title=title),
+                "image": img1
+            },
+            "act2": {
+                "tag": act2["tag"],
+                "fa_icon": act2.get("fa_icon", "fa-solid fa-sun"),
+                "title": act2["title"],
+                "description": act2["desc_tmpl"].format(title=title),
+                "image": img2
+            },
+            "act3": {
+                "tag": act3["tag"],
+                "fa_icon": act3.get("fa_icon", "fa-solid fa-shield-halved"),
+                "title": act3["title"],
+                "description": act3["desc_tmpl"].format(title=title),
+                "image": img3
+            },
+            "specs": specs,
+            "care_tips": template.get("care_tips", "Lavar com sabão neutro e secar à sombra.")
         }
