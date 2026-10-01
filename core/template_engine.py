@@ -623,81 +623,101 @@ class TemplateEngine:
 
     def detect_archetype(self, title: str, category: str = "", tags: List[str] = None, vendor: str = "") -> str:
         """
-        Detecta com máxima precisão e prioridade estrita o arquétipo correto do produto,
-        eliminando categorizações incorretas (ex: chapéus como bonés, iscas como camisas,
-        manguitos com zíper, etc.).
+        Detecta com máxima precisão o arquétipo correto do produto.
+        O TÍTULO DO PRODUTO É SOBERANO: previne que coleções multi-categoria
+        (ex: 'Bonés & Chapéus') façam camisas serem classificadas incorretamente.
         """
-        text = f"{title} {category} {vendor} {' '.join(tags or [])}".lower()
-        
-        # 1. Livros & Publicações (Prioridade Absoluta)
-        if any(w in text for w in ["livro", "livros", "livro de colorir", "guia de bolso", "guia ilustrado", "cartilha", "publicacao", "publicação"]):
-            return "books_publications"
+        t = (title or "").lower().strip()
+        cat = (category or "").lower().strip()
+        tags_str = " ".join(tags or []).lower()
+        vend = (vendor or "").lower().strip()
 
-        # 2. Macacões & Jardineiras
-        if any(w in text for w in ["macacao", "macacão", "jardineira", "jardineiras", "salopete", "wader"]):
-            return "overalls_workwear"
+        # 1. Regra Soberana do Título: Camisas / Vestuário Superior
+        if any(w in t for w in ["camisa", "camiseta", "baby look", "regata", "t-shirt", "polo"]):
+            if any(w in t for w in ["agro", "campo", "fazenda", "trator", "algodao", "algodão"]):
+                return "agro_field"
+            if any(w in t for w in ["jersey", "moto", "cross", "off-road", "trilha", "speed", "motors"]):
+                return "motors_speed"
+            return "uv_performance"
 
-        # 3. Manguitos (Manga avulsa de proteção)
-        if any(w in text for w in ["manguito", "manguitos", "manga avulsa", "sleeves"]):
-            return "sun_sleeves_manguitos"
-
-        # 4. Bandanas, Tubenecks, Balaclavas & Buffs
-        if any(w in text for w in ["bandana", "balaclava", "tubeneck", "buff", "gaiter", "mascara facial", "máscara facial", "protetor de pescoço", "protetor de pescoco"]):
-            return "neck_gaiters_balaclavas"
-
-        # 5. Chapéus de Pesca / Safári / Australiano / Palha / Nuca
-        if any(w in text for w in ["chapeu", "chapéu", "safari", "safári", "australiano", "pescador", "nuca", "palha"]):
-            return "hats_safari_outdoor"
-
-        # 6. Bonés Trucker & Snapback (Somente bonés reais)
-        if any(w in text for w in ["bone", "boné", "trucker", "snapback", "aba curva", "aba reta", "viseira"]):
-            return "caps_trucker_snapback"
-
-        # 7. Iscas Artificiais (Plugs, Jigs, Softs, etc.)
-        if any(w in text for w in ["isca artificial", "isca de pesca", "iscas artificiais", "plug", "jig", "frog", "soft bait", "meia agua", "meia-água", "superficie", "superfície", "crankbait", "minnow", "popper", "stick", "twitch", "spinnerbait"]) or (
-            any(w in text for w in ["isca", "iscas"]) and not any(w in text for w in ["camisa", "camiseta", "bone", "boné"])
-        ):
-            return "fishing_lures"
-
-        # 8. Térmicos, Copos, Garrafas e Canecas
-        if any(w in text for w in ["copo termico", "copo térmico", "garrafa termica", "garrafa térmica", "caneca termica", "caneca térmica", "copo", "garrafa", "caneca", "cantil", "cooler", "geladeira", "caixa termica", "caixa térmica", "elber"]):
-            return "drinkware_thermo"
-
-        # 9. Tênis & Calçados Fechados
-        if any(w in text for w in ["tenis", "tênis", "sapato", "botina", "sneaker", "calcado fechado", "calçado fechado"]):
-            return "closed_footwear_sneakers"
-
-        # 10. Sandálias, Chinelos, Babuches e Clogs Boaonda
-        if any(w in text for w in ["sandalia", "sandália", "chinelo", "boaonda", "babuche", "clog", "slide", "pantufa", "crocs", "papete", "calcado", "calçado"]):
-            return "footwear_sandals_boaonda"
-
-        # 11. Caixas, Estojos & Organização de Tralha
-        if any(w in text for w in ["caixa de pesca", "caixa pesca", "estojo", "maleta", "organizador", "porta-vara", "porta vara", "tubo de vara", "bolsa de pesca"]) or (
-            any(w in text for w in ["caixa", "estojo", "maleta"]) and not any(w in text for w in ["camisa", "camiseta", "termica", "térmica"])
-        ):
-            return "tackle_boxes_storage"
-
-        # 12. Cutelaria & Facas
-        if any(w in text for w in ["faca", "cutelaria", "lamina", "lâmina", "bainha", "churrasco", "canivete"]):
-            return "cutlery_unique"
-
-        # 13. Equipamentos de Pesca & Revenda (Varas, Carretilhas, Molinetes, Linhas)
-        gear_keywords = ["vara de pesca", "vara para", "carretilha", "molinete", "anzol", "alicate de bico", "alicate de contenção", "passagua", "passaguá", "linha multifilamento", "linha monofilamento", "girador", "snap", "chumbada", "boia cevadeira", "boia de pesca"]
-        resale_vendors = ["marine sports", "shimano", "daiwa", "deyu", "albatroz", "rapala", "lucky nelson nakamura", "maruri", "yara", "sumax"]
-        if any(w in text for w in gear_keywords) or any(v in text for v in resale_vendors) or (
-            any(w in text for w in ["vara", "carretilha", "molinete"]) and not any(w in text for w in ["camisa", "camiseta", "bone", "boné"])
-        ):
-            return "fishing_tackle_gear"
-
-        # 14. Motors & Trilha / Off-road
-        if any(w in text for w in ["jersey", "moto", "motociclismo", "cross", "motocross", "off-road", "velocidade", "trail", "expedição", "expedicao", "atacama", "ushuaia", "motors"]):
+        if "jersey" in t:
             return "motors_speed"
 
-        # 15. Agro & Campo
-        if any(w in text for w in ["agro", "campo", "rural", "soja", "milho", "trator", "gado", "fazenda"]):
+        # 2. Manguitos (Manga avulsa de proteção)
+        if any(w in t for w in ["manguito", "manguitos", "manga avulsa"]):
+            return "sun_sleeves_manguitos"
+
+        # 3. Bandanas, Tubenecks & Balaclavas
+        if any(w in t for w in ["bandana", "balaclava", "tubeneck", "buff", "mascara facial", "máscara facial", "protetor de pescoço"]):
+            return "neck_gaiters_balaclavas"
+
+        # 4. Chapéus de Pesca / Safári / Australiano / Palha / Nuca
+        if any(w in t for w in ["chapeu", "chapéu", "safari", "safári", "australiano", "palha", "pescador"]):
+            return "hats_safari_outdoor"
+
+        # 5. Bonés Trucker & Snapback
+        if any(w in t for w in ["bone", "boné", "trucker", "snapback", "aba curva", "aba reta", "viseira"]):
+            return "caps_trucker_snapback"
+
+        # 6. Iscas Artificiais (Plugs, Jigs, Softs, etc.)
+        if any(w in t for w in ["isca", "iscas", "plug", "jig", "frog", "soft bait", "crankbait", "minnow", "popper", "stick", "twitch"]):
+            return "fishing_lures"
+
+        # 7. Calçados (Sandálias Boaonda vs Tênis)
+        if any(w in t for w in ["tenis", "tênis", "botina", "sneaker", "sapato"]):
+            return "closed_footwear_sneakers"
+        if any(w in t for w in ["sandalia", "sandália", "chinelo", "boaonda", "babuche", "clog", "slide", "pantufa"]):
+            return "footwear_sandals_boaonda"
+
+        # 8. Copos, Garrafas e Canecas Térmicas
+        if any(w in t for w in ["copo", "garrafa", "caneca", "cantil", "cooler", "termico", "térmico", "termica", "térmica", "elber"]):
+            return "drinkware_thermo"
+
+        # 9. Livros & Publicações
+        if any(w in t for w in ["livro", "livros", "cartilha", "guia ilustrado", "colorir"]):
+            return "books_publications"
+
+        # 10. Macacões & Jardineiras
+        if any(w in t for w in ["macacao", "macacão", "jardineira", "jardineiras", "salopete"]):
+            return "overalls_workwear"
+
+        # 11. Cutelaria & Facas
+        if any(w in t for w in ["faca", "cutelaria", "lamina", "lâmina", "bainha", "canivete"]):
+            return "cutlery_unique"
+
+        # 12. Caixas de Pesca & Organização
+        if any(w in t for w in ["caixa de pesca", "caixa pesca", "estojo", "maleta", "organizador", "porta-vara", "porta vara", "tubo de vara"]):
+            return "tackle_boxes_storage"
+
+        # 13. Equipamentos de Pesca (Varas, Carretilhas, Molinetes, Linhas)
+        if any(w in t for w in ["vara", "carretilha", "molinete", "linha", "anzol", "alicate", "passagua", "passaguá"]):
+            return "fishing_tackle_gear"
+
+        # 14. Fallback Secundário via Categoria / Tags / Vendor (se o título não foi conclusivo)
+        text = f"{t} {cat} {vend} {tags_str}"
+        if any(w in text for w in ["manguito", "manguitos"]):
+            return "sun_sleeves_manguitos"
+        if any(w in text for w in ["bandana", "balaclava", "tubeneck"]):
+            return "neck_gaiters_balaclavas"
+        if any(w in text for w in ["sandalia", "sandália", "chinelo", "boaonda"]):
+            return "footwear_sandals_boaonda"
+        if any(w in text for w in ["tenis", "tênis", "calcado", "calçado"]):
+            return "closed_footwear_sneakers"
+        if any(w in text for w in ["isca", "iscas", "plug"]):
+            return "fishing_lures"
+        if any(w in text for w in ["copo", "garrafa", "termic", "térmic"]):
+            return "drinkware_thermo"
+        if any(w in text for w in ["chapeu", "chapéu"]):
+            return "hats_safari_outdoor"
+        if any(w in text for w in ["bone", "boné"]):
+            return "caps_trucker_snapback"
+        if any(w in text for w in ["vara", "carretilha", "molinete"]):
+            return "fishing_tackle_gear"
+        if any(w in text for w in ["jersey", "moto", "motors"]):
+            return "motors_speed"
+        if any(w in text for w in ["agro", "campo"]):
             return "agro_field"
 
-        # 16. Padrão: Camisas UV Performance
         return "uv_performance"
 
     def extract_product_specs(self, product: Dict[str, Any], archetype_id: str, sibling_specs: List[Dict[str, str]] = None) -> List[Dict[str, str]]:

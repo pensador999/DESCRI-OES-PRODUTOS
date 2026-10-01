@@ -102,6 +102,14 @@ def build_master():
         for p in extra_broken[:30]:
             selected_prods.append(p)
             selected_handles.add(p.get("handle"))
+
+        # 3. Garantir 100% de representação de todos os arquétipos especializados no grid interativo
+        for p in all_prods:
+            arch = template_engine.detect_archetype(p.get("title", ""), p.get("category", ""), p.get("tags", []), vendor=p.get("vendor", ""))
+            if arch not in ("uv_performance", "agro_field", "motors_speed"):
+                if p.get("handle") not in selected_handles:
+                    selected_prods.append(p)
+                    selected_handles.add(p.get("handle"))
         
         sibling_matcher = SiblingMatcher(all_prods)
         enriched = []
