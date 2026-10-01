@@ -1,0 +1,976 @@
+﻿Handle,Title,Body (HTML),Vendor,Product Category,Type,Tags,Published
+camisa-armorx-feminina-brk-barkeiro-azul-com-listra-e-luva-e-protecao-uv50,Camisa ArmorX Feminina BRK Barkeiro Azul com Listra e Luva e Proteção UV50+,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Solar UV50+ Homologada -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0628/1445/3826/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F187283813_2Fdcc759cff00e49378db916a95e1e8cfe.jpg?v=1790703928&width=900"" alt=""Camisa ArmorX Feminina BRK Barkeiro Azul com Listra e Luva e Proteção UV50+ - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Solar UV50+ Homologada</span>
+      <h3 class=""brk-desc-title"">BLINDAGEM TOTAL CONTRA O SOL</h3>
+      <p class=""brk-desc-paragraph"">A **Camisa ArmorX Feminina BRK Barkeiro Azul com Listra e Luva e Proteção UV50+** foi desenvolvida para pescadores e aventureiros que enfrentam longas jornadas sob sol intenso. Sua tecnologia têxtil com certificação permanente bloqueia até 98% dos raios UVA e UVB (FPU 50+), garantindo segurança absoluta para a sua pele sem sair nas lavagens.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Luva Integrada no Punho Passa-Dedo -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0628/1445/3826/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F187283828_2Fb558339b534247ba97686e50ebd5e8c8.jpg?v=1790704002&width=900"" alt=""Camisa ArmorX Feminina BRK Barkeiro Azul com Listra e Luva e Proteção UV50+ - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Luva Integrada no Punho Passa-Dedo</span>
+      <h3 class=""brk-desc-title"">PROTEÇÃO ATÉ O DORSO DAS MÃOS</h3>
+      <p class=""brk-desc-paragraph"">Com acabamento na tonalidade **Azul**, o punho inteligente com encaixe para o polegar mantém a manga perfeitamente posicionada durante arremessos, recolhimentos ou pilotagem do barco. Protege o dorso das mãos contra queimaduras solares e atrito, preservando total sensibilidade no manuseio da carretilha.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecido XTech Pro Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0628/1445/3826/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F187283828_2F0163db32639a4590b1e0a40fde38a046.jpg?v=1790704002&width=900"" alt=""Camisa ArmorX Feminina BRK Barkeiro Azul com Listra e Luva e Proteção UV50+ - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecido XTech Pro Respirável</span>
+      <h3 class=""brk-desc-title"">TOQUE MACIO E SECAGEM ULTRARRÁPIDA</h3>
+      <p class=""brk-desc-paragraph"">Confeccionada com a consagrada microfibra XTech Pro com tecnologia Dry, a camisa evapora o suor quase instantaneamente, mantendo o corpo sempre seco e com sensação térmica agradável. Possui ação antibacteriana que inibe odores indesejados mesmo após horas de uso contínuo.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK ArmorX Performance</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">XTech Pro (90% Poliéster / 10% Elastano com toque suave)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Punho</span>
+        <span class=""brk-spec-value"">Luva integrada anatômica com passa-dedo</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Gola</span>
+        <span class=""brk-spec-value"">Gola alta com zíper tratorado e puxador emborrachado</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Secagem</span>
+        <span class=""brk-spec-value"">Tecnologia Dry de evaporação ultrarrápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Cuidados</span>
+        <span class=""brk-spec-value"">Lavagem simples, não requer ferro de passar, secagem rápida à sombra</span>
+      </div>
+    </div>
+  </div>
+</div>",Brk Fishing,,,"Camisa, Com Luva, Com Zíper, Feminino",true
+camisa-armorx-brk-barkeiro-azul-com-listra-e-luva-e-protecao-uv50,Camisa ArmorX Brk Barkeiro Azul com Listra e Luva e Proteção UV50+,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Solar UV50+ Homologada -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0628/1445/3826/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F187283767_2F4787b96422a84a76b2b4437d41a75de5.jpg?v=1790703842&width=900"" alt=""Camisa ArmorX Brk Barkeiro Azul com Listra e Luva e Proteção UV50+ - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Solar UV50+ Homologada</span>
+      <h3 class=""brk-desc-title"">BLINDAGEM TOTAL CONTRA O SOL</h3>
+      <p class=""brk-desc-paragraph"">A **Camisa ArmorX Brk Barkeiro Azul com Listra e Luva e Proteção UV50+** foi desenvolvida para pescadores e aventureiros que enfrentam longas jornadas sob sol intenso. Sua tecnologia têxtil com certificação permanente bloqueia até 98% dos raios UVA e UVB (FPU 50+), garantindo segurança absoluta para a sua pele sem sair nas lavagens.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Luva Integrada no Punho Passa-Dedo -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0628/1445/3826/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F187283781_2F6c947aa3a0b84ee4bcf35e099a0ed214.jpg?v=1790703916&width=900"" alt=""Camisa ArmorX Brk Barkeiro Azul com Listra e Luva e Proteção UV50+ - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Luva Integrada no Punho Passa-Dedo</span>
+      <h3 class=""brk-desc-title"">PROTEÇÃO ATÉ O DORSO DAS MÃOS</h3>
+      <p class=""brk-desc-paragraph"">Com acabamento na tonalidade **Azul**, o punho inteligente com encaixe para o polegar mantém a manga perfeitamente posicionada durante arremessos, recolhimentos ou pilotagem do barco. Protege o dorso das mãos contra queimaduras solares e atrito, preservando total sensibilidade no manuseio da carretilha.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecido XTech Pro Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0628/1445/3826/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F187283781_2F8c40336a0534440b8afde8b67e85948b.jpg?v=1790703916&width=900"" alt=""Camisa ArmorX Brk Barkeiro Azul com Listra e Luva e Proteção UV50+ - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecido XTech Pro Respirável</span>
+      <h3 class=""brk-desc-title"">TOQUE MACIO E SECAGEM ULTRARRÁPIDA</h3>
+      <p class=""brk-desc-paragraph"">Confeccionada com a consagrada microfibra XTech Pro com tecnologia Dry, a camisa evapora o suor quase instantaneamente, mantendo o corpo sempre seco e com sensação térmica agradável. Possui ação antibacteriana que inibe odores indesejados mesmo após horas de uso contínuo.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK ArmorX Performance</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">XTech Pro (90% Poliéster / 10% Elastano com toque suave)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Punho</span>
+        <span class=""brk-spec-value"">Luva integrada anatômica com passa-dedo</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Gola</span>
+        <span class=""brk-spec-value"">Gola alta com zíper tratorado e puxador emborrachado</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Secagem</span>
+        <span class=""brk-spec-value"">Tecnologia Dry de evaporação ultrarrápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Cuidados</span>
+        <span class=""brk-spec-value"">Lavagem simples, não requer ferro de passar, secagem rápida à sombra</span>
+      </div>
+    </div>
+  </div>
+</div>",Brk Fishing,,,"Camisa, Com Luva, Com Zíper, Masculino",true
+camisa-armorx-feminina-brk-pinhal-com-luva-e-protecao-uv50,Camisa ArmorX Feminina Brk Pinhal com Luva e Proteção UV50+,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Solar UV50+ Homologada -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0628/1445/3826/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F182400713_2Fec6cab5b9f3c484eb40cd16a8bee3d25.jpg?v=1785957373&width=900"" alt=""Camisa ArmorX Feminina Brk Pinhal com Luva e Proteção UV50+ - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Solar UV50+ Homologada</span>
+      <h3 class=""brk-desc-title"">BLINDAGEM TOTAL CONTRA O SOL</h3>
+      <p class=""brk-desc-paragraph"">A **Camisa ArmorX Feminina Brk Pinhal com Luva e Proteção UV50+** foi desenvolvida para pescadores e aventureiros que enfrentam longas jornadas sob sol intenso. Sua tecnologia têxtil com certificação permanente bloqueia até 98% dos raios UVA e UVB (FPU 50+), garantindo segurança absoluta para a sua pele sem sair nas lavagens.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Luva Integrada no Punho Passa-Dedo -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0628/1445/3826/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F182400718_2F96a4c065ecf141f5b3631818ddcd9912.jpg?v=1785957756&width=900"" alt=""Camisa ArmorX Feminina Brk Pinhal com Luva e Proteção UV50+ - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Luva Integrada no Punho Passa-Dedo</span>
+      <h3 class=""brk-desc-title"">PROTEÇÃO ATÉ O DORSO DAS MÃOS</h3>
+      <p class=""brk-desc-paragraph"">Com acabamento na tonalidade **Pinhal**, o punho inteligente com encaixe para o polegar mantém a manga perfeitamente posicionada durante arremessos, recolhimentos ou pilotagem do barco. Protege o dorso das mãos contra queimaduras solares e atrito, preservando total sensibilidade no manuseio da carretilha.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecido XTech Pro Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0628/1445/3826/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F182400718_2Faf2988efa84f44438ed53c511675c9e6.jpg?v=1785957756&width=900"" alt=""Camisa ArmorX Feminina Brk Pinhal com Luva e Proteção UV50+ - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecido XTech Pro Respirável</span>
+      <h3 class=""brk-desc-title"">TOQUE MACIO E SECAGEM ULTRARRÁPIDA</h3>
+      <p class=""brk-desc-paragraph"">Confeccionada com a consagrada microfibra XTech Pro com tecnologia Dry, a camisa evapora o suor quase instantaneamente, mantendo o corpo sempre seco e com sensação térmica agradável. Possui ação antibacteriana que inibe odores indesejados mesmo após horas de uso contínuo.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK ArmorX Performance</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">XTech Pro (90% Poliéster / 10% Elastano com toque suave)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Punho</span>
+        <span class=""brk-spec-value"">Luva integrada anatômica com passa-dedo</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Gola</span>
+        <span class=""brk-spec-value"">Gola alta com zíper tratorado e puxador emborrachado</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Secagem</span>
+        <span class=""brk-spec-value"">Tecnologia Dry de evaporação ultrarrápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Cuidados</span>
+        <span class=""brk-spec-value"">Lavagem simples, não requer ferro de passar, secagem rápida à sombra</span>
+      </div>
+    </div>
+  </div>
+</div>",Brk Fishing,,,"Camisa, Com Luva, Com Zíper, Feminino",true
+camisa-armorx-camuflada-verde-militar-com-luva-e-protecao-uv50,Camisa ArmorX Camuflada Verde Militar com Luva e Proteção UV50,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Solar UV50+ Homologada -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0628/1445/3826/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F185189694_2F2c0e0bd092e14a83aba8c8255bc78032.jpg?v=1788352804&width=900"" alt=""Camisa ArmorX Camuflada Verde Militar com Luva e Proteção UV50 - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Solar UV50+ Homologada</span>
+      <h3 class=""brk-desc-title"">BLINDAGEM TOTAL CONTRA O SOL</h3>
+      <p class=""brk-desc-paragraph"">A **Camisa ArmorX Camuflada Verde Militar com Luva e Proteção UV50** foi desenvolvida para pescadores e aventureiros que enfrentam longas jornadas sob sol intenso. Sua tecnologia têxtil com certificação permanente bloqueia até 98% dos raios UVA e UVB (FPU 50+), garantindo segurança absoluta para a sua pele sem sair nas lavagens.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Luva Integrada no Punho Passa-Dedo -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0628/1445/3826/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F185189694_2F8dc71dbb16454376a7e43446d3961641.jpg?v=1788352804&width=900"" alt=""Camisa ArmorX Camuflada Verde Militar com Luva e Proteção UV50 - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Luva Integrada no Punho Passa-Dedo</span>
+      <h3 class=""brk-desc-title"">PROTEÇÃO ATÉ O DORSO DAS MÃOS</h3>
+      <p class=""brk-desc-paragraph"">Com acabamento na tonalidade **Verde Militar**, o punho inteligente com encaixe para o polegar mantém a manga perfeitamente posicionada durante arremessos, recolhimentos ou pilotagem do barco. Protege o dorso das mãos contra queimaduras solares e atrito, preservando total sensibilidade no manuseio da carretilha.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecido XTech Pro Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0628/1445/3826/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F185189694_2F1806f7de51ee48efbc87e5045863880c.jpg?v=1788352804&width=900"" alt=""Camisa ArmorX Camuflada Verde Militar com Luva e Proteção UV50 - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecido XTech Pro Respirável</span>
+      <h3 class=""brk-desc-title"">TOQUE MACIO E SECAGEM ULTRARRÁPIDA</h3>
+      <p class=""brk-desc-paragraph"">Confeccionada com a consagrada microfibra XTech Pro com tecnologia Dry, a camisa evapora o suor quase instantaneamente, mantendo o corpo sempre seco e com sensação térmica agradável. Possui ação antibacteriana que inibe odores indesejados mesmo após horas de uso contínuo.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK ArmorX Performance</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">XTech Pro (90% Poliéster / 10% Elastano com toque suave)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Punho</span>
+        <span class=""brk-spec-value"">Luva integrada anatômica com passa-dedo</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Gola</span>
+        <span class=""brk-spec-value"">Gola alta com zíper tratorado e puxador emborrachado</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Secagem</span>
+        <span class=""brk-spec-value"">Tecnologia Dry de evaporação ultrarrápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Cuidados</span>
+        <span class=""brk-spec-value"">Lavagem simples, não requer ferro de passar, secagem rápida à sombra</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK FISHING,,,"Camisa, Camuflado, Com Luva, Com Zíper, Masculino, prazo_imediato",true
+camisa-armorx-feminina-camuflada-verde-militar-com-luva-e-protecao-uv50,Camisa ArmorX Feminina Camuflada Verde Militar com Luva e Proteção UV50,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Solar UV50+ Homologada -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0628/1445/3826/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F185189729_2F9ef9008779624e0cb13b63af8aa10452.jpg?v=1788352829&width=900"" alt=""Camisa ArmorX Feminina Camuflada Verde Militar com Luva e Proteção UV50 - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Solar UV50+ Homologada</span>
+      <h3 class=""brk-desc-title"">BLINDAGEM TOTAL CONTRA O SOL</h3>
+      <p class=""brk-desc-paragraph"">A **Camisa ArmorX Feminina Camuflada Verde Militar com Luva e Proteção UV50** foi desenvolvida para pescadores e aventureiros que enfrentam longas jornadas sob sol intenso. Sua tecnologia têxtil com certificação permanente bloqueia até 98% dos raios UVA e UVB (FPU 50+), garantindo segurança absoluta para a sua pele sem sair nas lavagens.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Luva Integrada no Punho Passa-Dedo -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0628/1445/3826/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F185189729_2Faa1acf3aa40d4a968d6b6a2e5899af05.jpg?v=1788352829&width=900"" alt=""Camisa ArmorX Feminina Camuflada Verde Militar com Luva e Proteção UV50 - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Luva Integrada no Punho Passa-Dedo</span>
+      <h3 class=""brk-desc-title"">PROTEÇÃO ATÉ O DORSO DAS MÃOS</h3>
+      <p class=""brk-desc-paragraph"">Com acabamento na tonalidade **Verde Militar**, o punho inteligente com encaixe para o polegar mantém a manga perfeitamente posicionada durante arremessos, recolhimentos ou pilotagem do barco. Protege o dorso das mãos contra queimaduras solares e atrito, preservando total sensibilidade no manuseio da carretilha.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecido XTech Pro Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0628/1445/3826/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F185189729_2F74904d5cbe6b4957ba17b87cddb63fd5.jpg?v=1788352829&width=900"" alt=""Camisa ArmorX Feminina Camuflada Verde Militar com Luva e Proteção UV50 - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecido XTech Pro Respirável</span>
+      <h3 class=""brk-desc-title"">TOQUE MACIO E SECAGEM ULTRARRÁPIDA</h3>
+      <p class=""brk-desc-paragraph"">Confeccionada com a consagrada microfibra XTech Pro com tecnologia Dry, a camisa evapora o suor quase instantaneamente, mantendo o corpo sempre seco e com sensação térmica agradável. Possui ação antibacteriana que inibe odores indesejados mesmo após horas de uso contínuo.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK ArmorX Performance</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">XTech Pro (90% Poliéster / 10% Elastano com toque suave)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Punho</span>
+        <span class=""brk-spec-value"">Luva integrada anatômica com passa-dedo</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Gola</span>
+        <span class=""brk-spec-value"">Gola alta com zíper tratorado e puxador emborrachado</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Secagem</span>
+        <span class=""brk-spec-value"">Tecnologia Dry de evaporação ultrarrápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Cuidados</span>
+        <span class=""brk-spec-value"">Lavagem simples, não requer ferro de passar, secagem rápida à sombra</span>
+      </div>
+    </div>
+  </div>
+</div>",Brk Fishing,,,"Camisa, Camuflado, Com Luva, Com Zíper, Feminino, prazo_imediato",true

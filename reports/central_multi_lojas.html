@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Central Multi-Lojas BRK - Painel Unificado de Auditoria</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-heading { font-family: 'Space Grotesk', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-6 sm:p-12 antialiased">
+  <div class="max-w-6xl mx-auto space-y-10">
+
+    <!-- Header Central -->
+    <div class="text-center space-y-3">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-400/30 text-xs font-bold uppercase tracking-wider">
+        Ecossistema Multi-Site Shopify
+      </div>
+      <h1 class="font-heading font-extrabold text-3xl sm:text-5xl text-white tracking-tight">
+        Central de Auditoria & Gestão por SKU
+      </h1>
+      <p class="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
+        Ambientes 100% isolados para monitorar a saúde de descrições, fotos quebradas e conciliação de SKUs para cada uma das lojas do grupo.
+      </p>
+    </div>
+
+    <!-- Cards das 3 Lojas -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+
+      <!-- LOJA 1: BRK FISHING -->
+      <div class="bg-slate-800/80 border border-blue-500/30 rounded-3xl p-6 sm:p-8 flex flex-col justify-between hover:border-blue-400 hover:scale-[1.02] transition-all shadow-xl shadow-blue-950/30 group">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-blue-500/30">
+              🎣
+            </span>
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">Pesca & UV</span>
+          </div>
+          <h3 class="font-heading font-bold text-xl text-white">BRK Fishing</h3>
+          <p class="text-xs text-slate-400 mt-1">www.brkfishing.com.br</p>
+
+          <div class="mt-6 space-y-2.5 text-xs">
+            <div class="flex justify-between py-1.5 border-b border-slate-700/60">
+              <span class="text-slate-400">Total de Modelos:</span>
+              <span class="font-bold text-white">120</span>
+            </div>
+            <div class="flex justify-between py-1.5 border-b border-slate-700/60">
+              <span class="text-slate-400">SKUs Agrupados:</span>
+              <span class="font-bold text-white">438</span>
+            </div>
+            <div class="flex justify-between py-1.5 border-b border-slate-700/60">
+              <span class="text-slate-400">SKUs com Fotos Quebradas:</span>
+              <span class="font-bold text-rose-400">43 ⚠️</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8">
+          <a href="catalogo_interativo_brk.html" target="_blank" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-md shadow-blue-600/30">
+            <span>Acessar Ambiente Fishing</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- LOJA 2: BRK AGRO -->
+      <div class="bg-slate-800/80 border border-emerald-500/30 rounded-3xl p-6 sm:p-8 flex flex-col justify-between hover:border-emerald-400 hover:scale-[1.02] transition-all shadow-xl shadow-emerald-950/30 group">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="w-12 h-12 rounded-2xl bg-emerald-600 flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-emerald-500/30">
+              🌾
+            </span>
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Campo & Pecuária</span>
+          </div>
+          <h3 class="font-heading font-bold text-xl text-white">BRK Agro</h3>
+          <p class="text-xs text-slate-400 mt-1">www.brkagro.com.br</p>
+
+          <div class="mt-6 space-y-2.5 text-xs">
+            <div class="flex justify-between py-1.5 border-b border-slate-700/60">
+              <span class="text-slate-400">Total de Modelos:</span>
+              <span class="font-bold text-white">1000</span>
+            </div>
+            <div class="flex justify-between py-1.5 border-b border-slate-700/60">
+              <span class="text-slate-400">SKUs Agrupados:</span>
+              <span class="font-bold text-white">5955</span>
+            </div>
+            <div class="flex justify-between py-1.5 border-b border-slate-700/60">
+              <span class="text-slate-400">SKUs com Fotos Quebradas:</span>
+              <span class="font-bold text-rose-400">
+                19 ⚠️
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 space-y-2">
+          <a href="catalogo_interativo_brk_agro.html" target="_blank" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-md shadow-emerald-600/30">
+            <span>Acessar Ambiente Agro</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- LOJA 3: BRK MOTORS -->
+      <div class="bg-slate-800/80 border border-red-500/30 rounded-3xl p-6 sm:p-8 flex flex-col justify-between hover:border-red-400 hover:scale-[1.02] transition-all shadow-xl shadow-red-950/30 group">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="w-12 h-12 rounded-2xl bg-red-600 flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-red-500/30">
+              🏍️
+            </span>
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-red-500/20 text-red-300 border border-red-500/30">Motors & Off-Road</span>
+          </div>
+          <h3 class="font-heading font-bold text-xl text-white">BRK Motors</h3>
+          <p class="text-xs text-slate-400 mt-1">www.brkmotors.com.br</p>
+
+          <div class="mt-6 space-y-2.5 text-xs">
+            <div class="flex justify-between py-1.5 border-b border-slate-700/60">
+              <span class="text-slate-400">Total de Modelos:</span>
+              <span class="font-bold text-white">1000</span>
+            </div>
+            <div class="flex justify-between py-1.5 border-b border-slate-700/60">
+              <span class="text-slate-400">SKUs Agrupados:</span>
+              <span class="font-bold text-white">6758</span>
+            </div>
+            <div class="flex justify-between py-1.5 border-b border-slate-700/60">
+              <span class="text-slate-400">SKUs com Fotos Quebradas:</span>
+              <span class="font-bold text-rose-400">
+                98 ⚠️
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 space-y-2">
+          <a href="catalogo_interativo_brk_motors.html" target="_blank" class="w-full py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-md shadow-red-600/30">
+            <span>Acessar Ambiente Motors</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Rodapé -->
+    <div class="p-6 rounded-2xl bg-slate-800/40 border border-slate-800 text-center text-xs text-slate-400">
+      Cada ambiente possui seu próprio banco de dados, relatórios CSV separados e catálogo interativo independente para conciliação no ERP Sankhya e Shopify.
+    </div>
+
+  </div>
+</body>
+</html>

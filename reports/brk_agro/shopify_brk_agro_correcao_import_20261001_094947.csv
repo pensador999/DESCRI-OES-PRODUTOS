@@ -1,0 +1,574 @@
+﻿Handle,Title,Body (HTML),Vendor,Product Category,Type,Tags,Published
+camiseta-agro-brk-nelore-pecuaria-com-algodao-premium,Camiseta Agro Brk Nelore Pecuária com Algodão Premium,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Solar UV50+ Homologada -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0887/2083/4857/files/camiseta-agro-brk-nelore-pecuaria-com-algodao-premium-apc0237-premium-preto-p-camiseta-agro-7794967468388-brk-agro-p-41187686973737.jpg?v=1787682950&width=900"" alt=""Camiseta Agro Brk Nelore Pecuária com Algodão Premium - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Solar UV50+ Homologada</span>
+      <h3 class=""brk-desc-title"">BLINDAGEM PARA A ROTINA NO CAMPO</h3>
+      <p class=""brk-desc-paragraph"">Desenvolvida para o produtor e para quem vive a lida pesada de sol a sol, a **Camiseta Agro Brk Nelore Pecuária com Algodão Premium** oferece bloqueio permanente de até 98% dos raios UVA e UVB (FPU 50+). Segurança essencial para longas horas na lavoura, manejo de gado ou operação de máquinas sem desgaste da fibra nas lavagens frequentes.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Construção de Alta Resistência -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0887/2083/4857/files/camiseta-agro-brk-nelore-pecuaria-com-algodao-premium-apc0237-premium-preto-p-camiseta-agro-7794967468388-brk-agro-p-41187687006505.jpg?v=1787682589&width=900"" alt=""Camiseta Agro Brk Nelore Pecuária com Algodão Premium - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Construção de Alta Resistência</span>
+      <h3 class=""brk-desc-title"">DURABILIDADE CONTRA O ATRITO DA LIDA</h3>
+      <p class=""brk-desc-paragraph"">Com acabamento na cor **Exclusiva**, possui costuras reforçadas ponto-a-ponto que suportam a abrasão do dia a dia no campo. Recorte anatômico confortável que não puxa nem aperta durante o trabalho braçal, garantindo liberdade total de movimentos.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecido Respirável & Conforto Térmico -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0887/2083/4857/files/camiseta-agro-brk-nelore-pecuaria-com-algodao-premium-apc0237-premium-preto-p-camiseta-agro-7794967468388-brk-agro-p-41187687072041.jpg?v=1787682601&width=900"" alt=""Camiseta Agro Brk Nelore Pecuária com Algodão Premium - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecido Respirável & Conforto Térmico</span>
+      <h3 class=""brk-desc-title"">SECAGEM RÁPIDA E TOQUE SUAVE</h3>
+      <p class=""brk-desc-paragraph"">O tecido com tecnologia Dry dissipa o suor e a umidade com rapidez extrema, mantendo a sensação térmica agradável mesmo sob o calor forte do cerrado e pasto. Tratamento antibacteriano que inibe odores e poeira, além de dispensar o uso de ferro de passar.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Agro Heavy Duty</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Agro,Camisas Agro & Campo,LINHAGEM_VESTUARIO,,true
+camiseta-agro-brk-bandeira-brasil-algodao-premium,Camiseta Agro Brk Bandeira Brasil Algodão Premium,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Solar UV50+ Homologada -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0887/2083/4857/files/camiseta-agro-brk-bandeira-brasil-algodao-premium-apc046-premium-preto-p-camiseta-agro-7794966277417-brk-agro-p-41186057912617.jpg?v=1787682880&width=900"" alt=""Camiseta Agro Brk Bandeira Brasil Algodão Premium - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Solar UV50+ Homologada</span>
+      <h3 class=""brk-desc-title"">BLINDAGEM PARA A ROTINA NO CAMPO</h3>
+      <p class=""brk-desc-paragraph"">Desenvolvida para o produtor e para quem vive a lida pesada de sol a sol, a **Camiseta Agro Brk Bandeira Brasil Algodão Premium** oferece bloqueio permanente de até 98% dos raios UVA e UVB (FPU 50+). Segurança essencial para longas horas na lavoura, manejo de gado ou operação de máquinas sem desgaste da fibra nas lavagens frequentes.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Construção de Alta Resistência -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0887/2083/4857/files/camiseta-agro-brk-bandeira-brasil-algodao-premium-apc046-premium-preto-p-camiseta-agro-7794966277417-brk-agro-p-41186057945385.jpg?v=1787682865&width=900"" alt=""Camiseta Agro Brk Bandeira Brasil Algodão Premium - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Construção de Alta Resistência</span>
+      <h3 class=""brk-desc-title"">DURABILIDADE CONTRA O ATRITO DA LIDA</h3>
+      <p class=""brk-desc-paragraph"">Com acabamento na cor **Exclusiva**, possui costuras reforçadas ponto-a-ponto que suportam a abrasão do dia a dia no campo. Recorte anatômico confortável que não puxa nem aperta durante o trabalho braçal, garantindo liberdade total de movimentos.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecido Respirável & Conforto Térmico -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0887/2083/4857/files/camiseta-agro-brk-bandeira-brasil-algodao-premium-apc046-premium-preto-p-camiseta-agro-7794966277417-brk-agro-p-41186058010921.jpg?v=1787682874&width=900"" alt=""Camiseta Agro Brk Bandeira Brasil Algodão Premium - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecido Respirável & Conforto Térmico</span>
+      <h3 class=""brk-desc-title"">SECAGEM RÁPIDA E TOQUE SUAVE</h3>
+      <p class=""brk-desc-paragraph"">O tecido com tecnologia Dry dissipa o suor e a umidade com rapidez extrema, mantendo a sensação térmica agradável mesmo sob o calor forte do cerrado e pasto. Tratamento antibacteriano que inibe odores e poeira, além de dispensar o uso de ferro de passar.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Agro Heavy Duty</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Agro,Camisas Agro & Campo,LINHAGEM_VESTUARIO,,true
+botina-feminina-dallas-all-black-brk-agro,Botina Feminina Dallas All Black,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Solar UV50+ Homologada -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0887/2083/4857/files/01_867e74cb-480d-44cf-b6ac-7d6564985e45.webp?v=1784288474&width=900"" alt=""Botina Feminina Dallas All Black - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Solar UV50+ Homologada</span>
+      <h3 class=""brk-desc-title"">BLINDAGEM PARA A ROTINA NO CAMPO</h3>
+      <p class=""brk-desc-paragraph"">Desenvolvida para o produtor e para quem vive a lida pesada de sol a sol, a **Botina Feminina Dallas All Black** oferece bloqueio permanente de até 98% dos raios UVA e UVB (FPU 50+). Segurança essencial para longas horas na lavoura, manejo de gado ou operação de máquinas sem desgaste da fibra nas lavagens frequentes.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Construção de Alta Resistência -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0887/2083/4857/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F178854739_2F38a3c0529a6a4d619c4249bafc5dbd6a_cb8898b3-d2fd-41a7-b213-a47e738756f1.jpg?v=1782818793&width=900"" alt=""Botina Feminina Dallas All Black - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Construção de Alta Resistência</span>
+      <h3 class=""brk-desc-title"">DURABILIDADE CONTRA O ATRITO DA LIDA</h3>
+      <p class=""brk-desc-paragraph"">Com acabamento na cor **Preto**, possui costuras reforçadas ponto-a-ponto que suportam a abrasão do dia a dia no campo. Recorte anatômico confortável que não puxa nem aperta durante o trabalho braçal, garantindo liberdade total de movimentos.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecido Respirável & Conforto Térmico -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0887/2083/4857/files/02_3252a30a-5ce3-4cab-ae21-c313a3f146df.webp?v=1784288474&width=900"" alt=""Botina Feminina Dallas All Black - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecido Respirável & Conforto Térmico</span>
+      <h3 class=""brk-desc-title"">SECAGEM RÁPIDA E TOQUE SUAVE</h3>
+      <p class=""brk-desc-paragraph"">O tecido com tecnologia Dry dissipa o suor e a umidade com rapidez extrema, mantendo a sensação térmica agradável mesmo sob o calor forte do cerrado e pasto. Tratamento antibacteriano que inibe odores e poeira, além de dispensar o uso de ferro de passar.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Agro Heavy Duty</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Preto</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Agro,Camisas Agro & Campo,LINHAGEM_VESTUARIO,,true

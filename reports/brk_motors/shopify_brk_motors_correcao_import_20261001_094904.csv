@@ -1,0 +1,3810 @@
+﻿Handle,Title,Body (HTML),Vendor,Product Category,Type,Tags,Published
+bandana-tubeneck-sea-camo-brk-com-protecao-uv50,Bandana com Proteção UV50 Sea Camo,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750274586771-01.jpg?v=1752698514&width=900"" alt=""Bandana com Proteção UV50 Sea Camo - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana com Proteção UV50 Sea Camo** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750274587695-02.jpg?v=1752698514&width=900"" alt=""Bandana com Proteção UV50 Sea Camo - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Exclusiva** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/2-1KJPEG_4ca730e4-4a9d-4bc2-ad49-7f3502e784af.jpg?v=1758735686&width=900"" alt=""Bandana com Proteção UV50 Sea Camo - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-balaclava-tubeneck-brk-edicao-especial-halloween-venom-com-protecao-uv50,Bandana com Proteção UV50 Edição Especial Halloween Venom,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1752241256514-FRENTE.jpg?v=1752698456&width=900"" alt=""Bandana com Proteção UV50 Edição Especial Halloween Venom - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana com Proteção UV50 Edição Especial Halloween Venom** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1-1KJPEG_1a580d2e-0ffc-4bf0-b7be-23c082213284.jpg?v=1758735703&width=900"" alt=""Bandana com Proteção UV50 Edição Especial Halloween Venom - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Exclusiva** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/3-1KJPEG_3537b3d6-35aa-4506-ae2e-92836d3a2273.jpg?v=1758735761&width=900"" alt=""Bandana com Proteção UV50 Edição Especial Halloween Venom - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-balaclava-tubeneck-brk-edicao-especial-halloween-caveira-com-protecao-uv50,Bandana com Proteção UV50 Edição Especial Halloween Caveira,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750273828975-01.jpg?v=1752698448&width=900"" alt=""Bandana com Proteção UV50 Edição Especial Halloween Caveira - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana com Proteção UV50 Edição Especial Halloween Caveira** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750273829761-02.jpg?v=1752698448&width=900"" alt=""Bandana com Proteção UV50 Edição Especial Halloween Caveira - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Exclusiva** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750273831871-04.jpg?v=1752698448&width=900"" alt=""Bandana com Proteção UV50 Edição Especial Halloween Caveira - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-tubeneck-green-stealth-brk-com-protecao-uv50,Bandana com Proteção UV50 Green Stealth,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750274931031-01.jpg?v=1752698565&width=900"" alt=""Bandana com Proteção UV50 Green Stealth - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana com Proteção UV50 Green Stealth** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750274933152-02.jpg?v=1752698565&width=900"" alt=""Bandana com Proteção UV50 Green Stealth - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Exclusiva** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750274934732-04.jpg?v=1752698565&width=900"" alt=""Bandana com Proteção UV50 Green Stealth - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-tubeneck-white-green-brk-com-protecao-uv50,Bandana com Proteção UV50 White Green,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750274639354-01.jpg?v=1752698531&width=900"" alt=""Bandana com Proteção UV50 White Green - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana com Proteção UV50 White Green** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750274640122-02.jpg?v=1752698531&width=900"" alt=""Bandana com Proteção UV50 White Green - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Exclusiva** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750274641959-04.jpg?v=1752698531&width=900"" alt=""Bandana com Proteção UV50 White Green - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-tubeneck-yellow-camo-brk-com-protecao-uv50,Bandana com Proteção UV50 Yellow Camo,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750274610699-01.jpg?v=1752698523&width=900"" alt=""Bandana com Proteção UV50 Yellow Camo - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana com Proteção UV50 Yellow Camo** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750274613645-02.jpg?v=1752698523&width=900"" alt=""Bandana com Proteção UV50 Yellow Camo - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Exclusiva** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/2-1KJPEG_bed24c42-a296-4726-8ddf-310298aa2f4b.jpg?v=1758735608&width=900"" alt=""Bandana com Proteção UV50 Yellow Camo - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-balaclava-tubeneck-brk-polinesia-com-protecao-uv50,Bandana com Proteção UV50 Polinésia,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275254813-01.jpg?v=1752698658&width=900"" alt=""Bandana com Proteção UV50 Polinésia - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana com Proteção UV50 Polinésia** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275255836-02.jpg?v=1752698658&width=900"" alt=""Bandana com Proteção UV50 Polinésia - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Exclusiva** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-balaclava-tubeneck-brk-cultura-mexicana-travel-com-protecao-uv50,Bandana com Proteção UV50 Cultura Mexicana Travel,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275240605-01.jpg?v=1752698650&width=900"" alt=""Bandana com Proteção UV50 Cultura Mexicana Travel - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana com Proteção UV50 Cultura Mexicana Travel** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275241947-02.jpg?v=1752698650&width=900"" alt=""Bandana com Proteção UV50 Cultura Mexicana Travel - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Exclusiva** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275245035-04.jpg?v=1752698650&width=900"" alt=""Bandana com Proteção UV50 Cultura Mexicana Travel - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-balaclava-tubeneck-brk-cultura-mexicana-com-protecao-uv50,Bandana com Proteção UV50 Cultura Mexicana,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275221291-01.jpg?v=1752698641&width=900"" alt=""Bandana com Proteção UV50 Cultura Mexicana - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana com Proteção UV50 Cultura Mexicana** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275225610-02.jpg?v=1752698641&width=900"" alt=""Bandana com Proteção UV50 Cultura Mexicana - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Exclusiva** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275227789-04.jpg?v=1752698641&width=900"" alt=""Bandana com Proteção UV50 Cultura Mexicana - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-balaclava-tubeneck-brk-camuflada-bege-com-protecao-solar-uv50,Bandana com Proteção UV50 Camuflada Bege,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1752695184030-01.jpg?v=1752698607&width=900"" alt=""Bandana com Proteção UV50 Camuflada Bege - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana com Proteção UV50 Camuflada Bege** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1752695185120-02.jpg?v=1752698607&width=900"" alt=""Bandana com Proteção UV50 Camuflada Bege - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Camuflada** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1752695186730-04.jpg?v=1752698607&width=900"" alt=""Bandana com Proteção UV50 Camuflada Bege - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Camuflada</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-balaclava-tubeneck-brk-viajens-pelo-mundo-com-protecao-uv50,Bandana com Proteção UV50 Viajens Pelo Mundo,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275527135-01.jpg?v=1752698700&width=900"" alt=""Bandana com Proteção UV50 Viajens Pelo Mundo - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana com Proteção UV50 Viajens Pelo Mundo** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275528284-02.jpg?v=1752698700&width=900"" alt=""Bandana com Proteção UV50 Viajens Pelo Mundo - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Exclusiva** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275529751-04.jpg?v=1752698700&width=900"" alt=""Bandana com Proteção UV50 Viajens Pelo Mundo - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-balaclava-tubeneck-brk-pantanal-com-protecao-uv50,Bandana com Proteção UV50 Pantanal,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275293702-01.jpg?v=1752698683&width=900"" alt=""Bandana com Proteção UV50 Pantanal - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana com Proteção UV50 Pantanal** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275296111-02.jpg?v=1752698683&width=900"" alt=""Bandana com Proteção UV50 Pantanal - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Exclusiva** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275298080-04.jpg?v=1752698683&width=900"" alt=""Bandana com Proteção UV50 Pantanal - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-balaclava-tubeneck-brk-world-map-com-protecao-uv50,Bandana com Proteção UV50 World Map,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275280970-01.jpg?v=1752698675&width=900"" alt=""Bandana com Proteção UV50 World Map - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana com Proteção UV50 World Map** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275281866-02.jpg?v=1752698675&width=900"" alt=""Bandana com Proteção UV50 World Map - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Exclusiva** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275284078-04.jpg?v=1752698675&width=900"" alt=""Bandana com Proteção UV50 World Map - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+balaclava-tubeneck-brk-estampas-de-caveiras-com-uv50-diversos-modelos,Bandana com Proteção UV50 Caveira - Envio Imediato,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/FRENTETUB.jpg?v=1758553210&width=900"" alt=""Bandana com Proteção UV50 Caveira - Envio Imediato - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana com Proteção UV50 Caveira - Envio Imediato** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/LADOTUB.jpg?v=1758553210&width=900"" alt=""Bandana com Proteção UV50 Caveira - Envio Imediato - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Exclusiva** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/LADOMASC.jpg?v=1758554012&width=900"" alt=""Bandana com Proteção UV50 Caveira - Envio Imediato - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-tubeneck-brk-surf-beach-com-protecao-uv50,Bandana com Proteção UV50 Surf Beach,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750276019726-01.jpg?v=1752698917&width=900"" alt=""Bandana com Proteção UV50 Surf Beach - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana com Proteção UV50 Surf Beach** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750276020662-02.jpg?v=1752698918&width=900"" alt=""Bandana com Proteção UV50 Surf Beach - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Exclusiva** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750276022778-04.jpg?v=1752698918&width=900"" alt=""Bandana com Proteção UV50 Surf Beach - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-tubeneck-brk-african-style-com-protecao-uv50,Bandana com Proteção UV50 African Style,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275956980-01.jpg?v=1752698876&width=900"" alt=""Bandana com Proteção UV50 African Style - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana com Proteção UV50 African Style** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275957946-02.jpg?v=1752698876&width=900"" alt=""Bandana com Proteção UV50 African Style - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Exclusiva** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275959548-04.jpg?v=1752698876&width=900"" alt=""Bandana com Proteção UV50 African Style - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-para-pescoco-brk-rubro-negro-listas-vermelhas-com-protecao-uv50,Bandana para Pescoço Brk Rubro Negro Listas Vermelhas com Proteção UV50,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1759435931210-1.jpg?v=1769017013&width=900"" alt=""Bandana para Pescoço Brk Rubro Negro Listas Vermelhas com Proteção UV50 - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana para Pescoço Brk Rubro Negro Listas Vermelhas com Proteção UV50** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1759435931982-2.jpg?v=1769017014&width=900"" alt=""Bandana para Pescoço Brk Rubro Negro Listas Vermelhas com Proteção UV50 - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Exclusiva** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1759435932700-3.jpg?v=1769017125&width=900"" alt=""Bandana para Pescoço Brk Rubro Negro Listas Vermelhas com Proteção UV50 - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-para-pescoco-brk-rubro-negro-vermelho-e-preto-com-protecao-uv50,Bandana para Pescoço Brk Rubro Negro Vermelho e Preto com Proteção UV50,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1759435944518-1.jpg?v=1769017043&width=900"" alt=""Bandana para Pescoço Brk Rubro Negro Vermelho e Preto com Proteção UV50 - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana para Pescoço Brk Rubro Negro Vermelho e Preto com Proteção UV50** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1759435945221-2.jpg?v=1769017043&width=900"" alt=""Bandana para Pescoço Brk Rubro Negro Vermelho e Preto com Proteção UV50 - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Preto** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1759435945924-3.jpg?v=1769017178&width=900"" alt=""Bandana para Pescoço Brk Rubro Negro Vermelho e Preto com Proteção UV50 - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Preto</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-tubeneck-brk-mapa-estilizado-com-protecao-uv50,Bandana para Pescoço Brk Mapa Estilizado com Proteção UV50+,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750276123162-01.jpg?v=1752698984&width=900"" alt=""Bandana para Pescoço Brk Mapa Estilizado com Proteção UV50+ - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana para Pescoço Brk Mapa Estilizado com Proteção UV50+** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/PSDEmusoAmbiente_Tube_0a28326e-8417-40b5-bceb-cf877ee64d6b.jpg?v=1769017512&width=900"" alt=""Bandana para Pescoço Brk Mapa Estilizado com Proteção UV50+ - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Exclusiva** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/DiferencialUVTubeMotors_855d619c-cadd-44ae-845e-f4555715c5fc.jpg?v=1769019147&width=900"" alt=""Bandana para Pescoço Brk Mapa Estilizado com Proteção UV50+ - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Exclusiva</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
+bandana-balaclava-tubeneck-brk-camuflada-verde-escuro-com-protecao-uv50,Bandana para Pescoço Brk Camuflada Verde Escuro com Proteção UV50+,"<!-- BRK FISHING - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO SHOPIFY RESILIENTE) -->
+<div class=""brk-desc-wrapper"">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 40px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+    }
+    .brk-desc-text {
+      flex: 1.1;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0284c7;
+      margin-bottom: 6px;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+    }
+    .brk-desc-paragraph {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 36px;
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 2px;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 32px;
+        text-align: center;
+      }
+      .brk-desc-title {
+        font-size: 19px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-spec-item {
+        text-align: left;
+      }
+    }
+  </style>
+
+  
+  <!-- Bloco 1: Proteção Térmica & UV50+ -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275176424-01.jpg?v=1752698624&width=900"" alt=""Bandana para Pescoço Brk Camuflada Verde Escuro com Proteção UV50+ - Visão Geral e Modelagem Exclusiva"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Proteção Térmica & UV50+</span>
+      <h3 class=""brk-desc-title"">ESCUDO CONTRA VENTO, SOL E POEIRA</h3>
+      <p class=""brk-desc-paragraph"">A **Bandana para Pescoço Brk Camuflada Verde Escuro com Proteção UV50+** foi projetada para pilotos de moto, trilha e esportes de velocidade. Oferece proteção solar homologada FPU 50+ e atua como barreira contra o vento forte, poeira da pista e insetos, mantendo o rosto e pescoço totalmente protegidos.</p>
+    </div>
+  </div>
+  <!-- Bloco 2: Elasticidade & Ajuste Anatômico -->
+  <div class=""brk-desc-block reverse"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275180792-02.jpg?v=1752698624&width=900"" alt=""Bandana para Pescoço Brk Camuflada Verde Escuro com Proteção UV50+ - Detalhe da Luva Integrada e Punho Anatômico"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Elasticidade & Ajuste Anatômico</span>
+      <h3 class=""brk-desc-title"">VERSATILIDADE MULTIUSO</h3>
+      <p class=""brk-desc-paragraph"">Estampa exclusiva **Verde** em microfibra elástica sem costura de toque sedoso. Pode ser usada como bandana, balaclava, máscara sob o capacete, faixa ou pescoceira, adaptando-se sem apertar ou escorregar durante a pilotagem.</p>
+    </div>
+  </div>
+  <!-- Bloco 3: Tecnologia Dry Respirável -->
+  <div class=""brk-desc-block"">
+    <div class=""brk-desc-media"">
+      <img src=""https://cdn.shopify.com/s/files/1/0920/4799/9271/files/1750275185419-05.jpg?v=1769010290&width=900"" alt=""Bandana para Pescoço Brk Camuflada Verde Escuro com Proteção UV50+ - Tecido XTech Pro e Caimento Perfeito"" loading=""lazy"" />
+    </div>
+    <div class=""brk-desc-text"">
+      <span class=""brk-desc-tag"">Tecnologia Dry Respirável</span>
+      <h3 class=""brk-desc-title"">FLUXO DE AR E SECAGEM INSTANTÂNEA</h3>
+      <p class=""brk-desc-paragraph"">Permite respiração fluida sem embaçar os óculos ou a viseira do capacete. A tecnologia de evaporação térmica impede o acúmulo de suor, mantendo o piloto focado e com sensação refrescante na pilotagem.</p>
+    </div>
+  </div>
+
+  <!-- Box de Especificacoes e Cuidados -->
+  <div class=""brk-desc-specs-box"">
+    <h4 class=""brk-desc-specs-title"">Ficha Técnica & Cuidados de Conservação</h4>
+    <div class=""brk-specs-grid"">
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Linha</span>
+        <span class=""brk-spec-value"">BRK Motors Performance Gear</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Proteção Solar</span>
+        <span class=""brk-spec-value"">FPU 50+ Homologado (Bloqueia até 98% dos raios UV)</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Tecido</span>
+        <span class=""brk-spec-value"">Microfibra Técnica com Tecnologia Dry de Secagem Rápida</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Acabamento</span>
+        <span class=""brk-spec-value"">Costuras Reforçadas • Tonalidade Verde</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Sensação Térmica</span>
+        <span class=""brk-spec-value"">Toque Suave, Respirabilidade Elevada e Ação Anti-odor</span>
+      </div>
+      <div class=""brk-spec-item"">
+        <span class=""brk-spec-label"">Conservação</span>
+        <span class=""brk-spec-value"">Lavagem simples, secagem rápida à sombra, não requer ferro de passar</span>
+      </div>
+    </div>
+  </div>
+</div>",BRK Motors,Acessórios & Equipamentos,LINHAGEM_VESTUARIO,,true
