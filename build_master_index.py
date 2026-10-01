@@ -12,6 +12,8 @@ import json
 import os
 import re
 import sys
+import shutil
+import subprocess
 from datetime import datetime
 
 from core.template_engine import TemplateEngine
@@ -2291,6 +2293,30 @@ def build_master():
             print(f"[OK] Sincronizado com sucesso: {dest}")
         except Exception as e:
             print(f"[ALERTA] Nao foi possivel escrever em {dest}: {e}")
+
+    # Sincronização contínua com a pasta e repositório oficial do GitHub
+    target_onedrive_dir = r"C:\Users\lucas\OneDrive\Documentos\DESCRIÇOES"
+    if os.path.exists(target_onedrive_dir):
+        try:
+            src_reports = r"C:\Users\lucas\Desktop\PYTHON DATA\reports"
+            dst_reports = os.path.join(target_onedrive_dir, "reports")
+            if os.path.exists(src_reports):
+                shutil.copytree(src_reports, dst_reports, dirs_exist_ok=True)
+
+            src_core = r"C:\Users\lucas\Desktop\PYTHON DATA\core"
+            dst_core = os.path.join(target_onedrive_dir, "core")
+            if os.path.exists(src_core):
+                shutil.copytree(src_core, dst_core, dirs_exist_ok=True)
+
+            shutil.copy2(r"C:\Users\lucas\Desktop\PYTHON DATA\build_master_index.py", os.path.join(target_onedrive_dir, "build_master_index.py"))
+            shutil.copy2(r"C:\Users\lucas\Desktop\PYTHON DATA\generate_catalog_data.py", os.path.join(target_onedrive_dir, "generate_catalog_data.py"))
+
+            sync_script = os.path.join(target_onedrive_dir, "sync_github.py")
+            if os.path.exists(sync_script):
+                print("[GITHUB SYNC] Executando sincronização contínua com o repositório GitHub...")
+                subprocess.run([sys.executable, sync_script, "feat: atualizacao automatica do portal mestre e catalogos"], cwd=target_onedrive_dir)
+        except Exception as e:
+            print(f"[ALERTA GITHUB SYNC] Erro ao sincronizar com GitHub: {e}")
 
     print("[SUCESSO] Compilação do Mestre v4.0 Finalizada com a 4ª Aba de Análises!")
 
