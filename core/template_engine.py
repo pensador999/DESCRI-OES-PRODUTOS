@@ -26,8 +26,16 @@ Preserva rigorosamente 100% dos dados técnicos reais da peça sem alucinar espe
 import re
 from typing import Dict, Any, List, Optional
 
+KNOWN_BRANDS = [
+    'Rapala', 'Deyu', 'Marine Sports', 'Marine', 'Daisen', 'Albatroz', 
+    'Boaonda', 'American Hat', 'Elber', 'Maruri', 'Daiwa', 'Shimano', 
+    'Loomis', 'Monster 3X', 'Moriah', 'Kowalsky', 'VMC', 'Mustad', 
+    'Crown', 'Ottoni', 'Pesca Brasil', 'Sumax', 'Saint', 'Jogá', 'Joga'
+]
+
 class TemplateEngine:
     def __init__(self):
+        self.known_brands = KNOWN_BRANDS
         self.templates = {
             # 1. Camisas UV Performance
             "uv_performance": {
@@ -778,6 +786,54 @@ class TemplateEngine:
 
         return extracted
 
+    def resolve_product_origin_and_title(self, title: str, vendor: str = "", sku: str = "", tags = None) -> Dict[str, Any]:
+        """
+        Determina com precisão a origem do produto (produção própria BRK vs revenda)
+        e formata o título da descrição:
+        - Produção própria: garante 'BRK' no título.
+        - Revenda: garante o nome da marca correspondente no título.
+        - Camisas de produção própria com código iniciado em C0: ativa show_copyright.
+        """
+        tags_str = " ".join(tags or []) if isinstance(tags, list) else str(tags or "")
+        full_info = f"{title} {vendor} {tags_str}"
+        
+        detected_brand = None
+        for brand in self.known_brands:
+            if re.search(r'\b' + re.escape(brand) + r'\b', full_info, re.IGNORECASE):
+                detected_brand = brand
+                break
+                
+        is_revenda = detected_brand is not None and detected_brand.lower() != "brk"
+        
+        t_clean = title.strip()
+        if is_revenda:
+            origin_type = "revenda"
+            brand_name = detected_brand
+            if not re.search(r'\b' + re.escape(brand_name) + r'\b', t_clean, re.IGNORECASE):
+                formatted_title = f"{t_clean} - {brand_name}"
+            else:
+                formatted_title = t_clean
+        else:
+            origin_type = "producao_propria"
+            brand_name = "BRK"
+            if not re.search(r'\b(BRK|ArmorX)\b', t_clean, re.IGNORECASE):
+                formatted_title = f"BRK {t_clean}"
+            else:
+                formatted_title = t_clean
+                
+        # Regra de Direitos Autorais em Camisas C0
+        sku_upper = str(sku or "").upper().strip()
+        is_c0 = sku_upper.startswith("C0")
+        is_shirt = any(w in t_clean.lower() for w in ["camisa", "camiseta", "jersey", "baby look", "regata", "polo"])
+        show_copyright = (origin_type == "producao_propria") and is_shirt and is_c0
+        
+        return {
+            "formatted_title": formatted_title,
+            "brand_name": brand_name,
+            "origin_type": origin_type,
+            "show_copyright": show_copyright
+        }
+
     def generate_narrative_from_template(self, product: Dict[str, Any], archetype_id: str, cdn_images: List[str], store_key: str = None, sibling_info: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Gera os 3 blocos narrativos e especificações prontos para o HTMLBuilder.
@@ -785,6 +841,16 @@ class TemplateEngine:
         """
         template = self.templates.get(archetype_id, self.templates["uv_performance"])
         title = product.get("title", "Produto BRK")
+        sku = product.get("master_sku") or product.get("sku") or ""
+        vendor = product.get("vendor", "")
+        tags = product.get("tags") or []
+
+        # Resolução de Origem, Título Formatado e Direitos Autorais C0
+        origin_info = self.resolve_product_origin_and_title(title=title, vendor=vendor, sku=sku, tags=tags)
+        formatted_title = origin_info["formatted_title"]
+        brand_name = origin_info["brand_name"]
+        origin_type = origin_info["origin_type"]
+        show_copyright = origin_info["show_copyright"]
         
         # Paleta Cromática Suave por Loja
         store_palettes = {
@@ -795,11 +861,11 @@ class TemplateEngine:
         
         if not store_key:
             url = (product.get("url") or "").lower()
-            vendor = (product.get("vendor") or "").lower()
+            vendor_str = (product.get("vendor") or "").lower()
             category = (product.get("category") or "").lower()
-            if "agro" in url or "agro" in vendor or "agro" in category or archetype_id == "agro_field":
+            if "agro" in url or "agro" in vendor_str or "agro" in category or archetype_id == "agro_field":
                 store_key = "brk_agro"
-            elif "motors" in url or "motors" in vendor or "motors" in category or archetype_id == "motors_speed":
+            elif "motors" in url or "motors" in vendor_str or "motors" in category or archetype_id == "motors_speed":
                 store_key = "brk_motors"
             else:
                 store_key = "brk_fishing"
@@ -833,6 +899,21 @@ class TemplateEngine:
         img2 = cdn_images[1] if len(cdn_images) > 1 else img1
         img3 = cdn_images[2] if len(cdn_images) > 2 else img1
 
+        # Tratamento Especial para Iscas e Produtos com Várias Variações (Split Media)
+        is_lure = (archetype_id == "fishing_lures") or any(w in title.lower() for w in ["isca", "plug", "popper", "stick", "crankbait", "minnow", "frog", "soft"])
+        variants = product.get("variants") or []
+        has_multiple_variations = is_lure and (len(variants) > 1 or len(cdn_images) >= 2)
+        split_images = None
+        variations_summary = ""
+        if has_multiple_variations:
+            if len(cdn_images) >= 2:
+                split_images = [cdn_images[0], cdn_images[1]]
+            variant_titles = [v.get("title") for v in variants if v.get("title") and v.get("title") != "Default Title"]
+            if variant_titles:
+                variations_summary = f"Disponível em {len(variant_titles)} opções de cores e modelos no anúncio ({', '.join(variant_titles[:4])}{'...' if len(variant_titles) > 4 else ''})."
+            else:
+                variations_summary = "Múltiplas variações e opções de cores disponíveis para escolha no anúncio."
+
         act1 = template["act1"]
         act2 = template["act2"]
         act3 = template["act3"]
@@ -854,25 +935,35 @@ class TemplateEngine:
             "tag": act1["tag"],
             "fa_icon": act1.get("fa_icon", template.get("fa_icon", "fa-solid fa-check")),
             "title": act1["title"],
-            "description": act1["desc_tmpl"].format(title=title),
-            "image": img1
+            "description": act1["desc_tmpl"].format(title=formatted_title),
+            "image": img1,
+            "split_images": split_images,
+            "variations_summary": variations_summary
         }
         act2_dict = {
             "tag": act2["tag"],
             "fa_icon": act2.get("fa_icon", "fa-solid fa-sun"),
             "title": act2["title"],
-            "description": act2["desc_tmpl"].format(title=title),
+            "description": act2["desc_tmpl"].format(title=formatted_title),
             "image": img2
         }
         act3_dict = {
             "tag": act3["tag"],
             "fa_icon": act3.get("fa_icon", "fa-solid fa-shield-halved"),
             "title": act3["title"],
-            "description": act3["desc_tmpl"].format(title=title),
+            "description": act3["desc_tmpl"].format(title=formatted_title),
             "image": img3
         }
 
         return {
+            "title": formatted_title,
+            "formatted_title": formatted_title,
+            "brand_name": brand_name,
+            "origin_type": origin_type,
+            "show_copyright": show_copyright,
+            "has_multiple_variations": has_multiple_variations,
+            "split_images": split_images,
+            "variations_summary": variations_summary,
             "theme_color": theme_color,
             "theme_bg": theme_bg,
             "care_icon": care_icon,

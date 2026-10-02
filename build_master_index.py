@@ -170,6 +170,7 @@ def build_master():
             # 4. Gerar Modo B (3 Atos com Arquétipo Especializado ou Molde de Irmão do Site)
             narrative = template_engine.generate_narrative_from_template(p, archetype_id, images, store_key=store_key, sibling_info=sibling_info)
             mode_b_html = html_builder.build_shopify_html(narrative)
+            mode_b_markdown = html_builder.build_shopify_markdown(narrative)
 
             # Detectar links proibidos e SKUs órfãos se não estavam anotados
             prohibited_links = p.get("prohibited_links", [])
@@ -186,11 +187,19 @@ def build_master():
             p_copy["source_label"] = narrative["source_label"]
             p_copy["sibling_info"] = sibling_info
             p_copy["store_key"] = store_key
+            p_copy["formatted_title"] = narrative.get("formatted_title", title)
+            p_copy["brand_name"] = narrative.get("brand_name", "BRK")
+            p_copy["origin_type"] = narrative.get("origin_type", "producao_propria")
+            p_copy["show_copyright"] = narrative.get("show_copyright", False)
+            p_copy["has_multiple_variations"] = narrative.get("has_multiple_variations", False)
+            p_copy["split_images"] = narrative.get("split_images")
+            p_copy["variations_summary"] = narrative.get("variations_summary", "")
             p_copy["theme_color"] = narrative["theme_color"]
             p_copy["theme_bg"] = narrative["theme_bg"]
             p_copy["care_icon"] = narrative["care_icon"]
             p_copy["mode_a_html"] = mode_a_html
             p_copy["mode_b_html"] = mode_b_html
+            p_copy["mode_b_markdown"] = mode_b_markdown
             p_copy["specs"] = narrative["specs"]
             p_copy["prohibited_links"] = prohibited_links
             p_copy["orphaned_variants"] = p.get("orphaned_variants", [])
@@ -699,6 +708,7 @@ def build_master():
       <div class="p-5 border-b border-slate-100 flex items-center justify-between gap-4 bg-slate-900 text-white">
         <div class="min-w-0">
           <div class="flex items-center gap-2 mb-1">
+            <span id="modal-store-badge" class="px-2 py-0.5 rounded-md bg-blue-600 text-white font-bold text-[10px] uppercase tracking-wider">BRK Fishing</span>
             <span id="modal-sku-badge" class="px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 font-mono text-[10px] font-bold border border-blue-500/30">SKU: --</span>
             <span id="modal-variants-badge" class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 text-[10px] font-semibold">8 Variantes</span>
             <span id="modal-archetype-badge" class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Molde UV50+</span>
@@ -735,15 +745,23 @@ def build_master():
         </div>
 
         <div class="flex items-center gap-2">
+          <a id="modal-open-admin-btn" href="#" target="_blank" class="px-3.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all text-xs" title="Abrir produto diretamente no Admin da Shopify desta loja específica">
+            <span>🔗</span>
+            <span>Admin Shopify ↗</span>
+          </a>
           <button id="modal-save-shopify-direct-btn" onclick="saveDirectToShopify(this)" class="px-3.5 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all transform active:scale-95 text-xs" title="Atualiza EXCLUSIVAMENTE o campo body_html deste produto na Shopify">
             <span>⚡</span>
-            <span>Salvar na Shopify (Direto)</span>
+            <span>Salvar Direto</span>
           </button>
-          <button id="modal-header-copy-btn" onclick="copyCurrentModalHTML(this)" class="px-4 py-1.5 bg-slate-900 hover:bg-black text-white rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all transform active:scale-95 text-xs">
+          <button id="modal-copy-markdown-btn" onclick="copyCurrentModalMarkdown(this)" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all transform active:scale-95 text-xs" title="Copiar descrição completa em formato Markdown limpo">
+            <span class="copy-icon">📝</span>
+            <span class="copy-label">Copiar Markdown</span>
+          </button>
+          <button id="modal-header-copy-btn" onclick="copyCurrentModalHTML(this)" class="px-3.5 py-1.5 bg-slate-900 hover:bg-black text-white rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all transform active:scale-95 text-xs">
             <span class="copy-icon">📋</span>
             <span class="copy-label">Copiar HTML</span>
           </button>
-          <button onclick="downloadCurrentProductCSV()" class="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all text-xs">
+          <button onclick="downloadCurrentProductCSV()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-all text-xs">
             <span>📥 CSV</span>
           </button>
         </div>
@@ -827,6 +845,10 @@ def build_master():
           <span class="text-[11px] font-mono" id="modal-footer-sku-info">SKU Mestre: Pronto para Shopify</span>
         </div>
         <div class="flex items-center gap-2">
+          <button id="modal-footer-copy-md-btn" onclick="copyCurrentModalMarkdown(this)" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/40 rounded-xl font-bold flex items-center gap-2 transition-all transform active:scale-95 text-xs">
+            <span class="copy-icon">📝</span>
+            <span class="copy-label">Copiar Markdown</span>
+          </button>
           <button id="modal-footer-copy-btn" onclick="copyCurrentModalHTML(this)" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl font-extrabold flex items-center gap-2 shadow-lg shadow-emerald-950/40 transition-all transform active:scale-95 text-xs">
             <span class="copy-icon">📋</span>
             <span class="copy-label">Copiar Código HTML Shopify</span>
@@ -1133,31 +1155,103 @@ def build_master():
       }};
     }}
 
+    function resolveClientOriginAndTitle(liveP) {{
+      const KNOWN_BRANDS = [
+        'Rapala', 'Deyu', 'Marine Sports', 'Marine', 'Daisen', 'Albatroz', 
+        'Boaonda', 'American Hat', 'Elber', 'Maruri', 'Daiwa', 'Shimano', 
+        'Loomis', 'Monster 3X', 'Moriah', 'Kowalsky', 'VMC', 'Mustad', 
+        'Crown', 'Ottoni', 'Pesca Brasil', 'Sumax', 'Saint', 'Jogá', 'Joga'
+      ];
+      const rawTitle = (liveP.title || "Produto BRK").trim();
+      const vendor = (liveP.vendor || "").trim();
+      const tags = Array.isArray(liveP.tags) ? liveP.tags.join(" ") : (liveP.tags || "");
+      const fullInfo = `${{rawTitle}} ${{vendor}} ${{tags}}`.toLowerCase();
+
+      let detectedBrand = null;
+      for (const b of KNOWN_BRANDS) {{
+        const bLower = b.toLowerCase();
+        if (new RegExp('\\\\b' + bLower + '\\\\b', 'i').test(fullInfo)) {{
+          detectedBrand = b;
+          break;
+        }}
+      }}
+
+      const isRevenda = detectedBrand !== null && detectedBrand.toLowerCase() !== "brk";
+      let formattedTitle = rawTitle;
+      let brandName = "BRK";
+      let originType = "producao_propria";
+
+      if (isRevenda) {{
+        originType = "revenda";
+        brandName = detectedBrand;
+        if (!new RegExp('\\\\b' + brandName + '\\\\b', 'i').test(formattedTitle)) {{
+          formattedTitle = `${{formattedTitle}} - ${{brandName}}`;
+        }}
+      }} else {{
+        originType = "producao_propria";
+        brandName = "BRK";
+        if (!/\\b(BRK|ArmorX)\\b/i.test(formattedTitle)) {{
+          formattedTitle = `BRK ${{formattedTitle}}`;
+        }}
+      }}
+
+      const masterSku = (liveP.master_sku || liveP.sku || "").toUpperCase().trim();
+      const isC0 = masterSku.startsWith("C0");
+      const isShirt = anyShirtWord(rawTitle);
+      const showCopyright = (originType === "producao_propria") && isShirt && isC0;
+
+      return {{ formattedTitle, brandName, originType, showCopyright }};
+    }}
+
+    function anyShirtWord(text) {{
+      const t = text.toLowerCase();
+      return t.includes("camisa") || t.includes("camiseta") || t.includes("jersey") || t.includes("baby look") || t.includes("regata") || t.includes("polo");
+    }}
+
     function buildClientModeBHTML(liveP, archId, archName, images, themeColor, themeBg, storeKey) {{
-      const title = liveP.title || "Produto BRK";
+      const originInfo = resolveClientOriginAndTitle(liveP);
+      const formattedTitle = originInfo.formattedTitle;
+      const brandName = originInfo.brandName;
+      const originType = originInfo.originType;
+      const showCopyright = originInfo.showCopyright;
+
       const img1 = images[0] || "https://placehold.co/800x600?text=BRK+Oficial";
       const img2 = images[1] || img1;
       const img3 = images[2] || img1;
 
-      let act1 = {{ tag: "Performance & Conforto", icon: "fa-solid fa-gauge-high", title: "ALTA PERFORMANCE E RESPIRABILIDADE", desc: `Desenvolvido para oferecer máxima durabilidade e conforto térmico, o(a) ${{title}} garante total liberdade de movimentos e proteção contínua.` }};
-      let act2 = {{ tag: "Tecnologia & Proteção", icon: "fa-solid fa-shield-halved", title: "TECNOLOGIA RESISTENTE E FUNCIONAL", desc: `Projetado com matérias-primas nobres de padrão industrial, assegurando desempenho superior e resistência comprovada.` }};
-      let act3 = {{ tag: "Acabamento & Durabilidade", icon: "fa-solid fa-circle-check", title: "ACABAMENTO PREMIUM REFORÇADO", desc: `Costuras reforçadas e estrutura pensada para enfrentar condições extremas sem perder qualidade.` }};
-      let careIcon = "fa-solid fa-shirt";
+      // Iscas com múltiplas variações (Split Media)
+      const rawTitle = liveP.title || "";
+      const isLure = (archId === "fishing_lures") || /isca|plug|popper|stick|crankbait|minnow|frog|soft/i.test(rawTitle);
+      const variants = liveP.variants || [];
+      const hasMultipleVariations = isLure && (variants.length > 1 || images.length >= 2);
+      const splitImages = hasMultipleVariations && images.length >= 2 ? [images[0], images[1]] : null;
+      let variationsSummary = "";
+      if (hasMultipleVariations) {{
+        const variantTitles = variants.filter(v => v.title && v.title !== "Default Title").map(v => v.title);
+        if (variantTitles.length > 0) {{
+          variationsSummary = `Disponível em ${{variantTitles.length}} opções de cores e modelos no anúncio (${{variantTitles.slice(0, 4).join(', ')}}${{variantTitles.length > 4 ? '...' : ''}}).`;
+        }} else {{
+          variationsSummary = "Múltiplas opções e cores disponíveis para escolha no anúncio.";
+        }}
+      }}
+
+      let act1 = {{ tag: "Performance & Conforto", emoji: "⚡", title: "ALTA PERFORMANCE E RESPIRABILIDADE", desc: `Desenvolvido para oferecer máxima durabilidade e conforto térmico, o(a) ${{formattedTitle}} garante total liberdade de movimentos e proteção contínua.` }};
+      let act2 = {{ tag: "Tecnologia & Proteção", emoji: "🛡️", title: "TECNOLOGIA RESISTENTE E FUNCIONAL", desc: `Projetado com matérias-primas nobres de padrão industrial, assegurando desempenho superior e resistência comprovada.` }};
+      let act3 = {{ tag: "Acabamento & Durabilidade", emoji: "✨", title: "ACABAMENTO PREMIUM REFORÇADO", desc: `Costuras reforçadas e estrutura pensada para enfrentar condições extremas sem perder qualidade.` }};
       let careTips = "Lavar à mão ou em ciclo suave com sabão neutro. Secar à sombra (dispensa uso de ferro).";
       
-      const isShirt = (archId === "uv_performance" || archId === "agro_field" || archId === "motors_speed" || title.toLowerCase().includes("camisa") || title.toLowerCase().includes("camiseta") || title.toLowerCase().includes("jersey") || title.toLowerCase().includes("baby look") || title.toLowerCase().includes("regata") || title.toLowerCase().includes("polo"));
+      const isShirt = anyShirtWord(rawTitle) || (archId === "uv_performance" || archId === "agro_field" || archId === "motors_speed");
       let specs = (isShirt && (storeKey === "brk_agro" || storeKey === "brk_motors")) ? [] : [
         {{ label: "Categoria", value: archName }},
-        {{ label: "Fabricante", value: liveP.vendor || "BRK Group Oficial" }},
+        {{ label: "Fabricante", value: liveP.vendor || (originType === "revenda" ? brandName : "BRK Group Oficial") }},
         {{ label: "Garantia", value: "Garantia oficial contra defeitos de fabricação" }},
         {{ label: "Uso Recomendado", value: "Atividades intensas, lazer e uso diário" }}
       ];
 
       if (archId === "cutlery_unique") {{
-        act1 = {{ tag: "Lâmina & Afiação", icon: "fa-solid fa-utensils", title: "AÇO CIRÚRGICO DE ALTA DUREZA E RETENÇÃO DE FIO", desc: `Forjada com tratamento térmico especial, a lâmina do(a) ${{title}} garante cortes precisos, durabilidade extrema e afiação resistente ao desgaste.` }};
-        act2 = {{ tag: "Empunhadura Nobre", icon: "fa-solid fa-hand-holding", title: "CABO ANATÔMICO EM MADEIRA E RESINA BALANCEADA", desc: `Design anatômico que se encaixa com firmeza na mão, proporcionando controle absoluto, estabilidade no manuseio e segurança em cortes pesados.` }};
-        act3 = {{ tag: "Proteção & Bainha", icon: "fa-solid fa-shield-halved", title: "BAINHA EM COURO LEGÍTIMO COM PASSADOR", desc: `Acompanha bainha artesanal sob medida em couro legítimo espesso com costura reforçada para transporte seguro na cintura e conservação da lâmina.` }};
-        careIcon = "fa-solid fa-utensils";
+        act1 = {{ tag: "Lâmina & Afiação", emoji: "🔪", title: "AÇO CIRÚRGICO DE ALTA DUREZA E RETENÇÃO DE FIO", desc: `Forjada com tratamento térmico especial, a lâmina do(a) ${{formattedTitle}} garante cortes precisos, durabilidade extrema e afiação resistente ao desgaste.` }};
+        act2 = {{ tag: "Empunhadura Nobre", emoji: "🪵", title: "CABO ANATÔMICO EM MADEIRA E RESINA BALANCEADA", desc: `Design anatômico que se encaixa com firmeza na mão, proporcionando controle absoluto, estabilidade no manuseio e segurança em cortes pesados.` }};
+        act3 = {{ tag: "Proteção & Bainha", emoji: "🛡️", title: "BAINHA EM COURO LEGÍTIMO COM PASSADOR", desc: `Acompanha bainha artesanal sob medida em couro legítimo espesso com costura reforçada para transporte seguro na cintura e conservação da lâmina.` }};
         careTips = "Lavar e secar imediatamente após o uso. Não lavar em máquina nem deixar de molho. Aplicar uma fina camada de óleo mineral na lâmina e hidratar o couro da bainha.";
         specs = [
           {{ label: "Material da Lâmina", value: "Aço cirúrgico inoxidável de alta pureza" }},
@@ -1167,10 +1261,9 @@ def build_master():
           {{ label: "Indicação de Uso", value: "Churrasco, campo, pesca, acampamento e coleção" }}
         ];
       }} else if (archId === "footwear_sandals" || archId === "footwear_sandals_boaonda") {{
-        act1 = {{ tag: "Conforto & Ergonomia", icon: "fa-solid fa-shoe-prints", title: "DESIGN ANATÔMICO COM PALMILHA ANTI-IMPACTO", desc: `Desenvolvida para proporcionar amortecimento suave e alívio de pressão na pisada, o(a) ${{title}} garante descanso aos pés durante longos períodos em pé.` }};
-        act2 = {{ tag: "Aderência & Drenagem", icon: "fa-solid fa-water", title: "SOLADO ANTIDERRAPANTE COM DRENAGEM RÁPIDA", desc: `Possui frisos e canais de escoamento especialmente projetados para pisos molhados, decks de barcos e bordas de piscina, oferecendo tração segura.` }};
-        act3 = {{ tag: "Durabilidade & Higiene", icon: "fa-solid fa-shield-halved", title: "MATERIAL ANTIMICROBIANO E SECAGEM INSTANTÂNEA", desc: `Confeccionada em polímero nobre impermeável que não absorve umidade nem odores, sendo extremamente fácil de lavar e secar rapidamente.` }};
-        careIcon = "fa-solid fa-shoe-prints";
+        act1 = {{ tag: "Conforto & Ergonomia", emoji: "👟", title: "DESIGN ANATÔMICO COM PALMILHA ANTI-IMPACTO", desc: `Desenvolvida para proporcionar amortecimento suave e alívio de pressão na pisada, o(a) ${{formattedTitle}} garante descanso aos pés durante longos períodos em pé.` }};
+        act2 = {{ tag: "Aderência & Drenagem", emoji: "💧", title: "SOLADO ANTIDERRAPANTE COM DRENAGEM RÁPIDA", desc: `Possui frisos e canais de escoamento especialmente projetados para pisos molhados, decks de barcos e bordas de piscina, oferecendo tração segura.` }};
+        act3 = {{ tag: "Durabilidade & Higiene", emoji: "🛡️", title: "MATERIAL ANTIMICROBIANO E SECAGEM INSTANTÂNEA", desc: `Confeccionada em polímero nobre impermeável que não absorve umidade nem odores, sendo extremamente fácil de lavar e secar rapidamente.` }};
         careTips = "Lavar com água corrente e sabão neutro. Não expor ao sol excessivo direto para evitar deformação do EVA.";
         specs = [
           {{ label: "Material do Cabedal", value: "Termoplástico nobre Boaonda flexível e lavável" }},
@@ -1179,37 +1272,44 @@ def build_master():
           {{ label: "Resistência", value: "100% à prova d'água, secagem instantânea" }},
           {{ label: "Uso Recomendado", value: "Embarcações, pesqueiros, praia, piscina e uso casual" }}
         ];
+      }} else if (archId === "fishing_lures") {{
+        act1 = {{ tag: "Ação & Nado Errático", emoji: "🎣", title: "NADO REALISTA QUE ESTIMULA O ATAQUE DE PREDADORES", desc: `Desenvolvida com hidrodinâmica refinada, a ${{formattedTitle}} produz vibrações e movimentação provocante na água, atraindo ataques ferozes por agressividade e territorialidade.` }};
+        act2 = {{ tag: "Sonoridade & Balanceamento", emoji: "🔔", title: "SISTEMA DE RATTLING COM ESFERAS SONORAS INTERNAS", desc: `Possui esferas internas calibradas que emitem frequências sonoras a longas distâncias, além de concentrar o centro de gravidade para arremessos longos e estáveis.` }};
+        act3 = {{ tag: "Poder de Fisgada", emoji: "⚡", title: "GARATÉIAS DE ALTA RESISTÊNCIA E PINTURA HOLOGRÁFICA", desc: `Armada com garatéias reforçadas afiadas a laser para penetração instantânea, associadas a pintura holográfica ultra reflexiva.` }};
+        careTips = "Após o uso em água salgada, enxaguar em água doce corrente e secar à sombra para proteger as garatéias da oxidação.";
+        specs = [
+          {{ label: "Ação do Trabalho", value: "Trabalho atrativo de superfície/meia-água com nado provocante" }},
+          {{ label: "Garatéias", value: "Aço carbono reforçado afiadas a laser" }},
+          {{ label: "Sistema Sonoro", value: "Rattling interno com esferas sonoras vibratórias" }},
+          {{ label: "Corpo", value: "Polímero ABS virgem reforçado resistente a mordidas" }},
+          {{ label: "Peixes Indicados", value: "Tucunaré, Robalo, Traíra, Dourado e predadores esportivos" }}
+        ];
       }} else if (archId === "tackle_boxes_storage") {{
-        act1 = {{ tag: "Organização & Espaço", icon: "fa-solid fa-box-archive", title: "DIVISÓRIAS MODULARES E COMPARTIMENTAÇÃO INTELIGENTE", desc: `Projetada para acomodar iscas, anzóis, chumbadas e equipamentos com total organização, o(a) ${{title}} permite ajustar o espaço interno sob medida.` }};
-        act2 = {{ tag: "Segurança Reforçada", icon: "fa-solid fa-lock", title: "TRAVAS DUPLAS REFORÇADAS ANTI-ABERTURA", desc: `Equipada com fechos de alta pressão que garantem travamento firme e seguro, impedindo aberturas acidentais mesmo durante impactos e movimentação intensa na embarcação.` }};
-        act3 = {{ tag: "Proteção Estrutural", icon: "fa-solid fa-shield-halved", title: "POLÍMERO VIRGEM DE ALTA RESISTÊNCIA COM PROTEÇÃO UV", desc: `Construção robusta resistente a quedas, choques mecânicos e à degradação solar, preservando suas tralhas protegidas da água e do sol por muito mais tempo.` }};
-        careIcon = "fa-solid fa-box-archive";
+        act1 = {{ tag: "Organização & Espaço", emoji: "📦", title: "DIVISÓRIAS MODULARES E COMPARTIMENTAÇÃO INTELIGENTE", desc: `Projetada para acomodar iscas, anzóis e equipamentos com total organização, o(a) ${{formattedTitle}} permite ajustar o espaço interno sob medida.` }};
+        act2 = {{ tag: "Segurança Reforçada", emoji: "🔒", title: "TRAVAS DUPLAS REFORÇADAS ANTI-ABERTURA", desc: `Equipada com fechos de alta pressão que garantem travamento firme, impedindo aberturas acidentais durante o transporte.` }};
+        act3 = {{ tag: "Proteção Estrutural", emoji: "🛡️", title: "POLÍMERO VIRGEM DE ALTA RESISTÊNCIA COM PROTEÇÃO UV", desc: `Construção robusta resistente a quedas, choques mecânicos e à degradação solar, preservando suas tralhas protegidas da água e do sol.` }};
         careTips = "Higienizar com pano úmido e sabão neutro. Enxaguar e secar antes de guardar as tralhas para evitar umidade interna.";
         specs = [
           {{ label: "Material", value: "Polipropileno virgem de alto impacto com proteção UV" }},
           {{ label: "Divisórias", value: "Removíveis e reposicionáveis sob medida" }},
           {{ label: "Travas", value: "Sistema duplo reforçado de alta pressão" }},
-          {{ label: "Vedação", value: "Resistente a respingos d'água e poeira" }},
-          {{ label: "Aplicação", value: "Organização de tralhas em barcos, caiaques, pesqueiros e camping" }}
+          {{ label: "Vedação", value: "Resistente a respingos d'água e poeira" }}
         ];
       }} else if (archId === "fishing_tackle_gear") {{
-        act1 = {{ tag: "Engenharia & Precisão", icon: "fa-solid fa-gear", title: "MECÂNICA BALANCEADA PARA ALTO DESEMPENHO", desc: `Construído com componentes de engenharia refinada, o(a) ${{title}} oferece arremessos precisos, sensibilidade máxima no trabalho da isca e funcionamento suave.` }};
-        act2 = {{ tag: "Poder de Tração", icon: "fa-solid fa-bolt", title: "RESISTÊNCIA SOB TRAÇÃO E CONTROLE PROGRESSIVO", desc: `Projetado para suportar esforço extremo nas brigas com grandes exemplares, mantendo tração firme e confiabilidade absoluta na linha.` }};
-        act3 = {{ tag: "Blindagem Anticorrosão", icon: "fa-solid fa-shield-halved", title: "COMPONENTES TRATADOS CONTRA CORROSÃO", desc: `Materiais selecionados de alta dureza com revestimento resistente à água doce e salinidade, garantindo longa vida útil e preservação dos mecanismos.` }};
-        careIcon = "fa-solid fa-screwdriver-wrench";
+        act1 = {{ tag: "Engenharia & Precisão", emoji: "⚙️", title: "MECÂNICA BALANCEADA PARA ALTO DESEMPENHO", desc: `Construído com componentes de engenharia refinada, o(a) ${{formattedTitle}} oferece arremessos precisos, sensibilidade máxima no trabalho da isca e recolhimento macio.` }};
+        act2 = {{ tag: "Poder de Tração", emoji: "⚡", title: "RESISTÊNCIA SOB TRAÇÃO E CONTROLE PROGRESSIVO", desc: `Projetado para suportar esforço extremo nas brigas com grandes exemplares, mantendo tração firme e confiabilidade absoluta na linha.` }};
+        act3 = {{ tag: "Blindagem Anticorrosão", emoji: "🛡️", title: "COMPONENTES TRATADOS CONTRA CORROSÃO", desc: `Materiais selecionados de alta dureza com revestimento resistente à água doce e salinidade, garantindo longa vida útil.` }};
         careTips = "Após uso em água salgada ou salobra, enxaguar em água corrente doce e secar à sombra. Manter lubrificação periódica.";
         specs = [
           {{ label: "Categoria", value: "Equipamento de Precisão para Pesca Esportiva" }},
           {{ label: "Estrutura", value: "Liga reforçada de baixo peso e alta rigidez estrutural" }},
           {{ label: "Mecânica", value: "Componentes de precisão com rolamentos selados" }},
-          {{ label: "Aplicação", value: "Pesca esportiva em rios, lagos, pesqueiros e mar aberto" }},
-          {{ label: "Origem / Distribuição", value: `Produto original ${{liveP.vendor || 'Oficial'}} com procedência e garantia` }}
+          {{ label: "Origem / Distribuição", value: `Produto original ${{liveP.vendor || brandName}} com procedência e garantia` }}
         ];
       }} else if (archId === "thermal_gear") {{
-        act1 = {{ tag: "Eficiência Térmica", icon: "fa-solid fa-snowflake", title: "ISOLAMENTO TÉRMICO DE ALTA DENSIDADE", desc: `Tecnologia de retenção térmica de alto rendimento para conservar alimentos e bebidas na temperatura ideal por muito mais tempo.` }};
-        act2 = {{ tag: "Vedação Hermética", icon: "fa-solid fa-temperature-arrow-down", title: "VEDAÇÃO TOTAL CONTRA TROCA DE CALOR", desc: `Garante bloqueio absoluto de calor externo e conservação uniforme mesmo sob sol forte.` }};
-        act3 = {{ tag: "Robustez Industrial", icon: "fa-solid fa-shield-halved", title: "ESTRUTURA REFORÇADA PARA EXPEDIÇÕES", desc: `Resistente a impactos em caçambas, barcos e acampamentos.` }};
-        careIcon = "fa-solid fa-snowflake";
+        act1 = {{ tag: "Eficiência Térmica", emoji: "❄️", title: "ISOLAMENTO TÉRMICO DE ALTA DENSIDADE", desc: `Tecnologia de retenção térmica de alto rendimento para conservar bebidas na temperatura ideal por muito mais tempo.` }};
+        act2 = {{ tag: "Vedação Hermética", emoji: "🔒", title: "VEDAÇÃO TOTAL CONTRA TROCA DE CALOR", desc: `Garante bloqueio térmico e conservação uniforme mesmo sob sol forte.` }};
+        act3 = {{ tag: "Robustez Industrial", emoji: "🛡️", title: "ESTRUTURA REFORÇADA PARA EXPEDIÇÕES", desc: `Resistente a impactos em caçambas, barcos e acampamentos.` }};
         careTips = "Higienizar com água morna e sabão neutro. Deixar secar totalmente aberto antes de armazenar.";
         specs = [
           {{ label: "Estrutura", value: "Parede dupla isolada com poliuretano injetado" }},
@@ -1218,9 +1318,36 @@ def build_master():
         ];
       }}
 
+      const originBadge = (originType === "revenda")
+        ? `<span class="brk-desc-origin-badge revenda">✨ PRODUTO ORIGINAL • MARCA ${{brandName.toUpperCase()}}</span>`
+        : `<span class="brk-desc-origin-badge propria">🛡️ PRODUTO ORIGINAL • FABRICAÇÃO PRÓPRIA BRK</span>`;
+
+      const copyrightBox = showCopyright ? `
+  <!-- Aviso de Protecao de Estampas e Direitos Autorais (Camisas C0) -->
+  <div class="brk-desc-copyright-box">
+    <div class="brk-copyright-icon">⚖️</div>
+    <div class="brk-copyright-text">
+      <strong>Aviso de Propriedade Intelectual:</strong> Nossas estampas são protegidas pela Lei de Direitos Autorais (Lei 9.610/98) a Reprodução não autorizada está sujeita às penalidades legais. Copiar é crime !
+    </div>
+  </div>` : '';
+
+      const mediaAto1 = splitImages ? `
+    <div class="brk-desc-media brk-desc-media-split">
+      <div class="brk-split-item"><img src="${{splitImages[0]}}" alt="${{formattedTitle}} - Opção 1" loading="lazy" /></div>
+      <div class="brk-split-item"><img src="${{splitImages[1]}}" alt="${{formattedTitle}} - Opção 2" loading="lazy" /></div>
+    </div>` : `
+    <div class="brk-desc-media">
+      <img src="${{img1}}" alt="${{formattedTitle}} - Visual e Design" loading="lazy" />
+    </div>`;
+
+      const varNoticeHtml = (hasMultipleVariations && variationsSummary) ? `
+      <div class="brk-variations-notice">
+        <span class="brk-var-icon">🎨</span>
+        <span class="brk-var-text">${{variationsSummary}}</span>
+      </div>` : '';
+
       return `<!-- BRK GROUP - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL SHOPIFY) -->
 <div class="brk-desc-wrapper">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
     .brk-desc-wrapper {{
       width: 100%;
@@ -1235,8 +1362,65 @@ def build_master():
     .brk-desc-wrapper * {{
       box-sizing: border-box;
     }}
-
-    /* Atos Narrativos */
+    .brk-desc-header {{
+      margin-bottom: 32px;
+      text-align: center;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e2e8f0;
+    }}
+    .brk-desc-origin-badge {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      margin-bottom: 12px;
+    }}
+    .brk-desc-origin-badge.propria {{
+      color: ${{themeColor}};
+      background: ${{themeBg}};
+      border: 1px solid ${{themeColor}}35;
+    }}
+    .brk-desc-origin-badge.revenda {{
+      color: #b45309;
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+    }}
+    .brk-desc-main-title {{
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0;
+      letter-spacing: -0.4px;
+    }}
+    .brk-desc-copyright-box {{
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      border-radius: 0 12px 12px 0;
+      padding: 14px 18px;
+      margin-bottom: 36px;
+      border-top: 1px solid #fef3c7;
+      border-right: 1px solid #fef3c7;
+      border-bottom: 1px solid #fef3c7;
+    }}
+    .brk-copyright-icon {{
+      font-size: 24px;
+      line-height: 1;
+      flex-shrink: 0;
+    }}
+    .brk-copyright-text {{
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: #92400e;
+    }}
     .brk-desc-block {{
       display: flex;
       align-items: center;
@@ -1265,6 +1449,17 @@ def build_master():
       border: 1px solid #f1f5f9;
       background: #ffffff;
     }}
+    .brk-desc-media-split {{
+      display: flex;
+      gap: 12px;
+    }}
+    .brk-desc-media-split .brk-split-item {{
+      flex: 1;
+      min-width: 0;
+    }}
+    .brk-desc-media-split .brk-split-item img {{
+      max-height: 380px;
+    }}
     .brk-desc-text {{
       flex: 1.15;
       min-width: 0;
@@ -1285,7 +1480,7 @@ def build_master():
       border: 1px solid ${{themeColor}}25;
     }}
     .brk-desc-title {{
-      font-size: 23px;
+      font-size: 22px;
       font-weight: 800;
       line-height: 1.25;
       color: #0f172a;
@@ -1299,8 +1494,19 @@ def build_master():
       color: #475569;
       margin: 0;
     }}
-
-    /* Box de Ficha Técnica & Cuidados */
+    .brk-variations-notice {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+    }}
     .brk-desc-specs-box {{
       background: #f8fafc;
       border: 1px solid #e2e8f0;
@@ -1347,8 +1553,6 @@ def build_master():
       color: #0f172a;
       margin-top: 3px;
     }}
-
-    /* Guia de Conservação */
     .brk-desc-care-box {{
       margin-top: 20px;
       background: #ffffff;
@@ -1361,12 +1565,10 @@ def build_master():
       border-top: 1px solid #e2e8f0;
       border-right: 1px solid #e2e8f0;
       border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
     }}
-    .brk-desc-care-box strong {{
-      color: #0f172a;
-    }}
-
-    /* Rodapé de Confiança e Garantia BRK com Font Awesome */
     .brk-desc-trust-bar {{
       margin-top: 32px;
       display: grid;
@@ -1384,9 +1586,9 @@ def build_master():
       align-items: center;
       gap: 6px;
     }}
-    .brk-trust-icon {{
-      font-size: 22px;
-      color: ${{themeColor}};
+    .brk-trust-emoji {{
+      font-size: 24px;
+      line-height: 1;
       margin-bottom: 2px;
     }}
     .brk-trust-title {{
@@ -1399,60 +1601,47 @@ def build_master():
       color: #64748b;
       line-height: 1.3;
     }}
-
-    /* Responsividade Mobile-First Blindada */
     @media (max-width: 768px) {{
+      .brk-desc-main-title {{ font-size: 20px; }}
       .brk-desc-block, .brk-desc-block.reverse {{
         flex-direction: column !important;
         gap: 16px;
         margin-bottom: 34px;
         text-align: left;
       }}
-      .brk-desc-title {{
-        font-size: 19px;
-      }}
-      .brk-desc-paragraph {{
-        font-size: 14px;
-      }}
-      .brk-specs-grid {{
-        grid-template-columns: 1fr;
-      }}
-      .brk-desc-trust-bar {{
-        grid-template-columns: 1fr;
-        gap: 10px;
-      }}
-      .brk-trust-item {{
-        flex-direction: row;
-        text-align: left;
-        padding: 12px 14px;
-        gap: 14px;
-      }}
-      .brk-trust-icon {{
-        font-size: 20px;
-        margin-bottom: 0;
-      }}
+      .brk-desc-media-split {{ flex-direction: row; gap: 8px; }}
+      .brk-desc-title {{ font-size: 18px; }}
+      .brk-desc-paragraph {{ font-size: 14px; }}
+      .brk-specs-grid {{ grid-template-columns: 1fr; }}
+      .brk-desc-trust-bar {{ grid-template-columns: 1fr; gap: 8px; }}
+      .brk-trust-item {{ flex-direction: row; text-align: left; padding: 12px 14px; gap: 12px; }}
     }}
   </style>
 
+  <!-- Cabecalho Oficial com Origem e Marca -->
+  <div class="brk-desc-header">
+    ${{originBadge}}
+    <h2 class="brk-desc-main-title">${{formattedTitle}}</h2>
+  </div>
+${{copyrightBox}}
+
   <!-- Ato 1 -->
   <div class="brk-desc-block">
-    <div class="brk-desc-media">
-      <img src="${{img1}}" alt="${{title}} - Visual e Design" loading="lazy" />
-    </div>
+    ${{mediaAto1}}
     <div class="brk-desc-text">
-      <span class="brk-desc-tag"><i class="${{act1.icon}}"></i> ${{act1.tag}}</span>
+      <span class="brk-desc-tag">${{act1.emoji}} ${{act1.tag}}</span>
       <h3 class="brk-desc-title">${{act1.title}}</h3>
-      <p class="brk-desc-paragraph">${{act1.desc}}</p>
+      <p class="brk-desc-paragraph">${{act1.desc}}</p>${{varNoticeHtml}}
     </div>
   </div>
 
   <!-- Ato 2 -->
   <div class="brk-desc-block reverse">
     <div class="brk-desc-media">
-      <img src="${{img2}}" alt="${{title}} - Performance e Detalhes" loading="lazy" />
+      <img src="${{img2}}" alt="${{formattedTitle}} - Performance e Detalhes" loading="lazy" />
     </div>
     <div class="brk-desc-text">
-      <span class="brk-desc-tag"><i class="${{act2.icon}}"></i> ${{act2.tag}}</span>
+      <span class="brk-desc-tag">${{act2.emoji}} ${{act2.tag}}</span>
       <h3 class="brk-desc-title">${{act2.title}}</h3>
       <p class="brk-desc-paragraph">${{act2.desc}}</p>
     </div>
@@ -1461,10 +1650,10 @@ def build_master():
   <!-- Ato 3 -->
   <div class="brk-desc-block">
     <div class="brk-desc-media">
-      <img src="${{img3}}" alt="${{title}} - Durabilidade e Acabamento" loading="lazy" />
+      <img src="${{img3}}" alt="${{formattedTitle}} - Durabilidade e Acabamento" loading="lazy" />
     </div>
     <div class="brk-desc-text">
-      <span class="brk-desc-tag"><i class="${{act3.icon}}"></i> ${{act3.tag}}</span>
+      <span class="brk-desc-tag">${{act3.emoji}} ${{act3.tag}}</span>
       <h3 class="brk-desc-title">${{act3.title}}</h3>
       <p class="brk-desc-paragraph">${{act3.desc}}</p>
     </div>
@@ -1474,47 +1663,51 @@ def build_master():
   <!-- Box de Especificacoes e Cuidados -->
   <div class="brk-desc-specs-box">
     <h4 class="brk-desc-specs-title">
-      <i class="fa-solid fa-list-check" style="color: ${{themeColor}};"></i>
+      <span>📋</span>
       <span>Ficha Técnica & Cuidados de Conservação</span>
     </h4>
     <div class="brk-specs-grid">
       ${{specs.map(s => `
       <div class="brk-spec-item">
-        <span class="brk-spec-label"><i class="fa-solid fa-angle-right" style="color: ${{themeColor}}; font-size: 10px;"></i> ${{s.label}}</span>
+        <span class="brk-spec-label"><span style="color: ${{themeColor}};">▸</span> ${{s.label}}</span>
         <span class="brk-spec-value">${{s.value}}</span>
       </div>`).join('')}}
     </div>
 
     <!-- Guia de Cuidados -->
     <div class="brk-desc-care-box">
-      <i class="${{careIcon}}" style="color: ${{themeColor}}; margin-right: 8px;"></i>
-      <strong>Guia de Cuidados & Conservação da Peça:</strong> ${{careTips}}
+      <span style="font-size: 20px;">🧼</span>
+      <div>
+        <strong>Guia de Cuidados & Conservação da Peça:</strong> ${{careTips}}
+      </div>
     </div>
   </div>` : `
   <!-- Guia de Cuidados (Ficha Técnica descartada para camisas Agro e Motors) -->
   <div class="brk-desc-care-box" style="margin-top: 36px;">
-    <i class="${{careIcon}}" style="color: ${{themeColor}}; margin-right: 8px;"></i>
-    <strong>Guia de Cuidados & Conservação da Peça:</strong> ${{careTips}}
+    <span style="font-size: 20px;">🧼</span>
+    <div>
+      <strong>Guia de Cuidados & Conservação da Peça:</strong> ${{careTips}}
+    </div>
   </div>`}}
 
-  <!-- Selos de Confiança e Garantia BRK (Font Awesome) -->
+  <!-- Selos de Confiança e Garantia BRK -->
   <div class="brk-desc-trust-bar">
     <div class="brk-trust-item">
-      <i class="fa-solid fa-circle-check brk-trust-icon"></i>
+      <span class="brk-trust-emoji">🛡️</span>
       <div>
         <div class="brk-trust-title">Qualidade Oficial BRK</div>
         <div class="brk-trust-desc">Matérias-primas nobres testadas</div>
       </div>
     </div>
     <div class="brk-trust-item">
-      <i class="fa-solid fa-truck-fast brk-trust-icon"></i>
+      <span class="brk-trust-emoji">🚚</span>
       <div>
         <div class="brk-trust-title">Envio Rápido & Seguro</div>
         <div class="brk-trust-desc">Rastreamento de ponta a ponta</div>
       </div>
     </div>
     <div class="brk-trust-item">
-      <i class="fa-solid fa-arrow-rotate-left brk-trust-icon"></i>
+      <span class="brk-trust-emoji">🔄</span>
       <div>
         <div class="brk-trust-title">Troca Descomplicada</div>
         <div class="brk-trust-desc">Satisfação garantida ou seu dinheiro de volta</div>
@@ -1522,6 +1715,54 @@ def build_master():
     </div>
   </div>
 </div>`;
+    }}
+
+    function buildClientModeBMarkdown(liveP) {{
+      const originInfo = resolveClientOriginAndTitle(liveP);
+      const formattedTitle = originInfo.formattedTitle;
+      const showCopyright = originInfo.showCopyright;
+      const images = liveP.cdn_images || (liveP.gallery ? liveP.gallery.slice(0, 3) : []) || [];
+      const img1 = images[0] || "";
+      const img2 = images[1] || img1;
+      const img3 = images[2] || img1;
+
+      const lines = [];
+      lines.push(`# ${{formattedTitle}}\\n`);
+      if (showCopyright) {{
+        lines.push(`> ⚖️ **Aviso de Propriedade Intelectual:** Nossas estampas são protegidas pela Lei de Direitos Autorais (Lei 9.610/98) a Reprodução não autorizada está sujeita às penalidades legais. Copiar é crime !\\n`);
+      }}
+
+      lines.push(`### ⚡ Performance & Conforto: ALTA PERFORMANCE E RESPIRABILIDADE`);
+      if (img1) lines.push(`![${{formattedTitle}}](${{img1}})`);
+      lines.push(`Desenvolvido para oferecer máxima durabilidade e conforto térmico, o(a) ${{formattedTitle}} garante total liberdade de movimentos e proteção contínua.\\n`);
+
+      lines.push(`### 🛡️ Tecnologia & Proteção: TECNOLOGIA RESISTENTE E FUNCIONAL`);
+      if (img2) lines.push(`![${{formattedTitle}} - Detalhes](${{img2}})`);
+      lines.push(`Projetado com matérias-primas nobres de padrão industrial, assegurando desempenho superior e resistência comprovada.\\n`);
+
+      lines.push(`### ✨ Acabamento & Durabilidade: ACABAMENTO PREMIUM REFORÇADO`);
+      if (img3) lines.push(`![${{formattedTitle}} - Acabamento](${{img3}})`);
+      lines.push(`Costuras reforçadas e estrutura pensada para enfrentar condições extremas sem perder qualidade.\\n`);
+
+      if (liveP.specs && liveP.specs.length > 0) {{
+        lines.push(`### 📋 Ficha Técnica & Especificações`);
+        lines.push(`| Característica | Especificação |`);
+        lines.push(`| :--- | :--- |`);
+        liveP.specs.forEach(s => {{
+          lines.push(`| **${{s.label}}** | ${{s.value}} |`);
+        }});
+        lines.push(``);
+      }}
+
+      lines.push(`### 🧼 Guia de Cuidados & Conservação`);
+      lines.push(`Lavar à mão ou em ciclo suave com sabão neutro. Secar à sombra (dispensa uso de ferro).\\n`);
+
+      lines.push(`---`);
+      lines.push(`- 🛡️ **Qualidade Oficial BRK:** Matérias-primas nobres testadas`);
+      lines.push(`- 🚚 **Envio Rápido & Seguro:** Rastreamento de ponta a ponta`);
+      lines.push(`- 🔄 **Troca Descomplicada:** Satisfação garantida ou seu dinheiro de volta`);
+
+      return lines.join("\\n");
     }}
 
     // Alternador de Loja
@@ -1785,11 +2026,31 @@ def build_master():
       currentModalProduct = product;
       currentModalMode = "b";
 
-      document.getElementById("modal-title").innerText = product.title;
+      const originInfo = resolveClientOriginAndTitle(product);
+      const titleToShow = product.formatted_title || originInfo.formattedTitle || product.title;
+      document.getElementById("modal-title").innerText = titleToShow;
       document.getElementById("modal-sku-badge").innerText = "SKU Mestre: " + (product.master_sku || "N/D");
+      
+      // Indicador da Loja Específica e Link Direto ao Admin Shopify
+      const storeBadge = document.getElementById("modal-store-badge");
+      const storeMap = {{
+        "brk_fishing": {{ name: "BRK Fishing", slug: "use-brk-fishing", color: "bg-blue-600" }},
+        "brk_agro": {{ name: "BRK Agro", slug: "use-brk-agro", color: "bg-emerald-600" }},
+        "brk_motors": {{ name: "BRK Motors", slug: "use-brk-motors", color: "bg-orange-600" }}
+      }};
+      const sInfo = storeMap[product.store_key] || storeMap["brk_fishing"];
+      if (storeBadge) {{
+        storeBadge.className = `px-2 py-0.5 rounded-md text-white font-bold text-[10px] uppercase tracking-wider ${{sInfo.color}}`;
+        storeBadge.innerText = sInfo.name;
+      }}
+      const adminBtn = document.getElementById("modal-open-admin-btn");
+      if (adminBtn) {{
+        adminBtn.href = `https://admin.shopify.com/store/${{sInfo.slug}}/products/${{product.id}}`;
+      }}
+
       const footerSku = document.getElementById("modal-footer-sku-info");
       if (footerSku) {{
-        footerSku.innerText = `SKU: ${{product.master_sku || 'N/D'}} | ${{product.category || 'Geral'}} | 3 Atos Ativo`;
+        footerSku.innerText = `Loja: ${{sInfo.name}} | SKU: ${{product.master_sku || 'N/D'}} | ${{product.category || 'Geral'}} | 3 Atos Ativo`;
       }}
       document.getElementById("modal-variants-badge").innerText = (product.variants_skus ? product.variants_skus.length : 1) + " Variantes Agrupadas";
       document.getElementById("modal-archetype-badge").innerText = product.archetype_name || "Molde Padrão";
@@ -2004,6 +2265,49 @@ def build_master():
       }}
 
       showToast("Fotos do BRK Bunker aplicadas nas 3 posições com sucesso!");
+    }}
+
+    // Copiar Markdown Atual do Modal com Feedback Visual Reativo nos Botões
+    function copyCurrentModalMarkdown(btnTrigger) {{
+      if (!currentModalProduct) return;
+      const p = currentModalProduct;
+      const mdText = p.mode_b_markdown || buildClientModeBMarkdown(p);
+      if (!mdText) {{
+        showToast("⚠️ Nenhum texto Markdown disponível para copiar.");
+        return;
+      }}
+
+      navigator.clipboard.writeText(mdText).then(() => {{
+        showToast("Markdown copiado com sucesso! Pronto para documentação ou Shopify.");
+
+        const buttons = [
+          btnTrigger,
+          document.getElementById("modal-copy-markdown-btn"),
+          document.getElementById("modal-footer-copy-md-btn")
+        ].filter(Boolean);
+
+        buttons.forEach(btn => {{
+          const label = btn.querySelector(".copy-label");
+          const icon = btn.querySelector(".copy-icon");
+          if (!label) return;
+
+          const origText = label.innerText;
+          const origIcon = icon ? icon.innerText : "📝";
+
+          label.innerText = "Copiado! ✓";
+          if (icon) icon.innerText = "✅";
+          btn.classList.add("ring-4", "ring-emerald-400/40", "scale-105");
+
+          setTimeout(() => {{
+            label.innerText = origText;
+            if (icon) icon.innerText = origIcon;
+            btn.classList.remove("ring-4", "ring-emerald-400/40", "scale-105");
+          }}, 2200);
+        }});
+      }}).catch(err => {{
+        console.error("Erro ao copiar markdown:", err);
+        showToast("⚠️ Erro ao copiar Markdown.");
+      }});
     }}
 
     // Copiar HTML Atual do Modal com Feedback Visual Reativo nos Botões
