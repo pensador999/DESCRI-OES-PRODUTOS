@@ -131,7 +131,15 @@ class CatalogAuditor:
         clean_text = re.sub(r'\s+', ' ', clean_text)
         word_count = len(clean_text.split()) if clean_text else 0
 
-        if not body_html.strip() or word_count == 0:
+        is_placeholder_or_empty = (
+            not body_html.strip()
+            or word_count == 0
+            or clean_text.lower() in ["a", "p", "br", "-", ".", "none", "null", "undefined"]
+            or (word_count < 20 and not any(tag in body_html.lower() for tag in ["<p", "<div", "<table", "<ul"]))
+            or word_count < 5
+        )
+
+        if is_placeholder_or_empty:
             return {
                 "id": product.get("id"),
                 "title": title,
@@ -141,17 +149,17 @@ class CatalogAuditor:
                 "total_skus_count": total_skus,
                 "affected_skus_count": total_skus,
                 "is_out_of_standard": True,
-                "standard_violations": ["Produto totalmente sem descrição cadastrada."],
+                "standard_violations": ["Produto totalmente sem descrição ou com placeholder/caractere único."],
                 "archetype": archetype,
                 "status": "SEM_DESCRICAO",
                 "score": 0,
-                "word_count": 0,
+                "word_count": word_count,
                 "total_images": 0,
                 "broken_images_count": 0,
                 "external_images_count": 0,
-                "issues": ["Produto cadastrado sem nenhuma descrição."],
+                "issues": ["Produto cadastrado sem nenhuma descrição real."],
                 "broken_urls": [],
-                "recommendation": "Gerar descrição completa a partir do arquétipo correspondente."
+                "recommendation": "Gerar descrição completa em 3 Atos a partir do arquétipo correspondente."
             }
 
         # 2. Análise de Imagens no Corpo da Descrição
@@ -209,9 +217,9 @@ class CatalogAuditor:
         if broken_images:
             status = "IMAGENS_QUEBRADAS"
             standard_violations.append(f"{len(broken_images)} foto(s) com erro 404 (links quebrados).")
-        elif not body_html.strip() or word_count == 0:
+        elif is_placeholder_or_empty or word_count < 20:
             status = "SEM_DESCRICAO"
-            standard_violations.append("Produto totalmente sem descrição.")
+            standard_violations.append("Produto sem descrição real ou com texto insuficiente.")
         elif external_images:
             status = "FOTOS_EXTERNAS"
             standard_violations.append(f"{len(external_images)} foto(s) fora da CDN oficial da Shopify.")

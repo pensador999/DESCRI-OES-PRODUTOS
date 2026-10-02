@@ -24,6 +24,14 @@ class HTMLBuilder:
         theme_color = enriched_data.get("theme_color", "#0284c7")
         theme_bg = enriched_data.get("theme_bg", "#f0f9ff")
         blocks = enriched_data.get("narrative_blocks", [])
+        if not blocks:
+            acts = []
+            for act_key in ["act1", "act2", "act3"]:
+                if act_key in enriched_data and isinstance(enriched_data[act_key], dict):
+                    acts.append(enriched_data[act_key])
+            if acts:
+                blocks = acts
+
         specs = enriched_data.get("specs", [])
         care_tips = enriched_data.get("care_tips", "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar).")
         care_icon = enriched_data.get("care_icon", "fa-solid fa-hand-sparkles")

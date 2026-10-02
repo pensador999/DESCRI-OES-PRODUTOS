@@ -72,6 +72,23 @@ def build_master():
         selected_prods = []
         selected_handles = set()
 
+        # 0. Normalizar status de produtos vazios ou com placeholder para SEM_DESCRICAO
+        for p in all_prods:
+            body = (p.get("original_body_html") or p.get("body_html") or "").strip()
+            clean_b = re.sub(r'<[^>]+>', ' ', body).strip()
+            clean_b = re.sub(r'\s+', ' ', clean_b)
+            w_count = len(clean_b.split()) if clean_b else 0
+            is_empty_or_placeholder = (
+                not body
+                or w_count == 0
+                or clean_b.lower() in ("a", "p", "br", "-", ".", "none", "null", "undefined")
+                or (w_count < 20 and not any(tag in body.lower() for tag in ["<table", "<div", "<ul"]))
+                or w_count < 5
+            )
+            if is_empty_or_placeholder and p.get("status") != "IMAGENS_QUEBRADAS":
+                p["status"] = "SEM_DESCRICAO"
+                p["is_out_of_standard"] = True
+
         # 1. Garantir que cada categoria cadastrada na loja tenha produtos ricos disponíveis
         for cat_name in categories.keys():
             cat_items = [p for p in all_prods if p.get("category") == cat_name]
@@ -91,7 +108,7 @@ def build_master():
                 cat_out_std = [p for p in cat_items if p.get("is_out_of_standard") and p.get("status") not in ("IMAGENS_QUEBRADAS", "SEM_DESCRICAO")]
                 cat_healthy = [p for p in cat_items if not p.get("is_out_of_standard")]
                 
-                cat_sample = cat_broken[:20] + cat_empty[:10] + cat_out_std[:10] + cat_healthy[:15]
+                cat_sample = cat_broken[:25] + cat_empty[:25] + cat_out_std[:10] + cat_healthy[:15]
                 for p in cat_sample:
                     if p.get("handle") not in selected_handles:
                         selected_prods.append(p)
@@ -100,6 +117,12 @@ def build_master():
         # 2. Se houver falhas críticas adicionais, acrescenta até 30
         extra_broken = [p for p in all_prods if p.get("status") == "IMAGENS_QUEBRADAS" and p.get("handle") not in selected_handles]
         for p in extra_broken[:30]:
+            selected_prods.append(p)
+            selected_handles.add(p.get("handle"))
+
+        # 2.5 Garantir inclusão de produtos sem descrição na amostra para resolução imediata
+        extra_empty = [p for p in all_prods if p.get("status") == "SEM_DESCRICAO" and p.get("handle") not in selected_handles]
+        for p in extra_empty[:60]:
             selected_prods.append(p)
             selected_handles.add(p.get("handle"))
 
@@ -356,26 +379,42 @@ def build_master():
           </div>
 
           <!-- O BOTÃO UNIFICADO ANIMADO NO TOPO (COCKPIT) -->
-          <div id="unified-button-cockpit" class="flex items-center gap-3 bg-slate-900 border border-slate-700/80 rounded-2xl p-1.5 px-3 unified-button-glow cursor-pointer transition-all hover:border-blue-500" onclick="filterBrokenFromCockpit()">
-            <div class="flex items-center gap-2.5">
-              <span class="relative flex h-3 w-3">
+          <div id="unified-button-cockpit" class="flex items-center gap-3 bg-slate-900 border border-slate-700/80 rounded-2xl p-1.5 px-3 unified-button-glow transition-all">
+            <!-- Falha 1: Fotos Quebradas -->
+            <div class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-all" onclick="filterBrokenFromCockpit()" title="Filtrar SKUs com fotos quebradas">
+              <span class="relative flex h-2.5 w-2.5">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
               </span>
               <div class="text-left">
-                <span class="text-[10px] uppercase tracking-wider font-extrabold text-slate-400 block">Diagnóstico por SKU</span>
-                <span class="text-xs font-bold text-white flex items-center gap-1.5">
-                  <span id="cockpit-broken-count" class="text-red-400 font-extrabold text-sm">--</span> SKUs com Fotos Quebradas
+                <span class="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 block">Fotos Quebradas</span>
+                <span class="text-xs font-bold text-white flex items-center gap-1">
+                  <span id="cockpit-broken-count" class="text-red-400 font-extrabold text-sm">--</span> SKUs
                 </span>
               </div>
             </div>
-            <div class="h-7 w-[1px] bg-slate-800 mx-1"></div>
-            <div class="text-right">
-              <span class="text-[10px] text-slate-400 block font-medium">Saúde do Catálogo</span>
-              <span id="cockpit-health-badge" class="text-xs font-extrabold text-emerald-400">--% Saudável</span>
+
+            <div class="h-6 w-[1px] bg-slate-800"></div>
+
+            <!-- Falha 2: Alerta Sem Descrição -->
+            <div class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-all" onclick="filterEmptyFromCockpit()" title="Filtrar produtos sem descrição">
+              <span class="relative flex h-2.5 w-2.5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+              </span>
+              <div class="text-left">
+                <span class="text-[9px] uppercase tracking-wider font-extrabold text-amber-400 block">⚠️ Sem Descrição</span>
+                <span class="text-xs font-bold text-white flex items-center gap-1">
+                  <span id="cockpit-empty-count" class="text-amber-400 font-extrabold text-sm">--</span> Itens
+                </span>
+              </div>
             </div>
-            <div class="bg-blue-600/30 text-blue-400 hover:bg-blue-600 hover:text-white transition-all px-2.5 py-1 rounded-xl text-[11px] font-bold border border-blue-500/30">
-              Isolar Falhas 🎯
+
+            <div class="h-6 w-[1px] bg-slate-800"></div>
+
+            <div class="text-right">
+              <span class="text-[9px] text-slate-400 block font-medium">Saúde</span>
+              <span id="cockpit-health-badge" class="text-xs font-extrabold text-emerald-400">--%</span>
             </div>
           </div>
         </div>
@@ -1011,8 +1050,8 @@ def build_master():
     }}
 
     function createEnrichedFromLiveProduct(liveP, storeKey) {{
-      const rawHtml = liveP.body_html || "";
-      const isEmpty = (!rawHtml || rawHtml.trim() === "" || rawHtml.trim() === "<p></p>");
+      const rawTrim = (rawHtml || "").trim();
+      const isEmpty = (!rawTrim || rawTrim.length <= 5 || rawTrim.toLowerCase() === "a" || rawTrim.toLowerCase() === "<p>a</p>" || rawTrim === "<p></p>");
       const images = (liveP.images || []).map(img => img.src || img);
       const title = liveP.title || "Produto BRK";
       const tags = typeof liveP.tags === 'string' ? liveP.tags.split(',').map(t => t.trim()) : (liveP.tags || []);
@@ -1024,7 +1063,10 @@ def build_master():
       let archId = "uv_performance";
       let archName = "UV50+ Performance";
 
-      if (text.includes("sandalia") || text.includes("chinelo") || text.includes("boaonda") || text.includes("calcado")) {{
+      if (text.includes("faca") || text.includes("cutelaria") || text.includes("cutelo") || text.includes("canivete") || text.includes("lamina") || text.includes("bainha")) {{
+        archId = "cutlery_unique";
+        archName = "Cutelaria & Facas";
+      }} else if (text.includes("sandalia") || text.includes("chinelo") || text.includes("boaonda") || text.includes("calcado")) {{
         archId = "footwear_sandals";
         archName = "Calçados & Sandálias";
       }} else if (text.includes("caixa") || text.includes("estojo") || text.includes("organizador")) {{
@@ -1036,13 +1078,13 @@ def build_master():
       }} else if (text.includes("vara") || text.includes("carretilha") || text.includes("molinete") || text.includes("isca") || text.includes("marine") || text.includes("deyu") || text.includes("albatroz")) {{
         archId = "fishing_tackle_gear";
         archName = "Equipamentos de Pesca & Revenda";
-      }} else if (text.includes("faca") || text.includes("cutelaria")) {{
-        archId = "cutlery_unique";
-        archName = "Cutelaria & Facas";
-      }} else if (text.includes("bone") || text.includes("chapeu")) {{
+      }} else if (text.includes("chapeu") || text.includes("chapéu") || text.includes("safari")) {{
+        archId = "hats_safari_outdoor";
+        archName = "Chapéus Outdoor & Safári";
+      }} else if (text.includes("bone") || text.includes("boné") || text.includes("trucker")) {{
         archId = "caps_accessories";
         archName = "Bonés & Chapéus";
-      }} else if (storeKey === "brk_motors" || text.includes("moto") || text.includes("cross")) {{
+      }} else if (storeKey === "brk_motors" || text.includes("moto") || text.includes("cross") || text.includes("jersey")) {{
         archId = "motors_speed";
         archName = "Motors & Velocidade";
       }} else if (storeKey === "brk_agro" || text.includes("agro") || text.includes("campo")) {{
@@ -1111,7 +1153,20 @@ def build_master():
         {{ label: "Uso Recomendado", value: "Atividades intensas, lazer e uso diário" }}
       ];
 
-      if (archId === "footwear_sandals") {{
+      if (archId === "cutlery_unique") {{
+        act1 = {{ tag: "Lâmina & Afiação", icon: "fa-solid fa-utensils", title: "AÇO CIRÚRGICO DE ALTA DUREZA E RETENÇÃO DE FIO", desc: `Forjada com tratamento térmico especial, a lâmina do(a) ${{title}} garante cortes precisos, durabilidade extrema e afiação resistente ao desgaste.` }};
+        act2 = {{ tag: "Empunhadura Nobre", icon: "fa-solid fa-hand-holding", title: "CABO ANATÔMICO EM MADEIRA E RESINA BALANCEADA", desc: `Design anatômico que se encaixa com firmeza na mão, proporcionando controle absoluto, estabilidade no manuseio e segurança em cortes pesados.` }};
+        act3 = {{ tag: "Proteção & Bainha", icon: "fa-solid fa-shield-halved", title: "BAINHA EM COURO LEGÍTIMO COM PASSADOR", desc: `Acompanha bainha artesanal sob medida em couro legítimo espesso com costura reforçada para transporte seguro na cintura e conservação da lâmina.` }};
+        careIcon = "fa-solid fa-utensils";
+        careTips = "Lavar e secar imediatamente após o uso. Não lavar em máquina nem deixar de molho. Aplicar uma fina camada de óleo mineral na lâmina e hidratar o couro da bainha.";
+        specs = [
+          {{ label: "Material da Lâmina", value: "Aço cirúrgico inoxidável de alta pureza" }},
+          {{ label: "Empunhadura", value: "Madeira nobre tratada com acabamento em resina cristal" }},
+          {{ label: "Bainha", value: "Couro legítimo costurado à mão com passador para cinto" }},
+          {{ label: "Afiação", value: "Fio navalha com ângulo de corte a laser" }},
+          {{ label: "Indicação de Uso", value: "Churrasco, campo, pesca, acampamento e coleção" }}
+        ];
+      }} else if (archId === "footwear_sandals" || archId === "footwear_sandals_boaonda") {{
         act1 = {{ tag: "Conforto & Ergonomia", icon: "fa-solid fa-shoe-prints", title: "DESIGN ANATÔMICO COM PALMILHA ANTI-IMPACTO", desc: `Desenvolvida para proporcionar amortecimento suave e alívio de pressão na pisada, o(a) ${{title}} garante descanso aos pés durante longos períodos em pé.` }};
         act2 = {{ tag: "Aderência & Drenagem", icon: "fa-solid fa-water", title: "SOLADO ANTIDERRAPANTE COM DRENAGEM RÁPIDA", desc: `Possui frisos e canais de escoamento especialmente projetados para pisos molhados, decks de barcos e bordas de piscina, oferecendo tração segura.` }};
         act3 = {{ tag: "Durabilidade & Higiene", icon: "fa-solid fa-shield-halved", title: "MATERIAL ANTIMICROBIANO E SECAGEM INSTANTÂNEA", desc: `Confeccionada em polímero nobre impermeável que não absorve umidade nem odores, sendo extremamente fácil de lavar e secar rapidamente.` }};
@@ -1524,8 +1579,21 @@ def build_master():
       document.getElementById("cockpit-health-badge").innerText = healthPct + "% Saudável";
       
       const loadedBroken = products.filter(p => p.status === "IMAGENS_QUEBRADAS").length;
-      const loadedEmpty = products.filter(p => p.status === "SEM_DESCRICAO").length;
-      const loadedHealthy = products.filter(p => !p.is_out_of_standard).length;
+      const loadedEmpty = products.filter(p => {{
+        const b = (p.original_body_html || p.body_html || "").trim();
+        return p.status === "SEM_DESCRICAO" || !b || b.length <= 5 || b.toLowerCase() === "a" || b.toLowerCase() === "<p>a</p>" || b === "<p></p>";
+      }}).length;
+      const loadedHealthy = products.filter(p => {{
+        const isB = p.status === "IMAGENS_QUEBRADAS";
+        const b = (p.original_body_html || p.body_html || "").trim();
+        const isE = p.status === "SEM_DESCRICAO" || !b || b.length <= 5 || b.toLowerCase() === "a" || b.toLowerCase() === "<p>a</p>" || b === "<p></p>";
+        return !isB && !isE && !p.is_out_of_standard;
+      }}).length;
+
+      const emptyCockpitElem = document.getElementById("cockpit-empty-count");
+      if (emptyCockpitElem) {{
+        emptyCockpitElem.innerText = loadedEmpty.toLocaleString('pt-BR');
+      }}
 
       document.getElementById("count-all").innerText = products.length;
       document.getElementById("count-broken").innerText = loadedBroken;
@@ -1537,6 +1605,14 @@ def build_master():
     function filterBrokenFromCockpit() {{
       switchMainTab("tab-catalog");
       currentFilter = "broken";
+      syncFilterButtons();
+      renderProducts();
+    }}
+
+    // Filtrar Sem Descrição com 1 clique no Cockpit
+    function filterEmptyFromCockpit() {{
+      switchMainTab("tab-catalog");
+      currentFilter = "empty";
       syncFilterButtons();
       renderProducts();
     }}
@@ -1613,9 +1689,14 @@ def build_master():
 
       let filtered = products.filter(p => {{
         if (selectedCategory !== "all" && p.category !== selectedCategory) return false;
-        if (currentFilter === "broken" && p.status !== "IMAGENS_QUEBRADAS") return false;
-        if (currentFilter === "empty" && p.status !== "SEM_DESCRICAO") return false;
-        if (currentFilter === "healthy" && p.is_out_of_standard) return false;
+        
+        const isBroken = p.status === "IMAGENS_QUEBRADAS";
+        const b = (p.original_body_html || p.body_html || "").trim();
+        const isEmpty = p.status === "SEM_DESCRICAO" || !b || b.length <= 5 || b.toLowerCase() === "a" || b.toLowerCase() === "<p>a</p>" || b === "<p></p>";
+
+        if (currentFilter === "broken" && !isBroken) return false;
+        if (currentFilter === "empty" && !isEmpty) return false;
+        if (currentFilter === "healthy" && (isBroken || isEmpty || p.is_out_of_standard)) return false;
 
         if (searchQuery.trim() !== "") {{
           const q = searchQuery.toLowerCase();
@@ -1634,21 +1715,36 @@ def build_master():
       emptyState.classList.add("hidden");
 
       filtered.forEach(p => {{
+        const b = (p.original_body_html || p.body_html || "").trim();
+        const isBroken = p.status === "IMAGENS_QUEBRADAS";
+        const isEmpty = p.status === "SEM_DESCRICAO" || !b || b.length <= 5 || b.toLowerCase() === "a" || b.toLowerCase() === "<p>a</p>" || b === "<p></p>";
+        const isExternal = p.status === "FOTOS_EXTERNAS";
+        const isLowConv = p.status === "BAIXA_CONVERSAO";
+
+        let borderClass = "border-slate-200 hover:border-blue-400";
+        if (isBroken) {{
+          borderClass = "border-red-300 hover:border-red-500 ring-1 ring-red-100";
+        }} else if (isEmpty) {{
+          borderClass = "border-2 border-amber-400 hover:border-amber-500 ring-2 ring-amber-200/60 bg-amber-50/15";
+        }}
+
         const card = document.createElement("div");
-        card.className = "bg-white rounded-2xl border border-slate-200 p-4 product-shadow flex flex-col justify-between transition-all hover:border-blue-400 group cursor-pointer";
+        card.className = `bg-white rounded-2xl border ${{borderClass}} p-4 product-shadow flex flex-col justify-between transition-all group cursor-pointer`;
         card.onclick = () => openProductModal(p);
 
         const imgUrl = (p.cdn_images && p.cdn_images[0]) || p.image || (p.gallery && p.gallery[0]) || "https://placehold.co/300x300?text=Sem+Foto";
-        const isBroken = p.status === "IMAGENS_QUEBRADAS";
-        const isEmpty = p.status === "SEM_DESCRICAO";
 
         let statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">✅ Saudável</span>`;
         if (p.is_live_synced) {{
           statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-600 text-white animate-pulse shadow-md flex items-center gap-1">✨ AO VIVO • ${{isEmpty ? 'SEM DESCRIÇÃO' : 'RECÉM-SUBIDO'}}</span>`;
         }} else if (isBroken) {{
-          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-50 text-red-700 border border-red-200 flex items-center gap-1">❌ Foto Quebrada (${{p.affected_skus_count || 1}} SKUs)</span>`;
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-600 text-white shadow-sm flex items-center gap-1">❌ Foto Quebrada (${{p.affected_skus_count || 1}} SKUs)</span>`;
         }} else if (isEmpty) {{
-          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200">⚠️ Sem Descrição</span>`;
+          statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500 text-slate-950 shadow-sm flex items-center gap-1 border border-amber-600 animate-pulse">⚠️ ALERTA: SEM DESCRIÇÃO</span>`;
+        }} else if (isExternal) {{
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-50 text-purple-700 border border-purple-200">🌐 Fotos Externas</span>`;
+        }} else if (isLowConv) {{
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-orange-50 text-orange-700 border border-orange-200">📉 Baixa Conversão</span>`;
         }}
 
         card.innerHTML = `

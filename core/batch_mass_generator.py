@@ -48,7 +48,13 @@ class BatchMassGenerator:
         for p in products:
             status = p.get("status", "")
             is_broken = (status == "IMAGENS_QUEBRADAS")
-            is_empty = (status == "SEM_DESCRICAO" or not p.get("original_body_html") or not p.get("original_body_html").strip())
+            body_str = (p.get("original_body_html") or p.get("body_html") or "").strip()
+            is_empty = (
+                status == "SEM_DESCRICAO" 
+                or not body_str 
+                or len(body_str) <= 5 
+                or body_str.lower() in ("a", "<p>a</p>", "<p></p>")
+            )
             
             if target_filter == "broken_or_empty" and (is_broken or is_empty):
                 target_products.append(p)
@@ -70,6 +76,8 @@ class BatchMassGenerator:
             handle = p.get("handle", "")
             master_sku = p.get("master_sku", "SKU-N/D")
             variants_skus = p.get("variants_skus", [])
+            category = p.get("category", "")
+            tags = p.get("tags", [])
             # 1. Coleta das fotos oficiais do CDN Shopify (da galeria cadastrada no site)
             images = p.get("gallery") or []
             if not images and p.get("cdn_images"):
@@ -96,9 +104,10 @@ class BatchMassGenerator:
                 generation_mode_used = "Preservar HTML Original + Fotos CDN"
             else:
                 # Modo B: Redesenho completo em 3 Atos com Molde Mestre
-                narrative_data = self.template_engine.generate_narrative_from_template(p, archetype_id, images)
+                narrative_data = self.template_engine.generate_narrative_from_template(p, archetype_id, images, store_key=store_key)
                 generated_html = self.html_builder.build_shopify_html(narrative_data)
-                generation_mode_used = f"3 Atos Alta Conversão ({narrative_data['archetype_name']})"
+                arch_name = narrative_data.get("source_label") or archetype_id
+                generation_mode_used = f"3 Atos Alta Conversão ({arch_name})"
 
             item_result = {
                 "id": p.get("id"),

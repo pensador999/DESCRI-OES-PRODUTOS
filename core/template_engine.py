@@ -643,13 +643,15 @@ class TemplateEngine:
         if "jersey" in t:
             return "motors_speed"
 
-        # 2. Manguitos (Manga avulsa de proteção)
-        if any(w in t for w in ["manguito", "manguitos", "manga avulsa"]):
-            return "sun_sleeves_manguitos"
+        # 2. Cutelaria & Facas (Prioridade alta para evitar que facas com cabos resinados/iscas virem isca artificial)
+        if any(w in t for w in ["faca", "facas", "cutelo", "cutelaria", "lamina", "lâmina", "bainha", "canivete", "chaira", "afiador"]):
+            return "cutlery_unique"
 
-        # 3. Bandanas, Tubenecks & Balaclavas
-        if any(w in t for w in ["bandana", "balaclava", "tubeneck", "buff", "mascara facial", "máscara facial", "protetor de pescoço"]):
-            return "neck_gaiters_balaclavas"
+        # 3. Calçados (Sandálias Boaonda vs Tênis/Botinas)
+        if any(w in t for w in ["tenis", "tênis", "botina", "bota", "sneaker", "sapato"]):
+            return "closed_footwear_sneakers"
+        if any(w in t for w in ["sandalia", "sandália", "chinelo", "boaonda", "babuche", "clog", "slide", "pantufa"]):
+            return "footwear_sandals_boaonda"
 
         # 4. Chapéus de Pesca / Safári / Australiano / Palha / Nuca
         if any(w in t for w in ["chapeu", "chapéu", "safari", "safári", "australiano", "palha", "pescador"]):
@@ -659,39 +661,37 @@ class TemplateEngine:
         if any(w in t for w in ["bone", "boné", "trucker", "snapback", "aba curva", "aba reta", "viseira"]):
             return "caps_trucker_snapback"
 
-        # 6. Iscas Artificiais (Plugs, Jigs, Softs, etc.)
-        if any(w in t for w in ["isca", "iscas", "plug", "jig", "frog", "soft bait", "crankbait", "minnow", "popper", "stick", "twitch"]):
-            return "fishing_lures"
+        # 6. Manguitos (Manga avulsa de proteção)
+        if any(w in t for w in ["manguito", "manguitos", "manga avulsa"]):
+            return "sun_sleeves_manguitos"
 
-        # 7. Calçados (Sandálias Boaonda vs Tênis)
-        if any(w in t for w in ["tenis", "tênis", "botina", "sneaker", "sapato"]):
-            return "closed_footwear_sneakers"
-        if any(w in t for w in ["sandalia", "sandália", "chinelo", "boaonda", "babuche", "clog", "slide", "pantufa"]):
-            return "footwear_sandals_boaonda"
+        # 7. Bandanas, Tubenecks & Balaclavas
+        if any(w in t for w in ["bandana", "balaclava", "tubeneck", "buff", "mascara facial", "máscara facial", "protetor de pescoço"]):
+            return "neck_gaiters_balaclavas"
 
-        # 8. Copos, Garrafas e Canecas Térmicas
-        if any(w in t for w in ["copo", "garrafa", "caneca", "cantil", "cooler", "termico", "térmico", "termica", "térmica", "elber"]):
-            return "drinkware_thermo"
-
-        # 9. Livros & Publicações
-        if any(w in t for w in ["livro", "livros", "cartilha", "guia ilustrado", "colorir"]):
-            return "books_publications"
-
-        # 10. Macacões & Jardineiras
+        # 8. Macacões & Jardineiras
         if any(w in t for w in ["macacao", "macacão", "jardineira", "jardineiras", "salopete"]):
             return "overalls_workwear"
 
-        # 11. Cutelaria & Facas
-        if any(w in t for w in ["faca", "cutelaria", "lamina", "lâmina", "bainha", "canivete"]):
-            return "cutlery_unique"
+        # 9. Iscas Artificiais (Plugs, Jigs, Softs, etc.)
+        if any(w in t for w in ["isca", "iscas", "plug", "jig", "frog", "soft bait", "crankbait", "minnow", "popper", "stick", "twitch"]):
+            return "fishing_lures"
 
-        # 12. Caixas de Pesca & Organização
+        # 10. Equipamentos de Pesca (Varas, Carretilhas, Molinetes, Linhas)
+        if any(w in t for w in ["vara", "carretilha", "molinete", "linha", "anzol", "alicate", "passagua", "passaguá"]):
+            return "fishing_tackle_gear"
+
+        # 11. Caixas de Pesca & Organização
         if any(w in t for w in ["caixa de pesca", "caixa pesca", "estojo", "maleta", "organizador", "porta-vara", "porta vara", "tubo de vara"]):
             return "tackle_boxes_storage"
 
-        # 13. Equipamentos de Pesca (Varas, Carretilhas, Molinetes, Linhas)
-        if any(w in t for w in ["vara", "carretilha", "molinete", "linha", "anzol", "alicate", "passagua", "passaguá"]):
-            return "fishing_tackle_gear"
+        # 12. Copos, Garrafas e Canecas Térmicas
+        if any(w in t for w in ["copo", "garrafa", "caneca", "cantil", "cooler", "termico", "térmico", "termica", "térmica", "elber"]):
+            return "drinkware_thermo"
+
+        # 13. Livros & Publicações
+        if any(w in t for w in ["livro", "livros", "cartilha", "guia ilustrado", "colorir"]):
+            return "books_publications"
 
         # 14. Fallback Secundário via Categoria / Tags / Vendor (se o título não foi conclusivo)
         text = f"{t} {cat} {vend} {tags_str}"
@@ -850,6 +850,28 @@ class TemplateEngine:
         source_type = "sibling_template" if sibling_info else "archetype_specialized"
         source_label = f"Molde Homólogo do Site ({sibling_info['sibling_title']})" if sibling_info else f"Arquétipo Especializado ({template['name']})"
 
+        act1_dict = {
+            "tag": act1["tag"],
+            "fa_icon": act1.get("fa_icon", template.get("fa_icon", "fa-solid fa-check")),
+            "title": act1["title"],
+            "description": act1["desc_tmpl"].format(title=title),
+            "image": img1
+        }
+        act2_dict = {
+            "tag": act2["tag"],
+            "fa_icon": act2.get("fa_icon", "fa-solid fa-sun"),
+            "title": act2["title"],
+            "description": act2["desc_tmpl"].format(title=title),
+            "image": img2
+        }
+        act3_dict = {
+            "tag": act3["tag"],
+            "fa_icon": act3.get("fa_icon", "fa-solid fa-shield-halved"),
+            "title": act3["title"],
+            "description": act3["desc_tmpl"].format(title=title),
+            "image": img3
+        }
+
         return {
             "theme_color": theme_color,
             "theme_bg": theme_bg,
@@ -857,27 +879,10 @@ class TemplateEngine:
             "source_type": source_type,
             "source_label": source_label,
             "sibling_info": sibling_info,
-            "act1": {
-                "tag": act1["tag"],
-                "fa_icon": act1.get("fa_icon", template.get("fa_icon", "fa-solid fa-check")),
-                "title": act1["title"],
-                "description": act1["desc_tmpl"].format(title=title),
-                "image": img1
-            },
-            "act2": {
-                "tag": act2["tag"],
-                "fa_icon": act2.get("fa_icon", "fa-solid fa-sun"),
-                "title": act2["title"],
-                "description": act2["desc_tmpl"].format(title=title),
-                "image": img2
-            },
-            "act3": {
-                "tag": act3["tag"],
-                "fa_icon": act3.get("fa_icon", "fa-solid fa-shield-halved"),
-                "title": act3["title"],
-                "description": act3["desc_tmpl"].format(title=title),
-                "image": img3
-            },
+            "act1": act1_dict,
+            "act2": act2_dict,
+            "act3": act3_dict,
+            "narrative_blocks": [act1_dict, act2_dict, act3_dict],
             "specs": specs,
             "care_tips": template.get("care_tips", "Lavar com sabão neutro e secar à sombra.")
         }
