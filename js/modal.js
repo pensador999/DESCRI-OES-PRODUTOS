@@ -541,7 +541,23 @@ function getProductModeBHTML(liveP) {
   let blocks = liveP.narrative_blocks;
   if (!blocks || blocks.length === 0) {
     const moldes = window.__STORE_MOLDES || {};
-    const archKey = liveP.archetype_id || (isLure ? "fishing_lures" : "uv_performance");
+    let archKey = liveP.archetype_id;
+    const tLower = (liveP.title || "").toLowerCase();
+    if (!archKey || archKey === "uv_performance") {
+      if (isLure || /\b(isca|iscas|plug|jig|frog|soft|popper|stick|crankbait|minnow)\b/i.test(tLower)) archKey = "fishing_lures";
+      else if (/\b(faca|facas|cutelo|cutelaria|canivete|chaira|afiador)\b/i.test(tLower)) archKey = "cutlery_unique";
+      else if (/\b(bone|boné|trucker|snapback|viseira)\b/i.test(tLower)) archKey = "caps_trucker_snapback";
+      else if (/\b(chapeu|chapéu|safari|safári|australiano|palha)\b/i.test(tLower)) archKey = "hats_safari_outdoor";
+      else if (/\b(copo|garrafa|caneca|cantil|cooler|termico|térmico)\b/i.test(tLower)) archKey = "drinkware_thermo";
+      else if (/\b(manguito|manguitos)\b/i.test(tLower)) archKey = "sun_sleeves_manguitos";
+      else if (/\b(bandana|balaclava|tubeneck)\b/i.test(tLower)) archKey = "neck_gaiters_balaclavas";
+      else if (/\b(sandalia|sandália|chinelo|boaonda|babuche|clog)\b/i.test(tLower)) archKey = "footwear_sandals_boaonda";
+      else if (/\b(tenis|tênis|botina|bota|sneaker)\b/i.test(tLower)) archKey = "closed_footwear_sneakers";
+      else if (/\b(caixa de pesca|estojo|maleta|bolsa de pesca)\b/i.test(tLower)) archKey = "tackle_boxes_storage";
+      else if (/\b(jersey|moto|cross|off-road|trilha|speed)\b/i.test(tLower)) archKey = "motors_speed";
+      else if (/\b(agro|campo|fazenda|trator)\b/i.test(tLower)) archKey = "agro_field";
+      else archKey = "uv_performance";
+    }
     const tmpl = moldes[archKey] || moldes["uv_performance"];
 
     if (tmpl && tmpl.act1 && tmpl.act2 && tmpl.act3) {

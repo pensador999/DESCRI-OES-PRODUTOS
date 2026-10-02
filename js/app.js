@@ -199,6 +199,27 @@ async function performLiveSync(isManual = false) {
   }
 }
 
+function detectClientArchetype(title, category, tags) {
+  const t = (title || "").toLowerCase();
+  const cat = (category || "").toLowerCase();
+  const text = `${t} ${cat} ${Array.isArray(tags) ? tags.join(" ") : tags || ""}`.toLowerCase();
+
+  if (/\b(faca|facas|cutelo|cutelaria|canivete|chaira|afiador)\b/i.test(t)) return { id: "cutlery_unique", name: "Cutelaria & Peças Artesanais" };
+  if (/\b(isca|iscas|plug|jig|frog|soft|popper|stick|crankbait|minnow)\b/i.test(t)) return { id: "fishing_lures", name: "Iscas Artificiais & Alta Atratividade" };
+  if (/\b(bone|boné|trucker|snapback|viseira)\b/i.test(t)) return { id: "caps_trucker_snapback", name: "Bonés Trucker & Snapback" };
+  if (/\b(chapeu|chapéu|safari|safári|australiano|palha)\b/i.test(t)) return { id: "hats_safari_outdoor", name: "Chapéus de Pesca, Safári & Outdoor" };
+  if (/\b(copo|garrafa|caneca|cantil|cooler|termico|térmico)\b/i.test(t)) return { id: "drinkware_thermo", name: "Copos, Garrafas & Térmicos" };
+  if (/\b(manguito|manguitos)\b/i.test(t)) return { id: "sun_sleeves_manguitos", name: "Manguitos de Proteção Solar UV50+" };
+  if (/\b(bandana|balaclava|tubeneck)\b/i.test(t)) return { id: "neck_gaiters_balaclavas", name: "Bandanas, Tubenecks & Balaclavas" };
+  if (/\b(sandalia|sandália|chinelo|boaonda|babuche|clog)\b/i.test(t)) return { id: "footwear_sandals_boaonda", name: "Sandálias, Chinelos & Babuches Boaonda" };
+  if (/\b(tenis|tênis|botina|bota|sneaker)\b/i.test(t)) return { id: "closed_footwear_sneakers", name: "Tênis & Calçados Fechados" };
+  if (/\b(caixa de pesca|estojo|maleta|bolsa de pesca)\b/i.test(t)) return { id: "tackle_boxes_storage", name: "Caixas, Estojos & Organização" };
+  if (/\b(jersey|moto|cross|off-road|trilha|speed)\b/i.test(t)) return { id: "motors_speed", name: "Trilha, Velocidade & Off-Road" };
+  if (/\b(agro|campo|fazenda|trator)\b/i.test(t)) return { id: "agro_field", name: "Força, Campo & Tradição" };
+
+  return { id: "uv_performance", name: "Camisas UV50+ Performance & Pesca" };
+}
+
 function createEnrichedFromLiveProduct(liveP, storeKey) {
   const rawImgs = liveP.images || [];
   const rawSources = [];
@@ -232,6 +253,7 @@ function createEnrichedFromLiveProduct(liveP, storeKey) {
   const tags = Array.isArray(liveP.tags) ? liveP.tags : (liveP.tags ? liveP.tags.split(",").map(t => t.trim()) : []);
   const title = liveP.title || "";
   const isC0 = title.toUpperCase().includes("C0") || (liveP.handle || "").toUpperCase().includes("C0");
+  const arch = detectClientArchetype(title, liveP.product_type || "", tags);
 
   return {
     id: liveP.id,
@@ -246,11 +268,11 @@ function createEnrichedFromLiveProduct(liveP, storeKey) {
     image: dedupImages[0] || "",
     original_body_html: rawHtml,
     body_html: rawHtml,
-    status: isEmpty ? "SEM_DESCRICAO" : "ATENCAO",
-    is_out_of_standard: true,
+    status: isEmpty ? "SEM_DESCRICAO" : "SAUDAVEL",
+    is_out_of_standard: isEmpty,
     is_c0: isC0,
-    archetype_id: "uv_performance",
-    archetype_name: "Camisa UV Performance",
+    archetype_id: arch.id,
+    archetype_name: arch.name,
     mode_a_html: rawHtml,
     mode_b_html: "",
     mode_b_markdown: ""
