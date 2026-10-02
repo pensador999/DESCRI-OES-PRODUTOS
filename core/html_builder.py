@@ -17,9 +17,40 @@ Implementa os 8 Pilares Estratégicos:
 
 from typing import Dict, Any, List
 
+try:
+    from core.svg_icons import get_svg_icon
+except ImportError:
+    try:
+        from svg_icons import get_svg_icon
+    except ImportError:
+        def get_svg_icon(name: str, color: str = "currentColor", size: int = 16, extra_class: str = "") -> str:
+            return ""
+
 class HTMLBuilder:
     def __init__(self):
         pass
+
+    def _get_tag_icon_name(self, tag_text: str) -> str:
+        t = tag_text.lower()
+        if any(w in t for w in ["performance", "conforto", "respirabilidade"]):
+            return "bolt"
+        if any(w in t for w in ["design", "identidade", "visual", "estilo", "estampa"]):
+            return "palette"
+        if any(w in t for w in ["durabilidade", "acabamento", "proteção", "resiste"]):
+            return "shield"
+        if any(w in t for w in ["nado", "ação", "pesca", "isca", "predador"]):
+            return "fish"
+        if any(w in t for w in ["solar", "sol", "uv"]):
+            return "sun"
+        if any(w in t for w in ["lâmina", "afiação", "corte", "faca"]):
+            return "knife"
+        if any(w in t for w in ["ergonomia", "calçado", "solado", "pisada"]):
+            return "shoe"
+        if any(w in t for w in ["organização", "espaço", "caixa", "maleta"]):
+            return "box"
+        if any(w in t for w in ["engenharia", "mecânica", "precisão", "engrenagem"]):
+            return "gear"
+        return "sparkle"
 
     def _get_tag_emoji(self, tag_text: str) -> str:
         t = tag_text.lower()
@@ -51,7 +82,7 @@ class HTMLBuilder:
 
     def build_shopify_html(self, enriched_data: Dict[str, Any]) -> str:
         """
-        Compila a descrição em HTML no padrão verticalizado BRK, 100% autônomo sem Font Awesome.
+        Compila a descrição em HTML no padrão verticalizado BRK, 100% autônomo com SVGs inline estilo Font Awesome.
         """
         formatted_title = enriched_data.get("formatted_title") or enriched_data.get("title", "Produto BRK")
         brand_name = enriched_data.get("brand_name", "BRK")
@@ -77,9 +108,9 @@ class HTMLBuilder:
 
         # 1. Cabeçalho com Título Oficial e Origem
         if origin_type == "revenda":
-            origin_badge = f'<span class="brk-desc-origin-badge revenda">✨ PRODUTO ORIGINAL • MARCA {brand_name.upper()}</span>'
+            origin_badge = f'<span class="brk-desc-origin-badge revenda">{get_svg_icon("sparkle", color="#b45309", size=12)} PRODUTO ORIGINAL • MARCA {brand_name.upper()}</span>'
         else:
-            origin_badge = '<span class="brk-desc-origin-badge propria">🛡️ PRODUTO ORIGINAL</span>'
+            origin_badge = f'<span class="brk-desc-origin-badge propria">{get_svg_icon("shield", color=theme_color, size=12)} PRODUTO ORIGINAL</span>'
 
         header_html = f"""  <!-- Cabecalho Oficial com Origem e Marca -->
   <div class="brk-desc-header">
@@ -105,7 +136,7 @@ class HTMLBuilder:
             reverse_class = " reverse" if is_reverse else ""
             img_src = block.get("image") or "https://placehold.co/800x600?text=BRK+Foto+Oficial"
             tag_text = block.get("tag", "Destaque")
-            tag_emoji = self._get_tag_emoji(tag_text)
+            tag_icon = self._get_tag_icon_name(tag_text)
             act_title = block.get("title", "").upper()
             act_desc = block.get("description", "")
             block_split_imgs = block.get("split_images") or (split_images if idx == 0 else None)
@@ -130,7 +161,7 @@ class HTMLBuilder:
             if idx == 0 and has_multiple_variations and variations_summary:
                 var_notice_html = f"""
       <div class="brk-variations-notice">
-        <span class="brk-var-icon">🎨</span>
+        <span class="brk-var-icon">{get_svg_icon('palette', color=theme_color, size=15)}</span>
         <span class="brk-var-text">{variations_summary}</span>
       </div>"""
 
@@ -139,7 +170,7 @@ class HTMLBuilder:
   <div class="brk-desc-block{reverse_class}">
     {media_html}
     <div class="brk-desc-text">
-      <span class="brk-desc-tag">{tag_emoji} {tag_text}</span>
+      <span class="brk-desc-tag">{get_svg_icon(tag_icon, color=theme_color, size=12)} {tag_text}</span>
       <h3 class="brk-desc-title">{act_title}</h3>
       <p class="brk-desc-paragraph">{act_desc}</p>{var_notice_html}
     </div>
@@ -152,14 +183,14 @@ class HTMLBuilder:
             for spec in specs:
                 specs_rows.append(f"""
       <div class="brk-spec-item">
-        <span class="brk-spec-label"><span class="brk-bullet" style="color: {theme_color};">▸</span> {spec['label']}</span>
+        <span class="brk-spec-label"><span class="brk-bullet">{get_svg_icon('chevron', color=theme_color, size=9)}</span> {spec['label']}</span>
         <span class="brk-spec-value">{spec['value']}</span>
       </div>""")
             specs_markup = "".join(specs_rows)
             specs_section = f"""  <!-- Box de Especificacoes e Cuidados -->
   <div class="brk-desc-specs-box">
     <h4 class="brk-desc-specs-title">
-      <span class="brk-title-icon">📋</span>
+      <span class="brk-title-icon">{get_svg_icon('clipboard', color=theme_color, size=16)}</span>
       <span>Ficha Técnica & Cuidados de Conservação</span>
     </h4>
     <div class="brk-specs-grid">{specs_markup}
@@ -167,7 +198,7 @@ class HTMLBuilder:
 
     <!-- Guia de Cuidados -->
     <div class="brk-desc-care-box">
-      <span class="brk-care-icon">🧼</span>
+      <span class="brk-care-icon">{get_svg_icon('care', color=theme_color, size=18)}</span>
       <div class="brk-care-text">
         <strong>Guia de Cuidados & Conservação da Peça:</strong> {care_tips}
       </div>
@@ -176,7 +207,7 @@ class HTMLBuilder:
         else:
             specs_section = f"""  <!-- Guia de Cuidados (Ficha Técnica Descartada para Camisas Agro e Motors) -->
   <div class="brk-desc-care-box" style="margin-top: 36px;">
-    <span class="brk-care-icon">🧼</span>
+    <span class="brk-care-icon">{get_svg_icon('care', color=theme_color, size=18)}</span>
     <div class="brk-care-text">
       <strong>Guia de Cuidados & Conservação da Peça:</strong> {care_tips}
     </div>
@@ -442,6 +473,18 @@ class HTMLBuilder:
       gap: 12px;
       text-align: center;
     }}
+    .brk-svg-icon {{
+      display: inline-block;
+      vertical-align: -0.15em;
+      flex-shrink: 0;
+    }}
+    .brk-trust-svg {{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 2px;
+      height: 28px;
+    }}
     .brk-trust-item {{
       background: #ffffff;
       border: 1px solid #e2e8f0;
@@ -451,11 +494,6 @@ class HTMLBuilder:
       flex-direction: column;
       align-items: center;
       gap: 6px;
-    }}
-    .brk-trust-emoji {{
-      font-size: 24px;
-      line-height: 1;
-      margin-bottom: 2px;
     }}
     .brk-trust-title {{
       font-size: 12.5px;
@@ -515,21 +553,21 @@ class HTMLBuilder:
   <!-- Selos de Confiança e Garantia BRK -->
   <div class="brk-desc-trust-bar">
     <div class="brk-trust-item">
-      <span class="brk-trust-emoji">🛡️</span>
+      <span class="brk-trust-svg">{get_svg_icon('shield', color=theme_color, size=24)}</span>
       <div>
         <div class="brk-trust-title">Qualidade Oficial BRK</div>
         <div class="brk-trust-desc">Matérias-primas nobres testadas</div>
       </div>
     </div>
     <div class="brk-trust-item">
-      <span class="brk-trust-emoji">🚚</span>
+      <span class="brk-trust-svg">{get_svg_icon('truck', color=theme_color, size=24)}</span>
       <div>
         <div class="brk-trust-title">Envio Rápido & Seguro</div>
         <div class="brk-trust-desc">Rastreamento de ponta a ponta</div>
       </div>
     </div>
     <div class="brk-trust-item">
-      <span class="brk-trust-emoji">🔄</span>
+      <span class="brk-trust-svg">{get_svg_icon('return', color=theme_color, size=24)}</span>
       <div>
         <div class="brk-trust-title">Troca Descomplicada</div>
         <div class="brk-trust-desc">Satisfação garantida ou seu dinheiro de volta</div>
