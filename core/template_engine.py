@@ -840,6 +840,13 @@ class TemplateEngine:
         sibling_specs = sibling_info.get("extracted_specs") if sibling_info else None
         specs = self.extract_product_specs(product, archetype_id, sibling_specs=sibling_specs)
 
+        # Regra de Negócio: Descartar detalhes técnicos para camisas referente ao Agro e ao Motors, mantendo no Fishing
+        is_shirt = archetype_id in ("uv_performance", "agro_field", "motors_speed") or any(
+            w in title.lower() for w in ["camisa", "camiseta", "jersey", "baby look", "regata", "polo"]
+        )
+        if is_shirt and store_key in ("brk_agro", "brk_motors"):
+            specs = []
+
         source_type = "sibling_template" if sibling_info else "archetype_specialized"
         source_label = f"Molde Homólogo do Site ({sibling_info['sibling_title']})" if sibling_info else f"Arquétipo Especializado ({template['name']})"
 

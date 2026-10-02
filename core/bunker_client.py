@@ -69,7 +69,7 @@ class BunkerClient:
         return (
             f'<div class="brk-bunker-media" style="margin: 24px auto; text-align: center; max-width: 850px;">'
             f'<img src="{url}" alt="{alt_text}" '
-            f'style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 14px rgba(15,23,42,0.08); aspect-ratio: 4 / 3; object-fit: cover; display: inline-block;" '
+            f'style="max-width: 100%; height: auto; max-height: 520px; border-radius: 12px; box-shadow: 0 4px 14px rgba(15,23,42,0.08); object-fit: contain; display: inline-block;" '
             f'loading="lazy" />'
             f'</div>'
         )

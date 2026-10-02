@@ -1081,7 +1081,7 @@ def build_master():
         original_body_html: rawHtml,
         mode_a_html: rawHtml,
         mode_b_html: modeBHtml,
-        specs: [
+        specs: ((archId === "uv_performance" || archId === "agro_field" || archId === "motors_speed" || title.toLowerCase().includes("camisa") || title.toLowerCase().includes("camiseta") || title.toLowerCase().includes("jersey")) && (storeKey === "brk_agro" || storeKey === "brk_motors")) ? [] : [
           {{ label: "Categoria", value: archName }},
           {{ label: "Fabricante / Origem", value: liveP.vendor || "BRK Group Oficial" }},
           {{ label: "Garantia", value: "Garantia oficial de fábrica contra defeitos" }}
@@ -1102,7 +1102,9 @@ def build_master():
       let act3 = {{ tag: "Acabamento & Durabilidade", icon: "fa-solid fa-circle-check", title: "ACABAMENTO PREMIUM REFORÇADO", desc: `Costuras reforçadas e estrutura pensada para enfrentar condições extremas sem perder qualidade.` }};
       let careIcon = "fa-solid fa-shirt";
       let careTips = "Lavar à mão ou em ciclo suave com sabão neutro. Secar à sombra (dispensa uso de ferro).";
-      let specs = [
+      
+      const isShirt = (archId === "uv_performance" || archId === "agro_field" || archId === "motors_speed" || title.toLowerCase().includes("camisa") || title.toLowerCase().includes("camiseta") || title.toLowerCase().includes("jersey") || title.toLowerCase().includes("baby look") || title.toLowerCase().includes("regata") || title.toLowerCase().includes("polo"));
+      let specs = (isShirt && (storeKey === "brk_agro" || storeKey === "brk_motors")) ? [] : [
         {{ label: "Categoria", value: archName }},
         {{ label: "Fabricante", value: liveP.vendor || "BRK Group Oficial" }},
         {{ label: "Garantia", value: "Garantia oficial contra defeitos de fabricação" }},
@@ -1192,16 +1194,21 @@ def build_master():
     .brk-desc-media {{
       flex: 1;
       min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }}
     .brk-desc-media img {{
       width: 100%;
       height: auto;
-      aspect-ratio: 4 / 3;
-      object-fit: cover;
+      max-height: 520px;
+      object-fit: contain;
       border-radius: 14px;
       display: block;
+      margin: 0 auto;
       box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
       border: 1px solid #f1f5f9;
+      background: #ffffff;
     }}
     .brk-desc-text {{
       flex: 1.15;
@@ -1408,6 +1415,7 @@ def build_master():
     </div>
   </div>
 
+  ${{specs && specs.length > 0 ? `
   <!-- Box de Especificacoes e Cuidados -->
   <div class="brk-desc-specs-box">
     <h4 class="brk-desc-specs-title">
@@ -1427,7 +1435,12 @@ def build_master():
       <i class="${{careIcon}}" style="color: ${{themeColor}}; margin-right: 8px;"></i>
       <strong>Guia de Cuidados & Conservação da Peça:</strong> ${{careTips}}
     </div>
-  </div>
+  </div>` : `
+  <!-- Guia de Cuidados (Ficha Técnica descartada para camisas Agro e Motors) -->
+  <div class="brk-desc-care-box" style="margin-top: 36px;">
+    <i class="${{careIcon}}" style="color: ${{themeColor}}; margin-right: 8px;"></i>
+    <strong>Guia de Cuidados & Conservação da Peça:</strong> ${{careTips}}
+  </div>`}}
 
   <!-- Selos de Confiança e Garantia BRK (Font Awesome) -->
   <div class="brk-desc-trust-bar">

@@ -53,15 +53,38 @@ class HTMLBuilder:
   </div>"""
             blocks_html.append(block_markup)
 
-        # 2. Especificações Técnicas no Grid Clássico BRK
-        specs_rows = []
-        for spec in specs:
-            specs_rows.append(f"""
+        # 2. Especificações Técnicas no Grid Clássico BRK (Omitido para Camisas Agro e Motors)
+        if specs and len(specs) > 0:
+            specs_rows = []
+            for spec in specs:
+                specs_rows.append(f"""
       <div class="brk-spec-item">
         <span class="brk-spec-label"><i class="fa-solid fa-angle-right" style="color: {theme_color}; font-size: 10px;"></i> {spec['label']}</span>
         <span class="brk-spec-value">{spec['value']}</span>
       </div>""")
-        specs_markup = "".join(specs_rows)
+            specs_markup = "".join(specs_rows)
+            specs_section = f"""  <!-- Box de Especificacoes e Cuidados -->
+  <div class="brk-desc-specs-box">
+    <h4 class="brk-desc-specs-title">
+      <i class="fa-solid fa-list-check" style="color: {theme_color};"></i>
+      <span>Ficha Técnica & Cuidados de Conservação</span>
+    </h4>
+    <div class="brk-specs-grid">{specs_markup}
+    </div>
+
+    <!-- Guia de Cuidados -->
+    <div class="brk-desc-care-box">
+      <i class="{care_icon}" style="color: {theme_color}; margin-right: 8px;"></i>
+      <strong>Guia de Cuidados & Conservação da Peça:</strong> {care_tips}
+    </div>
+  </div>"""
+        else:
+            # Ficha técnica descartada para camisas Agro e Motors conforme diretriz
+            specs_section = f"""  <!-- Guia de Cuidados (Ficha Técnica Descartada para Camisas Agro e Motors) -->
+  <div class="brk-desc-care-box" style="margin-top: 36px;">
+    <i class="{care_icon}" style="color: {theme_color}; margin-right: 8px;"></i>
+    <strong>Guia de Cuidados & Conservação da Peça:</strong> {care_tips}
+  </div>"""
 
         # 3. Template Completo Encapsulado (Padrão Autêntico BRK)
         full_html = f"""<!-- BRK GROUP - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL SHOPIFY) -->
@@ -95,16 +118,21 @@ class HTMLBuilder:
     .brk-desc-media {{
       flex: 1;
       min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }}
     .brk-desc-media img {{
       width: 100%;
       height: auto;
-      aspect-ratio: 4 / 3;
-      object-fit: cover;
+      max-height: 520px;
+      object-fit: contain;
       border-radius: 14px;
       display: block;
+      margin: 0 auto;
       box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
       border: 1px solid #f1f5f9;
+      background: #ffffff;
     }}
     .brk-desc-text {{
       flex: 1.15;
@@ -278,21 +306,7 @@ class HTMLBuilder:
   <!-- 3 Atos Narrativos de Alta Conversão -->
   {"".join(blocks_html)}
 
-  <!-- Box de Especificacoes e Cuidados -->
-  <div class="brk-desc-specs-box">
-    <h4 class="brk-desc-specs-title">
-      <i class="fa-solid fa-list-check" style="color: {theme_color};"></i>
-      <span>Ficha Técnica & Cuidados de Conservação</span>
-    </h4>
-    <div class="brk-specs-grid">{specs_markup}
-    </div>
-
-    <!-- Guia de Cuidados -->
-    <div class="brk-desc-care-box">
-      <i class="{care_icon}" style="color: {theme_color}; margin-right: 8px;"></i>
-      <strong>Guia de Cuidados & Conservação da Peça:</strong> {care_tips}
-    </div>
-  </div>
+{specs_section}
 
   <!-- Selos de Confiança e Garantia BRK (Font Awesome) -->
   <div class="brk-desc-trust-bar">
