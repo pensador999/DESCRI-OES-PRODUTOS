@@ -894,25 +894,29 @@ class TemplateEngine:
         }
         care_icon = care_icons.get(archetype_id, template.get("fa_icon", "fa-solid fa-hand-sparkles"))
 
-        # Até 3 imagens CDN oficiais
-        img1 = cdn_images[0] if len(cdn_images) > 0 else ""
-        img2 = cdn_images[1] if len(cdn_images) > 1 else img1
-        img3 = cdn_images[2] if len(cdn_images) > 2 else img1
-
         # Tratamento Especial para Iscas e Produtos com Várias Variações (Split Media)
         is_lure = (archetype_id == "fishing_lures") or any(w in title.lower() for w in ["isca", "plug", "popper", "stick", "crankbait", "minnow", "frog", "soft"])
         variants = product.get("variants") or []
         has_multiple_variations = is_lure and (len(variants) > 1 or len(cdn_images) >= 2)
         split_images = None
         variations_summary = ""
-        if has_multiple_variations:
-            if len(cdn_images) >= 2:
-                split_images = [cdn_images[0], cdn_images[1]]
+
+        # Alocação estrita de imagens exclusivas por ato - ZERO DUPLICAÇÃO
+        if has_multiple_variations and len(cdn_images) >= 2:
+            split_images = [cdn_images[0], cdn_images[1]]
+            img1 = cdn_images[0]
+            # Se for split no Ato 1, Atos 2 e 3 usam as fotos seguintes para não repetir
+            img2 = cdn_images[2] if len(cdn_images) > 2 else ""
+            img3 = cdn_images[3] if len(cdn_images) > 3 else ""
             variant_titles = [v.get("title") for v in variants if v.get("title") and v.get("title") != "Default Title"]
             if variant_titles:
                 variations_summary = f"Disponível em {len(variant_titles)} opções de cores e modelos no anúncio ({', '.join(variant_titles[:4])}{'...' if len(variant_titles) > 4 else ''})."
             else:
                 variations_summary = "Múltiplas variações e opções de cores disponíveis para escolha no anúncio."
+        else:
+            img1 = cdn_images[0] if len(cdn_images) > 0 else ""
+            img2 = cdn_images[1] if len(cdn_images) > 1 else ""
+            img3 = cdn_images[2] if len(cdn_images) > 2 else ""
 
         act1 = template["act1"]
         act2 = template["act2"]

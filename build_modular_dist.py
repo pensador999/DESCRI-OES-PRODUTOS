@@ -119,16 +119,31 @@ def build_dist():
             category = p.get("category", "")
             tags = p.get("tags", [])
             
-            images = p.get("cdn_images", [])
-            if not images:
+            # Coleta oficial e desduplicação estrita de fotos da galeria da Shopify
+            raw_sources = p.get("gallery") or []
+            if not raw_sources and p.get("cdn_images"):
+                raw_sources = p.get("cdn_images")
+            if not raw_sources and p.get("images"):
                 raw_imgs = p.get("images", [])
                 if raw_imgs and isinstance(raw_imgs, list) and isinstance(raw_imgs[0], dict):
-                    images = [img["src"] for img in raw_imgs if img.get("src")]
+                    raw_sources = [img["src"] for img in raw_imgs if img.get("src")]
                 elif raw_imgs and isinstance(raw_imgs, list) and isinstance(raw_imgs[0], str):
-                    images = raw_imgs
-            if not images and p.get("image"):
-                images = [p.get("image")]
-            images = [img for img in images if img][:3]
+                    raw_sources = raw_imgs
+            if not raw_sources and p.get("image"):
+                raw_sources = [p.get("image")]
+
+            seen_roots = set()
+            images = []
+            for u in raw_sources:
+                if not u or not isinstance(u, str):
+                    continue
+                clean_u = u.strip()
+                if not clean_u:
+                    continue
+                root = clean_u.split("?")[0].lower()
+                if root not in seen_roots:
+                    seen_roots.add(root)
+                    images.append(clean_u)
 
             orig_html = p.get("original_body_html") or p.get("body_html") or ""
             vendor = p.get("vendor", "")

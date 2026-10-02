@@ -54,9 +54,10 @@ function openProductModal(product) {
   const thumbsContainer = document.getElementById("modal-gallery-thumbs");
   if (thumbsContainer) {
     thumbsContainer.innerHTML = "";
-    const imgs = product.cdn_images || (product.gallery ? product.gallery.slice(0, 3) : []) || [];
+    const rawImgs = product.cdn_images || product.gallery || (product.images || []).map(i => i.src || i) || [];
+    const imgs = [...new Set(rawImgs.filter(u => typeof u === "string" && u.trim().length > 0))];
     const countBadge = document.getElementById("modal-photos-count-badge");
-    if (countBadge) countBadge.innerText = imgs.length + " Foto(s) no CDN Shopify";
+    if (countBadge) countBadge.innerText = imgs.length + " Foto(s) Oficiais";
     imgs.forEach((url, idx) => {
       const thumb = document.createElement("img");
       thumb.src = url;
@@ -442,7 +443,12 @@ function buildClientModeBMarkdown(liveP) {
   const brandName = originInfo.brandName;
   const originType = originInfo.originType;
   const showCopyright = originInfo.showCopyright;
-  const images = liveP.cdn_images || (liveP.images || []).map(img => img.src || img);
+  const rawImgs = (liveP.cdn_images && liveP.cdn_images.length > 0)
+    ? liveP.cdn_images
+    : (liveP.gallery && liveP.gallery.length > 0)
+      ? liveP.gallery
+      : ((liveP.images || []).map(img => img.src || img));
+  const images = [...new Set(rawImgs.filter(u => typeof u === "string" && u.trim().length > 0))];
   const img1 = images[0] || "";
 
   const lines = [];
@@ -496,12 +502,35 @@ function getProductModeBHTML(liveP) {
   const themeColor = liveP.theme_color || (liveP.store_key === "brk_agro" ? "#16a34a" : liveP.store_key === "brk_motors" ? "#f97316" : "#0284c7");
   const themeBg = liveP.theme_bg || (liveP.store_key === "brk_agro" ? "#f0fdf4" : liveP.store_key === "brk_motors" ? "#fff7ed" : "#f0f9ff");
 
-  const images = (liveP.cdn_images && liveP.cdn_images.length > 0)
+  // Coleta oficial e desduplicação estrita de fotos da galeria da Shopify
+  const rawSources = (liveP.cdn_images && liveP.cdn_images.length > 0)
     ? liveP.cdn_images
-    : ((liveP.images || []).map(img => img.src || img));
-  const img1 = images[0] || "https://placehold.co/800x600?text=BRK+Foto+Oficial";
-  const img2 = images[1] || img1;
-  const img3 = images[2] || img1;
+    : (liveP.gallery && liveP.gallery.length > 0)
+      ? liveP.gallery
+      : ((liveP.images || []).map(img => (typeof img === "object" ? img.src : img)));
+
+  const seenRoots = new Set();
+  const images = [];
+  rawSources.forEach(u => {
+    if (!u || typeof u !== "string") return;
+    const cleanU = u.trim();
+    if (!cleanU) return;
+    const root = cleanU.split("?")[0].toLowerCase();
+    if (!seenRoots.has(root)) {
+      seenRoots.add(root);
+      images.push(cleanU);
+    }
+  });
+
+  // Atribuição de imagens exclusivas por ato - ZERO DUPLICAÇÃO
+  let img1 = images[0] || "";
+  let img2 = images[1] || "";
+  let img3 = images[2] || "";
+
+  if (hasMultipleVariations && images.length >= 2) {
+    img2 = images[2] || "";
+    img3 = images[3] || "";
+  }
 
   let blocks = liveP.narrative_blocks;
   if (!blocks || blocks.length === 0) {
@@ -551,7 +580,19 @@ function getProductModeBHTML(liveP) {
   blocks.forEach((block, idx) => {
     const isReverse = (idx % 2 === 1);
     const reverseClass = isReverse ? " reverse" : "";
-    const imgSrc = block.image || (images[idx] || img1);
+    
+    // Obter imagem única do bloco sem nunca duplicar
+    let blockImg = "";
+    if (block.image) {
+      blockImg = block.image;
+    } else if (idx === 0) {
+      blockImg = img1;
+    } else if (idx === 1) {
+      blockImg = img2;
+    } else if (idx === 2) {
+      blockImg = img3;
+    }
+
     const tagText = block.tag || "Destaque";
     const tagIcon = getTagIconName(tagText);
     const actTitle = (block.title || "").toUpperCase();
@@ -564,9 +605,9 @@ function getProductModeBHTML(liveP) {
         <div class="brk-split-item"><img src="${blockSplitImgs[0]}" alt="${formattedTitle} - Opção 1" loading="lazy" /></div>
         <div class="brk-split-item"><img src="${blockSplitImgs[1]}" alt="${formattedTitle} - Opção 2" loading="lazy" /></div>
       </div>`;
-    } else {
+    } else if (blockImg) {
       mediaHtml = `<div class="brk-desc-media">
-        <img src="${imgSrc}" alt="${block.alt || formattedTitle}" loading="lazy" />
+        <img src="${blockImg}" alt="${block.alt || formattedTitle}" loading="lazy" />
       </div>`;
     }
 
@@ -579,7 +620,8 @@ function getProductModeBHTML(liveP) {
       </div>`;
     }
 
-    blocksHtml.push(`
+    if (mediaHtml) {
+      blocksHtml.push(`
   <!-- Ato ${idx + 1}: ${tagText} -->
   <div class="brk-desc-block${reverseClass}">
     ${mediaHtml}
@@ -589,6 +631,17 @@ function getProductModeBHTML(liveP) {
       <p class="brk-desc-paragraph">${actDesc}</p>${varNoticeHtml}
     </div>
   </div>`);
+    } else {
+      blocksHtml.push(`
+  <!-- Ato ${idx + 1}: ${tagText} (Destaque Conceitual) -->
+  <div class="brk-desc-block brk-desc-block-text-only">
+    <div class="brk-desc-text" style="width: 100%; max-width: 100%;">
+      <span class="brk-desc-tag">${getSvgIcon(tagIcon, themeColor, 12)} ${tagText}</span>
+      <h3 class="brk-desc-title">${actTitle}</h3>
+      <p class="brk-desc-paragraph">${actDesc}</p>${varNoticeHtml}
+    </div>
+  </div>`);
+    }
   });
 
   // 3. Especificações Técnicas (Omitido para Camisas Agro e Motors)
@@ -718,6 +771,13 @@ function getProductModeBHTML(liveP) {
     }
     .brk-desc-block.reverse {
       flex-direction: row-reverse;
+    }
+    .brk-desc-block.brk-desc-block-text-only {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px 28px;
+      margin-bottom: 34px;
     }
     .brk-desc-media {
       flex: 1;

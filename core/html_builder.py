@@ -151,10 +151,12 @@ class HTMLBuilder:
           <img src="{block_split_imgs[1]}" alt="{formatted_title} - Opção 2" loading="lazy" />
         </div>
       </div>"""
-            else:
+            elif img_src:
                 media_html = f"""<div class="brk-desc-media">
         <img src="{img_src}" alt="{block.get('alt', formatted_title)}" loading="lazy" />
       </div>"""
+            else:
+                media_html = ""
 
             # Aviso de variações adicionais no primeiro bloco se houver
             var_notice_html = ""
@@ -165,11 +167,22 @@ class HTMLBuilder:
         <span class="brk-var-text">{variations_summary}</span>
       </div>"""
 
-            block_markup = f"""
+            if media_html:
+                block_markup = f"""
   <!-- Ato {idx + 1}: {tag_text} -->
   <div class="brk-desc-block{reverse_class}">
     {media_html}
     <div class="brk-desc-text">
+      <span class="brk-desc-tag">{get_svg_icon(tag_icon, color=theme_color, size=12)} {tag_text}</span>
+      <h3 class="brk-desc-title">{act_title}</h3>
+      <p class="brk-desc-paragraph">{act_desc}</p>{var_notice_html}
+    </div>
+  </div>"""
+            else:
+                block_markup = f"""
+  <!-- Ato {idx + 1}: {tag_text} (Destaque Conceitual) -->
+  <div class="brk-desc-block brk-desc-block-text-only">
+    <div class="brk-desc-text" style="width: 100%; max-width: 100%;">
       <span class="brk-desc-tag">{get_svg_icon(tag_icon, color=theme_color, size=12)} {tag_text}</span>
       <h3 class="brk-desc-title">{act_title}</h3>
       <p class="brk-desc-paragraph">{act_desc}</p>{var_notice_html}
@@ -298,6 +311,13 @@ class HTMLBuilder:
     }}
     .brk-desc-block.reverse {{
       flex-direction: row-reverse;
+    }}
+    .brk-desc-block.brk-desc-block-text-only {{
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 24px 28px;
+      margin-bottom: 34px;
     }}
     .brk-desc-media {{
       flex: 1;

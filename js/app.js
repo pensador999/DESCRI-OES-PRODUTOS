@@ -440,7 +440,7 @@ function renderProducts() {
     card.className = `bg-white rounded-2xl border ${borderClass} p-4 product-shadow transition-all flex flex-col justify-between cursor-pointer group`;
     card.onclick = () => openProductModal(p);
 
-    const imgSrc = p.image || (p.cdn_images && p.cdn_images[0]) || "https://placehold.co/400x300?text=Sem+Foto";
+    const imgSrc = (p.cdn_images && p.cdn_images[0]) || (p.gallery && p.gallery[0]) || p.image || "https://placehold.co/400x300?text=Sem+Foto";
 
     card.innerHTML = `
       <div>
