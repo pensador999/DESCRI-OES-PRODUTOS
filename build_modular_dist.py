@@ -114,7 +114,7 @@ def build_dist():
                         selected_handles.add(h)
 
         enriched = []
-        for p in selected_prods:
+        for idx, p in enumerate(selected_prods):
             title = p.get("title", "")
             category = p.get("category", "")
             tags = p.get("tags", [])
@@ -167,10 +167,14 @@ def build_dist():
             p_copy["theme_color"] = narrative["theme_color"]
             p_copy["theme_bg"] = narrative["theme_bg"]
             p_copy["care_icon"] = narrative["care_icon"]
+            p_copy["narrative_blocks"] = narrative.get("narrative_blocks", [])
+            p_copy["care_tips"] = narrative.get("care_tips", "")
+            p_copy["specs"] = narrative.get("specs", [])
             p_copy["mode_a_html"] = mode_a_html
-            p_copy["mode_b_html"] = mode_b_html
-            p_copy["mode_b_markdown"] = mode_b_markdown
-            p_copy["specs"] = narrative["specs"]
+            # Salvar mode_b_html completo nos 5 primeiros itens como amostra;
+            # os demais são compilados instantaneamente pelo frontend via getProductModeBHTML()
+            p_copy["mode_b_html"] = mode_b_html if idx < 5 else ""
+            p_copy["mode_b_markdown"] = mode_b_markdown if idx < 5 else ""
             p_copy["prohibited_links"] = prohibited_links
             p_copy["orphaned_variants"] = p.get("orphaned_variants", [])
             enriched.append(p_copy)

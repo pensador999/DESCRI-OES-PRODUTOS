@@ -486,6 +486,9 @@ function quickCopyProductHTML(event, sku) {
   const p = storeData.products.find(prod => (prod.master_sku || "") === sku);
   if (!p) return;
 
+  if (!p.mode_b_html && typeof getProductModeBHTML === "function") {
+    p.mode_b_html = getProductModeBHTML(p);
+  }
   const htmlToCopy = p.mode_b_html || p.mode_a_html || p.original_body_html || "";
   if (!htmlToCopy) {
     showToast("⚠️ Produto sem HTML disponível.");
@@ -610,6 +613,9 @@ function downloadShopifyCSVBatch() {
 
   const rows = ["Handle,Title,Body (HTML)"];
   selected.forEach(p => {
+    if (!p.mode_b_html && typeof getProductModeBHTML === "function") {
+      p.mode_b_html = getProductModeBHTML(p);
+    }
     const html = p.mode_b_html || p.mode_a_html || "";
     rows.push(`"${p.handle}","${p.title.replace(/"/g, '""')}","${html.replace(/"/g, '""')}"`);
   });

@@ -11,6 +11,13 @@ function openProductModal(product) {
   currentModalProduct = product;
   currentModalMode = "b";
 
+  if (!product.mode_b_html && typeof getProductModeBHTML === "function") {
+    product.mode_b_html = getProductModeBHTML(product);
+  }
+  if (!product.mode_b_markdown && typeof buildClientModeBMarkdown === "function") {
+    product.mode_b_markdown = buildClientModeBMarkdown(product);
+  }
+
   document.getElementById("modal-title").innerText = product.title;
   document.getElementById("modal-store-badge").innerText = product.store_key ? product.store_key.replace('_', ' ').toUpperCase() : "BRK";
   document.getElementById("modal-sku-badge").innerText = "SKU: " + (product.master_sku || product.id);
@@ -100,6 +107,9 @@ function updateModalView() {
 
   let htmlToShow = "";
   if (currentModalMode === "b") {
+    if (!currentModalProduct.mode_b_html && typeof getProductModeBHTML === "function") {
+      currentModalProduct.mode_b_html = getProductModeBHTML(currentModalProduct);
+    }
     htmlToShow = currentModalProduct.mode_b_html || "<p>HTML Modo B não disponível</p>";
     if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-emerald-50 border-emerald-200 text-emerald-800";
     if (bannerDesc) bannerDesc.innerHTML = "<strong>Modo B Ativo:</strong> Redesenho persuasivo em 3 Atos narrativos com ícones vetoriais SVG estilo Font Awesome, layout sem corte e aviso legal no final.";
@@ -470,4 +480,509 @@ function buildClientModeBMarkdown(liveP) {
   }
 
   return lines.join("\n");
+}
+
+function getProductModeBHTML(liveP) {
+  if (!liveP) return "";
+  const originInfo = resolveClientOriginAndTitle(liveP);
+  const formattedTitle = liveP.formatted_title || originInfo.formattedTitle;
+  const brandName = liveP.brand_name || originInfo.brandName;
+  const originType = liveP.origin_type || originInfo.originType;
+  const showCopyright = (liveP.show_copyright !== undefined) ? liveP.show_copyright : originInfo.showCopyright;
+  const hasMultipleVariations = liveP.has_multiple_variations || false;
+  const splitImages = liveP.split_images || null;
+  const variationsSummary = liveP.variations_summary || "";
+
+  const themeColor = liveP.theme_color || (liveP.store_key === "brk_agro" ? "#16a34a" : liveP.store_key === "brk_motors" ? "#f97316" : "#0284c7");
+  const themeBg = liveP.theme_bg || (liveP.store_key === "brk_agro" ? "#f0fdf4" : liveP.store_key === "brk_motors" ? "#fff7ed" : "#f0f9ff");
+
+  const images = (liveP.cdn_images && liveP.cdn_images.length > 0)
+    ? liveP.cdn_images
+    : ((liveP.images || []).map(img => img.src || img));
+  const img1 = images[0] || "https://placehold.co/800x600?text=BRK+Foto+Oficial";
+  const img2 = images[1] || img1;
+  const img3 = images[2] || img1;
+
+  let blocks = liveP.narrative_blocks;
+  if (!blocks || blocks.length === 0) {
+    blocks = [
+      {
+        tag: "Performance & Conforto",
+        title: "MODELAGEM ANATÔMICA E MÁXIMO CONFORTO",
+        description: `Desenvolvido para oferecer máxima durabilidade e conforto térmico, o(a) ${formattedTitle} garante total liberdade de movimentos.`,
+        image: img1,
+        split_images: splitImages,
+        variations_summary: variationsSummary
+      },
+      {
+        tag: "Design & Identidade",
+        title: "ACABAMENTO PREMIUM E IDENTIDADE VISUAL",
+        description: `Design exclusivo e caimento equilibrado, unindo estilo marcante a matérias-primas de alta qualidade para qualquer ocasião.`,
+        image: img2
+      },
+      {
+        tag: "Durabilidade & Proteção",
+        title: "ALTA RESISTÊNCIA E VIDA ÚTIL PROLONGADA",
+        description: `Estrutura reforçada desenvolvida para suportar uso contínuo, mantendo suas propriedades originais mesmo após repetidas utilizações.`,
+        image: img3
+      }
+    ];
+  }
+
+  const specs = liveP.specs || [];
+  const careTips = liveP.care_tips || "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar).";
+
+  // 1. Cabeçalho de Origem e Título
+  let originBadge = "";
+  if (originType === "revenda") {
+    originBadge = `<span class="brk-desc-origin-badge revenda">${getSvgIcon("sparkle", "#b45309", 12)} PRODUTO ORIGINAL • MARCA ${brandName.toUpperCase()}</span>`;
+  } else {
+    originBadge = `<span class="brk-desc-origin-badge propria">${getSvgIcon("shield", themeColor, 12)} PRODUTO ORIGINAL</span>`;
+  }
+
+  const headerHtml = `  <!-- Cabecalho Oficial com Origem e Marca -->
+  <div class="brk-desc-header">
+    ${originBadge}
+    <h2 class="brk-desc-main-title">${formattedTitle}</h2>
+  </div>`;
+
+  // 2. Blocos Narrativos
+  const blocksHtml = [];
+  blocks.forEach((block, idx) => {
+    const isReverse = (idx % 2 === 1);
+    const reverseClass = isReverse ? " reverse" : "";
+    const imgSrc = block.image || (images[idx] || img1);
+    const tagText = block.tag || "Destaque";
+    const tagIcon = getTagIconName(tagText);
+    const actTitle = (block.title || "").toUpperCase();
+    const actDesc = block.description || "";
+    const blockSplitImgs = block.split_images || (idx === 0 ? splitImages : null);
+
+    let mediaHtml = "";
+    if (blockSplitImgs && blockSplitImgs.length >= 2) {
+      mediaHtml = `<div class="brk-desc-media brk-desc-media-split">
+        <div class="brk-split-item"><img src="${blockSplitImgs[0]}" alt="${formattedTitle} - Opção 1" loading="lazy" /></div>
+        <div class="brk-split-item"><img src="${blockSplitImgs[1]}" alt="${formattedTitle} - Opção 2" loading="lazy" /></div>
+      </div>`;
+    } else {
+      mediaHtml = `<div class="brk-desc-media">
+        <img src="${imgSrc}" alt="${block.alt || formattedTitle}" loading="lazy" />
+      </div>`;
+    }
+
+    let varNoticeHtml = "";
+    if (idx === 0 && hasMultipleVariations && variationsSummary) {
+      varNoticeHtml = `
+      <div class="brk-variations-notice">
+        <span class="brk-var-icon">${getSvgIcon('palette', themeColor, 15)}</span>
+        <span class="brk-var-text">${variationsSummary}</span>
+      </div>`;
+    }
+
+    blocksHtml.push(`
+  <!-- Ato ${idx + 1}: ${tagText} -->
+  <div class="brk-desc-block${reverseClass}">
+    ${mediaHtml}
+    <div class="brk-desc-text">
+      <span class="brk-desc-tag">${getSvgIcon(tagIcon, themeColor, 12)} ${tagText}</span>
+      <h3 class="brk-desc-title">${actTitle}</h3>
+      <p class="brk-desc-paragraph">${actDesc}</p>${varNoticeHtml}
+    </div>
+  </div>`);
+  });
+
+  // 3. Especificações Técnicas (Omitido para Camisas Agro e Motors)
+  let specsSection = "";
+  if (specs && specs.length > 0) {
+    const specsRows = specs.map(s => `
+      <div class="brk-spec-item">
+        <span class="brk-spec-label"><span class="brk-bullet">${getSvgIcon('chevron', themeColor, 9)}</span> ${s.label}</span>
+        <span class="brk-spec-value">${s.value}</span>
+      </div>`).join("");
+
+    specsSection = `  <!-- Box de Especificacoes e Cuidados -->
+  <div class="brk-desc-specs-box">
+    <h4 class="brk-desc-specs-title">
+      <span class="brk-title-icon">${getSvgIcon('clipboard', themeColor, 16)}</span>
+      <span>Ficha Técnica & Cuidados de Conservação</span>
+    </h4>
+    <div class="brk-specs-grid">${specsRows}
+    </div>
+
+    <!-- Guia de Cuidados -->
+    <div class="brk-desc-care-box">
+      <span class="brk-care-icon">${getSvgIcon('care', themeColor, 18)}</span>
+      <div class="brk-care-text">
+        <strong>Guia de Cuidados & Conservação da Peça:</strong> ${careTips}
+      </div>
+    </div>
+  </div>`;
+  } else {
+    specsSection = `  <!-- Guia de Cuidados (Ficha Técnica Descartada para Camisas Agro e Motors) -->
+  <div class="brk-desc-care-box" style="margin-top: 36px;">
+    <span class="brk-care-icon">${getSvgIcon('care', themeColor, 18)}</span>
+    <div class="brk-care-text">
+      <strong>Guia de Cuidados & Conservação da Peça:</strong> ${careTips}
+    </div>
+  </div>`;
+  }
+
+  // 4. Aviso de Propriedade Intelectual (Camisas C0 - Fica no Final da Descrição, Amarelo sem Balança)
+  let copyrightHtml = "";
+  if (showCopyright) {
+    copyrightHtml = `
+  <!-- Aviso de Protecao de Estampas e Direitos Autorais (Camisas C0 - Final da Descricao) -->
+  <div class="brk-desc-copyright-box">
+    <div class="brk-copyright-text">
+      <strong>Aviso de Propriedade Intelectual:</strong> Nossas estampas são protegidas pela Lei de Direitos Autorais (Lei 9.610/98) a Reprodução não autorizada está sujeita às penalidades legais. Copiar é crime !
+    </div>
+  </div>`;
+  }
+
+  // 5. Estrutura HTML Completa com CSS Embutido Responsivo
+  return `<!-- BRK GROUP - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL SHOPIFY) -->
+<div class="brk-desc-wrapper">
+  <style>
+    .brk-desc-wrapper {
+      width: 100%;
+      max-width: 980px;
+      margin: 30px auto;
+      padding: 0 10px;
+      font-family: inherit;
+      color: #1e293b;
+      box-sizing: border-box;
+      line-height: 1.5;
+    }
+    .brk-desc-wrapper * {
+      box-sizing: border-box;
+    }
+    .brk-desc-header {
+      margin-bottom: 32px;
+      text-align: center;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .brk-desc-origin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      margin-bottom: 12px;
+    }
+    .brk-desc-origin-badge.propria {
+      color: ${themeColor};
+      background: ${themeBg};
+      border: 1px solid ${themeColor}35;
+    }
+    .brk-desc-origin-badge.revenda {
+      color: #b45309;
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+    }
+    .brk-desc-main-title {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0;
+      letter-spacing: -0.4px;
+    }
+    .brk-desc-copyright-box {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      border-radius: 0 10px 10px 0;
+      padding: 14px 18px;
+      margin-top: 28px;
+      border-top: 1px solid #fef3c7;
+      border-right: 1px solid #fef3c7;
+      border-bottom: 1px solid #fef3c7;
+    }
+    .brk-copyright-text {
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: #92400e;
+    }
+    .brk-copyright-text strong {
+      color: #78350f;
+    }
+    .brk-desc-block {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      margin-bottom: 42px;
+    }
+    .brk-desc-block.reverse {
+      flex-direction: row-reverse;
+    }
+    .brk-desc-media {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .brk-desc-media img {
+      width: 100%;
+      height: auto;
+      max-height: 520px;
+      object-fit: contain;
+      border-radius: 14px;
+      display: block;
+      margin: 0 auto;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+      border: 1px solid #f1f5f9;
+      background: #ffffff;
+    }
+    .brk-desc-media-split {
+      display: flex;
+      gap: 12px;
+    }
+    .brk-desc-media-split .brk-split-item {
+      flex: 1;
+      min-width: 0;
+    }
+    .brk-desc-media-split .brk-split-item img {
+      max-height: 380px;
+    }
+    .brk-desc-text {
+      flex: 1.15;
+      min-width: 0;
+    }
+    .brk-desc-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: ${themeColor};
+      background: ${themeBg};
+      padding: 4px 12px;
+      border-radius: 9999px;
+      margin-bottom: 10px;
+      border: 1px solid ${themeColor}25;
+    }
+    .brk-desc-title {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin: 0 0 12px 0;
+      text-transform: uppercase;
+      letter-spacing: -0.3px;
+    }
+    .brk-desc-paragraph {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #475569;
+      margin: 0;
+    }
+    .brk-variations-notice {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+    }
+    .brk-var-icon {
+      font-size: 16px;
+    }
+    .brk-desc-specs-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 26px 24px;
+      margin-top: 36px;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+    }
+    .brk-desc-specs-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 18px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #edf2f7;
+    }
+    .brk-title-icon {
+      font-size: 18px;
+    }
+    .brk-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px 22px;
+    }
+    .brk-spec-item {
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .brk-spec-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .brk-bullet {
+      font-weight: 900;
+      font-size: 13px;
+    }
+    .brk-spec-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-top: 3px;
+    }
+    .brk-desc-care-box {
+      margin-top: 20px;
+      background: #ffffff;
+      border-left: 4px solid ${themeColor};
+      border-radius: 0 10px 10px 0;
+      padding: 14px 18px;
+      font-size: 12.5px;
+      line-height: 1.6;
+      color: #334155;
+      border-top: 1px solid #e2e8f0;
+      border-right: 1px solid #e2e8f0;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .brk-care-icon {
+      font-size: 20px;
+      line-height: 1.2;
+    }
+    .brk-care-text strong {
+      color: #0f172a;
+    }
+    .brk-desc-trust-bar {
+      margin-top: 32px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      text-align: center;
+    }
+    .brk-svg-icon {
+      display: inline-block;
+      vertical-align: -0.15em;
+      flex-shrink: 0;
+    }
+    .brk-trust-svg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 2px;
+      height: 28px;
+    }
+    .brk-trust-item {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .brk-trust-title {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .brk-trust-desc {
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.3;
+    }
+    @media (max-width: 768px) {
+      .brk-desc-main-title {
+        font-size: 20px;
+      }
+      .brk-desc-block, .brk-desc-block.reverse {
+        flex-direction: column !important;
+        gap: 16px;
+        margin-bottom: 34px;
+        text-align: left;
+      }
+      .brk-desc-media-split {
+        flex-direction: row;
+        gap: 8px;
+      }
+      .brk-desc-title {
+        font-size: 18px;
+      }
+      .brk-desc-paragraph {
+        font-size: 14px;
+      }
+      .brk-specs-grid {
+        grid-template-columns: 1fr;
+      }
+      .brk-desc-trust-bar {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .brk-trust-item {
+        flex-direction: row;
+        text-align: left;
+        padding: 12px 14px;
+        gap: 12px;
+      }
+    }
+  </style>
+
+${headerHtml}
+
+  <!-- 3 Atos Narrativos de Alta Conversão -->
+  ${blocksHtml.join("")}
+
+${specsSection}
+
+  <!-- Selos de Confiança e Garantia BRK -->
+  <div class="brk-desc-trust-bar">
+    <div class="brk-trust-item">
+      <span class="brk-trust-svg">${getSvgIcon('shield', themeColor, 24)}</span>
+      <div>
+        <div class="brk-trust-title">Qualidade Oficial BRK</div>
+        <div class="brk-trust-desc">Matérias-primas nobres testadas</div>
+      </div>
+    </div>
+    <div class="brk-trust-item">
+      <span class="brk-trust-svg">${getSvgIcon('truck', themeColor, 24)}</span>
+      <div>
+        <div class="brk-trust-title">Envio Rápido & Seguro</div>
+        <div class="brk-trust-desc">Rastreamento de ponta a ponta</div>
+      </div>
+    </div>
+    <div class="brk-trust-item">
+      <span class="brk-trust-svg">${getSvgIcon('return', themeColor, 24)}</span>
+      <div>
+        <div class="brk-trust-title">Troca Descomplicada</div>
+        <div class="brk-trust-desc">Satisfação garantida ou seu dinheiro de volta</div>
+      </div>
+    </div>
+  </div>
+
+${copyrightHtml}
+
+</div>`;
 }
