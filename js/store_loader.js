@@ -17,7 +17,8 @@ const StoreLoader = {
   loadScript(src) {
     return new Promise((resolve, reject) => {
       // Se o script já foi adicionado
-      const existingScript = document.querySelector(`script[src="${src}"]`);
+      const cleanSrc = src.split("?")[0];
+      const existingScript = document.querySelector(`script[src*="${cleanSrc}"]`);
       if (existingScript) {
         return resolve();
       }
@@ -47,7 +48,7 @@ const StoreLoader = {
 
     // 3. Tentar carregar via injeção dinâmica de script (.js) - Funciona 100% no file:// e em http://
     try {
-      await this.loadScript(`data/stores/${storeKey}.js`);
+      await this.loadScript(`data/stores/${storeKey}.js?t=${Date.now()}`);
       if (window[varName]) {
         this.cache.stores[storeKey] = window[varName];
         return window[varName];
@@ -58,7 +59,7 @@ const StoreLoader = {
 
     // 4. Fallback para fetch (.json) se estiver rodando em servidor HTTP/HTTPS (Vercel)
     try {
-      const resp = await fetch(`./data/stores/${storeKey}.json`);
+      const resp = await fetch(`./data/stores/${storeKey}.json?t=${Date.now()}`);
       if (resp.ok) {
         const data = await resp.json();
         this.cache.stores[storeKey] = data;

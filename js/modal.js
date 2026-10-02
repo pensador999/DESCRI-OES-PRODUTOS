@@ -108,7 +108,7 @@ function updateModalView() {
 
   let htmlToShow = "";
   if (currentModalMode === "b") {
-    if (!currentModalProduct.mode_b_html && typeof getProductModeBHTML === "function") {
+    if (typeof getProductModeBHTML === "function") {
       currentModalProduct.mode_b_html = getProductModeBHTML(currentModalProduct);
     }
     htmlToShow = currentModalProduct.mode_b_html || "<p>HTML Modo B não disponível</p>";
@@ -236,21 +236,29 @@ function applyBunkerLinksToModal() {
     return;
   }
 
-  const finalImgs = [
-    bunkerUrls[0],
-    bunkerUrls[1] || bunkerUrls[0],
-    bunkerUrls[2] || bunkerUrls[1] || bunkerUrls[0]
-  ];
+  const origList = currentModalProduct.cdn_images || [];
+  const candidateImgs = [
+    bunkerUrls[0] || origList[0] || "",
+    bunkerUrls[1] || origList[1] || "",
+    bunkerUrls[2] || origList[2] || ""
+  ].filter(Boolean);
 
-  currentModalProduct.cdn_images = finalImgs;
-
-  const renderedDiv = document.getElementById("modal-rendered-content");
-  const imgsInRendered = renderedDiv.querySelectorAll("img");
-  imgsInRendered.forEach((img, idx) => {
-    if (idx < finalImgs.length) {
-      img.src = finalImgs[idx];
+  const seenB = new Set();
+  const finalImgs = [];
+  candidateImgs.forEach(u => {
+    const root = u.split("?")[0].toLowerCase();
+    if (!seenB.has(root)) {
+      seenB.add(root);
+      finalImgs.push(u);
     }
   });
+
+  currentModalProduct.cdn_images = finalImgs;
+  // Recalcular HTML com as novas imagens
+  currentModalProduct.mode_b_html = getProductModeBHTML(currentModalProduct);
+  updateModalView();
+  showToast("Fotos do Bunker aplicadas com sucesso sem repetição!");
+  return;
 
   const updatedHTML = renderedDiv.innerHTML;
   if (currentModalMode === "b") currentModalProduct.mode_b_html = updatedHTML;
@@ -582,16 +590,7 @@ function getProductModeBHTML(liveP) {
     const reverseClass = isReverse ? " reverse" : "";
     
     // Obter imagem única do bloco sem nunca duplicar
-    let blockImg = "";
-    if (block.image) {
-      blockImg = block.image;
-    } else if (idx === 0) {
-      blockImg = img1;
-    } else if (idx === 1) {
-      blockImg = img2;
-    } else if (idx === 2) {
-      blockImg = img3;
-    }
+    const blockImg = (idx === 0) ? img1 : (idx === 1) ? img2 : (idx === 2 ? img3 : "");
 
     const tagText = block.tag || "Destaque";
     const tagIcon = getTagIconName(tagText);
@@ -1045,4 +1044,15 @@ ${specsSection}
 ${copyrightHtml}
 
 </div>`;
+
+  // Guarda Final de Segurança: Eliminação rigorosa de qualquer tag <img> com URL raiz repetida
+  const seenImgRoots = new Set();
+  return fullHtml.replace(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi, (match, src) => {
+    const root = src.split("?")[0].toLowerCase();
+    if (seenImgRoots.has(root)) {
+      return "";
+    }
+    seenImgRoots.add(root);
+    return match;
+  });
 }

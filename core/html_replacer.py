@@ -54,35 +54,48 @@ class HTMLReplacer:
         
         assigned_cdn = list(cdn_images[:3]) if cdn_images else []
         cdn_idx = 0
+        seen_roots = set()
 
         def img_sub_callback(match):
             nonlocal cdn_idx
-            original_src = match.group(1)
+            original_src = match.group(1).strip()
+            orig_root = original_src.split("?")[0].lower()
             
             # Se a imagem é morta ou se queremos garantir CDN Shopify
             if self.is_dead_image(original_src) or ("cdn.shopify.com" not in original_src and cdn_idx < len(assigned_cdn)):
                 if cdn_idx < len(assigned_cdn):
                     new_src = assigned_cdn[cdn_idx]
                     cdn_idx += 1
+                    new_root = new_src.split("?")[0].lower()
+                    if new_root in seen_roots:
+                        return ""
+                    seen_roots.add(new_root)
                     return self.create_responsive_image_tag(new_src, f"{product_title} - Detalhe Oficial")
                 else:
                     # Sem foto CDN substituta, remove a tag quebrada para não dar 404
                     return ""
             
-            # Se já for uma imagem CDN válida ou outra válida
+            # Se já for uma imagem válida no texto original, verificar duplicata
+            if orig_root in seen_roots:
+                return ""  # Remove duplicatas existentes no HTML original
+            seen_roots.add(orig_root)
             return match.group(0)
 
         # 1. Substituir tags <img> encontradas
         updated_html = img_pattern.sub(img_sub_callback, html)
 
         # 2. Se sobrou alguma imagem CDN não usada e havia poucas imagens no texto original
-        # Adiciona no final de forma harmônica
+        # Adiciona no final de forma harmônica garantindo que não foi usada antes
         remaining_cdn = assigned_cdn[cdn_idx:]
         if remaining_cdn:
             extra_imgs = []
             for i, img in enumerate(remaining_cdn):
-                extra_imgs.append(self.create_responsive_image_tag(img, f"{product_title} - Galeria {i+1}"))
-            updated_html += "\n" + "\n".join(extra_imgs)
+                img_root = img.split("?")[0].lower()
+                if img_root not in seen_roots:
+                    seen_roots.add(img_root)
+                    extra_imgs.append(self.create_responsive_image_tag(img, f"{product_title} - Galeria {i+1}"))
+            if extra_imgs:
+                updated_html += "\n" + "\n".join(extra_imgs)
 
         # 3. Limpeza de parágrafos vazios deixados por remoção de imagens
         updated_html = re.sub(r'<p>\s*(?:&nbsp;|<br\s*/?>)?\s*</p>', '', updated_html, flags=re.IGNORECASE)

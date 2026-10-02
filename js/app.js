@@ -199,6 +199,64 @@ async function performLiveSync(isManual = false) {
   }
 }
 
+function createEnrichedFromLiveProduct(liveP, storeKey) {
+  const rawImgs = liveP.images || [];
+  const rawSources = [];
+  if (Array.isArray(rawImgs)) {
+    rawImgs.forEach(img => {
+      const src = typeof img === "string" ? img : (img && img.src);
+      if (src) rawSources.push(src);
+    });
+  }
+  if (rawSources.length === 0 && liveP.image) {
+    const s = typeof liveP.image === "string" ? liveP.image : liveP.image.src;
+    if (s) rawSources.push(s);
+  }
+
+  // Deduplicar URLs estritamente pela raiz
+  const seenRoots = new Set();
+  const dedupImages = [];
+  rawSources.forEach(u => {
+    if (!u || typeof u !== "string") return;
+    const clean = u.trim();
+    if (!clean) return;
+    const root = clean.split("?")[0].toLowerCase();
+    if (!seenRoots.has(root)) {
+      seenRoots.add(root);
+      dedupImages.push(clean);
+    }
+  });
+
+  const rawHtml = liveP.body_html || "";
+  const isEmpty = (!rawHtml || rawHtml.trim() === "" || rawHtml.trim() === "<p></p>");
+  const tags = Array.isArray(liveP.tags) ? liveP.tags : (liveP.tags ? liveP.tags.split(",").map(t => t.trim()) : []);
+  const title = liveP.title || "";
+  const isC0 = title.toUpperCase().includes("C0") || (liveP.handle || "").toUpperCase().includes("C0");
+
+  return {
+    id: liveP.id,
+    title: title,
+    handle: liveP.handle || "",
+    vendor: liveP.vendor || (storeKey === "brk_agro" ? "BRK Agro" : storeKey === "brk_motors" ? "BRK Motors" : "BRK Fishing"),
+    category: liveP.product_type || "",
+    tags: tags,
+    images: dedupImages,
+    gallery: dedupImages,
+    cdn_images: dedupImages,
+    image: dedupImages[0] || "",
+    original_body_html: rawHtml,
+    body_html: rawHtml,
+    status: isEmpty ? "SEM_DESCRICAO" : "ATENCAO",
+    is_out_of_standard: true,
+    is_c0: isC0,
+    archetype_id: "uv_performance",
+    archetype_name: "Camisa UV Performance",
+    mode_a_html: rawHtml,
+    mode_b_html: "",
+    mode_b_markdown: ""
+  };
+}
+
 // Alternador de Loja Assíncrono com Cache
 async function switchStore(storeKey) {
   currentStore = storeKey;

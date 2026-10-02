@@ -250,8 +250,9 @@ def build_dist():
     motors_skus = motors_data.get("store", {}).get("total_skus", 6758)
     motors_skus_fmt = f"{motors_skus:,}".replace(",", ".")
 
-    # 5. Gerar index.html enxuto (< 50 KB) com links para css/main.css e js/*.js
+    # 5. Gerar index.html enxuto (< 50 KB) com links para css/main.css e js/*.js com cache-busting
     print("[4/5] Gerando index.html modular e ultra leve (< 50 KB)...")
+    build_ver = datetime.now().strftime("%Y%m%d%H%M%S")
     html_template = f"""<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -262,7 +263,7 @@ def build_dist():
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/main.css?v={build_ver}">
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
 
@@ -823,15 +824,15 @@ def build_dist():
   <!-- ======================================================== -->
   <!-- SCRIPTS MODULARES DISTRIBUÍDOS                           -->
   <!-- ======================================================== -->
-  <script src="js/svg_icons.js"></script>
-  <script src="data/stores/brk_fishing.js"></script>
-  <script defer src="data/stores/brk_agro.js"></script>
-  <script defer src="data/stores/brk_motors.js"></script>
-  <script src="data/stores/moldes.js"></script>
-  <script src="data/stores/analytics.js"></script>
-  <script src="js/store_loader.js"></script>
-  <script src="js/modal.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/svg_icons.js?v={build_ver}"></script>
+  <script src="data/stores/brk_fishing.js?v={build_ver}"></script>
+  <script defer src="data/stores/brk_agro.js?v={build_ver}"></script>
+  <script defer src="data/stores/brk_motors.js?v={build_ver}"></script>
+  <script src="data/stores/moldes.js?v={build_ver}"></script>
+  <script src="data/stores/analytics.js?v={build_ver}"></script>
+  <script src="js/store_loader.js?v={build_ver}"></script>
+  <script src="js/modal.js?v={build_ver}"></script>
+  <script src="js/app.js?v={build_ver}"></script>
 
 </body>
 </html>"""
@@ -870,7 +871,7 @@ def build_dist():
             sync_script = os.path.join(target_onedrive_dir, "sync_github.py")
             if os.path.exists(sync_script):
                 print("[GITHUB SYNC] Executando sync_github.py...")
-                res = subprocess.run([sys.executable, sync_script, "feat: modularizacao arquitetural completa, deploy vercel e icones svg font awesome"], cwd=target_onedrive_dir, capture_output=True, text=True)
+                res = subprocess.run([sys.executable, sync_script, "fix: eliminacao total de duplicacao de fotos e invalidacao instantanea de cache vercel"], cwd=target_onedrive_dir, capture_output=True, text=True)
                 print("  -> Saída do Git Sync:", res.stdout.strip())
         except Exception as e:
             print(f"  -> Erro na sincronização com GitHub: {e}")
