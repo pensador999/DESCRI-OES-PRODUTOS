@@ -186,25 +186,33 @@ def build_dist():
     enriched_agro = enrich_products(agro_data, store_key="brk_agro")
     enriched_motors = enrich_products(motors_data, store_key="brk_motors")
 
-    # 4. Salvar arquivos particionados em data/stores/
-    print("[3/5] Gravando arquivos JSON particionados em data/stores/...")
+    # 4. Salvar arquivos particionados em data/stores/ (.json e .js para duplo clique file:// sem CORS)
+    print("[3/5] Gravando arquivos JSON e JS particionados em data/stores/...")
     os.makedirs("data/stores", exist_ok=True)
     
     with open("data/stores/brk_fishing.json", "w", encoding="utf-8") as f:
         json.dump(enriched_fishing, f, ensure_ascii=False)
-    print("  -> data/stores/brk_fishing.json gravado.")
+    with open("data/stores/brk_fishing.js", "w", encoding="utf-8") as f:
+        f.write("window.__STORE_BRK_FISHING = " + json.dumps(enriched_fishing, ensure_ascii=False) + ";\n")
+    print("  -> data/stores/brk_fishing.json e .js gravados.")
 
     with open("data/stores/brk_agro.json", "w", encoding="utf-8") as f:
         json.dump(enriched_agro, f, ensure_ascii=False)
-    print("  -> data/stores/brk_agro.json gravado.")
+    with open("data/stores/brk_agro.js", "w", encoding="utf-8") as f:
+        f.write("window.__STORE_BRK_AGRO = " + json.dumps(enriched_agro, ensure_ascii=False) + ";\n")
+    print("  -> data/stores/brk_agro.json e .js gravados.")
 
     with open("data/stores/brk_motors.json", "w", encoding="utf-8") as f:
         json.dump(enriched_motors, f, ensure_ascii=False)
-    print("  -> data/stores/brk_motors.json gravado.")
+    with open("data/stores/brk_motors.js", "w", encoding="utf-8") as f:
+        f.write("window.__STORE_BRK_MOTORS = " + json.dumps(enriched_motors, ensure_ascii=False) + ";\n")
+    print("  -> data/stores/brk_motors.json e .js gravados.")
 
     with open("data/stores/moldes.json", "w", encoding="utf-8") as f:
         json.dump(template_engine.templates, f, ensure_ascii=False)
-    print("  -> data/stores/moldes.json gravado.")
+    with open("data/stores/moldes.js", "w", encoding="utf-8") as f:
+        f.write("window.__STORE_MOLDES = " + json.dumps(template_engine.templates, ensure_ascii=False) + ";\n")
+    print("  -> data/stores/moldes.json e .js gravados.")
 
     analytics_data = {
         "history": history_data,
@@ -212,7 +220,9 @@ def build_dist():
     }
     with open("data/stores/analytics.json", "w", encoding="utf-8") as f:
         json.dump(analytics_data, f, ensure_ascii=False)
-    print("  -> data/stores/analytics.json gravado.")
+    with open("data/stores/analytics.js", "w", encoding="utf-8") as f:
+        f.write("window.__STORE_ANALYTICS = " + json.dumps(analytics_data, ensure_ascii=False) + ";\n")
+    print("  -> data/stores/analytics.json e .js gravados.")
 
     fishing_skus = fishing_data.get("store", {}).get("total_skus", 12582)
     fishing_skus_fmt = f"{fishing_skus:,}".replace(",", ".")
@@ -795,6 +805,9 @@ def build_dist():
   <!-- SCRIPTS MODULARES DISTRIBUÍDOS                           -->
   <!-- ======================================================== -->
   <script src="js/svg_icons.js"></script>
+  <script src="data/stores/brk_fishing.js"></script>
+  <script src="data/stores/moldes.js"></script>
+  <script src="data/stores/analytics.js"></script>
   <script src="js/store_loader.js"></script>
   <script src="js/modal.js"></script>
   <script src="js/app.js"></script>
