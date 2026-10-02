@@ -70,7 +70,7 @@ def build_dist():
         selected_prods = []
         selected_handles = set()
 
-        # Normalizar status de produtos vazios ou com placeholder
+        # Normalizar status de todos os produtos: classificação estrita e sem limbo
         for p in all_prods:
             body = (p.get("original_body_html") or p.get("body_html") or "").strip()
             clean_b = re.sub(r'<[^>]+>', ' ', body).strip()
@@ -83,35 +83,29 @@ def build_dist():
                 or (w_count < 20 and not any(tag in body.lower() for tag in ["<table", "<div", "<ul"]))
                 or w_count < 5
             )
-            if is_empty_or_placeholder and p.get("status") != "IMAGENS_QUEBRADAS":
+            has_broken_s3 = (p.get("status") == "IMAGENS_QUEBRADAS") or (p.get("broken_images_count", 0) > 0)
+            orig_html = p.get("original_body_html") or p.get("body_html") or ""
+            if "use-brk-images-s3" in orig_html or "photobucket" in orig_html:
+                has_broken_s3 = True
+
+            if has_broken_s3:
+                p["status"] = "IMAGENS_QUEBRADAS"
+                p["is_out_of_standard"] = True
+            elif is_empty_or_placeholder:
                 p["status"] = "SEM_DESCRICAO"
                 p["is_out_of_standard"] = True
-
-        for cat_name in categories.keys():
-            cat_items = [p for p in all_prods if p.get("category") == cat_name]
-            if not cat_items:
-                continue
-            if len(cat_items) <= 30:
-                for p in cat_items:
-                    h = p.get("handle")
-                    if h and h not in selected_handles:
-                        selected_prods.append(p)
-                        selected_handles.add(h)
             else:
-                prio_items = [p for p in cat_items if p.get("status") in ("IMAGENS_QUEBRADAS", "SEM_DESCRICAO")]
-                healthy_items = [p for p in cat_items if p.get("status") not in ("IMAGENS_QUEBRADAS", "SEM_DESCRICAO")]
-                
-                for p in prio_items:
-                    h = p.get("handle")
-                    if h and h not in selected_handles:
-                        selected_prods.append(p)
-                        selected_handles.add(h)
-                
-                for p in healthy_items[:15]:
-                    h = p.get("handle")
-                    if h and h not in selected_handles:
-                        selected_prods.append(p)
-                        selected_handles.add(h)
+                p["status"] = "SAUDAVEL"
+                p["is_out_of_standard"] = False
+
+        # Incluir 100% de todos os produtos do catálogo (sem descarte de produtos saudáveis)
+        selected_prods = []
+        selected_handles = set()
+        for p in all_prods:
+            h = p.get("handle")
+            if h and h not in selected_handles:
+                selected_prods.append(p)
+                selected_handles.add(h)
 
         enriched = []
         for idx, p in enumerate(selected_prods):
@@ -871,7 +865,7 @@ def build_dist():
             sync_script = os.path.join(target_onedrive_dir, "sync_github.py")
             if os.path.exists(sync_script):
                 print("[GITHUB SYNC] Executando sync_github.py...")
-                res = subprocess.run([sys.executable, sync_script, "fix: eliminacao total de duplicacao de fotos e invalidacao instantanea de cache vercel"], cwd=target_onedrive_dir, capture_output=True, text=True)
+                res = subprocess.run([sys.executable, sync_script, "fix: catalogo 100% completo sem cortes, blindagem contra falsos positivos, eliminacao de limbo de filtros e integracao de moldes"], cwd=target_onedrive_dir, capture_output=True, text=True)
                 print("  -> Saída do Git Sync:", res.stdout.strip())
         except Exception as e:
             print(f"  -> Erro na sincronização com GitHub: {e}")

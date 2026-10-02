@@ -199,12 +199,8 @@ async function saveDirectToShopify(btn) {
     }
   } catch (netErr) {
     console.warn("Execução offline / erro de rede:", netErr);
-    p.original_body_html = htmlToSave;
-    p.status = "SAUDAVEL";
-    p.is_out_of_standard = false;
-    updateCockpit();
-    renderProducts();
-    showToast(`✅ Atualizado localmente! No deploy da Vercel, o endpoint /api/shopify_direct gravará automaticamente na Shopify.`);
+    alert(`⚠️ Atenção: Não foi possível conectar ao endpoint /api/shopify_direct (${netErr.message}).\n\nO produto NÃO foi alterado na Shopify online.\n\nAlternativas seguras:\n1. Clique em 'Copiar HTML' e cole diretamente no Admin da Shopify.\n2. Baixe o CSV do produto ou da loja para importação em lote no Shopify Admin.`);
+    showToast(`⚠️ Gravação online indisponível no momento. Use 'Copiar HTML' ou 'CSV'.`);
     if (btn) {
       btn.disabled = false;
       btn.innerHTML = `<span>⚡ Salvar Direto</span>`;
@@ -257,14 +253,6 @@ function applyBunkerLinksToModal() {
   // Recalcular HTML com as novas imagens
   currentModalProduct.mode_b_html = getProductModeBHTML(currentModalProduct);
   updateModalView();
-  showToast("Fotos do Bunker aplicadas com sucesso sem repetição!");
-  return;
-
-  const updatedHTML = renderedDiv.innerHTML;
-  if (currentModalMode === "b") currentModalProduct.mode_b_html = updatedHTML;
-  else currentModalProduct.mode_a_html = updatedHTML;
-
-  document.getElementById("modal-source-code").textContent = updatedHTML;
 
   const thumbsContainer = document.getElementById("modal-gallery-thumbs");
   if (thumbsContainer) {
@@ -284,7 +272,7 @@ function applyBunkerLinksToModal() {
     }
   }
 
-  showToast("Fotos do BRK Bunker aplicadas com sucesso!");
+  showToast("Fotos do Bunker aplicadas com sucesso sem repetição!");
 }
 
 // Cópia em Markdown com Feedback Reativo
@@ -433,7 +421,9 @@ function resolveClientOriginAndTitle(liveP) {
   }
 
   const masterSku = (liveP.master_sku || liveP.sku || "").toUpperCase().trim();
-  const isC0 = masterSku.startsWith("C0");
+  const varSkus = (liveP.variants_skus || []).map(v => String(v).toUpperCase().trim());
+  const handleStr = (liveP.handle || "").toUpperCase().trim();
+  const isC0 = masterSku.startsWith("C0") || varSkus.some(v => v.startsWith("C0")) || handleStr.startsWith("C0") || String(liveP.tags || "").toUpperCase().includes("C0");
   const isShirt = anyShirtWord(rawTitle);
   const showCopyright = (originType === "producao_propria") && isShirt && isC0;
 
@@ -530,6 +520,17 @@ function getProductModeBHTML(liveP) {
     }
   });
 
+  const isLure = (liveP.archetype_id === "fishing_lures") || /isca|plug|popper|stick|crankbait|minnow|frog|soft/i.test(liveP.title || "");
+  const hasMultipleVariations = liveP.has_multiple_variations || (isLure && (images.length >= 2 || (liveP.variants && liveP.variants.length > 1)));
+  let splitImages = liveP.split_images || null;
+  if (!splitImages && hasMultipleVariations && images.length >= 2) {
+    splitImages = [images[0], images[1]];
+  }
+  let variationsSummary = liveP.variations_summary || "";
+  if (!variationsSummary && hasMultipleVariations) {
+    variationsSummary = "Múltiplas variações e opções de cores disponíveis para escolha no anúncio.";
+  }
+
   // Atribuição de imagens exclusivas por ato - ZERO DUPLICAÇÃO
   let img1 = images[0] || "";
   let img2 = images[1] || "";
@@ -542,32 +543,80 @@ function getProductModeBHTML(liveP) {
 
   let blocks = liveP.narrative_blocks;
   if (!blocks || blocks.length === 0) {
-    blocks = [
-      {
-        tag: "Performance & Conforto",
-        title: "MODELAGEM ANATÔMICA E MÁXIMO CONFORTO",
-        description: `Desenvolvido para oferecer máxima durabilidade e conforto térmico, o(a) ${formattedTitle} garante total liberdade de movimentos.`,
-        image: img1,
-        split_images: splitImages,
-        variations_summary: variationsSummary
-      },
-      {
-        tag: "Design & Identidade",
-        title: "ACABAMENTO PREMIUM E IDENTIDADE VISUAL",
-        description: `Design exclusivo e caimento equilibrado, unindo estilo marcante a matérias-primas de alta qualidade para qualquer ocasião.`,
-        image: img2
-      },
-      {
-        tag: "Durabilidade & Proteção",
-        title: "ALTA RESISTÊNCIA E VIDA ÚTIL PROLONGADA",
-        description: `Estrutura reforçada desenvolvida para suportar uso contínuo, mantendo suas propriedades originais mesmo após repetidas utilizações.`,
-        image: img3
-      }
-    ];
+    const moldes = window.__STORE_MOLDES || {};
+    const archKey = liveP.archetype_id || (isLure ? "fishing_lures" : "uv_performance");
+    const tmpl = moldes[archKey] || moldes["uv_performance"];
+
+    if (tmpl && tmpl.act1 && tmpl.act2 && tmpl.act3) {
+      blocks = [
+        {
+          tag: tmpl.act1.tag || "Destaque",
+          title: tmpl.act1.title || "QUALIDADE E DESEMPENHO",
+          description: (tmpl.act1.desc_tmpl || "").replace(/\{title\}/g, formattedTitle),
+          image: img1,
+          split_images: splitImages,
+          variations_summary: variationsSummary
+        },
+        {
+          tag: tmpl.act2.tag || "Destaque",
+          title: tmpl.act2.title || "CONFORTO E TECNOLOGIA",
+          description: (tmpl.act2.desc_tmpl || "").replace(/\{title\}/g, formattedTitle),
+          image: img2
+        },
+        {
+          tag: tmpl.act3.tag || "Destaque",
+          title: tmpl.act3.title || "DURABILIDADE E ACABAMENTO",
+          description: (tmpl.act3.desc_tmpl || "").replace(/\{title\}/g, formattedTitle),
+          image: img3
+        }
+      ];
+    } else {
+      blocks = [
+        {
+          tag: "Performance & Conforto",
+          title: "MODELAGEM ANATÔMICA E MÁXIMO CONFORTO",
+          description: `Desenvolvido para oferecer máxima durabilidade e conforto térmico, o(a) ${formattedTitle} garante total liberdade de movimentos.`,
+          image: img1,
+          split_images: splitImages,
+          variations_summary: variationsSummary
+        },
+        {
+          tag: "Design & Identidade",
+          title: "ACABAMENTO PREMIUM E IDENTIDADE VISUAL",
+          description: `Design exclusivo e caimento equilibrado, unindo estilo marcante a matérias-primas de alta qualidade para qualquer ocasião.`,
+          image: img2
+        },
+        {
+          tag: "Durabilidade & Proteção",
+          title: "ALTA RESISTÊNCIA E VIDA ÚTIL PROLONGADA",
+          description: `Estrutura reforçada desenvolvida para suportar uso contínuo, mantendo suas propriedades originais mesmo após repetidas utilizações.`,
+          image: img3
+        }
+      ];
+    }
   }
 
-  const specs = liveP.specs || [];
-  const careTips = liveP.care_tips || "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar).";
+  let specs = liveP.specs || [];
+  const isShirt = anyShirtWord(formattedTitle);
+  const isAgroOrMotors = (liveP.store_key === "brk_agro" || liveP.store_key === "brk_motors" || (typeof currentStore !== "undefined" && (currentStore === "brk_agro" || currentStore === "brk_motors")));
+  if (isShirt && isAgroOrMotors) {
+    specs = [];
+  } else if (specs.length === 0 && window.__STORE_MOLDES) {
+    const archKey = liveP.archetype_id || "uv_performance";
+    const tmpl = window.__STORE_MOLDES[archKey];
+    if (tmpl && tmpl.base_specs) {
+      specs = tmpl.base_specs.map(s => ({ label: s.label, value: s.default }));
+    }
+  }
+
+  let careTips = liveP.care_tips;
+  if (!careTips && window.__STORE_MOLDES) {
+    const archKey = liveP.archetype_id || "uv_performance";
+    careTips = window.__STORE_MOLDES[archKey]?.care_tips;
+  }
+  if (!careTips) {
+    careTips = "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar).";
+  }
 
   // 1. Cabeçalho de Origem e Título
   let originBadge = "";

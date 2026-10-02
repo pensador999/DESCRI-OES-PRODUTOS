@@ -336,16 +336,8 @@ function updateCockpit() {
   if (healthElem) healthElem.innerText = healthPct + "% Saudável";
   
   const loadedBroken = products.filter(p => p.status === "IMAGENS_QUEBRADAS").length;
-  const loadedEmpty = products.filter(p => {
-    const b = (p.original_body_html || p.body_html || "").trim();
-    return p.status === "SEM_DESCRICAO" || !b || b.length <= 5 || b.toLowerCase() === "a" || b.toLowerCase() === "<p>a</p>" || b === "<p></p>";
-  }).length;
-  const loadedHealthy = products.filter(p => {
-    const isB = p.status === "IMAGENS_QUEBRADAS";
-    const b = (p.original_body_html || p.body_html || "").trim();
-    const isE = p.status === "SEM_DESCRICAO" || !b || b.length <= 5 || b.toLowerCase() === "a" || b.toLowerCase() === "<p>a</p>" || b === "<p></p>";
-    return !isB && !isE && !p.is_out_of_standard;
-  }).length;
+  const loadedEmpty = products.filter(p => p.status === "SEM_DESCRICAO").length;
+  const loadedHealthy = products.filter(p => p.status === "SAUDAVEL" || (!p.is_out_of_standard && p.status !== "IMAGENS_QUEBRADAS" && p.status !== "SEM_DESCRICAO")).length;
 
   const emptyCockpitElem = document.getElementById("cockpit-empty-count");
   if (emptyCockpitElem) {
@@ -455,12 +447,12 @@ function renderProducts() {
     if (selectedCategory !== "all" && p.category !== selectedCategory) return false;
     
     const isBroken = p.status === "IMAGENS_QUEBRADAS";
-    const b = (p.original_body_html || p.body_html || "").trim();
-    const isEmpty = p.status === "SEM_DESCRICAO" || !b || b.length <= 5 || b.toLowerCase() === "a" || b.toLowerCase() === "<p>a</p>" || b === "<p></p>";
+    const isEmpty = p.status === "SEM_DESCRICAO";
+    const isHealthy = !isBroken && !isEmpty;
 
     if (currentFilter === "broken" && !isBroken) return false;
     if (currentFilter === "empty" && !isEmpty) return false;
-    if (currentFilter === "healthy" && (isBroken || isEmpty || p.is_out_of_standard)) return false;
+    if (currentFilter === "healthy" && !isHealthy) return false;
 
     if (searchQuery.trim() !== "") {
       const q = searchQuery.toLowerCase();
@@ -481,7 +473,7 @@ function renderProducts() {
   filtered.forEach(p => {
     const b = (p.original_body_html || p.body_html || "").trim();
     const isBroken = p.status === "IMAGENS_QUEBRADAS";
-    const isEmpty = p.status === "SEM_DESCRICAO" || !b || b.length <= 5 || b.toLowerCase() === "a" || b.toLowerCase() === "<p>a</p>" || b === "<p></p>";
+    const isEmpty = p.status === "SEM_DESCRICAO";
 
     let borderClass = "border-slate-200 hover:border-blue-400";
     let statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1">${getSvgIcon('check', '#065f46', 10)} Saudável</span>`;
@@ -587,7 +579,7 @@ function renderMassTable() {
   selectedMassProductIds.clear();
 
   targetItems.forEach(p => {
-    selectedMassProductIds.add(p.id);
+    selectedMassProductIds.add(String(p.id));
     const tr = document.createElement("tr");
     tr.className = "hover:bg-slate-50 transition-colors";
     
@@ -631,11 +623,13 @@ function renderMassTable() {
   if (countElem) countElem.innerText = selectedMassProductIds.size;
 }
 
+let currentMassBatchMode = "mode_b_html";
+
 function toggleSelectAllMass(masterCheckbox) {
   const checkboxes = document.querySelectorAll(".mass-row-check");
   checkboxes.forEach(cb => {
     cb.checked = masterCheckbox.checked;
-    const id = parseInt(cb.dataset.id);
+    const id = String(cb.dataset.id);
     if (masterCheckbox.checked) selectedMassProductIds.add(id);
     else selectedMassProductIds.delete(id);
   });
@@ -643,7 +637,7 @@ function toggleSelectAllMass(masterCheckbox) {
 }
 
 function handleMassRowCheck(cb) {
-  const id = parseInt(cb.dataset.id);
+  const id = String(cb.dataset.id);
   if (cb.checked) selectedMassProductIds.add(id);
   else selectedMassProductIds.delete(id);
   document.getElementById("mass-selected-count").innerText = selectedMassProductIds.size;
@@ -654,15 +648,26 @@ function executeMassBatch(modeKey) {
     alert("Por favor, selecione ao menos um produto para gerar o lote.");
     return;
   }
+  currentMassBatchMode = modeKey;
+  const storeData = MASTER_PAYLOAD.stores[currentStore];
+  if (storeData && storeData.products) {
+    storeData.products.forEach(p => {
+      if (selectedMassProductIds.has(String(p.id))) {
+        if (modeKey === "mode_b_html" && !p.mode_b_html && typeof getProductModeBHTML === "function") {
+          p.mode_b_html = getProductModeBHTML(p);
+        }
+      }
+    });
+  }
   const modeName = modeKey === "mode_b_html" ? "Modo B (3 Atos Conversão)" : "Modo A (Preservar HTML)";
-  showToast(`Lote de ${selectedMassProductIds.size} produtos gerado com sucesso via ${modeName}!`);
+  showToast(`✨ Lote configurado: ${selectedMassProductIds.size} produtos gerados via ${modeName}! Clique em 'Baixar Planilha CSV' para exportar.`);
 }
 
 function downloadShopifyCSVBatch() {
   const storeData = MASTER_PAYLOAD.stores[currentStore];
   if (!storeData) return;
   const products = storeData.products;
-  const selected = products.filter(p => selectedMassProductIds.has(p.id));
+  const selected = products.filter(p => selectedMassProductIds.has(String(p.id)));
   
   if (selected.length === 0) {
     alert("Nenhum produto selecionado para exportação.");
@@ -671,10 +676,15 @@ function downloadShopifyCSVBatch() {
 
   const rows = ["Handle,Title,Body (HTML)"];
   selected.forEach(p => {
-    if (!p.mode_b_html && typeof getProductModeBHTML === "function") {
-      p.mode_b_html = getProductModeBHTML(p);
+    let html = "";
+    if (currentMassBatchMode === "mode_b_html") {
+      if (!p.mode_b_html && typeof getProductModeBHTML === "function") {
+        p.mode_b_html = getProductModeBHTML(p);
+      }
+      html = p.mode_b_html || "";
+    } else {
+      html = p.mode_a_html || p.original_body_html || "";
     }
-    const html = p.mode_b_html || p.mode_a_html || "";
     rows.push(`"${p.handle}","${p.title.replace(/"/g, '""')}","${html.replace(/"/g, '""')}"`);
   });
 
@@ -683,10 +693,11 @@ function downloadShopifyCSVBatch() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `shopify_lote_massa_${currentStore}_${new Date().toISOString().slice(0,10)}.csv`;
+  const modeLabel = currentMassBatchMode === "mode_b_html" ? "modo_b" : "modo_a";
+  link.download = `shopify_lote_${modeLabel}_${currentStore}_${new Date().toISOString().slice(0,10)}.csv`;
   link.click();
   URL.revokeObjectURL(url);
-  showToast(`Planilha CSV com ${selected.length} produtos gerada e baixada com sucesso!`);
+  showToast(`Planilha CSV com ${selected.length} produtos gerada e baixada com sucesso (${modeLabel.toUpperCase()})!`);
 }
 
 // Aba Moldes Mestres

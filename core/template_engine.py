@@ -786,7 +786,7 @@ class TemplateEngine:
 
         return extracted
 
-    def resolve_product_origin_and_title(self, title: str, vendor: str = "", sku: str = "", tags = None) -> Dict[str, Any]:
+    def resolve_product_origin_and_title(self, title: str, vendor: str = "", sku: str = "", tags = None, product: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Determina com precisão a origem do produto (produção própria BRK vs revenda)
         e formata o título da descrição:
@@ -821,9 +821,15 @@ class TemplateEngine:
             else:
                 formatted_title = t_clean
                 
-        # Regra de Direitos Autorais em Camisas C0
+        # Regra de Direitos Autorais em Camisas C0 (Verificação exaustiva de SKU mestre, variantes e handle)
         sku_upper = str(sku or "").upper().strip()
-        is_c0 = sku_upper.startswith("C0")
+        var_skus = []
+        handle_str = ""
+        if isinstance(product, dict):
+            var_skus = [str(v).upper() for v in product.get("variants_skus", [])]
+            handle_str = str(product.get("handle", "")).upper()
+        
+        is_c0 = sku_upper.startswith("C0") or any(v.startswith("C0") for v in var_skus) or handle_str.startswith("C0") or "C0" in str(tags or "").upper()
         is_shirt = any(w in t_clean.lower() for w in ["camisa", "camiseta", "jersey", "baby look", "regata", "polo"])
         show_copyright = (origin_type == "producao_propria") and is_shirt and is_c0
         
@@ -846,7 +852,7 @@ class TemplateEngine:
         tags = product.get("tags") or []
 
         # Resolução de Origem, Título Formatado e Direitos Autorais C0
-        origin_info = self.resolve_product_origin_and_title(title=title, vendor=vendor, sku=sku, tags=tags)
+        origin_info = self.resolve_product_origin_and_title(title=title, vendor=vendor, sku=sku, tags=tags, product=product)
         formatted_title = origin_info["formatted_title"]
         brand_name = origin_info["brand_name"]
         origin_type = origin_info["origin_type"]

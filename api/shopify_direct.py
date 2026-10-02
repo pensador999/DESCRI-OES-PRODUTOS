@@ -98,7 +98,12 @@ class handler(BaseHTTPRequestHandler):
                 return
 
             domain = STORE_DOMAINS[store_key]
-            clean_product_id = str(product_id).strip()
+            import re
+            id_match = re.search(r'\d+', str(product_id).strip())
+            if not id_match:
+                self._respond_json(400, {"success": False, "error": f"ID do produto inválido: '{product_id}'"})
+                return
+            clean_product_id = id_match.group(0)
 
             # 3. Blindagem de Escopo: Apenas o campo body_html é alterado (Shopify REST API)
             shopify_url = f"https://{domain}/admin/api/2024-01/products/{clean_product_id}.json"
