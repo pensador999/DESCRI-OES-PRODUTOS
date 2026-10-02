@@ -493,9 +493,6 @@ function getProductModeBHTML(liveP) {
   const brandName = liveP.brand_name || originInfo.brandName;
   const originType = liveP.origin_type || originInfo.originType;
   const showCopyright = (liveP.show_copyright !== undefined) ? liveP.show_copyright : originInfo.showCopyright;
-  const hasMultipleVariations = liveP.has_multiple_variations || false;
-  const splitImages = liveP.split_images || null;
-  const variationsSummary = liveP.variations_summary || "";
 
   const themeColor = liveP.theme_color || (liveP.store_key === "brk_agro" ? "#16a34a" : liveP.store_key === "brk_motors" ? "#f97316" : "#0284c7");
   const themeBg = liveP.theme_bg || (liveP.store_key === "brk_agro" ? "#f0fdf4" : liveP.store_key === "brk_motors" ? "#fff7ed" : "#f0f9ff");
