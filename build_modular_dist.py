@@ -810,6 +810,8 @@ def build_dist():
   <!-- ======================================================== -->
   <script src="js/svg_icons.js"></script>
   <script src="data/stores/brk_fishing.js"></script>
+  <script defer src="data/stores/brk_agro.js"></script>
+  <script defer src="data/stores/brk_motors.js"></script>
   <script src="data/stores/moldes.js"></script>
   <script src="data/stores/analytics.js"></script>
   <script src="js/store_loader.js"></script>
