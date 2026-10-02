@@ -79,7 +79,7 @@ class HTMLBuilder:
         if origin_type == "revenda":
             origin_badge = f'<span class="brk-desc-origin-badge revenda">✨ PRODUTO ORIGINAL • MARCA {brand_name.upper()}</span>'
         else:
-            origin_badge = f'<span class="brk-desc-origin-badge propria">🛡️ PRODUTO ORIGINAL • FABRICAÇÃO PRÓPRIA BRK</span>'
+            origin_badge = '<span class="brk-desc-origin-badge propria">🛡️ PRODUTO ORIGINAL</span>'
 
         header_html = f"""  <!-- Cabecalho Oficial com Origem e Marca -->
   <div class="brk-desc-header">
@@ -87,13 +87,12 @@ class HTMLBuilder:
     <h2 class="brk-desc-main-title">{formatted_title}</h2>
   </div>"""
 
-        # 2. Aviso de Proteção de Estampas e Direitos Autorais (Camisas C0)
+        # 2. Aviso de Proteção de Estampas e Direitos Autorais (Camisas C0 - Posicionado no Final da Descrição)
         copyright_html = ""
         if show_copyright:
             copyright_html = """
-  <!-- Aviso de Protecao de Estampas e Direitos Autorais (Camisas C0) -->
+  <!-- Aviso de Protecao de Estampas e Direitos Autorais (Camisas C0 - Final da Descricao) -->
   <div class="brk-desc-copyright-box">
-    <div class="brk-copyright-icon">⚖️</div>
     <div class="brk-copyright-text">
       <strong>Aviso de Propriedade Intelectual:</strong> Nossas estampas são protegidas pela Lei de Direitos Autorais (Lei 9.610/98) a Reprodução não autorizada está sujeita às penalidades legais. Copiar é crime !
     </div>
@@ -239,24 +238,16 @@ class HTMLBuilder:
       letter-spacing: -0.4px;
     }}
 
-    /* Aviso de Direitos Autorais em Camisas C0 */
+    /* Aviso de Direitos Autorais em Camisas C0 (Amarelo sem icone no final) */
     .brk-desc-copyright-box {{
-      display: flex;
-      align-items: center;
-      gap: 14px;
       background: #fffbeb;
       border-left: 4px solid #f59e0b;
-      border-radius: 0 12px 12px 0;
+      border-radius: 0 10px 10px 0;
       padding: 14px 18px;
-      margin-bottom: 36px;
+      margin-top: 28px;
       border-top: 1px solid #fef3c7;
       border-right: 1px solid #fef3c7;
       border-bottom: 1px solid #fef3c7;
-    }}
-    .brk-copyright-icon {{
-      font-size: 24px;
-      line-height: 1;
-      flex-shrink: 0;
     }}
     .brk-copyright-text {{
       font-size: 12.5px;
@@ -515,7 +506,6 @@ class HTMLBuilder:
   </style>
 
 {header_html}
-{copyright_html}
 
   <!-- 3 Atos Narrativos de Alta Conversão -->
   {"".join(blocks_html)}
@@ -547,6 +537,8 @@ class HTMLBuilder:
     </div>
   </div>
 
+{copyright_html}
+
 </div>
 """
         return full_html.strip()
@@ -574,9 +566,6 @@ class HTMLBuilder:
 
         md_parts = []
         md_parts.append(f"# {formatted_title}\n")
-
-        if show_copyright:
-            md_parts.append("> ⚖️ **Aviso de Propriedade Intelectual:** Nossas estampas são protegidas pela Lei de Direitos Autorais (Lei 9.610/98) a Reprodução não autorizada está sujeita às penalidades legais. Copiar é crime !\n")
 
         for idx, block in enumerate(blocks):
             tag_text = block.get("tag", f"Ato {idx+1}")
@@ -613,5 +602,8 @@ class HTMLBuilder:
         md_parts.append("- 🛡️ **Qualidade Oficial BRK:** Matérias-primas nobres testadas")
         md_parts.append("- 🚚 **Envio Rápido & Seguro:** Rastreamento de ponta a ponta")
         md_parts.append("- 🔄 **Troca Descomplicada:** Satisfação garantida ou seu dinheiro de volta")
+
+        if show_copyright:
+            md_parts.append("\n> **Aviso de Propriedade Intelectual:** Nossas estampas são protegidas pela Lei de Direitos Autorais (Lei 9.610/98) a Reprodução não autorizada está sujeita às penalidades legais. Copiar é crime !\n")
 
         return "\n".join(md_parts).strip()

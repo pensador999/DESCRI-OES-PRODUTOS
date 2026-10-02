@@ -1320,12 +1320,11 @@ def build_master():
 
       const originBadge = (originType === "revenda")
         ? `<span class="brk-desc-origin-badge revenda">✨ PRODUTO ORIGINAL • MARCA ${{brandName.toUpperCase()}}</span>`
-        : `<span class="brk-desc-origin-badge propria">🛡️ PRODUTO ORIGINAL • FABRICAÇÃO PRÓPRIA BRK</span>`;
+        : `<span class="brk-desc-origin-badge propria">🛡️ PRODUTO ORIGINAL</span>`;
 
       const copyrightBox = showCopyright ? `
-  <!-- Aviso de Protecao de Estampas e Direitos Autorais (Camisas C0) -->
+  <!-- Aviso de Protecao de Estampas e Direitos Autorais (Camisas C0 - Final da Descricao) -->
   <div class="brk-desc-copyright-box">
-    <div class="brk-copyright-icon">⚖️</div>
     <div class="brk-copyright-text">
       <strong>Aviso de Propriedade Intelectual:</strong> Nossas estampas são protegidas pela Lei de Direitos Autorais (Lei 9.610/98) a Reprodução não autorizada está sujeita às penalidades legais. Copiar é crime !
     </div>
@@ -1398,23 +1397,16 @@ def build_master():
       margin: 0;
       letter-spacing: -0.4px;
     }}
+    /* Aviso de Direitos Autorais em Camisas C0 (Amarelo sem icone no final) */
     .brk-desc-copyright-box {{
-      display: flex;
-      align-items: center;
-      gap: 14px;
       background: #fffbeb;
       border-left: 4px solid #f59e0b;
-      border-radius: 0 12px 12px 0;
+      border-radius: 0 10px 10px 0;
       padding: 14px 18px;
-      margin-bottom: 36px;
+      margin-top: 28px;
       border-top: 1px solid #fef3c7;
       border-right: 1px solid #fef3c7;
       border-bottom: 1px solid #fef3c7;
-    }}
-    .brk-copyright-icon {{
-      font-size: 24px;
-      line-height: 1;
-      flex-shrink: 0;
     }}
     .brk-copyright-text {{
       font-size: 12.5px;
@@ -1623,7 +1615,6 @@ def build_master():
     ${{originBadge}}
     <h2 class="brk-desc-main-title">${{formattedTitle}}</h2>
   </div>
-${{copyrightBox}}
 
   <!-- Ato 1 -->
   <div class="brk-desc-block">
@@ -1714,6 +1705,9 @@ ${{copyrightBox}}
       </div>
     </div>
   </div>
+
+${{copyrightBox}}
+
 </div>`;
     }}
 
@@ -1728,9 +1722,6 @@ ${{copyrightBox}}
 
       const lines = [];
       lines.push(`# ${{formattedTitle}}\\n`);
-      if (showCopyright) {{
-        lines.push(`> ⚖️ **Aviso de Propriedade Intelectual:** Nossas estampas são protegidas pela Lei de Direitos Autorais (Lei 9.610/98) a Reprodução não autorizada está sujeita às penalidades legais. Copiar é crime !\\n`);
-      }}
 
       lines.push(`### ⚡ Performance & Conforto: ALTA PERFORMANCE E RESPIRABILIDADE`);
       if (img1) lines.push(`![${{formattedTitle}}](${{img1}})`);
@@ -1761,6 +1752,10 @@ ${{copyrightBox}}
       lines.push(`- 🛡️ **Qualidade Oficial BRK:** Matérias-primas nobres testadas`);
       lines.push(`- 🚚 **Envio Rápido & Seguro:** Rastreamento de ponta a ponta`);
       lines.push(`- 🔄 **Troca Descomplicada:** Satisfação garantida ou seu dinheiro de volta`);
+
+      if (showCopyright) {{
+        lines.push(`\\n> **Aviso de Propriedade Intelectual:** Nossas estampas são protegidas pela Lei de Direitos Autorais (Lei 9.610/98) a Reprodução não autorizada está sujeita às penalidades legais. Copiar é crime !\\n`);
+      }}
 
       return lines.join("\\n");
     }}
