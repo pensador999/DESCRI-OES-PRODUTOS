@@ -107,6 +107,9 @@ def build_dist():
                 selected_prods.append(p)
                 selected_handles.add(h)
 
+        # Indexar catálogo desta loja no sibling_matcher para produtos com descrição rica
+        sibling_matcher.set_catalog(all_prods)
+
         enriched = []
         for idx, p in enumerate(selected_prods):
             title = p.get("title", "")
@@ -144,7 +147,9 @@ def build_dist():
             archetype_id = template_engine.detect_archetype(title, category, tags, vendor=vendor)
             arch_info = template_engine.templates.get(archetype_id, template_engine.templates["uv_performance"])
             
-            sibling_info = sibling_matcher.find_best_sibling(p, min_score=0.70)
+            # Busca de irmão homólogo com trava estrita de arquétipo para produtos sem descrição ou com placeholder
+            needs_sibling = (p.get("status") == "SEM_DESCRICAO") or is_empty_or_placeholder or len(orig_html.strip()) < 80
+            sibling_info = sibling_matcher.find_best_sibling(p, min_score=0.70, target_archetype=archetype_id) if needs_sibling else None
             mode_a_html = html_replacer.replace_images_preserve_html(orig_html, images, title)
             narrative = template_engine.generate_narrative_from_template(p, archetype_id, images, store_key=store_key, sibling_info=sibling_info)
             
@@ -160,6 +165,8 @@ def build_dist():
 
             p_copy = dict(p)
             p_copy["cdn_images"] = images
+            p_copy["gallery"] = images
+            p_copy["image"] = images[0] if images else (p.get("image") or "")
             p_copy["archetype_id"] = archetype_id
             p_copy["archetype_name"] = arch_info["name"]
             p_copy["source_type"] = narrative["source_type"]
@@ -194,9 +201,12 @@ def build_dist():
             "products": enriched
         }
 
-    print("[2/5] Processando e enriquecendo produtos das 3 lojas...")
+    print("[2/5] Processando e enriquecendo produtos das 3 lojas...", flush=True)
+    print("  -> Enriquecendo BRK Fishing...", flush=True)
     enriched_fishing = enrich_products(fishing_data, store_key="brk_fishing")
+    print("  -> Enriquecendo BRK Agro...", flush=True)
     enriched_agro = enrich_products(agro_data, store_key="brk_agro")
+    print("  -> Enriquecendo BRK Motors...", flush=True)
     enriched_motors = enrich_products(motors_data, store_key="brk_motors")
 
     # 4. Salvar arquivos particionados em data/stores/ (.json e .js para duplo clique file:// sem CORS)

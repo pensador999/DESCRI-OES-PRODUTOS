@@ -204,18 +204,65 @@ function detectClientArchetype(title, category, tags) {
   const cat = (category || "").toLowerCase();
   const text = `${t} ${cat} ${Array.isArray(tags) ? tags.join(" ") : tags || ""}`.toLowerCase();
 
+  // 1. Aromatizantes & Perfumaria Automotiva (Prioridade Máxima)
+  if (/\b(aromatizante|cheirinho|difusor|aromatizador|odorizador|little trees|odor)\b/i.test(t)) {
+    return { id: "accessories_car_care", name: "Aromatizantes Automotivos & Cuidados" };
+  }
+
+  // 2. Chaveiros, Adesivos & Acessórios Gerais
+  if (/\b(chaveiro|adesivo|adesivos|sticker|stickers|patch|emblema)\b/i.test(t)) {
+    return { id: "accessories_general", name: "Acessórios, Chaveiros & Adesivos" };
+  }
+
+  // 3. Calças & Bermudas (Evita cair em camisa)
+  if (/\b(calca|calça|calcas|calças|bermuda|bermudas|shorts|short|calcao|calção)\b/i.test(t) && !/\b(camisa|camiseta)\b/i.test(t)) {
+    return { id: "pants_cargo_tactical", name: "Calças & Bermudas Táticas / Cargo / Pesca" };
+  }
+
+  // 4. Chapéus: Country/Feltro/Pralana vs Safári/Outdoor/Pescador
+  if (/\b(chapeu|chapéu|chapeus|chapéus)\b/i.test(t)) {
+    if (/\b(feltro|pralana|american hat|karanda|karandá|country|cowboy|pantaneiro|lã|veludo|liso|marcatto)\b/i.test(t)) {
+      return { id: "hats_country_cowboy", name: "Chapéus Country, Feltro, Pralana & Cowboy" };
+    }
+    return { id: "hats_safari_outdoor", name: "Chapéus de Pesca, Safári & Outdoor" };
+  }
+
+  // 5. Camisas: Work/Botão vs Agro vs Motors vs UV50+
+  if (/\b(camisa|camiseta|baby look|regata|t-shirt|polo)\b/i.test(t)) {
+    if (/\b(work|safari sarja|manga longa sarja|manga curta sarja|sarja|militar|operacional|botao|botão|de botao|de botão|lisa|sem estampa)\b/i.test(t) && !/\b(ziper|zíper)\b/i.test(t)) {
+      return { id: "shirts_button_work", name: "Camisas Work, Botão & Sarja Utilitária" };
+    }
+    if (/\b(agro|campo|fazenda|trator|algodao|algodão)\b/i.test(t)) {
+      return { id: "agro_field", name: "Força, Campo & Tradição" };
+    }
+    if (/\b(jersey|moto|cross|off-road|trilha|speed|motors)\b/i.test(t)) {
+      return { id: "motors_speed", name: "Trilha, Velocidade & Off-Road" };
+    }
+    return { id: "uv_performance", name: "Camisas UV50+ Performance & Pesca" };
+  }
+
+  if (/\bjersey\b/i.test(t)) return { id: "motors_speed", name: "Trilha, Velocidade & Off-Road" };
   if (/\b(faca|facas|cutelo|cutelaria|canivete|chaira|afiador)\b/i.test(t)) return { id: "cutlery_unique", name: "Cutelaria & Peças Artesanais" };
-  if (/\b(isca|iscas|plug|jig|frog|soft|popper|stick|crankbait|minnow)\b/i.test(t)) return { id: "fishing_lures", name: "Iscas Artificiais & Alta Atratividade" };
+  if (/\b(tenis|tênis|botina|bota|sneaker|sapato)\b/i.test(t)) return { id: "closed_footwear_sneakers", name: "Tênis & Calçados Fechados" };
+  if (/\b(sandalia|sandália|chinelo|boaonda|babuche|clog|slide|pantufa)\b/i.test(t)) return { id: "footwear_sandals_boaonda", name: "Sandálias, Chinelos & Babuches Boaonda" };
+  if (/\b(safari|safári|australiano|palha|pescador)\b/i.test(t)) return { id: "hats_safari_outdoor", name: "Chapéus de Pesca, Safári & Outdoor" };
   if (/\b(bone|boné|trucker|snapback|viseira)\b/i.test(t)) return { id: "caps_trucker_snapback", name: "Bonés Trucker & Snapback" };
-  if (/\b(chapeu|chapéu|safari|safári|australiano|palha)\b/i.test(t)) return { id: "hats_safari_outdoor", name: "Chapéus de Pesca, Safári & Outdoor" };
-  if (/\b(copo|garrafa|caneca|cantil|cooler|termico|térmico)\b/i.test(t)) return { id: "drinkware_thermo", name: "Copos, Garrafas & Térmicos" };
   if (/\b(manguito|manguitos)\b/i.test(t)) return { id: "sun_sleeves_manguitos", name: "Manguitos de Proteção Solar UV50+" };
-  if (/\b(bandana|balaclava|tubeneck)\b/i.test(t)) return { id: "neck_gaiters_balaclavas", name: "Bandanas, Tubenecks & Balaclavas" };
-  if (/\b(sandalia|sandália|chinelo|boaonda|babuche|clog)\b/i.test(t)) return { id: "footwear_sandals_boaonda", name: "Sandálias, Chinelos & Babuches Boaonda" };
-  if (/\b(tenis|tênis|botina|bota|sneaker)\b/i.test(t)) return { id: "closed_footwear_sneakers", name: "Tênis & Calçados Fechados" };
-  if (/\b(caixa de pesca|estojo|maleta|bolsa de pesca)\b/i.test(t)) return { id: "tackle_boxes_storage", name: "Caixas, Estojos & Organização" };
-  if (/\b(jersey|moto|cross|off-road|trilha|speed)\b/i.test(t)) return { id: "motors_speed", name: "Trilha, Velocidade & Off-Road" };
-  if (/\b(agro|campo|fazenda|trator)\b/i.test(t)) return { id: "agro_field", name: "Força, Campo & Tradição" };
+  if (/\b(bandana|balaclava|tubeneck|buff)\b/i.test(t)) return { id: "neck_gaiters_balaclavas", name: "Bandanas, Tubenecks & Balaclavas" };
+  if (/\b(macacao|macacão|jardineira|jardineiras|salopete)\b/i.test(t)) return { id: "overalls_workwear", name: "Macacões, Jardineiras & Operacional" };
+  if (/\b(isca|iscas|plug|jig|frog|soft|popper|stick|crankbait|minnow)\b/i.test(t)) return { id: "fishing_lures", name: "Iscas Artificiais & Alta Atratividade" };
+  if (/\b(vara|carretilha|molinete|linha|anzol|alicate|passagua|passaguá)\b/i.test(t)) return { id: "fishing_tackle_gear", name: "Equipamentos de Pesca & Revenda" };
+  if (/\b(caixa de pesca|caixa pesca|estojo|maleta|bolsa de pesca|organizador)\b/i.test(t)) return { id: "tackle_boxes_storage", name: "Caixas, Estojos & Organização" };
+  if (/\b(copo|garrafa|caneca|cantil|cooler|termico|térmico|elber)\b/i.test(t)) return { id: "drinkware_thermo", name: "Copos, Garrafas & Térmicos" };
+  if (/\b(livro|livros|cartilha|guia)\b/i.test(t)) return { id: "books_publications", name: "Livros, Guias & Publicações" };
+
+  // Fallback Secundário via texto completo
+  if (/\b(aromatizante|cheirinho|difusor)\b/i.test(text)) return { id: "accessories_car_care", name: "Aromatizantes Automotivos & Cuidados" };
+  if (/\b(chaveiro|adesivo)\b/i.test(text)) return { id: "accessories_general", name: "Acessórios, Chaveiros & Adesivos" };
+  if (/\b(calca|calça|bermuda|shorts)\b/i.test(text)) return { id: "pants_cargo_tactical", name: "Calças & Bermudas Táticas / Cargo / Pesca" };
+  if (/\b(pralana|american hat|karanda|karandá|feltro|country)\b/i.test(text)) return { id: "hats_country_cowboy", name: "Chapéus Country, Feltro, Pralana & Cowboy" };
+  if (/\b(jersey|moto|cross|off-road|trilha|speed)\b/i.test(text)) return { id: "motors_speed", name: "Trilha, Velocidade & Off-Road" };
+  if (/\b(agro|campo|fazenda|trator)\b/i.test(text)) return { id: "agro_field", name: "Força, Campo & Tradição" };
 
   return { id: "uv_performance", name: "Camisas UV50+ Performance & Pesca" };
 }
@@ -512,12 +559,22 @@ function renderProducts() {
     card.className = `bg-white rounded-2xl border ${borderClass} p-4 product-shadow transition-all flex flex-col justify-between cursor-pointer group`;
     card.onclick = () => openProductModal(p);
 
-    const imgSrc = (p.cdn_images && p.cdn_images[0]) || (p.gallery && p.gallery[0]) || p.image || "https://placehold.co/400x300?text=Sem+Foto";
+    const allImages = (p.cdn_images && p.cdn_images.length ? p.cdn_images : (p.gallery && p.gallery.length ? p.gallery : (p.image ? [p.image] : []))).filter(Boolean);
+    const imgSrc = allImages[0] || "https://placehold.co/400x300?text=Sem+Foto";
+    const fallbacksJson = JSON.stringify(allImages.slice(1)).replace(/"/g, '&quot;');
+    const safeTitle = (p.title || '').replace(/"/g, '&quot;');
 
     card.innerHTML = `
       <div>
         <div class="relative w-full h-44 rounded-xl overflow-hidden bg-slate-100 mb-3 border border-slate-100">
-          <img src="${imgSrc}" alt="${p.title}" class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+          <img src="${imgSrc}" 
+               alt="${safeTitle}" 
+               data-fallbacks="${fallbacksJson}"
+               data-fallback-idx="0"
+               onerror="try { const fbs = JSON.parse(this.getAttribute('data-fallbacks') || '[]'); const idx = parseInt(this.getAttribute('data-fallback-idx') || '0'); if (idx < fbs.length) { this.setAttribute('data-fallback-idx', idx + 1); this.src = fbs[idx]; } else { this.onerror = null; this.src = 'https://placehold.co/400x300?text=Foto+Indisponivel'; } } catch(e) { this.onerror = null; this.src = 'https://placehold.co/400x300?text=Foto+Indisponivel'; }"
+               referrerpolicy="no-referrer"
+               class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" 
+               loading="lazy" />
           <div class="absolute top-2 left-2 flex flex-col gap-1">
             ${statusBadge}
           </div>

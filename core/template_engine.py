@@ -626,6 +626,190 @@ class TemplateEngine:
                     {"label": "Origem / Distribuição", "default": "Produto original com procedência e garantia"}
                 ],
                 "care_tips": "Após uso em água salgada, lavar levemente com água doce corrente, secar e aplicar óleo lubrificante nos pontos móveis recomendados."
+            },
+
+            # 17. Chapéus Country, Feltro, Pralana & Cowboy
+            "hats_country_cowboy": {
+                "id": "hats_country_cowboy",
+                "name": "Chapéus Country, Feltro, Pralana & Cowboy",
+                "fa_icon": "fa-solid fa-hat-cowboy",
+                "theme_color": "#854d0e",
+                "theme_bg": "#fefce8",
+                "category_keywords": ["feltro", "pralana", "american hat", "karanda", "karandá", "country", "cowboy", "pantaneiro", "lã", "veludo", "marcatto"],
+                "default_tagline": "Elegância Rústica, Copa Estruturada e Acabamento Premium em Couro e Fivela",
+                "act1": {
+                    "tag": "Copa & Estrutura",
+                    "fa_icon": "fa-solid fa-hat-cowboy",
+                    "title": "COPA CONFORMADA E ABA ESTRUTURADA DE ALTA RETENÇÃO",
+                    "desc_tmpl": "Produzido com modelagem clássica que preserva as linhas autênticas do estilo country, o(a) {title} conta com copa firme e aba com retenção de formato para uso prolongado no campo e em eventos."
+                },
+                "act2": {
+                    "tag": "Estilo & Nobreza",
+                    "fa_icon": "fa-solid fa-gem",
+                    "title": "BANDINHA EM COURO COM DETALHES REFINADOS",
+                    "desc_tmpl": "Destaque para o acabamento impecável ao redor da copa com bandinha decorativa e fivela metálica de precisão, conferindo elegância, imponência e robustez à peça."
+                },
+                "act3": {
+                    "tag": "Conforto & Encaixe",
+                    "fa_icon": "fa-solid fa-shield-halved",
+                    "title": "CARNEIRA INTERNA CONFORTÁVEL COM AJUSTE ANATÔMICO",
+                    "desc_tmpl": "Interior equipado com carneira acolchoada anti-suor que garante encaixe macio, estável e confortável na cabeça ao longo de todo o dia, sem apertar."
+                },
+                "base_specs": [
+                    {"label": "Material Principal", "default": "Feltro 100% Lã / Fibra Nobre Especial de Alta Densidade"},
+                    {"label": "Formato da Copa", "default": "Tradicional Country Gota / Clássica Conformada"},
+                    {"label": "Carneira Interna", "default": "Espuma Acolchoada de Alto Conforto e Toque Macio"},
+                    {"label": "Acabamento Externo", "default": "Bandinha exclusiva em couro com fivela/passador metálico"},
+                    {"label": "Uso Indicado", "default": "Lida no campo, cavalgadas, feiras agropecuárias e ocasiões casuais"}
+                ],
+                "care_tips": "Limpar periodicamente com escova de cerdas macias no sentido das fibras do feltro. Não molhar. Guardar apoiado pela copa ou pendurado em local seco."
+            },
+
+            # 18. Camisas Work, Botão & Sarja Utilitária
+            "shirts_button_work": {
+                "id": "shirts_button_work",
+                "name": "Camisas Work, Botão & Sarja Utilitária",
+                "fa_icon": "fa-solid fa-shirt",
+                "theme_color": "#15803d",
+                "theme_bg": "#f0fdf4",
+                "category_keywords": ["work", "camisa work", "camisa safari", "camisa sarja", "camisa de botao", "camisa botao", "camisa de botão", "camisa militar", "manga curta social", "manga longa sarja", "sarja", "operacional", "camisa lisa"],
+                "default_tagline": "Resistência Operacional, Abotoamento Clássico e Bolsos Utilitários de Alta Tenacidade",
+                "act1": {
+                    "tag": "Visual & Solidez",
+                    "fa_icon": "fa-solid fa-shirt",
+                    "title": "TECIDO RESISTENTE DE COR SÓLIDA E CAIMENTO PROFISSIONAL",
+                    "desc_tmpl": "Desenvolvida para máxima durabilidade no trabalho pesado ou no expediente diário, a {title} apresenta visual clássico e sóbrio em tecido encorpado, sem estampas espalhafatosas."
+                },
+                "act2": {
+                    "tag": "Fechamento & Gola",
+                    "fa_icon": "fa-solid fa-square-check",
+                    "title": "ABOTOAMENTO FRONTAL CLÁSSICO E COLARINHO ESTRUTURADO",
+                    "desc_tmpl": "Com fechamento integral por botões de alta tenacidade reforçados em costura em 'X', oferece ajuste prático, alinhamento alinhado e gola firme que mantém a postura durante toda a jornada."
+                },
+                "act3": {
+                    "tag": "Praticidade Utilitária",
+                    "fa_icon": "fa-solid fa-box-open",
+                    "title": "BOLSOS FRONTAIS COM LAPELA E COSTURA REFORÇADA",
+                    "desc_tmpl": "Equipada com bolsos funcionais no peito com fechamento por botão ou lapela protetora, perfeitos para portar ferramentas, canetas, celular e pequenos acessórios com total segurança."
+                },
+                "base_specs": [
+                    {"label": "Fechamento Frontal", "default": "Botões reforçados aplicados com costura em 'X' (sem zíper)"},
+                    {"label": "Colarinho / Gola", "default": "Colarinho tradicional estruturado com entretela de sustentação"},
+                    {"label": "Bolsos Frontais", "default": "Dois bolsos utilitários no peito com lapela protetora"},
+                    {"label": "Composição do Tecido", "default": "Algodão / Sarja de Alta Densidade resistente ao atrito"},
+                    {"label": "Modelagem", "default": "Confortável com folga estratégica para ampla mobilidade nos braços"}
+                ],
+                "care_tips": "Lavar em água fria com sabão neutro. Não usar alvejantes à base de cloro. Secar à sombra e passar em temperatura média."
+            },
+
+            # 19. Calças & Bermudas Táticas / Cargo / Pesca
+            "pants_cargo_tactical": {
+                "id": "pants_cargo_tactical",
+                "name": "Calças & Bermudas Táticas / Cargo / Pesca",
+                "fa_icon": "fa-solid fa-vest",
+                "theme_color": "#334155",
+                "theme_bg": "#f8fafc",
+                "category_keywords": ["calca", "calça", "calças", "bermuda", "bermudas", "shorts", "short", "ripstop", "tactical", "cargo"],
+                "default_tagline": "Resistência Anti-Rasgo Ripstop, Cós Anatômico e Bolsos Cargo Utilitários",
+                "act1": {
+                    "tag": "Resistência & Anti-Rasgo",
+                    "fa_icon": "fa-solid fa-shield-halved",
+                    "title": "TECIDO RIPSTOP REFORÇADO CONTRA ATRITO E VEGETAÇÃO",
+                    "desc_tmpl": "Projetada para suportar a lida no campo, trilhas e pescarias, o(a) {title} é confeccionado em tecido com trama ripstop que impede a propagação de rasgos e perfurações."
+                },
+                "act2": {
+                    "tag": "Ajuste & Firmeza",
+                    "fa_icon": "fa-solid fa-sliders",
+                    "title": "CÓS ANATÔMICO COM PASSADORES REFORÇADOS",
+                    "desc_tmpl": "Estrutura pensada para o movimento, oferecendo encaixe firme na cintura e passadores largos compatíveis com cintos táticos e coldres utilitários."
+                },
+                "act3": {
+                    "tag": "Capacidade de Carga",
+                    "fa_icon": "fa-solid fa-box-open",
+                    "title": "BOLSOS CARGO MULTIFUNCIONAIS COM FECHAMENTO SEGURO",
+                    "desc_tmpl": "Diversos bolsos com lapela distribuídos estrategicamente para acomodar canivetes, celular, alicate de pesca e ferramentas com rápido acesso."
+                },
+                "base_specs": [
+                    {"label": "Modelagem", "default": "Tática Operacional / Cargo com reforço no cavalo e joelhos"},
+                    {"label": "Cós e Fechamento", "default": "Botão de pressão reforçado e zíper com passadores largos para cinto"},
+                    {"label": "Compartimentação", "default": "Múltiplos bolsos multifuncionais (cargo laterais, faca e traseiros)"},
+                    {"label": "Tecido", "default": "Ripstop de alta tenacidade com acabamento repelente a sujeira"},
+                    {"label": "Uso Indicado", "default": "Trabalho operacional, campo, pesca, trilhas e atividades táticas"}
+                ],
+                "care_tips": "Lavar com sabão neutro em ciclo delicado. Secar à sombra. Não alvejar."
+            },
+
+            # 20. Aromatizantes Automotivos & Cuidados
+            "accessories_car_care": {
+                "id": "accessories_car_care",
+                "name": "Aromatizantes Automotivos & Cuidados",
+                "fa_icon": "fa-solid fa-spray-can-sparkles",
+                "theme_color": "#0d9488",
+                "theme_bg": "#f0fdfa",
+                "category_keywords": ["aromatizante", "cheirinho", "aroma", "fragrancia", "fragrância", "difusor", "aromatizador", "little trees", "carro", "automotivo"],
+                "default_tagline": "Perfume Marcante, Eliminação de Odores e Sensação Prolongada de Frescor",
+                "act1": {
+                    "tag": "Aroma & Frescor",
+                    "fa_icon": "fa-solid fa-spray-can-sparkles",
+                    "title": "PERFUME ENVOLVENTE E NEUTRALIZAÇÃO EFICAZ DE ODORES",
+                    "desc_tmpl": "O {title} transforma o interior do veículo ou ambiente com essências selecionadas, eliminando odores desagradáveis e promovendo agradável sensação de limpeza."
+                },
+                "act2": {
+                    "tag": "Difusão & Durabilidade",
+                    "fa_icon": "fa-solid fa-clock",
+                    "title": "TECNOLOGIA DE LIBERAÇÃO CONTÍNUA E PROLONGADA",
+                    "desc_tmpl": "Desenvolvido para liberar a fragrância de forma homogênea e estável, garantindo semanas de ação perfumada constante sem perder a intensidade inicial."
+                },
+                "act3": {
+                    "tag": "Praticidade & Estilo",
+                    "fa_icon": "fa-solid fa-car",
+                    "title": "DESIGN COMPACTO COM FIXAÇÃO SIMPLES NO RETROVISOR OU DIFUSOR",
+                    "desc_tmpl": "Acompanha cordão ou presilha para fácil acoplamento no retrovisor interno ou grade de ventilação, sem manchar superfícies plásticas ou couro."
+                },
+                "base_specs": [
+                    {"label": "Função Principal", "default": "Aromatizador e desodorizador de ambientes automotivos"},
+                    {"label": "Formato de Difusão", "default": "Liberação gradual contínua e homogênea"},
+                    {"label": "Durabilidade Estimada", "default": "Até 30 a 45 dias de ação perfumada"},
+                    {"label": "Fixação", "default": "Cordão para retrovisor interno ou clipe para grade de ar"},
+                    {"label": "Indicação", "default": "Veículos, escritórios, guarda-roupas e pequenos ambientes"}
+                ],
+                "care_tips": "Pendurar livremente evitando contato direto e contínuo com painéis plásticos e revestimentos de couro."
+            },
+
+            # 21. Acessórios, Chaveiros & Adesivos
+            "accessories_general": {
+                "id": "accessories_general",
+                "name": "Acessórios, Chaveiros & Adesivos",
+                "fa_icon": "fa-solid fa-key",
+                "theme_color": "#64748b",
+                "theme_bg": "#f8fafc",
+                "category_keywords": ["chaveiro", "adesivo", "adesivos", "sticker", "pin", "patch", "emblema"],
+                "default_tagline": "Identidade Marcante, Alta Durabilidade e Acabamento de Precisão",
+                "act1": {
+                    "tag": "Identidade & Estilo",
+                    "fa_icon": "fa-solid fa-tag",
+                    "title": "DESIGN EXCLUSIVO E IDENTIDADE VISUAL MARCANTE",
+                    "desc_tmpl": "O(A) {title} traz detalhes refinados e acabamento de alto nível, perfeito para personalizar suas tralhas, chaves, veículos e equipamentos."
+                },
+                "act2": {
+                    "tag": "Resistência & Durabilidade",
+                    "fa_icon": "fa-solid fa-shield-halved",
+                    "title": "MATERIAIS DE ALTA RESISTÊNCIA CONTRA DESGASTE",
+                    "desc_tmpl": "Confeccionado com matéria-prima resistente a atrito, intempéries e raios UV, preservando o brilho e as cores por muito mais tempo."
+                },
+                "act3": {
+                    "tag": "Praticidade & Fixação",
+                    "fa_icon": "fa-solid fa-check",
+                    "title": "ACABAMENTO SEGURO E FÁCIL APLICAÇÃO",
+                    "desc_tmpl": "Projetado para encaixe seguro ou aderência firme sobre superfícies lisas, resistindo à poeira e umidade sem soltar."
+                },
+                "base_specs": [
+                    {"label": "Categoria", "default": "Acessórios e Itens Colecionáveis Originais"},
+                    {"label": "Material", "default": "Liga reforçada / Vinil automotivo de alta resistência"},
+                    {"label": "Aplicação", "default": "Chaves, veículos, embarcações, caixas de pesca e cadernos"},
+                    {"label": "Durabilidade", "default": "Resistente a água e exposição solar"}
+                ],
+                "care_tips": "Limpar com pano seco ou levemente umedecido em água. Não utilizar solventes químicos abrasivos."
             }
         }
 
@@ -633,15 +817,37 @@ class TemplateEngine:
         """
         Detecta com máxima precisão o arquétipo correto do produto.
         O TÍTULO DO PRODUTO É SOBERANO: previne que coleções multi-categoria
-        (ex: 'Bonés & Chapéus') façam camisas serem classificadas incorretamente.
+        façam produtos serem classificados incorretamente.
         """
         t = (title or "").lower().strip()
         cat = (category or "").lower().strip()
         tags_str = " ".join(tags or []).lower()
         vend = (vendor or "").lower().strip()
+        text = f"{t} {cat} {vend} {tags_str}"
 
-        # 1. Regra Soberana do Título: Camisas / Vestuário Superior
+        # 1. Aromatizantes Automotivos & Cuidados (Prioridade máxima para evitar que caiam em camisas)
+        if any(w in t for w in ["aromatizante", "cheirinho", "difusor", "aromatizador", "odorizador", "little trees", "odor"]):
+            return "accessories_car_care"
+
+        # 2. Acessórios Gerais, Chaveiros & Adesivos
+        if any(w in t for w in ["chaveiro", "adesivo", "adesivos", "sticker", "stickers", "patch", "emblema", "pin "]):
+            return "accessories_general"
+
+        # 3. Calças, Bermudas & Shorts (Prioridade antes de camisa para não cair em uv_performance)
+        if any(w in t for w in ["calca", "calça", "calcas", "calças", "bermuda", "bermudas", "shorts", "short", "calcao", "calção"]) and not any(w in t for w in ["camisa", "camiseta"]):
+            return "pants_cargo_tactical"
+
+        # 4. Chapéus: Distinção estrita entre Country/Feltro/Cowboy vs Safári/Outdoor/Pescador
+        if any(w in t for w in ["chapeu", "chapéu", "chapeus", "chapéus"]):
+            if any(w in t for w in ["feltro", "pralana", "american hat", "karanda", "karandá", "country", "cowboy", "pantaneiro", "lã", "veludo", "liso", "marcatto"]):
+                return "hats_country_cowboy"
+            return "hats_safari_outdoor"
+
+        # 5. Camisas / Vestuário Superior: Distinção estrita entre Camisas Work/Botão vs Agro vs Motors vs UV50+
         if any(w in t for w in ["camisa", "camiseta", "baby look", "regata", "t-shirt", "polo"]):
+            # Camisas Work / Botão / Sarja / Lisas (Sem zíper, com botões e bolsos utilitários)
+            if any(w in t for w in ["work", "safari sarja", "manga longa sarja", "manga curta sarja", "sarja", "militar", "operacional", "botao", "botão", "de botao", "de botão", "lisa", "sem estampa"]) and not any(w in t for w in ["ziper", "zíper"]):
+                return "shirts_button_work"
             if any(w in t for w in ["agro", "campo", "fazenda", "trator", "algodao", "algodão"]):
                 return "agro_field"
             if any(w in t for w in ["jersey", "moto", "cross", "off-road", "trilha", "speed", "motors"]):
@@ -651,58 +857,65 @@ class TemplateEngine:
         if "jersey" in t:
             return "motors_speed"
 
-        # 2. Cutelaria & Facas (Prioridade alta para evitar que facas com cabos resinados/iscas virem isca artificial)
+        # 6. Cutelaria & Facas
         if any(w in t for w in ["faca", "facas", "cutelo", "cutelaria", "lamina", "lâmina", "bainha", "canivete", "chaira", "afiador"]):
             return "cutlery_unique"
 
-        # 3. Calçados (Sandálias Boaonda vs Tênis/Botinas)
+        # 7. Calçados (Sandálias Boaonda vs Tênis/Botinas)
         if any(w in t for w in ["tenis", "tênis", "botina", "bota", "sneaker", "sapato"]):
             return "closed_footwear_sneakers"
         if any(w in t for w in ["sandalia", "sandália", "chinelo", "boaonda", "babuche", "clog", "slide", "pantufa"]):
             return "footwear_sandals_boaonda"
 
-        # 4. Chapéus de Pesca / Safári / Australiano / Palha / Nuca
-        if any(w in t for w in ["chapeu", "chapéu", "safari", "safári", "australiano", "palha", "pescador"]):
+        # 8. Chapéus de Pesca / Safári (caso não tenha caído no bloco 4)
+        if any(w in t for w in ["safari", "safári", "australiano", "palha", "pescador"]):
             return "hats_safari_outdoor"
 
-        # 5. Bonés Trucker & Snapback
+        # 9. Bonés Trucker & Snapback
         if any(w in t for w in ["bone", "boné", "trucker", "snapback", "aba curva", "aba reta", "viseira"]):
             return "caps_trucker_snapback"
 
-        # 6. Manguitos (Manga avulsa de proteção)
+        # 10. Manguitos
         if any(w in t for w in ["manguito", "manguitos", "manga avulsa"]):
             return "sun_sleeves_manguitos"
 
-        # 7. Bandanas, Tubenecks & Balaclavas
+        # 11. Bandanas, Tubenecks & Balaclavas
         if any(w in t for w in ["bandana", "balaclava", "tubeneck", "buff", "mascara facial", "máscara facial", "protetor de pescoço"]):
             return "neck_gaiters_balaclavas"
 
-        # 8. Macacões & Jardineiras
+        # 12. Macacões & Jardineiras
         if any(w in t for w in ["macacao", "macacão", "jardineira", "jardineiras", "salopete"]):
             return "overalls_workwear"
 
-        # 9. Iscas Artificiais (Plugs, Jigs, Softs, etc.)
+        # 13. Iscas Artificiais
         if any(w in t for w in ["isca", "iscas", "plug", "jig", "frog", "soft bait", "crankbait", "minnow", "popper", "stick", "twitch"]):
             return "fishing_lures"
 
-        # 10. Equipamentos de Pesca (Varas, Carretilhas, Molinetes, Linhas)
+        # 14. Equipamentos de Pesca (Varas, Carretilhas, Molinetes)
         if any(w in t for w in ["vara", "carretilha", "molinete", "linha", "anzol", "alicate", "passagua", "passaguá"]):
             return "fishing_tackle_gear"
 
-        # 11. Caixas de Pesca & Organização
+        # 15. Caixas de Pesca & Organização
         if any(w in t for w in ["caixa de pesca", "caixa pesca", "estojo", "maleta", "organizador", "porta-vara", "porta vara", "tubo de vara"]):
             return "tackle_boxes_storage"
 
-        # 12. Copos, Garrafas e Canecas Térmicas
+        # 16. Copos, Garrafas e Canecas Térmicas
         if any(w in t for w in ["copo", "garrafa", "caneca", "cantil", "cooler", "termico", "térmico", "termica", "térmica", "elber"]):
             return "drinkware_thermo"
 
-        # 13. Livros & Publicações
+        # 17. Livros & Publicações
         if any(w in t for w in ["livro", "livros", "cartilha", "guia ilustrado", "colorir"]):
             return "books_publications"
 
-        # 14. Fallback Secundário via Categoria / Tags / Vendor (se o título não foi conclusivo)
-        text = f"{t} {cat} {vend} {tags_str}"
+        # 18. Fallback Secundário via Categoria / Tags / Vendor
+        if any(w in text for w in ["aromatizante", "cheirinho", "difusor"]):
+            return "accessories_car_care"
+        if any(w in text for w in ["chaveiro", "adesivo"]):
+            return "accessories_general"
+        if any(w in text for w in ["calca", "calça", "bermuda", "shorts"]):
+            return "pants_cargo_tactical"
+        if any(w in text for w in ["pralana", "american hat", "karanda", "karandá", "feltro", "country"]):
+            return "hats_country_cowboy"
         if any(w in text for w in ["manguito", "manguitos"]):
             return "sun_sleeves_manguitos"
         if any(w in text for w in ["bandana", "balaclava", "tubeneck"]):
@@ -728,13 +941,48 @@ class TemplateEngine:
 
         return "uv_performance"
 
+    def sanitize_specs_for_archetype(self, specs: List[Dict[str, str]], archetype_id: str) -> List[Dict[str, str]]:
+        """
+        Sanitiza a ficha técnica para remover estritamente especificações proibidas
+        ou alucinações incompatíveis com a categoria do produto (Regra de Ouro da Fidelidade).
+        """
+        sanitized = []
+        for s in specs:
+            label = s.get("label", "").lower()
+            val = s.get("value", s.get("default", "")).lower()
+            full = f"{label} {val}"
+
+            # 1. Chapéus Country / Feltro: ZERO cordão jugular, ZERO trava anti-vento, ZERO ilhoses de respiração
+            if archetype_id == "hats_country_cowboy":
+                if any(w in full for w in ["jugular", "vento", "ilhós", "ilhoses", "pescoço", "nuca", "protetor de nuca"]):
+                    continue
+
+            # 2. Camisas Work / Botão: ZERO zíper, ZERO trava de segurança, ZERO gola padre com zíper, ZERO estampa sublimada
+            elif archetype_id == "shirts_button_work":
+                if any(w in full for w in ["zíper", "ziper", "cursor", "trava", "sublimad", "gola padre"]):
+                    continue
+
+            # 3. Calças / Bermudas: ZERO mangas, ZERO gola alta, ZERO zíper frontal no peito
+            elif archetype_id == "pants_cargo_tactical":
+                if any(w in full for w in ["manga", "gola padre", "gola alta", "peito", "punho"]):
+                    continue
+
+            # 4. Aromatizantes & Cuidados: ZERO vestuário, ZERO tecido, ZERO lavagem à máquina, ZERO passar a ferro
+            elif archetype_id in ["accessories_car_care", "accessories_general"]:
+                if any(w in full for w in ["manga", "gola", "tecido", "poliéster", "algodão", "lavar à mão", "lavagem", "ferro", "modelagem"]):
+                    continue
+
+            sanitized.append(s)
+        return sanitized
+
     def extract_product_specs(self, product: Dict[str, Any], archetype_id: str, sibling_specs: List[Dict[str, str]] = None) -> List[Dict[str, str]]:
         """
         Extrai especificações autênticas do produto. Se o sibling_matcher encontrou
-        especificações de um irmão homólogo, elas são priorizadas para garantir fidelidade.
+        especificações de um irmão homólogo, elas são priorizadas e sanitizadas para garantir fidelidade.
         """
         if sibling_specs and len(sibling_specs) >= 2:
-            return [{"label": s["label"], "value": s["default"]} for s in sibling_specs]
+            raw_specs = [{"label": s["label"], "value": s["default"]} for s in sibling_specs]
+            return self.sanitize_specs_for_archetype(raw_specs, archetype_id)
 
         template = self.templates.get(archetype_id, self.templates["uv_performance"])
         base_specs = template["base_specs"]
@@ -881,8 +1129,13 @@ class TemplateEngine:
 
         # Determinar ícone de cuidados apropriado ao arquétipo
         care_icons = {
+            "hats_country_cowboy": "fa-solid fa-hat-cowboy",
             "hats_safari_outdoor": "fa-solid fa-hat-cowboy-side",
             "caps_trucker_snapback": "fa-solid fa-hat-baseball",
+            "shirts_button_work": "fa-solid fa-shirt",
+            "pants_cargo_tactical": "fa-solid fa-vest",
+            "accessories_car_care": "fa-solid fa-spray-can-sparkles",
+            "accessories_general": "fa-solid fa-key",
             "fishing_lures": "fa-solid fa-fish-fins",
             "neck_gaiters_balaclavas": "fa-solid fa-mask-face",
             "sun_sleeves_manguitos": "fa-solid fa-hand-holding-hand",
@@ -930,12 +1183,10 @@ class TemplateEngine:
 
         sibling_specs = sibling_info.get("extracted_specs") if sibling_info else None
         specs = self.extract_product_specs(product, archetype_id, sibling_specs=sibling_specs)
+        specs = self.sanitize_specs_for_archetype(specs, archetype_id)
 
-        # Regra de Negócio: Descartar detalhes técnicos para camisas referente ao Agro e ao Motors, mantendo no Fishing
-        is_shirt = archetype_id in ("uv_performance", "agro_field", "motors_speed") or any(
-            w in title.lower() for w in ["camisa", "camiseta", "jersey", "baby look", "regata", "polo"]
-        )
-        if is_shirt and store_key in ("brk_agro", "brk_motors"):
+        # Regra de Negócio: Descartar detalhes técnicos apenas para camisas sublimadas genéricas no Agro e Motors
+        if archetype_id in ("uv_performance", "agro_field", "motors_speed") and store_key in ("brk_agro", "brk_motors"):
             specs = []
 
         source_type = "sibling_template" if sibling_info else "archetype_specialized"

@@ -145,15 +145,15 @@ class HTMLBuilder:
             if block_split_imgs and len(block_split_imgs) >= 2:
                 media_html = f"""<div class="brk-desc-media brk-desc-media-split">
         <div class="brk-split-item">
-          <img src="{block_split_imgs[0]}" alt="{formatted_title} - Opção 1" loading="lazy" />
+          <img src="{block_split_imgs[0]}" alt="{formatted_title} - Opção 1" loading="lazy" referrerpolicy="no-referrer" />
         </div>
         <div class="brk-split-item">
-          <img src="{block_split_imgs[1]}" alt="{formatted_title} - Opção 2" loading="lazy" />
+          <img src="{block_split_imgs[1]}" alt="{formatted_title} - Opção 2" loading="lazy" referrerpolicy="no-referrer" />
         </div>
       </div>"""
             elif img_src:
                 media_html = f"""<div class="brk-desc-media">
-        <img src="{img_src}" alt="{block.get('alt', formatted_title)}" loading="lazy" />
+        <img src="{img_src}" alt="{block.get('alt', formatted_title)}" loading="lazy" referrerpolicy="no-referrer" />
       </div>"""
             else:
                 media_html = ""

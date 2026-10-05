@@ -26,10 +26,13 @@ class SiblingMatcher:
             clean_text = self._strip_html(html)
             if len(clean_text) >= 150:
                 norm_title = self.normalize_title(p.get("title", ""))
+                tokens = set(norm_title.split())
                 self.rich_candidates.append({
                     "product": p,
                     "clean_text": clean_text,
                     "norm_title": norm_title,
+                    "tokens": tokens,
+                    "archetype_id": p.get("archetype_id"),
                     "specs": self.extract_specs_from_html(html)
                 })
 
@@ -104,10 +107,11 @@ class SiblingMatcher:
 
         return unique[:8]
 
-    def find_best_sibling(self, target_product: Dict[str, Any], min_score: float = 0.68) -> Optional[Dict[str, Any]]:
+    def find_best_sibling(self, target_product: Dict[str, Any], min_score: float = 0.68, target_archetype: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """
         Busca o produto irmão mais semelhante que já tenha descrição rica homologada.
-        Retorna um dicionário com os detalhes do irmão ou None se não atingir a pontuação mínima.
+        Se target_archetype for fornecido, apenas irmãos do mesmo arquétipo são aceitos,
+        garantindo fidelidade absoluta e impedindo contaminação entre categorias distintas.
         """
         target_title = target_product.get("title", "")
         target_norm = self.normalize_title(target_title)
@@ -122,6 +126,8 @@ class SiblingMatcher:
         best_candidate = None
 
         target_tokens = set(target_norm.split())
+        if not target_tokens:
+            return None
 
         for cand in self.rich_candidates:
             cand_p = cand["product"]
@@ -129,18 +135,28 @@ class SiblingMatcher:
             if cand_p.get("handle") == target_handle:
                 continue
 
+            # Se target_archetype foi exigido, verificar compatibilidade do candidato
+            if target_archetype:
+                cand_arch = cand.get("archetype_id") or cand_p.get("archetype_id")
+                if cand_arch and cand_arch != target_archetype:
+                    continue
+
+            cand_tokens = cand["tokens"]
+
+            # Filtro de Alta Performance: requer ao menos 1 token em comum
+            inter = len(target_tokens & cand_tokens)
+            if inter == 0:
+                continue
+
+            union = len(target_tokens | cand_tokens)
+            jaccard_score = inter / union if union > 0 else 0.0
+
             cand_norm = cand["norm_title"]
-            cand_tokens = set(cand_norm.split())
 
             # 1. Similaridade por SequenceMatcher
             seq_score = SequenceMatcher(None, target_norm, cand_norm).ratio()
 
-            # 2. Similaridade de Tokens Jaccard
-            inter = len(target_tokens & cand_tokens)
-            union = len(target_tokens | cand_tokens)
-            jaccard_score = inter / union if union > 0 else 0.0
-
-            # 3. Bônus por Categoria ou Vendor compartilhado
+            # 2. Bônus por Categoria ou Vendor compartilhado
             cand_vendor = (cand_p.get("vendor") or "").lower()
             bonus = 0.0
             if target_vendor and target_vendor == cand_vendor:

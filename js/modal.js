@@ -542,21 +542,10 @@ function getProductModeBHTML(liveP) {
   if (!blocks || blocks.length === 0) {
     const moldes = window.__STORE_MOLDES || {};
     let archKey = liveP.archetype_id;
-    const tLower = (liveP.title || "").toLowerCase();
     if (!archKey || archKey === "uv_performance") {
-      if (isLure || /\b(isca|iscas|plug|jig|frog|soft|popper|stick|crankbait|minnow)\b/i.test(tLower)) archKey = "fishing_lures";
-      else if (/\b(faca|facas|cutelo|cutelaria|canivete|chaira|afiador)\b/i.test(tLower)) archKey = "cutlery_unique";
-      else if (/\b(bone|boné|trucker|snapback|viseira)\b/i.test(tLower)) archKey = "caps_trucker_snapback";
-      else if (/\b(chapeu|chapéu|safari|safári|australiano|palha)\b/i.test(tLower)) archKey = "hats_safari_outdoor";
-      else if (/\b(copo|garrafa|caneca|cantil|cooler|termico|térmico)\b/i.test(tLower)) archKey = "drinkware_thermo";
-      else if (/\b(manguito|manguitos)\b/i.test(tLower)) archKey = "sun_sleeves_manguitos";
-      else if (/\b(bandana|balaclava|tubeneck)\b/i.test(tLower)) archKey = "neck_gaiters_balaclavas";
-      else if (/\b(sandalia|sandália|chinelo|boaonda|babuche|clog)\b/i.test(tLower)) archKey = "footwear_sandals_boaonda";
-      else if (/\b(tenis|tênis|botina|bota|sneaker)\b/i.test(tLower)) archKey = "closed_footwear_sneakers";
-      else if (/\b(caixa de pesca|estojo|maleta|bolsa de pesca)\b/i.test(tLower)) archKey = "tackle_boxes_storage";
-      else if (/\b(jersey|moto|cross|off-road|trilha|speed)\b/i.test(tLower)) archKey = "motors_speed";
-      else if (/\b(agro|campo|fazenda|trator)\b/i.test(tLower)) archKey = "agro_field";
-      else archKey = "uv_performance";
+      if (typeof detectClientArchetype === "function") {
+        archKey = detectClientArchetype(liveP.title, liveP.category, liveP.tags).id;
+      }
     }
     const tmpl = moldes[archKey] || moldes["uv_performance"];
 
@@ -612,7 +601,7 @@ function getProductModeBHTML(liveP) {
   let specs = liveP.specs || [];
   const isShirt = anyShirtWord(formattedTitle);
   const isAgroOrMotors = (liveP.store_key === "brk_agro" || liveP.store_key === "brk_motors" || (typeof currentStore !== "undefined" && (currentStore === "brk_agro" || currentStore === "brk_motors")));
-  if (isShirt && isAgroOrMotors) {
+  if (isShirt && isAgroOrMotors && liveP.archetype_id !== "shirts_button_work") {
     specs = [];
   } else if (specs.length === 0 && window.__STORE_MOLDES) {
     const archKey = liveP.archetype_id || "uv_performance";
@@ -663,12 +652,12 @@ function getProductModeBHTML(liveP) {
     let mediaHtml = "";
     if (blockSplitImgs && blockSplitImgs.length >= 2) {
       mediaHtml = `<div class="brk-desc-media brk-desc-media-split">
-        <div class="brk-split-item"><img src="${blockSplitImgs[0]}" alt="${formattedTitle} - Opção 1" loading="lazy" /></div>
-        <div class="brk-split-item"><img src="${blockSplitImgs[1]}" alt="${formattedTitle} - Opção 2" loading="lazy" /></div>
+        <div class="brk-split-item"><img src="${blockSplitImgs[0]}" alt="${formattedTitle} - Opção 1" loading="lazy" referrerpolicy="no-referrer" /></div>
+        <div class="brk-split-item"><img src="${blockSplitImgs[1]}" alt="${formattedTitle} - Opção 2" loading="lazy" referrerpolicy="no-referrer" /></div>
       </div>`;
     } else if (blockImg) {
       mediaHtml = `<div class="brk-desc-media">
-        <img src="${blockImg}" alt="${block.alt || formattedTitle}" loading="lazy" />
+        <img src="${blockImg}" alt="${block.alt || formattedTitle}" loading="lazy" referrerpolicy="no-referrer" />
       </div>`;
     }
 
