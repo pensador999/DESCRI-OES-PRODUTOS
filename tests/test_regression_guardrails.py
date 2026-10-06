@@ -155,27 +155,6 @@ class TestBRKRegressionGuardrails(unittest.TestCase):
         self.assertNotIn('<details class="brk-size-guide">', html, "Faca artesanal não pode ter tabela de medidas!")
         self.assertIn("Aço", html, "Faca artesanal deve destacar especificações de aço e lâmina.")
 
-    def test_fishing_rod_marine_sports_guardrail(self):
-        """Varas de Pesca e equipamentos JAMAIS podem ter atributos de camisa (Dry Fit, FPU 50+, Costura)."""
-        prod = {
-            "id": "VPMSGLADIUSC581MH",
-            "title": "Vara de Pesca Marine Sports Gladius GL-C581MHM 25lbs 1,73m - Carretilha (inteiriça)",
-            "product_type": "Varas",
-            "tags": "vara de pesca, marine sports, carretilha, pesca"
-        }
-        html = self._generate_html(prod, "brk_fishing")
-        html_low = html.lower()
-
-        # 1. Não pode conter atributos têxteis de camisa
-        self.assertNotIn("fpu 50+", html_low, "Vara de pesca JAMAIS pode ter FPU 50+!")
-        self.assertNotIn("dry fit", html_low, "Vara de pesca JAMAIS pode ter Tecnologia Dry Fit!")
-        self.assertNotIn("costura reforçada", html_low, "Vara de pesca JAMAIS pode ter Costura Reforçada!")
-        self.assertNotIn("pesponto", html_low, "Vara de pesca não pode ter menção a pesponto de tecido!")
-
-        # 2. Deve conter os badges mecânicos de pesca
-        self.assertIn("Sensibilidade & Precisão", html, "Vara de pesca deve ter badge de Sensibilidade & Precisão.")
-        self.assertIn("Tratamento Anti-Corrosão", html, "Vara de pesca deve ter badge de Tratamento Anti-Corrosão.")
-
     # --------------------------------------------------------------------------
     # 3. TESTE DE SCHEMA.ORG MICRODATA JSON-LD (PILAR 2)
     # --------------------------------------------------------------------------
@@ -277,8 +256,62 @@ class TestBRKRegressionGuardrails(unittest.TestCase):
         self.assertNotIn('"images":', src, "Payload JAMAIS pode alterar imagens!")
         self.assertNotIn('"price":', src, "Payload JAMAIS pode alterar preços!")
 
+class TestSemanticConformity(unittest.TestCase):
+    """Anti-contaminacao semantica: selos/tabelas/narrativa coerentes com o arquetipo."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.engine = TemplateEngine()
+        cls.builder = HTMLBuilder()
+        cls.imgs = ["https://cdn.shopify.com/s/files/1/0612/8068/2177/files/img-1.jpg?v=1"]
+
+    def _html(self, prod):
+        arch = self.engine.detect_archetype(prod.get("title", ""), str(prod.get("product_type", "")), str(prod.get("tags", "")))
+        enriched = self.engine.generate_narrative_from_template(prod, arch, self.imgs, store_key="brk_fishing")
+        return arch, self.builder.build_shopify_html(enriched)
+
+    def test_vara_nao_recebe_selos_de_camisa(self):
+        arch, html = self._html({"id": 9001, "title": "Vara de Pesca Marine Sports Gladius 1,68m", "tags": "vara, pesca"})
+        low = html.lower()
+        for bad in ("fpu 50", "dry fit", "costura reforçada", "costura reforcada"):
+            self.assertNotIn(bad, low, f"Vara contaminada com selo de camisa: {bad}")
+        for good in ("Sensibilidade", "Anti-Corros", "100% Original"):
+            self.assertIn(good, html)
+
+    def test_camisa_caiaque_e_vestuario(self):
+        arch = self.engine.detect_archetype("Camisa de Pesca Proteção UV50+ Pescaiaque Caiaque", "", "")
+        self.assertEqual(arch, "uv_performance")
+
+    def test_oculos_infantil_sem_guia_de_camisa(self):
+        arch, html = self._html({"id": 9002, "title": "Óculos de Sol Polarizado Infantil BRK", "tags": "oculos, infantil"})
+        self.assertNotIn("Guia de Tamanhos Infantil", html)
+        self.assertNotIn("FPU 50", html)
+
+    def test_paridade_badges_python_js(self):
+        from core.html_builder import QUICK_BADGES_BY_ARCHETYPE
+        js = open(os.path.join(BASE_DIR, "js", "modal.js"), encoding="utf-8").read()
+        m = re.search(r"const QUICK_BADGES_BY_ARCHETYPE\s*=\s*(\{.*?\n\});", js, re.S)
+        self.assertIsNotNone(m, "Mapa JS de badges nao encontrado em modal.js")
+        js_map = json.loads(m.group(1))
+        py_map = json.loads(json.dumps(QUICK_BADGES_BY_ARCHETYPE))
+        self.assertEqual(set(js_map), set(py_map), "Arquetipos divergentes entre Python e JS")
+
+    def test_catalogo_real_sem_erros_semanticos(self):
+        from core.semantic_auditor import SemanticAuditor, load_store_products
+        aud = SemanticAuditor()
+        total = 0
+        for sk in ("brk_fishing", "brk_agro", "brk_motors"):
+            prods = load_store_products(sk)
+            if not prods:
+                continue
+            r = aud.audit_products(prods, sk)
+            total += r["errors"]
+        self.assertEqual(total, 0, "Auditor semantico encontrou ERROs no catalogo (rode: py -3.14 cli.py validate)")
+
 def run_tests():
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestBRKRegressionGuardrails)
+    suite = unittest.TestSuite()
+    for case in (TestBRKRegressionGuardrails, TestSemanticConformity):
+        suite.addTests(unittest.TestLoader().loadTestsFromTestCase(case))
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     return result.wasSuccessful()

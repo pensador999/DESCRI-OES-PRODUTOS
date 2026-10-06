@@ -137,12 +137,36 @@ def cmd_audit(args):
     print(json.dumps(summary.get("stores_summary", {}), indent=2, ensure_ascii=False))
 
 def cmd_validate(args):
-    """Executa o Agente Auditor de Conformidade Semântica"""
-    print("\n[🛡️] Disparando Agente Auditor de Conformidade Semântica...")
-    from core.semantic_auditor import run_semantic_audit
-    success = run_semantic_audit()
-    if not success:
+    """Agente Auditor de Conformidade Semântica: valida o Modo B de todo o catálogo"""
+    from core.semantic_auditor import SemanticAuditor, load_store_products
+    print("\n[🔎] Agente Auditor de Conformidade Semântica (Modo B)...")
+    stores = ["brk_fishing", "brk_agro", "brk_motors"] if args.store == "all" else [args.store]
+    auditor = SemanticAuditor()
+    all_findings = []
+    tot_err = tot_warn = 0
+    for sk in stores:
+        prods = load_store_products(sk)
+        if args.limit:
+            prods = prods[:args.limit]
+        r = auditor.audit_products(prods, sk)
+        tot_err += r["errors"]
+        tot_warn += r["warnings"]
+        all_findings += r["findings"]
+        print(f"  {sk:12}: {r['audited']:5d} auditados | ERROR={r['errors']} WARNING={r['warnings']}")
+        for rule, n in sorted(r["by_rule"].items(), key=lambda kv: -kv[1]):
+            print(f"      - {rule}: {n}")
+    errs = [f for f in all_findings if f.get("severity") == "ERROR"]
+    for f in errs[:10]:
+        print(f"  ❌ [{f['rule']}] {f['title'][:70]} -> {f['evidence']}")
+    reports_dir = os.path.join(BASE_DIR, "reports")
+    os.makedirs(reports_dir, exist_ok=True)
+    out = os.path.join(reports_dir, f"semantic_audit_{int(datetime.now().timestamp())}.json")
+    with open(out, "w", encoding="utf-8") as fh:
+        json.dump(all_findings, fh, indent=1, ensure_ascii=False)
+    print(f"\n  Total: ERROR={tot_err} WARNING={tot_warn} | Relatório: {out}")
+    if tot_err or (args.strict and tot_warn):
         sys.exit(1)
+    print("  ✅ Nenhuma violação crítica encontrada.")
 
 def cmd_build(args):
     """Compila a distribuição modular otimizada para a Vercel"""
@@ -190,8 +214,11 @@ def main():
     p_test.set_defaults(func=cmd_test)
 
     # Comando validate
-    p_validate = subparsers.add_parser("validate", help="Executa o Agente Auditor de Conformidade Semântica")
-    p_validate.set_defaults(func=cmd_validate)
+    p_val = subparsers.add_parser("validate", help="Agente Auditor de Conformidade Semântica do Modo B")
+    p_val.add_argument("--store", type=str, default="all", choices=["brk_fishing", "brk_agro", "brk_motors", "all"], help="Loja alvo")
+    p_val.add_argument("--limit", type=int, default=None, help="Limite de produtos por loja")
+    p_val.add_argument("--strict", action="store_true", default=False, help="Falha também com WARNINGs")
+    p_val.set_defaults(func=cmd_validate)
 
     # Comando audit
     p_audit = subparsers.add_parser("audit", help="Executa o Sentinela Diário de catálogo")

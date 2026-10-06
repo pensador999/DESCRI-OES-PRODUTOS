@@ -917,7 +917,8 @@ class TemplateEngine:
             return "neck_gaiters_balaclavas"
 
         # 5. Acessórios Gerais, Chaveiros, Adesivos, Camping & Caiaque
-        if any(w in t for w in ["chaveiro", "adesivo", "adesivos", "sticker", "stickers", "patch", "emblema", "pin ", "capa de caiaque", "caiaque", "barraca", "fogareiro", "mesa dobrável", "mesa dobravel", "coleira", "suporte magnético", "suporte magnetico", "personalização nome", "personalizacao nome"]):
+        #    (exclui camisas: "Camisa ... Pescaiaque/Caiaque" é vestuário, não acessório)
+        if any(w in t for w in ["chaveiro", "adesivo", "adesivos", "sticker", "stickers", "patch", "emblema", "pin ", "capa de caiaque", "caiaque", "barraca", "fogareiro", "mesa dobrável", "mesa dobravel", "coleira", "suporte magnético", "suporte magnetico", "personalização nome", "personalizacao nome"]) and not any(w in t for w in ["camisa", "camiseta"]):
             return "accessories_general"
 
         # 6. Calças, Bermudas & Shorts (Prioridade antes de camisa para não cair em uv_performance)
@@ -1306,7 +1307,9 @@ class TemplateEngine:
         is_apparel = archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work", "pants_cargo_tactical")
         
         is_hooded = is_apparel and any(w in t_low for w in ["capuz", "hood", "hoodie"])
-        is_kids = any(w in t_low for w in ["infantil", "kids", "juvenil"]) or bool(re.search(r'\bmini\b', t_low))
+        # is_kids só vale para vestuário: o texto/tabela infantil é de roupa (FPU 50+, Dry Fit, tórax/manga).
+        # Óculos, calçados etc. com "Infantil" no título NÃO podem receber essa narrativa.
+        is_kids = is_apparel and (any(w in t_low for w in ["infantil", "kids", "juvenil"]) or bool(re.search(r'\bmini\b', t_low)))
         if any(w in t_low for w in ["adulto", "unissex adulto"]):
             is_kids = False
         is_short_sleeve = is_apparel and (any(w in t_low for w in ["manga curta", "manga-curta"]) or ("curta" in t_low and "manga" in t_low)) and not any(w in t_low for w in ["manga longa", "manga-longa"])

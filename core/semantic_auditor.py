@@ -1,223 +1,224 @@
 """
-Agente Auditor de Conformidade Semântica (core/semantic_auditor.py)
-Audita a integridade e ausência de contaminação cruzada de arquétipos nas descrições:
-- Impede termos têxteis e de proteção solar em varas de pesca, carretilhas, facas e aromatizantes.
-- Impede menções a zíper em camisas de botão.
-- Impede menções a mangas e golas em calças e bermudas.
-- Impede tabelas de medidas em acessórios e cutelaria.
+Agente Auditor de Conformidade Semantica (core/semantic_auditor.py).
+
+Gera o HTML oficial (Modo B) de cada produto e confere se ele contem informacoes
+INCOMPATIVEIS com a categoria do produto (ex.: selo "FPU 50+" numa vara de pesca).
+
+As regras sao dados (lista RULES), faceis de ler e de ampliar. Cada achado tem:
+  - severity "ERROR"   : conteudo comprovadamente errado -> bloqueia (exit code 1)
+  - severity "WARNING" : suspeito, exige revisao humana  -> nao bloqueia por padrao
+
+Uso:
+  py -3.14 cli.py validate                       # todas as lojas
+  py -3.14 cli.py validate --store brk_fishing --limit 200
+  py -3.14 cli.py validate --strict              # WARNING tambem reprova
 """
 
 import os
+import re
 import sys
 import json
-import re
-from typing import Dict, Any, List, Tuple
-
-# Assegurar UTF-8 no Windows
-if sys.platform == "win32":
-    try:
-        sys.stdout.reconfigure(encoding="utf-8")
-        sys.stderr.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
+from collections import Counter
+from typing import Any, Callable, Dict, List, Optional
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
 from core.template_engine import TemplateEngine
-from core.html_builder import HTMLBuilder
+from core.html_builder import HTMLBuilder, QUICK_BADGES_BY_ARCHETYPE
 
-# Matriz Estrita de Termos Incompatíveis por Categoria / Arquétipo
-INCOMPATIBILITY_RULES = {
-    # 1. Equipamentos de Pesca Mecânica (Varas, Carretilhas, Molinetes, Alicates, Linhas)
-    "fishing_tackle_gear": {
-        "forbidden_terms": [
-            "fpu 50+", "dry fit", "costura reforçada", "zíper frontal", "ziper frontal",
-            "manga longa", "manga curta", "gola padre", "gola anatômica", "pesponto duplo",
-            "tecido tecnológico", "100% poliéster", "algodão nobre"
-        ],
-        "forbidden_tags": ['<details class="brk-size-guide">'],
-        "description": "Equipamentos mecânicos de pesca (Varas, Carretilhas) não podem conter termos de vestuário/tecido"
-    },
-    # 2. Caixas de Pesca e Estojos
-    "tackle_boxes_storage": {
-        "forbidden_terms": [
-            "fpu 50+", "dry fit", "costura reforçada", "manga longa", "gola", "zíper"
-        ],
-        "forbidden_tags": ['<details class="brk-size-guide">'],
-        "description": "Caixas e estojos não podem conter termos de vestuário"
-    },
-    # 3. Iscas Artificiais
-    "fishing_lures": {
-        "forbidden_terms": [
-            "fpu 50+", "dry fit", "costura reforçada", "manga", "gola", "tecido", "zíper"
-        ],
-        "forbidden_tags": ['<details class="brk-size-guide">'],
-        "description": "Iscas artificiais não podem conter termos de vestuário"
-    },
-    # 4. Cutelaria e Facas Artesanais
-    "cutlery_unique": {
-        "forbidden_terms": [
-            "fpu 50+", "dry fit", "costura reforçada", "zíper", "ziper", "manga longa", "manga curta", "gola"
-        ],
-        "forbidden_tags": ['<details class="brk-size-guide">'],
-        "description": "Cutelaria artesanal não pode conter termos de vestuário ou tabela de medidas de roupa"
-    },
-    # 5. Aromatizantes e Cuidados Automotivos
-    "accessories_car_care": {
-        "forbidden_terms": [
-            "fpu 50+", "proteção solar", "dry fit", "costura", "manga", "gola", "tecido tecnológico"
-        ],
-        "forbidden_tags": ['<details class="brk-size-guide">'],
-        "description": "Aromatizantes não podem conter proteção solar nem tabelas de medidas"
-    },
-    # 6. Camisas de Trabalho de Botão
-    "shirts_button_work": {
-        "forbidden_terms": [
-            "zíper", "ziper", "cursor do zíper", "fecho de engate"
-        ],
-        "description": "Camisas Work de botão jamais podem mencionar zíper"
-    },
-    # 7. Calças e Bermudas
-    "pants_cargo_tactical": {
-        "forbidden_terms": [
-            "manga longa", "manga curta", "gola padre", "gola anatômica"
-        ],
-        "description": "Calças e bermudas jamais podem mencionar termos de vestuário superior (mangas, golas)"
-    }
+# Arquetipos de vestuario/acessorios vestiveis: unicos que podem ter tabela de medidas.
+SIZE_GUIDE_OK = {
+    "uv_performance", "agro_field", "motors_speed", "shirts_button_work",
+    "pants_cargo_tactical", "overalls_workwear", "sun_sleeves_manguitos",
+    "neck_gaiters_balaclavas", "gloves_tactical_fishing", "hats_safari_outdoor",
+    "hats_country_cowboy", "caps_trucker_snapback",
+    "footwear_sandals_boaonda", "closed_footwear_sneakers",
 }
+
+# Arquetipos onde NAO pode haver vocabulario textil/de camisa (tecido, FPU, costura, manga...).
+NON_TEXTILE = {
+    "fishing_tackle_gear", "fishing_lures", "tackle_boxes_storage", "cutlery_unique",
+    "drinkware_thermo", "accessories_car_care", "accessories_general",
+    "books_publications", "eyewear_sunglasses",
+    "footwear_sandals_boaonda", "closed_footwear_sneakers",
+}
+
+TEXTILE_RE = re.compile(
+    r"dry ?fit|fpu ?50|pesponto|costura refor|z[ií]per|manga (?:longa|curta)|\bgola\b|"
+    r"algod[aã]o|poli[eé]ster|quick dry",
+    re.IGNORECASE,
+)
+# Vocabulário inequivocamente de camisa (sem poliéster/zíper/algodão, que existem em barracas etc.)
+TEXTILE_STRICT_RE = re.compile(r"dry ?fit|fpu ?50|pesponto|costura refor|manga (?:longa|curta)|quick dry", re.IGNORECASE)
+# A tabela infantil é de camisa (tórax/comprimento/manga)
+KIDS_SHIRT_TABLE_OK = {"uv_performance", "agro_field", "motors_speed", "shirts_button_work"}
+UPPER_BODY_RE = re.compile(r"\bmangas?\b|\bgola\b|colarinho", re.IGNORECASE)
+ZIPPER_RE = re.compile(r"z[ií]per", re.IGNORECASE)
+NEGATED_ZIPPER_RE = re.compile(r"sem\s+z[ií]per(?:es)?", re.IGNORECASE)
+ROD_RE = re.compile(r"\bvaras?\b", re.IGNORECASE)
+BADGE_TITLE_RE = re.compile(r'brk-badge-title">([^<]+)<')
+
+GENERIC_BADGE_TITLES = {"Qualidade Oficial", "Acabamento Premium", "Envio Rápido & Seguro", "Troca Descomplicada"}
+
+
+def _first(regex: "re.Pattern", text: str) -> Optional[str]:
+    m = regex.search(text)
+    return m.group(0) if m else None
+
+
+def _rule_textile_in_non_textile(arch: str, title: str, body: str) -> Optional[str]:
+    if arch == "accessories_general":
+        # camping/chaveiros podem ter poliéster ou zíper (barraca): só acusa o que é inequivocamente de camisa
+        return _first(TEXTILE_STRICT_RE, body)
+    if arch in NON_TEXTILE:
+        return _first(TEXTILE_RE, body)
+    return None
+
+
+def _rule_kids_shirt_table_in_non_shirt(arch: str, title: str, body: str) -> Optional[str]:
+    if arch not in KIDS_SHIRT_TABLE_OK and "Guia de Tamanhos Infantil" in body:
+        return "Guia de Tamanhos Infantil (tabela de camisa: tórax/manga)"
+    return None
+
+
+def _rule_dryfit_in_cotton_shirt(arch: str, title: str, body: str) -> Optional[str]:
+    if arch == "agro_field" and re.search(r"dry ?fit", body, re.IGNORECASE) and re.search(r"algod[aã]o", body, re.IGNORECASE):
+        return "Dry Fit e Algodão no mesmo produto (contraditório)"
+    return None
+
+
+def _rule_size_guide_in_non_wearable(arch: str, title: str, body: str) -> Optional[str]:
+    if arch not in SIZE_GUIDE_OK and '<details class="brk-size-guide"' in body:
+        return "tabela de medidas <details class=brk-size-guide>"
+    return None
+
+
+def _rule_zipper_in_button_shirt(arch: str, title: str, body: str) -> Optional[str]:
+    if arch == "shirts_button_work":
+        return _first(ZIPPER_RE, NEGATED_ZIPPER_RE.sub("", body))
+    return None
+
+
+def _rule_upper_body_in_pants(arch: str, title: str, body: str) -> Optional[str]:
+    if arch == "pants_cargo_tactical":
+        return _first(UPPER_BODY_RE, body)
+    return None
+
+
+def _rule_foreign_badge(arch: str, title: str, body: str) -> Optional[str]:
+    allowed = {b["title"] for b in QUICK_BADGES_BY_ARCHETYPE.get(arch, [])} | GENERIC_BADGE_TITLES
+    foreign = [t for t in BADGE_TITLE_RE.findall(body) if t not in allowed]
+    return ", ".join(foreign) if foreign else None
+
+
+def _rule_bearings_in_rod(arch: str, title: str, body: str) -> Optional[str]:
+    # Vara nao tem rolamentos; o molde "fishing_tackle_gear" e compartilhado com carretilhas/molinetes.
+    if arch == "fishing_tackle_gear" and ROD_RE.search(title) and "rolamento" in body.lower():
+        return "rolamentos (molde generico de equipamento aplicado a uma vara)"
+    return None
+
+
+# (id, severidade, descricao, funcao(arq, titulo, corpo_html) -> trecho_encontrado | None)
+RULES: List[Dict[str, Any]] = [
+    {"id": "textil_em_nao_textil", "severity": "ERROR",
+     "desc": "Vocabulario de roupa (Dry Fit, FPU 50+, costura, zíper, manga, gola, tecido) em produto que nao e roupa",
+     "check": _rule_textile_in_non_textile},
+    {"id": "tabela_medidas_em_nao_vestuario", "severity": "ERROR",
+     "desc": "Tabela de medidas em produto que nao se veste",
+     "check": _rule_size_guide_in_non_wearable},
+    {"id": "ziper_em_camisa_botao", "severity": "ERROR",
+     "desc": "Camisa de botao mencionando zíper/fecho de engate",
+     "check": _rule_zipper_in_button_shirt},
+    {"id": "vestuario_superior_em_calca", "severity": "ERROR",
+     "desc": "Calca/bermuda com termos de vestuario superior (manga, gola, colarinho)",
+     "check": _rule_upper_body_in_pants},
+    {"id": "selo_de_outro_arquetipo", "severity": "ERROR",
+     "desc": "Quick Badge que nao pertence ao arquetipo do produto",
+     "check": _rule_foreign_badge},
+    {"id": "rolamento_em_vara", "severity": "WARNING",
+     "desc": "Ficha tecnica de vara citando rolamentos",
+     "check": _rule_bearings_in_rod},
+    {"id": "tabela_infantil_de_camisa_em_nao_camisa", "severity": "ERROR",
+     "desc": "Tabela infantil de camisa (torax/manga) em produto que nao e camisa",
+     "check": _rule_kids_shirt_table_in_non_shirt},
+    {"id": "dryfit_em_camisa_de_algodao", "severity": "WARNING",
+     "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+     "check": _rule_dryfit_in_cotton_shirt},
+]
+
+
+def strip_non_visible(html: str) -> str:
+    """Remove <style> e <script> (CSS/JSON-LD) para auditar apenas o texto visivel ao cliente."""
+    html = re.sub(r"<style\b.*?</style>", "", html, flags=re.S | re.I)
+    html = re.sub(r"<script\b.*?</script>", "", html, flags=re.S | re.I)
+    return html
+
 
 class SemanticAuditor:
     def __init__(self):
         self.engine = TemplateEngine()
         self.builder = HTMLBuilder()
 
-    def audit_html(self, html: str, archetype_id: str, title: str = "") -> List[str]:
-        """
-        Valida o HTML compilado contra as regras de incompatibilidade do arquétipo.
-        Retorna lista de violações encontradas (vazio se 100% em conformidade).
-        """
-        violations = []
-        rule = INCOMPATIBILITY_RULES.get(archetype_id)
-        if not rule:
-            return violations
-
-        html_low = html.lower()
-
-        # 1. Checagem de termos proibidos
-        for term in rule.get("forbidden_terms", []):
-            if term.lower() in html_low:
-                violations.append(f"Termo proibido detectado: '{term}' em produto do arquétipo '{archetype_id}'")
-
-        # 2. Checagem de tags proibidas
-        for tag in rule.get("forbidden_tags", []):
-            if tag in html:
-                violations.append(f"Tag proibida detectada: '{tag}' em produto do arquétipo '{archetype_id}'")
-
-        return violations
-
-    def audit_product(self, prod: Dict[str, Any], store_key: str = "brk_fishing") -> Tuple[bool, List[str]]:
-        """Gera o HTML no padrão Modo B oficial e audita conformidade semântica"""
+    def render_mode_b(self, prod: Dict[str, Any], store_key: str) -> Dict[str, str]:
+        """Mesmo caminho de geracao usado pela sincronizacao direta (shopify_direct_sync)."""
         title = prod.get("title", "")
-        p_type = str(prod.get("product_type", ""))
-        tags = str(prod.get("tags", ""))
-        arch_id = prod.get("archetype_id") or self.engine.detect_archetype(title, p_type, tags)
+        arch = prod.get("archetype_id") or self.engine.detect_archetype(
+            title, str(prod.get("product_type", "")), str(prod.get("tags", ""))
+        )
+        raw_imgs = prod.get("cdn_images") or prod.get("gallery") or [
+            (i.get("src", i) if isinstance(i, dict) else i) for i in prod.get("images", [])
+        ]
+        imgs = [u for u in raw_imgs if isinstance(u, str) and u.startswith("http")]
+        enriched = self.engine.generate_narrative_from_template(prod, arch, imgs, store_key=store_key)
+        return {"archetype": arch, "html": self.builder.build_shopify_html(enriched)}
 
-        raw_imgs = prod.get("cdn_images") or prod.get("gallery") or [i.get("src", i) if isinstance(i, dict) else i for i in prod.get("images", [])]
-        cdn_imgs = [u for u in raw_imgs if isinstance(u, str) and u.startswith("http")]
+    def audit_html(self, arch: str, title: str, html: str) -> List[Dict[str, str]]:
+        body = strip_non_visible(html)
+        found = []
+        for rule in RULES:
+            evidence = rule["check"](arch, title, body)
+            if evidence:
+                found.append({"rule": rule["id"], "severity": rule["severity"],
+                              "desc": rule["desc"], "evidence": evidence})
+        return found
 
-        enriched = self.engine.generate_narrative_from_template(prod, arch_id, cdn_imgs, store_key=store_key)
-        html = self.builder.build_shopify_html(enriched)
+    def audit_products(self, products: List[Dict[str, Any]], store_key: str,
+                       limit: Optional[int] = None) -> Dict[str, Any]:
+        if limit and limit > 0:
+            products = products[:limit]
+        findings: List[Dict[str, Any]] = []
+        by_rule: Counter = Counter()
+        errors = warnings = crashed = 0
+        for prod in products:
+            try:
+                out = self.render_mode_b(prod, store_key)
+            except Exception as exc:  # um produto com dado ruim nao pode derrubar a auditoria
+                crashed += 1
+                findings.append({"store": store_key, "id": prod.get("id"), "title": prod.get("title", ""),
+                                 "archetype": "?", "rule": "falha_ao_gerar_html", "severity": "ERROR",
+                                 "desc": "Excecao ao gerar o HTML do produto", "evidence": repr(exc)[:200]})
+                errors += 1
+                by_rule["falha_ao_gerar_html"] += 1
+                continue
+            for f in self.audit_html(out["archetype"], prod.get("title", ""), out["html"]):
+                f.update({"store": store_key, "id": prod.get("id"),
+                          "title": prod.get("title", ""), "archetype": out["archetype"]})
+                findings.append(f)
+                by_rule[f["rule"]] += 1
+                if f["severity"] == "ERROR":
+                    errors += 1
+                else:
+                    warnings += 1
+        return {"store": store_key, "audited": len(products), "errors": errors,
+                "warnings": warnings, "crashed": crashed, "by_rule": dict(by_rule), "findings": findings}
 
-        violations = self.audit_html(html, arch_id, title)
-        return len(violations) == 0, violations
 
-    def audit_catalog_file(self, json_path: str, store_key: str, sample_limit: int = 150) -> Dict[str, Any]:
-        """Audita uma amostra representativa ou catálogo completo de uma loja"""
-        if not os.path.exists(json_path):
-            return {"error": f"Arquivo {json_path} não encontrado"}
-
-        with open(json_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        products = data.get("products", []) if isinstance(data, dict) else data
-        if sample_limit and sample_limit > 0:
-            products = products[:sample_limit]
-
-        total = len(products)
-        passed = 0
-        failed = 0
-        error_details = []
-
-        for p in products:
-            ok, viols = self.audit_product(p, store_key)
-            if ok:
-                passed += 1
-            else:
-                failed += 1
-                error_details.append({
-                    "id": p.get("id"),
-                    "title": p.get("title"),
-                    "violations": viols
-                })
-
-        return {
-            "store_key": store_key,
-            "total_audited": total,
-            "passed": passed,
-            "failed": failed,
-            "conformity_rate": round((passed / total) * 100, 2) if total > 0 else 100.0,
-            "errors": error_details
-        }
-
-def run_semantic_audit():
-    print("\n=======================================================")
-    print("  🛡️ AGENTE AUDITOR DE CONFORMIDADE SEMÂNTICA (BRK)")
-    print("=======================================================")
-    auditor = SemanticAuditor()
-
-    # Teste de caso de ouro da Vara Marine Sports
-    vara_test = {
-        "id": "VPMSGLADIUSC581MH",
-        "title": "Vara de Pesca Marine Sports Gladius GL-C581MHM 25lbs 1,73m - Carretilha (inteiriça)",
-        "product_type": "Varas",
-        "tags": "vara de pesca, marine sports, carretilha, pesca"
-    }
-    ok, viols = auditor.audit_product(vara_test, "brk_fishing")
-    if not ok:
-        print(f"❌ [FALHA NO CASO DA VARA DE PESCA]: {viols}")
-        return False
-    else:
-        print("✅ [CASO DE OURO]: Vara Marine Sports Gladius auditada com 0% de contaminação têxtil!")
-
-    stores = [
-        ("brk_fishing", "data/stores/brk_fishing.json"),
-        ("brk_agro", "data/stores/brk_agro.json"),
-        ("brk_motors", "data/stores/brk_motors.json")
-    ]
-
-    all_passed = True
-    for skey, fpath in stores:
-        full_path = os.path.join(BASE_DIR, fpath)
-        print(f"\n[*] Auditando conformidade da loja: {skey.upper()}...")
-        res = auditor.audit_catalog_file(full_path, skey, sample_limit=100)
-        rate = res.get("conformity_rate", 0)
-        print(f"    Taxa de Conformidade: {rate}% ({res.get('passed')}/{res.get('total_audited')} produtos sem contaminação)")
-        if res.get("failed", 0) > 0:
-            print(f"    ⚠️ {res.get('failed')} divergência(s) encontrada(s):")
-            for err in res.get("errors", [])[:3]:
-                print(f"       * {err['title'][:40]}... -> {err['violations']}")
-            all_passed = False
-
-    print("\n=======================================================")
-    if all_passed:
-        print("🎉 [SUCESSO TOTAL] Todas as 3 lojas em 100% de Conformidade Semântica!")
-    else:
-        print("⚠️ [AVISO] Algumas divergências pontuais foram registradas.")
-    print("=======================================================\n")
-    return all_passed
-
-if __name__ == "__main__":
-    success = run_semantic_audit()
-    sys.exit(0 if success else 1)
+def load_store_products(store_key: str) -> List[Dict[str, Any]]:
+    path = os.path.join(BASE_DIR, "data", "stores", f"{store_key}.json")
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Catalogo nao encontrado: {path}")
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return data.get("products", []) if isinstance(data, dict) else data

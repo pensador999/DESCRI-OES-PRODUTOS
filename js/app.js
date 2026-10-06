@@ -227,7 +227,7 @@ function detectClientArchetype(title, category, tags) {
   }
 
   // 5. Chaveiros, Adesivos, Camping & Acessórios Gerais
-  if (/\b(chaveiro|adesivo|adesivos|sticker|stickers|patch|emblema|capa de caiaque|caiaque|barraca|fogareiro|mesa dobrável|mesa dobravel|coleira|suporte magnético|suporte magnetico)\b/i.test(t)) {
+  if (/\b(chaveiro|adesivo|adesivos|sticker|stickers|patch|emblema|capa de caiaque|caiaque|barraca|fogareiro|mesa dobrável|mesa dobravel|coleira|suporte magnético|suporte magnetico)\b/i.test(t) && !/\b(camisa|camiseta)\b/i.test(t)) {
     return { id: "accessories_general", name: "Acessórios, Chaveiros & Adesivos" };
   }
 

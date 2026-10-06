@@ -26,9 +26,179 @@ except ImportError:
         def get_svg_icon(name: str, color: str = "currentColor", size: int = 16, extra_class: str = "") -> str:
             return ""
 
+_TROCA = {"icon": "return", "title": "Troca Fácil BRK", "sub": "Satisfação 100% Garantida"}
+
+# Quick Badges por ARQUÉTIPO (fonte única de verdade).
+# REGRA DE OURO: o arquétipo detectado decide os selos; palavras soltas do título
+# (ex.: "pesca" em "Vara de Pesca") NUNCA podem ativar selos de outra categoria.
+# Cada selo só afirma o que o molde (core/template_engine.py) já afirma na ficha técnica.
+QUICK_BADGES_BY_ARCHETYPE: Dict[str, List[Dict[str, str]]] = {
+    # --- Vestuário superior ---
+    "uv_performance": [
+        {"icon": "sun", "title": "FPU 50+ Certificado", "sub": "Bloqueia 98% Raios UV"},
+        {"icon": "bolt", "title": "Tecnologia Dry Fit", "sub": "Secagem Ultra Rápida"},
+        {"icon": "shield", "title": "Costura Reforçada", "sub": "Pesponto Duplo Anti-Atrito"},
+        _TROCA,
+    ],
+    "agro_field": [
+        {"icon": "care", "title": "Algodão Premium", "sub": "Toque Nobre Aveludado"},
+        {"icon": "sparkle", "title": "Respirabilidade Natural", "sub": "Conforto no Campo"},
+        {"icon": "shield", "title": "Costura Dupla Ombro", "sub": "Estrutura Anti-Deformação"},
+        {"icon": "return", "title": "Troca Fácil BRK", "sub": "Procedência Garantida"},
+    ],
+    "motors_speed": [
+        {"icon": "bolt", "title": "Ventilação Ativa", "sub": "Painéis Microperfurados"},
+        {"icon": "gear", "title": "Aerodinâmica Pro", "sub": "Modelagem Anatômica"},
+        {"icon": "shield", "title": "Costura Resistente", "sub": "Pronta para Off-Road"},
+        {"icon": "return", "title": "Troca Fácil BRK", "sub": "Garantia Oficial BRK"},
+    ],
+    "shirts_button_work": [
+        {"icon": "shield", "title": "Abotoamento Reforçado", "sub": "Botões com Costura em X"},
+        {"icon": "box", "title": "Bolsos Utilitários", "sub": "Funcionais no Peito"},
+        {"icon": "care", "title": "Colarinho Estruturado", "sub": "Postura o Dia Todo"},
+        _TROCA,
+    ],
+    # --- Vestuário inferior / macacões ---
+    "pants_cargo_tactical": [
+        {"icon": "shield", "title": "Ripstop Alta Tenacidade", "sub": "Resistente ao Atrito"},
+        {"icon": "gear", "title": "Reforço Cavalo e Joelhos", "sub": "Modelagem Operacional"},
+        {"icon": "box", "title": "Múltiplos Bolsos Cargo", "sub": "Compartimentação Prática"},
+        _TROCA,
+    ],
+    "overalls_workwear": [
+        {"icon": "shield", "title": "Costuras Duplas e Triplas", "sub": "Alta Tenacidade"},
+        {"icon": "gear", "title": "Alças Reguláveis", "sub": "Engate Rápido"},
+        {"icon": "box", "title": "Bolsos Reforçados", "sub": "Frontais, Laterais e Traseiros"},
+        _TROCA,
+    ],
+    # --- Acessórios de proteção solar ---
+    "sun_sleeves_manguitos": [
+        {"icon": "sun", "title": "FPU 50+ Permanente", "sub": "Proteção Solar Certificada"},
+        {"icon": "bolt", "title": "Tecnologia Dry Fit", "sub": "Evaporação do Suor"},
+        {"icon": "shield", "title": "Silicone no Bíceps", "sub": "Fixação Antiderrapante"},
+        _TROCA,
+    ],
+    "neck_gaiters_balaclavas": [
+        {"icon": "sun", "title": "FPU 50+ Permanente", "sub": "Bloqueador de Radiação"},
+        {"icon": "shield", "title": "Tubular Seamless", "sub": "Sem Costuras Anti-Atrito"},
+        {"icon": "bolt", "title": "Elasticidade 4-Way", "sub": "Memória de Forma"},
+        _TROCA,
+    ],
+    "gloves_tactical_fishing": [
+        {"icon": "shield", "title": "Palma Antiderrapante", "sub": "Material Texturizado"},
+        {"icon": "bolt", "title": "Dorso Respirável", "sub": "Secagem Ultra Rápida"},
+        {"icon": "gear", "title": "Ajuste no Punho", "sub": "Fita Regulável"},
+        _TROCA,
+    ],
+    # --- Chapéus e bonés ---
+    "hats_safari_outdoor": [
+        {"icon": "sun", "title": "Proteção Solar FPU 50+", "sub": "Barreira UV Térmica"},
+        {"icon": "care", "title": "Tecido Respirável", "sub": "Ilhoses de Respiração"},
+        {"icon": "shield", "title": "Ajuste Anatômico", "sub": "Segurança Anti-Vento"},
+        {"icon": "return", "title": "Troca Fácil BRK", "sub": "Satisfação Garantida"},
+    ],
+    "hats_country_cowboy": [
+        {"icon": "shield", "title": "Copa Estruturada", "sub": "Aba com Retenção de Formato"},
+        {"icon": "sparkle", "title": "Bandinha em Couro", "sub": "Fivela Metálica"},
+        {"icon": "care", "title": "Carneira Acolchoada", "sub": "Encaixe Macio e Estável"},
+        _TROCA,
+    ],
+    "caps_trucker_snapback": [
+        {"icon": "care", "title": "Tela Respirável", "sub": "Lateral e Traseira"},
+        {"icon": "shield", "title": "Aba Curva Reforçada", "sub": "6 Costuras de Reforço"},
+        {"icon": "gear", "title": "Fecho Snapback", "sub": "Tamanho Único Ajustável"},
+        _TROCA,
+    ],
+    "eyewear_sunglasses": [
+        {"icon": "sun", "title": "Lentes Polarizadas", "sub": "Filtro Anti-Reflexo"},
+        {"icon": "shield", "title": "Proteção UV400", "sub": "Bloqueio UVA e UVB"},
+        {"icon": "care", "title": "Armação Ultraleve", "sub": "Apoio Nasal Anatômico"},
+        {"icon": "sparkle", "title": "Estojo Incluso", "sub": "Com Flanela de Microfibra"},
+    ],
+    # --- Calçados ---
+    "footwear_sandals_boaonda": [
+        {"icon": "shoe", "title": "Palmilha Antiestresse", "sub": "Amortecimento Anatômico"},
+        {"icon": "shield", "title": "Solado Antiderrapante", "sub": "Aderência em Solo Molhado"},
+        {"icon": "care", "title": "Fácil Higienização", "sub": "Material Antibacteriano"},
+        {"icon": "return", "title": "Troca Fácil BRK", "sub": "Ajuste Perfeito Garantido"},
+    ],
+    "closed_footwear_sneakers": [
+        {"icon": "shoe", "title": "Palmilha Anatômica", "sub": "Espuma de Alta Densidade"},
+        {"icon": "shield", "title": "Solado Antiderrapante", "sub": "Borracha de Alta Tração"},
+        {"icon": "care", "title": "Cabedal Respirável", "sub": "Reforços Laterais"},
+        {"icon": "return", "title": "Troca Fácil BRK", "sub": "Ajuste Perfeito Garantido"},
+    ],
+    # --- Equipamentos de pesca (NUNCA vestuário) ---
+    "fishing_tackle_gear": [
+        {"icon": "fish", "title": "Sensibilidade & Precisão", "sub": "Resposta Rápida ao Toque"},
+        {"icon": "shield", "title": "Estrutura Reforçada", "sub": "Feita para Brigas Pesadas"},
+        {"icon": "gear", "title": "Tratamento Anti-Corrosão", "sub": "Água Doce e Salgada"},
+        {"icon": "sparkle", "title": "100% Original", "sub": "Procedência e Garantia"},
+    ],
+    "fishing_lures": [
+        {"icon": "fish", "title": "Ação & Nado Realista", "sub": "Atratividade para Predadores"},
+        {"icon": "shield", "title": "Pitões Reforçados", "sub": "Componentes em Aço Inox"},
+        {"icon": "gear", "title": "Equilíbrio Hidrodinâmico", "sub": "Arremessos Precisos"},
+        {"icon": "sparkle", "title": "Garantia de Procedência", "sub": "100% Original e Testado"},
+    ],
+    "tackle_boxes_storage": [
+        {"icon": "box", "title": "Polipropileno Anti-Impacto", "sub": "Proteção UV"},
+        {"icon": "shield", "title": "Travas de Alta Pressão", "sub": "Sistema Duplo Reforçado"},
+        {"icon": "gear", "title": "Divisórias Removíveis", "sub": "Reposicionáveis sob Medida"},
+        {"icon": "care", "title": "Vedação Anti-Respingos", "sub": "Contra Água e Poeira"},
+    ],
+    # --- Outros ---
+    "drinkware_thermo": [
+        {"icon": "shield", "title": "Inox 18/8 com Vácuo", "sub": "Parede Dupla Térmica"},
+        {"icon": "bolt", "title": "Máximo Isolamento", "sub": "Bebida Gelada por Horas"},
+        {"icon": "care", "title": "Livre de BPA", "sub": "Sem Condensação Externa"},
+        {"icon": "return", "title": "Garantia BRK", "sub": "Qualidade Assegurada"},
+    ],
+    "cutlery_unique": [
+        {"icon": "knife", "title": "Aço Especial Nobre", "sub": "Alta Retenção de Fio"},
+        {"icon": "gear", "title": "Tratamento Térmico", "sub": "Dureza e Tenacidade"},
+        {"icon": "shield", "title": "Acabamento Artesanal", "sub": "Cabo Anatômico Nobre"},
+        {"icon": "sparkle", "title": "Garantia BRK", "sub": "Procedência Garantida"},
+    ],
+    "accessories_car_care": [
+        {"icon": "sparkle", "title": "Fragrância Contínua", "sub": "Liberação Gradual"},
+        {"icon": "care", "title": "Longa Duração", "sub": "Até 30 a 45 Dias"},
+        {"icon": "gear", "title": "Fixação Prática", "sub": "Retrovisor ou Grade de Ar"},
+        {"icon": "return", "title": "Troca Descomplicada", "sub": "Satisfação Garantida"},
+    ],
+    "accessories_general": [
+        {"icon": "shield", "title": "Resistente à Água", "sub": "E à Exposição Solar"},
+        {"icon": "care", "title": "Material Reforçado", "sub": "Alta Resistência"},
+        {"icon": "sparkle", "title": "Item Original BRK", "sub": "Colecionável Oficial"},
+        {"icon": "return", "title": "Troca Descomplicada", "sub": "Satisfação Garantida"},
+    ],
+    "books_publications": [
+        {"icon": "sparkle", "title": "Impressão em Alta Definição", "sub": "Ilustrações Detalhadas"},
+        {"icon": "care", "title": "Capa Colorida Laminada", "sub": "Papel Resistente"},
+        {"icon": "box", "title": "Ideal para Presentear", "sub": "Para Todas as Idades"},
+        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Rastreamento Completo"},
+    ],
+}
+
+
 class HTMLBuilder:
     def __init__(self):
         pass
+
+    def _render_quick_badges(self, theme_color: str, badges: List[Dict[str, str]]) -> str:
+        items_html = []
+        for b in badges:
+            items_html.append(f"""    <div class="brk-badge-item">
+      <span class="brk-badge-icon">{get_svg_icon(b['icon'], color=theme_color, size=18)}</span>
+      <div class="brk-badge-content">
+        <strong class="brk-badge-title">{b['title']}</strong>
+        <span class="brk-badge-sub">{b['sub']}</span>
+      </div>
+    </div>\n""")
+
+        return f"""  <!-- Selos Rapidos de Confianca e Tecnologia (Destaque Superior) -->
+  <div class="brk-quick-badges">
+{"".join(items_html)}  </div>"""
 
     def _get_tag_icon_name(self, tag_text: str) -> str:
         t = tag_text.lower()
@@ -81,109 +251,25 @@ class HTMLBuilder:
         return "✨"
 
     def _build_quick_badges(self, theme_color: str, archetype_id: str, enriched_data: Dict[str, Any]) -> str:
-        title_low = (enriched_data.get("formatted_title") or enriched_data.get("title") or "").lower()
-        
-        # 1. Equipamentos de Pesca & Revenda (Varas, Carretilhas, Molinetes, Linhas, Alicates)
-        if archetype_id == "fishing_tackle_gear" or any(w in title_low for w in ["vara ", "vara de", "carretilha", "molinete", "linha de pesca", "alicate de pesca", "alicate", "passaguá", "passagua", "anzol", "chumbada", "snap "]):
-            badges = [
-                {"icon": "fish", "title": "Sensibilidade & Precisão", "sub": "Ação Rápida e Resposta Imediata"},
-                {"icon": "gear", "title": "Mecânica Balanceada", "sub": "Componentes de Alta Engenharia"},
-                {"icon": "shield", "title": "Tratamento Anti-Corrosão", "sub": "Resistente à Água Doce e Salinidade"},
-                {"icon": "return", "title": "100% Original com Garantia", "sub": "Procedência Oficial com Nota"}
-            ]
-        # 2. Caixas de Pesca, Maletas e Estojos Organizadores
-        elif archetype_id == "tackle_boxes_storage" or any(w in title_low for w in ["caixa de pesca", "estojo", "maleta", "organizador", "caixa pesca"]):
-            badges = [
-                {"icon": "box", "title": "Polímero de Alta Dureza", "sub": "Anti-Impacto e Alta Durabilidade"},
-                {"icon": "shield", "title": "Travas de Alta Pressão", "sub": "Fechamento Seguro Anti-Abertura"},
-                {"icon": "gear", "title": "Divisórias Modulares", "sub": "Organização Prática Personalizada"},
-                {"icon": "return", "title": "Proteção para Tralhas", "sub": "Segurança para Iscas e Acessórios"}
-            ]
-        # 3. Iscas Artificiais
-        elif archetype_id == "fishing_lures" or "isca" in title_low:
-            badges = [
-                {"icon": "fish", "title": "Ação & Nado Realista", "sub": "Atratividade para Predadores"},
-                {"icon": "shield", "title": "Pitões & Garatéias Inox", "sub": "Componentes em Aço Inox"},
-                {"icon": "gear", "title": "Equilíbrio Hidrodinâmico", "sub": "Arremessos Precisos"},
-                {"icon": "sparkle", "title": "Garantia de Procedência", "sub": "100% Original e Testado"}
-            ]
-        # 4. Vestuário UV50+ Performance & Pesca (EXCLUSIVO PARA ROUPAS E ACESSÓRIOS TÊXTEIS)
-        elif archetype_id in ("uv_performance", "sun_sleeves_manguitos", "neck_gaiters_balaclavas") or (any(w in title_low for w in ["camisa", "camiseta", "manguito", "bandana", "baby look"]) and any(w in title_low for w in ["uv", "dry", "solar", "proteção"])):
-            badges = [
-                {"icon": "sun", "title": "FPU 50+ Certificado", "sub": "Bloqueia 98% Raios UV"},
-                {"icon": "bolt", "title": "Tecnologia Dry Fit", "sub": "Secagem Ultra Rápida"},
-                {"icon": "shield", "title": "Costura Reforçada", "sub": "Pesponto Duplo Anti-Atrito"},
-                {"icon": "return", "title": "Troca Fácil BRK", "sub": "Satisfação 100% Garantida"}
-            ]
-        elif archetype_id == "agro_field" or (any(w in title_low for w in ["camisa", "camiseta"]) and any(w in title_low for w in ["agro", "campo", "trator", "rural"])):
-            badges = [
-                {"icon": "care", "title": "Algodão Premium", "sub": "Toque Nobre Aveludado"},
-                {"icon": "sparkle", "title": "Respirabilidade Natural", "sub": "Conforto no Campo"},
-                {"icon": "shield", "title": "Costura Dupla Ombro", "sub": "Estrutura Anti-Deformação"},
-                {"icon": "return", "title": "Troca Fácil BRK", "sub": "Procedência Garantida"}
-            ]
-        elif archetype_id == "motors_speed" or any(w in title_low for w in ["jersey", "motocross", "off-road", "trilha"]):
-            badges = [
-                {"icon": "bolt", "title": "Ventilação Ativa", "sub": "Painéis Microperfurados"},
-                {"icon": "gear", "title": "Aerodinâmica Pro", "sub": "Modelagem Anatômica"},
-                {"icon": "shield", "title": "Costura Resistente", "sub": "Pronta para Off-Road"},
-                {"icon": "return", "title": "Troca Fácil BRK", "sub": "Garantia Oficial BRK"}
-            ]
-        elif archetype_id in ("hats_safari_outdoor", "caps_trucker_snapback") or any(w in title_low for w in ["chapéu", "chapeu", "boné", "bone"]):
-            badges = [
-                {"icon": "sun", "title": "Proteção Solar FPU 50+", "sub": "Barreira UV Térmica"},
-                {"icon": "care", "title": "Tecido Respirável", "sub": "Ilhoses de Respiração"},
-                {"icon": "shield", "title": "Ajuste Anatômico", "sub": "Segurança Anti-Vento"},
-                {"icon": "return", "title": "Troca Fácil BRK", "sub": "Satisfação Garantida"}
-            ]
-        elif archetype_id in ("footwear_sandals_boaonda", "closed_footwear_sneakers") or any(w in title_low for w in ["sandália", "sandalia", "babuche", "chinelo"]):
-            badges = [
-                {"icon": "shoe", "title": "Palmilha Antiestresse", "sub": "Amortecimento Anatômico"},
-                {"icon": "shield", "title": "Solado Antiderrapante", "sub": "Aderência em Solo Molhado"},
-                {"icon": "care", "title": "Fácil Higienização", "sub": "Material Antibacteriano"},
-                {"icon": "return", "title": "Troca Fácil BRK", "sub": "Ajuste Perfeito Garantido"}
-            ]
-        elif archetype_id == "drinkware_thermo" or any(w in title_low for w in ["copo", "garrafa", "caneca", "térmic", "termic"]):
-            badges = [
-                {"icon": "shield", "title": "Inox 18/8 com Vácuo", "sub": "Parede Dupla Térmica"},
-                {"icon": "bolt", "title": "Máximo Isolamento", "sub": "Bebida Gelada por Horas"},
-                {"icon": "care", "title": "Livre de BPA", "sub": "Sem Condensação Externa"},
-                {"icon": "return", "title": "Garantia BRK", "sub": "Qualidade Assegurada"}
-            ]
-        elif archetype_id == "cutlery_unique" or any(w in title_low for w in ["faca", "cutelaria", "canivete", "lâmina", "lamina"]):
-            badges = [
-                {"icon": "knife", "title": "Aço Especial Nobre", "sub": "Alta Retenção de Fio"},
-                {"icon": "gear", "title": "Tratamento Térmico", "sub": "Dureza e Tenacidade"},
-                {"icon": "shield", "title": "Acabamento Artesanal", "sub": "Cabo Anatômico Nobre"},
-                {"icon": "sparkle", "title": "Garantia BRK", "sub": "Procedência Garantida"}
-            ]
-        else:
-            badges = [
-                {"icon": "shield", "title": "Qualidade Oficial", "sub": "Matéria-Prima Selecionada"},
-                {"icon": "sparkle", "title": "Acabamento Premium", "sub": "Rigoroso Padrão BRK"},
-                {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Rastreamento Completo"},
-                {"icon": "return", "title": "Troca Descomplicada", "sub": "Satisfação Garantida"}
-            ]
-
-        items_html = []
-        for b in badges:
-            items_html.append(f"""    <div class="brk-badge-item">
-      <span class="brk-badge-icon">{get_svg_icon(b['icon'], color=theme_color, size=18)}</span>
-      <div class="brk-badge-content">
-        <strong class="brk-badge-title">{b['title']}</strong>
-        <span class="brk-badge-sub">{b['sub']}</span>
-      </div>
-    </div>\n""")
-
-        return f"""  <!-- Selos Rapidos de Confianca e Tecnologia (Destaque Superior) -->
-  <div class="brk-quick-badges">
-{"".join(items_html)}  </div>"""
+        """
+        Seleciona os 4 selos EXCLUSIVAMENTE pelo arquétipo detectado.
+        Nunca usa palavras soltas do título (ex.: "pesca" em "Vara de Pesca"),
+        pois isso contaminava equipamentos com selos de camisa UV (FPU 50+, Dry Fit).
+        Arquétipo desconhecido -> selos genéricos e seguros.
+        """
+        badges = QUICK_BADGES_BY_ARCHETYPE.get(archetype_id) or [
+            {"icon": "shield", "title": "Qualidade Oficial", "sub": "Matéria-Prima Selecionada"},
+            {"icon": "sparkle", "title": "Acabamento Premium", "sub": "Rigoroso Padrão BRK"},
+            {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Rastreamento Completo"},
+            {"icon": "return", "title": "Troca Descomplicada", "sub": "Satisfação Garantida"},
+        ]
+        return self._render_quick_badges(theme_color, badges)
 
     def _build_size_guide(self, theme_color: str, archetype_id: str, is_kids: bool, is_short_sleeve: bool, enriched_data: Dict[str, Any]) -> str:
         title_low = (enriched_data.get("formatted_title") or enriched_data.get("title") or "").lower()
 
-        # 1. Infantil (Kids)
-        if is_kids:
+        # 1. Infantil (Kids) - a tabela é de CAMISA (tórax/comprimento/manga): só para arquétipos de camisa
+        if is_kids and archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work"):
             guide_title = "Guia de Tamanhos Infantil (02 a 16 Anos)"
             manga_header = "Manga Curta" if is_short_sleeve else "Manga Longa"
             rows = [

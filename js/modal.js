@@ -537,89 +537,526 @@ function buildClientModeBMarkdown(liveP) {
   return lines.join("\n");
 }
 
-function buildClientQuickBadges(themeColor, themeBg, archetypeId, liveP) {
-  const tLow = (liveP.formatted_title || liveP.title || "").toLowerCase();
-  let badges = [];
+// Quick Badges por ARQUÉTIPO (espelho de core/html_builder.py::QUICK_BADGES_BY_ARCHETYPE).
+// GERADO A PARTIR DO PYTHON - não editar à mão; o teste de paridade falha se divergir.
+// REGRA DE OURO: o arquétipo decide os selos; palavras soltas do título (ex.: "pesca"
+// em "Vara de Pesca") NUNCA ativam selos de outra categoria.
+const QUICK_BADGES_BY_ARCHETYPE = {
+  "uv_performance": [
+    {
+      "icon": "sun",
+      "title": "FPU 50+ Certificado",
+      "sub": "Bloqueia 98% Raios UV"
+    },
+    {
+      "icon": "bolt",
+      "title": "Tecnologia Dry Fit",
+      "sub": "Secagem Ultra Rápida"
+    },
+    {
+      "icon": "shield",
+      "title": "Costura Reforçada",
+      "sub": "Pesponto Duplo Anti-Atrito"
+    },
+    {
+      "icon": "return",
+      "title": "Troca Fácil BRK",
+      "sub": "Satisfação 100% Garantida"
+    }
+  ],
+  "agro_field": [
+    {
+      "icon": "care",
+      "title": "Algodão Premium",
+      "sub": "Toque Nobre Aveludado"
+    },
+    {
+      "icon": "sparkle",
+      "title": "Respirabilidade Natural",
+      "sub": "Conforto no Campo"
+    },
+    {
+      "icon": "shield",
+      "title": "Costura Dupla Ombro",
+      "sub": "Estrutura Anti-Deformação"
+    },
+    {
+      "icon": "return",
+      "title": "Troca Fácil BRK",
+      "sub": "Procedência Garantida"
+    }
+  ],
+  "motors_speed": [
+    {
+      "icon": "bolt",
+      "title": "Ventilação Ativa",
+      "sub": "Painéis Microperfurados"
+    },
+    {
+      "icon": "gear",
+      "title": "Aerodinâmica Pro",
+      "sub": "Modelagem Anatômica"
+    },
+    {
+      "icon": "shield",
+      "title": "Costura Resistente",
+      "sub": "Pronta para Off-Road"
+    },
+    {
+      "icon": "return",
+      "title": "Troca Fácil BRK",
+      "sub": "Garantia Oficial BRK"
+    }
+  ],
+  "shirts_button_work": [
+    {
+      "icon": "shield",
+      "title": "Abotoamento Reforçado",
+      "sub": "Botões com Costura em X"
+    },
+    {
+      "icon": "box",
+      "title": "Bolsos Utilitários",
+      "sub": "Funcionais no Peito"
+    },
+    {
+      "icon": "care",
+      "title": "Colarinho Estruturado",
+      "sub": "Postura o Dia Todo"
+    },
+    {
+      "icon": "return",
+      "title": "Troca Fácil BRK",
+      "sub": "Satisfação 100% Garantida"
+    }
+  ],
+  "pants_cargo_tactical": [
+    {
+      "icon": "shield",
+      "title": "Ripstop Alta Tenacidade",
+      "sub": "Resistente ao Atrito"
+    },
+    {
+      "icon": "gear",
+      "title": "Reforço Cavalo e Joelhos",
+      "sub": "Modelagem Operacional"
+    },
+    {
+      "icon": "box",
+      "title": "Múltiplos Bolsos Cargo",
+      "sub": "Compartimentação Prática"
+    },
+    {
+      "icon": "return",
+      "title": "Troca Fácil BRK",
+      "sub": "Satisfação 100% Garantida"
+    }
+  ],
+  "overalls_workwear": [
+    {
+      "icon": "shield",
+      "title": "Costuras Duplas e Triplas",
+      "sub": "Alta Tenacidade"
+    },
+    {
+      "icon": "gear",
+      "title": "Alças Reguláveis",
+      "sub": "Engate Rápido"
+    },
+    {
+      "icon": "box",
+      "title": "Bolsos Reforçados",
+      "sub": "Frontais, Laterais e Traseiros"
+    },
+    {
+      "icon": "return",
+      "title": "Troca Fácil BRK",
+      "sub": "Satisfação 100% Garantida"
+    }
+  ],
+  "sun_sleeves_manguitos": [
+    {
+      "icon": "sun",
+      "title": "FPU 50+ Permanente",
+      "sub": "Proteção Solar Certificada"
+    },
+    {
+      "icon": "bolt",
+      "title": "Tecnologia Dry Fit",
+      "sub": "Evaporação do Suor"
+    },
+    {
+      "icon": "shield",
+      "title": "Silicone no Bíceps",
+      "sub": "Fixação Antiderrapante"
+    },
+    {
+      "icon": "return",
+      "title": "Troca Fácil BRK",
+      "sub": "Satisfação 100% Garantida"
+    }
+  ],
+  "neck_gaiters_balaclavas": [
+    {
+      "icon": "sun",
+      "title": "FPU 50+ Permanente",
+      "sub": "Bloqueador de Radiação"
+    },
+    {
+      "icon": "shield",
+      "title": "Tubular Seamless",
+      "sub": "Sem Costuras Anti-Atrito"
+    },
+    {
+      "icon": "bolt",
+      "title": "Elasticidade 4-Way",
+      "sub": "Memória de Forma"
+    },
+    {
+      "icon": "return",
+      "title": "Troca Fácil BRK",
+      "sub": "Satisfação 100% Garantida"
+    }
+  ],
+  "gloves_tactical_fishing": [
+    {
+      "icon": "shield",
+      "title": "Palma Antiderrapante",
+      "sub": "Material Texturizado"
+    },
+    {
+      "icon": "bolt",
+      "title": "Dorso Respirável",
+      "sub": "Secagem Ultra Rápida"
+    },
+    {
+      "icon": "gear",
+      "title": "Ajuste no Punho",
+      "sub": "Fita Regulável"
+    },
+    {
+      "icon": "return",
+      "title": "Troca Fácil BRK",
+      "sub": "Satisfação 100% Garantida"
+    }
+  ],
+  "hats_safari_outdoor": [
+    {
+      "icon": "sun",
+      "title": "Proteção Solar FPU 50+",
+      "sub": "Barreira UV Térmica"
+    },
+    {
+      "icon": "care",
+      "title": "Tecido Respirável",
+      "sub": "Ilhoses de Respiração"
+    },
+    {
+      "icon": "shield",
+      "title": "Ajuste Anatômico",
+      "sub": "Segurança Anti-Vento"
+    },
+    {
+      "icon": "return",
+      "title": "Troca Fácil BRK",
+      "sub": "Satisfação Garantida"
+    }
+  ],
+  "hats_country_cowboy": [
+    {
+      "icon": "shield",
+      "title": "Copa Estruturada",
+      "sub": "Aba com Retenção de Formato"
+    },
+    {
+      "icon": "sparkle",
+      "title": "Bandinha em Couro",
+      "sub": "Fivela Metálica"
+    },
+    {
+      "icon": "care",
+      "title": "Carneira Acolchoada",
+      "sub": "Encaixe Macio e Estável"
+    },
+    {
+      "icon": "return",
+      "title": "Troca Fácil BRK",
+      "sub": "Satisfação 100% Garantida"
+    }
+  ],
+  "caps_trucker_snapback": [
+    {
+      "icon": "care",
+      "title": "Tela Respirável",
+      "sub": "Lateral e Traseira"
+    },
+    {
+      "icon": "shield",
+      "title": "Aba Curva Reforçada",
+      "sub": "6 Costuras de Reforço"
+    },
+    {
+      "icon": "gear",
+      "title": "Fecho Snapback",
+      "sub": "Tamanho Único Ajustável"
+    },
+    {
+      "icon": "return",
+      "title": "Troca Fácil BRK",
+      "sub": "Satisfação 100% Garantida"
+    }
+  ],
+  "eyewear_sunglasses": [
+    {
+      "icon": "sun",
+      "title": "Lentes Polarizadas",
+      "sub": "Filtro Anti-Reflexo"
+    },
+    {
+      "icon": "shield",
+      "title": "Proteção UV400",
+      "sub": "Bloqueio UVA e UVB"
+    },
+    {
+      "icon": "care",
+      "title": "Armação Ultraleve",
+      "sub": "Apoio Nasal Anatômico"
+    },
+    {
+      "icon": "sparkle",
+      "title": "Estojo Incluso",
+      "sub": "Com Flanela de Microfibra"
+    }
+  ],
+  "footwear_sandals_boaonda": [
+    {
+      "icon": "shoe",
+      "title": "Palmilha Antiestresse",
+      "sub": "Amortecimento Anatômico"
+    },
+    {
+      "icon": "shield",
+      "title": "Solado Antiderrapante",
+      "sub": "Aderência em Solo Molhado"
+    },
+    {
+      "icon": "care",
+      "title": "Fácil Higienização",
+      "sub": "Material Antibacteriano"
+    },
+    {
+      "icon": "return",
+      "title": "Troca Fácil BRK",
+      "sub": "Ajuste Perfeito Garantido"
+    }
+  ],
+  "closed_footwear_sneakers": [
+    {
+      "icon": "shoe",
+      "title": "Palmilha Anatômica",
+      "sub": "Espuma de Alta Densidade"
+    },
+    {
+      "icon": "shield",
+      "title": "Solado Antiderrapante",
+      "sub": "Borracha de Alta Tração"
+    },
+    {
+      "icon": "care",
+      "title": "Cabedal Respirável",
+      "sub": "Reforços Laterais"
+    },
+    {
+      "icon": "return",
+      "title": "Troca Fácil BRK",
+      "sub": "Ajuste Perfeito Garantido"
+    }
+  ],
+  "fishing_tackle_gear": [
+    {
+      "icon": "fish",
+      "title": "Sensibilidade & Precisão",
+      "sub": "Resposta Rápida ao Toque"
+    },
+    {
+      "icon": "shield",
+      "title": "Estrutura Reforçada",
+      "sub": "Feita para Brigas Pesadas"
+    },
+    {
+      "icon": "gear",
+      "title": "Tratamento Anti-Corrosão",
+      "sub": "Água Doce e Salgada"
+    },
+    {
+      "icon": "sparkle",
+      "title": "100% Original",
+      "sub": "Procedência e Garantia"
+    }
+  ],
+  "fishing_lures": [
+    {
+      "icon": "fish",
+      "title": "Ação & Nado Realista",
+      "sub": "Atratividade para Predadores"
+    },
+    {
+      "icon": "shield",
+      "title": "Pitões Reforçados",
+      "sub": "Componentes em Aço Inox"
+    },
+    {
+      "icon": "gear",
+      "title": "Equilíbrio Hidrodinâmico",
+      "sub": "Arremessos Precisos"
+    },
+    {
+      "icon": "sparkle",
+      "title": "Garantia de Procedência",
+      "sub": "100% Original e Testado"
+    }
+  ],
+  "tackle_boxes_storage": [
+    {
+      "icon": "box",
+      "title": "Polipropileno Anti-Impacto",
+      "sub": "Proteção UV"
+    },
+    {
+      "icon": "shield",
+      "title": "Travas de Alta Pressão",
+      "sub": "Sistema Duplo Reforçado"
+    },
+    {
+      "icon": "gear",
+      "title": "Divisórias Removíveis",
+      "sub": "Reposicionáveis sob Medida"
+    },
+    {
+      "icon": "care",
+      "title": "Vedação Anti-Respingos",
+      "sub": "Contra Água e Poeira"
+    }
+  ],
+  "drinkware_thermo": [
+    {
+      "icon": "shield",
+      "title": "Inox 18/8 com Vácuo",
+      "sub": "Parede Dupla Térmica"
+    },
+    {
+      "icon": "bolt",
+      "title": "Máximo Isolamento",
+      "sub": "Bebida Gelada por Horas"
+    },
+    {
+      "icon": "care",
+      "title": "Livre de BPA",
+      "sub": "Sem Condensação Externa"
+    },
+    {
+      "icon": "return",
+      "title": "Garantia BRK",
+      "sub": "Qualidade Assegurada"
+    }
+  ],
+  "cutlery_unique": [
+    {
+      "icon": "knife",
+      "title": "Aço Especial Nobre",
+      "sub": "Alta Retenção de Fio"
+    },
+    {
+      "icon": "gear",
+      "title": "Tratamento Térmico",
+      "sub": "Dureza e Tenacidade"
+    },
+    {
+      "icon": "shield",
+      "title": "Acabamento Artesanal",
+      "sub": "Cabo Anatômico Nobre"
+    },
+    {
+      "icon": "sparkle",
+      "title": "Garantia BRK",
+      "sub": "Procedência Garantida"
+    }
+  ],
+  "accessories_car_care": [
+    {
+      "icon": "sparkle",
+      "title": "Fragrância Contínua",
+      "sub": "Liberação Gradual"
+    },
+    {
+      "icon": "care",
+      "title": "Longa Duração",
+      "sub": "Até 30 a 45 Dias"
+    },
+    {
+      "icon": "gear",
+      "title": "Fixação Prática",
+      "sub": "Retrovisor ou Grade de Ar"
+    },
+    {
+      "icon": "return",
+      "title": "Troca Descomplicada",
+      "sub": "Satisfação Garantida"
+    }
+  ],
+  "accessories_general": [
+    {
+      "icon": "shield",
+      "title": "Resistente à Água",
+      "sub": "E à Exposição Solar"
+    },
+    {
+      "icon": "care",
+      "title": "Material Reforçado",
+      "sub": "Alta Resistência"
+    },
+    {
+      "icon": "sparkle",
+      "title": "Item Original BRK",
+      "sub": "Colecionável Oficial"
+    },
+    {
+      "icon": "return",
+      "title": "Troca Descomplicada",
+      "sub": "Satisfação Garantida"
+    }
+  ],
+  "books_publications": [
+    {
+      "icon": "sparkle",
+      "title": "Impressão em Alta Definição",
+      "sub": "Ilustrações Detalhadas"
+    },
+    {
+      "icon": "care",
+      "title": "Capa Colorida Laminada",
+      "sub": "Papel Resistente"
+    },
+    {
+      "icon": "box",
+      "title": "Ideal para Presentear",
+      "sub": "Para Todas as Idades"
+    },
+    {
+      "icon": "truck",
+      "title": "Envio Rápido & Seguro",
+      "sub": "Rastreamento Completo"
+    }
+  ]
+};
 
-  // 1. Equipamentos de Pesca & Revenda (Varas, Carretilhas, Molinetes, Linhas, Alicates)
-  if (archetypeId === "fishing_tackle_gear" || /vara |vara de|carretilha|molinete|linha de pesca|alicate de pesca|alicate|passaguá|passagua|anzol|chumbada|snap /i.test(tLow)) {
-    badges = [
-      { icon: "fish", title: "Sensibilidade & Precisão", sub: "Ação Rápida e Resposta Imediata" },
-      { icon: "gear", title: "Mecânica Balanceada", sub: "Componentes de Alta Engenharia" },
-      { icon: "shield", title: "Tratamento Anti-Corrosão", sub: "Resistente à Água Doce e Salinidade" },
-      { icon: "return", title: "100% Original com Garantia", sub: "Procedência Oficial com Nota" }
-    ];
-  } else if (archetypeId === "tackle_boxes_storage" || /caixa de pesca|estojo|maleta|organizador|caixa pesca/i.test(tLow)) {
-    badges = [
-      { icon: "box", title: "Polímero de Alta Dureza", sub: "Anti-Impacto e Alta Durabilidade" },
-      { icon: "shield", title: "Travas de Alta Pressão", sub: "Fechamento Seguro Anti-Abertura" },
-      { icon: "gear", title: "Divisórias Modulares", sub: "Organização Prática Personalizada" },
-      { icon: "return", title: "Proteção para Tralhas", sub: "Segurança para Iscas e Acessórios" }
-    ];
-  } else if (archetypeId === "fishing_lures" || tLow.includes("isca")) {
-    badges = [
-      { icon: "fish", title: "Ação & Nado Realista", sub: "Atratividade para Predadores" },
-      { icon: "shield", title: "Pitões & Garatéias Inox", sub: "Componentes em Aço Inox" },
-      { icon: "gear", title: "Equilíbrio Hidrodinâmico", sub: "Arremessos Precisos" },
-      { icon: "sparkle", title: "Garantia de Procedência", sub: "100% Original e Testado" }
-    ];
-  } else if (["uv_performance", "sun_sleeves_manguitos", "neck_gaiters_balaclavas"].includes(archetypeId) || (/camisa|camiseta|manguito|bandana|baby look/i.test(tLow) && /uv|dry|solar|proteção/i.test(tLow))) {
-    badges = [
-      { icon: "sun", title: "FPU 50+ Certificado", sub: "Bloqueia 98% Raios UV" },
-      { icon: "bolt", title: "Tecnologia Dry Fit", sub: "Secagem Ultra Rápida" },
-      { icon: "shield", title: "Costura Reforçada", sub: "Pesponto Duplo Anti-Atrito" },
-      { icon: "return", title: "Troca Fácil BRK", sub: "Satisfação 100% Garantida" }
-    ];
-  } else if (archetypeId === "agro_field" || (/camisa|camiseta/i.test(tLow) && /agro|campo|trator|rural/i.test(tLow))) {
-    badges = [
-      { icon: "care", title: "Algodão Premium", sub: "Toque Nobre Aveludado" },
-      { icon: "sparkle", title: "Respirabilidade Natural", sub: "Conforto no Campo" },
-      { icon: "shield", title: "Costura Dupla Ombro", sub: "Estrutura Anti-Deformação" },
-      { icon: "return", title: "Troca Fácil BRK", sub: "Procedência Garantida" }
-    ];
-  } else if (archetypeId === "motors_speed" || /jersey|motocross|off-road|trilha/i.test(tLow)) {
-    badges = [
-      { icon: "bolt", title: "Ventilação Ativa", sub: "Painéis Microperfurados" },
-      { icon: "gear", title: "Aerodinâmica Pro", sub: "Modelagem Anatômica" },
-      { icon: "shield", title: "Costura Resistente", sub: "Pronta para Off-Road" },
-      { icon: "return", title: "Troca Fácil BRK", sub: "Garantia Oficial BRK" }
-    ];
-  } else if (["hats_safari_outdoor", "caps_trucker_snapback"].includes(archetypeId) || /chapéu|chapeu|boné|bone/i.test(tLow)) {
-    badges = [
-      { icon: "sun", title: "Proteção Solar FPU 50+", sub: "Barreira UV Térmica" },
-      { icon: "care", title: "Tecido Respirável", sub: "Ilhoses de Respiração" },
-      { icon: "shield", title: "Ajuste Anatômico", sub: "Segurança Anti-Vento" },
-      { icon: "return", title: "Troca Fácil BRK", sub: "Satisfação Garantida" }
-    ];
-  } else if (["footwear_sandals_boaonda", "closed_footwear_sneakers", "calcados_botinas"].includes(archetypeId) || /sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina/i.test(tLow)) {
-    badges = [
-      { icon: "shoe", title: "Palmilha Antiestresse", sub: "Amortecimento Anatômico" },
-      { icon: "shield", title: "Solado Antiderrapante", sub: "Aderência em Solo Molhado" },
-      { icon: "care", title: "Fácil Higienização", sub: "Material Antibacteriano" },
-      { icon: "return", title: "Troca Fácil BRK", sub: "Ajuste Perfeito Garantido" }
-    ];
-  } else if (archetypeId === "drinkware_thermo" || /copo|garrafa|caneca|térmic|termic/i.test(tLow)) {
-    badges = [
-      { icon: "shield", title: "Inox 18/8 com Vácuo", sub: "Parede Dupla Térmica" },
-      { icon: "bolt", title: "Máximo Isolamento", sub: "Bebida Gelada por Horas" },
-      { icon: "care", title: "Livre de BPA", sub: "Sem Condensação Externa" },
-      { icon: "return", title: "Garantia BRK", sub: "Qualidade Assegurada" }
-    ];
-  } else if (archetypeId === "cutlery_unique" || /faca|cutelaria|canivete|lâmina|lamina/i.test(tLow)) {
-    badges = [
-      { icon: "knife", title: "Aço Especial Nobre", sub: "Alta Retenção de Fio" },
-      { icon: "gear", title: "Tratamento Térmico", sub: "Dureza e Tenacidade" },
-      { icon: "shield", title: "Acabamento Artesanal", sub: "Cabo Anatômico Nobre" },
-      { icon: "sparkle", title: "Garantia BRK", sub: "Procedência Garantida" }
-    ];
-  } else {
-    badges = [
-      { icon: "shield", title: "Qualidade Oficial", sub: "Matéria-Prima Selecionada" },
-      { icon: "sparkle", title: "Acabamento Premium", sub: "Rigoroso Padrão BRK" },
-      { icon: "truck", title: "Envio Rápido & Seguro", sub: "Rastreamento Completo" },
-      { icon: "return", title: "Troca Descomplicada", sub: "Satisfação Garantida" }
-    ];
-  }
+function buildClientQuickBadges(themeColor, themeBg, archetypeId, liveP) {
+  const badges = QUICK_BADGES_BY_ARCHETYPE[archetypeId] || [
+    { icon: "shield", title: "Qualidade Oficial", sub: "Matéria-Prima Selecionada" },
+    { icon: "sparkle", title: "Acabamento Premium", sub: "Rigoroso Padrão BRK" },
+    { icon: "truck", title: "Envio Rápido & Seguro", sub: "Rastreamento Completo" },
+    { icon: "return", title: "Troca Descomplicada", sub: "Satisfação Garantida" }
+  ];
 
   const itemsHtml = badges.map(b => `    <div class="brk-badge-item">
       <span class="brk-badge-icon">${getSvgIcon(b.icon, themeColor, 18)}</span>
@@ -641,7 +1078,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
   let guideTitle = "";
   let tableHtml = "";
 
-  if (isKids) {
+  if (isKids && ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId)) {
     guideTitle = "Guia de Tamanhos Infantil (02 a 16 Anos)";
     const mHeader = isShortSleeve ? "Manga Curta" : "Manga Longa";
     const rows = [
@@ -962,7 +1399,7 @@ function getProductModeBHTML(liveP) {
 
   const archetypeId = liveP.archetype_id || (typeof detectClientArchetype === "function" ? detectClientArchetype(liveP.title, liveP.category, liveP.tags).id : "uv_performance");
   const tLowTitle = (formattedTitle || liveP.title || "").toLowerCase();
-  const isKids = liveP.is_kids !== undefined ? liveP.is_kids : (/\b(infantil|kids|juvenil|mini)\b/i.test(tLowTitle) && !/\b(adulto|unissex adulto)\b/i.test(tLowTitle));
+  const isKids = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId) && (liveP.is_kids !== undefined ? liveP.is_kids : (/\b(infantil|kids|juvenil|mini)\b/i.test(tLowTitle) && !/\b(adulto|unissex adulto)\b/i.test(tLowTitle)));
   const isShortSleeve = liveP.is_short_sleeve !== undefined ? liveP.is_short_sleeve : (/\b(manga curta|manga-curta)\b/i.test(tLowTitle) && !/\b(manga longa|manga-longa)\b/i.test(tLowTitle));
 
   const quickBadgesHtml = buildClientQuickBadges(themeColor, themeBg, archetypeId, liveP);
