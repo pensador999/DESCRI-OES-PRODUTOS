@@ -875,7 +875,7 @@ def build_dist():
             sync_script = os.path.join(target_onedrive_dir, "sync_github.py")
             if os.path.exists(sync_script):
                 print("[GITHUB SYNC] Executando sync_github.py...")
-                res = subprocess.run([sys.executable, sync_script, "fix: auditoria completa do fluxo, eliminacao de placeholder externo, modernizacao do vigilante com 1612 correcoes segmentadas"], cwd=target_onedrive_dir, capture_output=True, text=True)
+                res = subprocess.run([sys.executable, sync_script, "fix: auditoria do fluxo concluida, CSVs segmentados menores que 15MB para importacao Shopify sem timeout"], cwd=target_onedrive_dir, capture_output=True, text=True)
                 print("  -> Saída do Git Sync:", res.stdout.strip())
         except Exception as e:
             print(f"  -> Erro na sincronização com GitHub: {e}")

@@ -141,13 +141,18 @@ class DailySentinel:
                 "corrections_generated": len(store_corrections)
             }
 
-        # 1. Salvar Planilhas Diárias de Correções (Segmentadas e Mestre Consolidada)
-        csv_filename = f"shopify_correcoes_{now.strftime('%Y%m%d')}.csv"
+        # 1. Salvar Planilhas Diárias de Correções (Segmentadas e Particionadas < 15 MB)
+        # Dividir fishing_quebradas em 2 lotes seguros para importação sem timeout na Shopify e compatível com Vercel
+        fq = corrections_by_category["fishing_quebradas"]
+        mid_fq = len(fq) // 2
+        fq_p1 = fq[:mid_fq]
+        fq_p2 = fq[mid_fq:]
+
+        csv_filename = "shopify_correcoes_fishing_quebradas_parte1.csv"
         csv_path = os.path.join(self.daily_fixes_dir, csv_filename)
         csv_files_to_save = {
-            csv_filename: all_daily_corrections,
-            "shopify_correcoes_todas_lojas.csv": all_daily_corrections,
-            "shopify_correcoes_fishing_fotos_quebradas.csv": corrections_by_category["fishing_quebradas"],
+            "shopify_correcoes_fishing_quebradas_parte1.csv": fq_p1,
+            "shopify_correcoes_fishing_quebradas_parte2.csv": fq_p2,
             "shopify_correcoes_fishing_sem_descricao.csv": corrections_by_category["fishing_sem_descricao"],
             "shopify_correcoes_agro.csv": corrections_by_category["agro_todas"],
             "shopify_correcoes_motors.csv": corrections_by_category["motors_todas"]
