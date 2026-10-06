@@ -83,8 +83,9 @@ function switchModalMode(mode) {
   const btnB = document.getElementById("btn-mode-b");
   const btnA = document.getElementById("btn-mode-a");
   const btnOrig = document.getElementById("btn-mode-orig");
+  const btnDiff = document.getElementById("btn-mode-diff");
 
-  [btnB, btnA, btnOrig].forEach(b => {
+  [btnB, btnA, btnOrig, btnDiff].forEach(b => {
     if (b) b.className = "px-3.5 py-1.5 rounded-lg font-bold transition-all text-slate-600 hover:text-slate-900";
   });
 
@@ -94,6 +95,8 @@ function switchModalMode(mode) {
     btnA.className = "px-3.5 py-1.5 rounded-lg font-extrabold transition-all bg-blue-600 text-white shadow-sm";
   } else if (mode === "orig" && btnOrig) {
     btnOrig.className = "px-3.5 py-1.5 rounded-lg font-extrabold transition-all bg-red-600 text-white shadow-sm";
+  } else if (mode === "diff" && btnDiff) {
+    btnDiff.className = "px-3.5 py-1.5 rounded-lg font-extrabold transition-all bg-indigo-600 text-white shadow-sm";
   }
 
   updateModalView();
@@ -113,7 +116,7 @@ function updateModalView() {
     }
     htmlToShow = currentModalProduct.mode_b_html || "<p>HTML Modo B não disponível</p>";
     if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-emerald-50 border-emerald-200 text-emerald-800";
-    if (bannerDesc) bannerDesc.innerHTML = "<strong>Modo B Ativo:</strong> Redesenho persuasivo em 3 Atos narrativos com ícones vetoriais SVG estilo Font Awesome, layout sem corte e aviso legal no final.";
+    if (bannerDesc) bannerDesc.innerHTML = "<strong>Modo B Ativo:</strong> Redesenho persuasivo em 3 Atos narrativos com Badges Rápidos no topo, Tabela de Medidas Inteligente, Schema.org SEO e ícones vetoriais SVG estilo Font Awesome.";
   } else if (currentModalMode === "a") {
     htmlToShow = currentModalProduct.mode_a_html || currentModalProduct.original_body_html || "<p>Sem HTML original</p>";
     if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-blue-50 border-blue-200 text-blue-800";
@@ -122,10 +125,58 @@ function updateModalView() {
     htmlToShow = currentModalProduct.original_body_html || "<p class='text-slate-400 italic'>Este produto não continha descrição original cadastrada.</p>";
     if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-red-50 border-red-200 text-red-800";
     if (bannerDesc) bannerDesc.innerHTML = "<strong>Conteúdo Original:</strong> Exibe como o produto estava antes na loja (contendo imagens com erro 404 da AWS S3 se houver).";
+  } else if (currentModalMode === "diff") {
+    if (typeof getProductModeBHTML === "function") {
+      currentModalProduct.mode_b_html = getProductModeBHTML(currentModalProduct);
+    }
+    const htmlB = currentModalProduct.mode_b_html || "<p>HTML Modo B não disponível</p>";
+    const htmlA = currentModalProduct.mode_a_html || currentModalProduct.original_body_html || "<p class='text-slate-400 italic'>Sem descrição original prévia cadastrada.</p>";
+
+    if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-indigo-50 border-indigo-200 text-indigo-900";
+    if (bannerDesc) bannerDesc.innerHTML = "<strong>Comparador Lado a Lado (Diff):</strong> Compare a versão original com a nova versão blindada 100/100 (com Badges Rápidos, 3 Atos, Tabela de Medidas e Schema SEO).";
+
+    htmlToShow = `
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <!-- Coluna Esquerda: Versao Original / Modo A -->
+      <div class="border-2 border-slate-200 rounded-2xl p-4 bg-slate-50/50 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-200">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-1 rounded-md bg-slate-800 text-white text-[11px] font-extrabold uppercase tracking-wider">Original / Modo A</span>
+            <span class="text-xs text-slate-500 font-medium">Estrutura Prévia</span>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">⚠️ Legado</span>
+        </div>
+        <div class="overflow-y-auto max-h-[680px] bg-white p-4 rounded-xl border border-slate-200 text-xs">
+          ${htmlA}
+        </div>
+      </div>
+
+      <!-- Coluna Direita: Modo B Otimizado BRK -->
+      <div class="border-2 border-emerald-300 rounded-2xl p-4 bg-emerald-50/30 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-emerald-200">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-1 rounded-md bg-emerald-600 text-white text-[11px] font-extrabold uppercase tracking-wider">Novo Padrão Oficial BRK</span>
+            <span class="text-xs text-emerald-800 font-bold">Modo B Blindado</span>
+          </div>
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+            <span>✓</span> Score 100/100
+          </span>
+        </div>
+        <div class="overflow-y-auto max-h-[680px] bg-white p-4 rounded-xl border border-slate-200 text-xs">
+          ${htmlB}
+        </div>
+      </div>
+    </div>`;
   }
 
   if (contentElem) contentElem.innerHTML = htmlToShow;
-  if (sourceElem) sourceElem.textContent = htmlToShow;
+  if (sourceElem) {
+    if (currentModalMode === "diff") {
+      sourceElem.textContent = currentModalProduct.mode_b_html || "";
+    } else {
+      sourceElem.textContent = htmlToShow;
+    }
+  }
 }
 
 // Salvar Direto na Shopify via API Serverless Vercel (/api/shopify_direct)
@@ -486,6 +537,232 @@ function buildClientModeBMarkdown(liveP) {
   return lines.join("\n");
 }
 
+function buildClientQuickBadges(themeColor, themeBg, archetypeId, liveP) {
+  const tLow = (liveP.formatted_title || liveP.title || "").toLowerCase();
+  let badges = [];
+
+  if (["uv_performance", "sun_sleeves_manguitos", "neck_gaiters_balaclavas"].includes(archetypeId) || tLow.includes("uv") || tLow.includes("pesca")) {
+    badges = [
+      { icon: "sun", title: "FPU 50+ Certificado", sub: "Bloqueia 98% Raios UV" },
+      { icon: "bolt", title: "Tecnologia Dry Fit", sub: "Secagem Ultra Rápida" },
+      { icon: "shield", title: "Costura Reforçada", sub: "Pesponto Duplo Anti-Atrito" },
+      { icon: "return", title: "Troca Fácil BRK", sub: "Satisfação 100% Garantida" }
+    ];
+  } else if (archetypeId === "agro_field" || tLow.includes("agro") || tLow.includes("campo")) {
+    badges = [
+      { icon: "care", title: "Algodão Premium", sub: "Toque Nobre Aveludado" },
+      { icon: "sparkle", title: "Respirabilidade Natural", sub: "Conforto no Campo" },
+      { icon: "shield", title: "Costura Dupla Ombro", sub: "Estrutura Anti-Deformação" },
+      { icon: "return", title: "Troca Fácil BRK", sub: "Procedência Garantida" }
+    ];
+  } else if (archetypeId === "motors_speed" || tLow.includes("jersey") || tLow.includes("moto") || tLow.includes("trilha")) {
+    badges = [
+      { icon: "bolt", title: "Ventilação Ativa", sub: "Painéis Microperfurados" },
+      { icon: "gear", title: "Aerodinâmica Pro", sub: "Modelagem Anatômica" },
+      { icon: "shield", title: "Costura Resistente", sub: "Pronta para Off-Road" },
+      { icon: "return", title: "Troca Fácil BRK", sub: "Garantia Oficial BRK" }
+    ];
+  } else if (["hats_safari_outdoor", "caps_trucker_snapback"].includes(archetypeId) || /chapéu|chapeu|boné|bone/i.test(tLow)) {
+    badges = [
+      { icon: "sun", title: "Proteção Solar FPU 50+", sub: "Barreira UV Térmica" },
+      { icon: "care", title: "Tecido Respirável", sub: "Ilhoses de Respiração" },
+      { icon: "shield", title: "Ajuste Anatômico", sub: "Segurança Anti-Vento" },
+      { icon: "return", title: "Troca Fácil BRK", sub: "Satisfação Garantida" }
+    ];
+  } else if (["footwear_sandals_boaonda", "closed_footwear_sneakers"].includes(archetypeId) || /sandália|sandalia|babuche|chinelo/i.test(tLow)) {
+    badges = [
+      { icon: "shoe", title: "Palmilha Antiestresse", sub: "Amortecimento Anatômico" },
+      { icon: "shield", title: "Solado Antiderrapante", sub: "Aderência em Solo Molhado" },
+      { icon: "care", title: "Fácil Higienização", sub: "Material Antibacteriano" },
+      { icon: "return", title: "Troca Fácil BRK", sub: "Ajuste Perfeito Garantido" }
+    ];
+  } else if (archetypeId === "fishing_lures" || tLow.includes("isca")) {
+    badges = [
+      { icon: "fish", title: "Ação & Nado Realista", sub: "Atratividade para Predadores" },
+      { icon: "shield", title: "Pitões Reforçados", sub: "Componentes em Aço Inox" },
+      { icon: "gear", title: "Equilíbrio Hidrodinâmico", sub: "Arremessos Precisos" },
+      { icon: "sparkle", title: "Garantia de Procedência", sub: "100% Original e Testado" }
+    ];
+  } else if (archetypeId === "drinkware_thermo" || /copo|garrafa|caneca|térmic|termic/i.test(tLow)) {
+    badges = [
+      { icon: "shield", title: "Inox 18/8 com Vácuo", sub: "Parede Dupla Térmica" },
+      { icon: "bolt", title: "Máximo Isolamento", sub: "Bebida Gelada por Horas" },
+      { icon: "care", title: "Livre de BPA", sub: "Sem Condensação Externa" },
+      { icon: "return", title: "Garantia BRK", sub: "Qualidade Assegurada" }
+    ];
+  } else if (archetypeId === "cutlery_unique" || tLow.includes("faca")) {
+    badges = [
+      { icon: "knife", title: "Aço Especial Nobre", sub: "Alta Retenção de Fio" },
+      { icon: "gear", title: "Tratamento Térmico", sub: "Dureza e Tenacidade" },
+      { icon: "shield", title: "Acabamento Artesanal", sub: "Cabo Anatômico Nobre" },
+      { icon: "sparkle", title: "Garantia BRK", sub: "Procedência Garantida" }
+    ];
+  } else {
+    badges = [
+      { icon: "shield", title: "Qualidade Oficial", sub: "Matéria-Prima Selecionada" },
+      { icon: "sparkle", title: "Acabamento Premium", sub: "Rigoroso Padrão BRK" },
+      { icon: "truck", title: "Envio Rápido & Seguro", sub: "Rastreamento Completo" },
+      { icon: "return", title: "Troca Descomplicada", sub: "Satisfação Garantida" }
+    ];
+  }
+
+  const itemsHtml = badges.map(b => `    <div class="brk-badge-item">
+      <span class="brk-badge-icon">${getSvgIcon(b.icon, themeColor, 18)}</span>
+      <div class="brk-badge-content">
+        <strong class="brk-badge-title">${b.title}</strong>
+        <span class="brk-badge-sub">${b.sub}</span>
+      </div>
+    </div>`).join("\n");
+
+  return `  <!-- Selos Rapidos de Confianca e Tecnologia (Destaque Superior) -->
+  <div class="brk-quick-badges">
+${itemsHtml}
+  </div>`;
+}
+
+function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortSleeve, liveP) {
+  const tLow = (liveP.formatted_title || liveP.title || "").toLowerCase();
+
+  let guideTitle = "";
+  let tableHtml = "";
+
+  if (isKids) {
+    guideTitle = "Guia de Tamanhos Infantil (02 a 16 Anos)";
+    const mHeader = isShortSleeve ? "Manga Curta" : "Manga Longa";
+    const rows = [
+      ["02 Anos", "64 cm", "42 cm", isShortSleeve ? "14 cm" : "40 cm"],
+      ["04 Anos", "70 cm", "46 cm", isShortSleeve ? "15 cm" : "44 cm"],
+      ["06 Anos", "76 cm", "50 cm", isShortSleeve ? "16 cm" : "48 cm"],
+      ["08 Anos", "82 cm", "54 cm", isShortSleeve ? "17 cm" : "52 cm"],
+      ["10 Anos", "88 cm", "58 cm", isShortSleeve ? "18 cm" : "56 cm"],
+      ["12 Anos", "92 cm", "62 cm", isShortSleeve ? "19 cm" : "60 cm"],
+      ["14 Anos", "96 cm", "65 cm", isShortSleeve ? "20 cm" : "64 cm"],
+      ["16 Anos", "100 cm", "68 cm", isShortSleeve ? "21 cm" : "68 cm"],
+    ];
+    tableHtml = `<table class="brk-sg-table"><thead><tr><th>Idade / Tam</th><th>Tórax / Peito</th><th>Comprimento</th><th>${mHeader}</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
+  } else if (["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId) || /camisa|camiseta|jersey|baby look/i.test(tLow)) {
+    guideTitle = "Tabela de Medidas Adulto (P ao EXG)";
+    const mHeader = isShortSleeve ? "Manga Curta" : "Manga Longa";
+    const rows = [
+      ["P", "102 cm", "68 cm", isShortSleeve ? "22 cm" : "75 cm"],
+      ["M", "108 cm", "71 cm", isShortSleeve ? "23 cm" : "77 cm"],
+      ["G", "114 cm", "74 cm", isShortSleeve ? "24 cm" : "79 cm"],
+      ["GG", "120 cm", "77 cm", isShortSleeve ? "25 cm" : "81 cm"],
+      ["XG", "126 cm", "80 cm", isShortSleeve ? "26 cm" : "83 cm"],
+      ["EXG (G1)", "132 cm", "83 cm", isShortSleeve ? "27 cm" : "85 cm"],
+      ["G2", "138 cm", "85 cm", isShortSleeve ? "28 cm" : "87 cm"],
+      ["G3", "144 cm", "87 cm", isShortSleeve ? "29 cm" : "89 cm"],
+    ];
+    tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Tórax / Circunferência</th><th>Comprimento Total</th><th>${mHeader}</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
+  } else if (["pants_cargo_tactical", "overalls_workwear"].includes(archetypeId) || /calça|calca|bermuda|shorts|macacão|macacao/i.test(tLow)) {
+    guideTitle = "Tabela de Medidas - Calças & Bermudas (38 ao 52)";
+    const rows = [
+      ["38", "78 - 82 cm", "98 cm", "104 cm"],
+      ["40", "82 - 86 cm", "102 cm", "105 cm"],
+      ["42", "86 - 90 cm", "106 cm", "106 cm"],
+      ["44", "90 - 94 cm", "110 cm", "107 cm"],
+      ["46", "94 - 98 cm", "114 cm", "108 cm"],
+      ["48", "98 - 102 cm", "118 cm", "109 cm"],
+      ["50", "102 - 106 cm", "122 cm", "110 cm"],
+      ["52", "106 - 110 cm", "126 cm", "111 cm"],
+    ];
+    tableHtml = `<table class="brk-sg-table"><thead><tr><th>Numeração</th><th>Cintura</th><th>Quadril</th><th>Comprimento</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
+  } else if (["hats_safari_outdoor", "caps_trucker_snapback"].includes(archetypeId) || /chapéu|chapeu|boné|bone/i.test(tLow)) {
+    guideTitle = "Guia de Dimensões - Chapéus & Bonés";
+    tableHtml = `<table class="brk-sg-table"><thead><tr><th>Modelo</th><th>Circunferência da Cabeça</th><th>Aba / Profundidade</th><th>Regulagem & Ajuste</th></tr></thead><tbody><tr><td><strong>Chapéu Safári / Australiano</strong></td><td>56 cm a 60 cm (Veste P ao GG)</td><td>Aba 7,5 cm de proteção 360°</td><td>Cordão jugular com trava anti-vento</td></tr><tr><td><strong>Boné Trucker / Snapback</strong></td><td>54 cm a 61 cm (Ajustável)</td><td>Aba 7,0 cm estruturada curvada</td><td>Fecho regulador traseiro de alta pressão</td></tr></tbody></table>`;
+  } else if (["footwear_sandals_boaonda", "closed_footwear_sneakers"].includes(archetypeId) || /sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota/i.test(tLow)) {
+    guideTitle = "Guia de Tamanhos de Calçados (Medida da Palmilha)";
+    const rows = [
+      ["34", "23,0 cm"], ["35", "23,7 cm"], ["36", "24,3 cm"],
+      ["37", "25,0 cm"], ["38", "25,7 cm"], ["39", "26,3 cm"],
+      ["40", "27,0 cm"], ["41", "27,7 cm"], ["42", "28,3 cm"],
+      ["43", "29,0 cm"], ["44", "29,7 cm"], ["45", "30,3 cm"]
+    ];
+    tableHtml = `<table class="brk-sg-table"><thead><tr><th>Numeração BR</th><th>Comprimento da Palmilha (cm)</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td></tr>`).join("")}</tbody></table>`;
+  } else if (archetypeId === "gloves_tactical_fishing" || tLow.includes("luva")) {
+    guideTitle = "Tabela de Medidas de Luvas (Largura da Palma)";
+    const rows = [
+      ["P", "8,0 a 8,5 cm", "19 cm"],
+      ["M", "8,5 a 9,0 cm", "20 cm"],
+      ["G", "9,0 a 9,5 cm", "21 cm"],
+      ["GG", "9,5 a 10,5 cm", "22 cm"]
+    ];
+    tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Largura da Palma</th><th>Comprimento da Mão</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("")}</tbody></table>`;
+  } else if (archetypeId === "sun_sleeves_manguitos" || tLow.includes("manguito")) {
+    guideTitle = "Tabela de Medidas - Manguitos de Proteção Solar";
+    const rows = [
+      ["P / M", "24 a 30 cm", "16 a 20 cm", "45 cm"],
+      ["G / GG", "30 a 38 cm", "18 a 24 cm", "48 cm"]
+    ];
+    tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Circunferência Bíceps</th><th>Circunferência Punho</th><th>Comprimento Total</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
+  } else if (archetypeId === "neck_gaiters_balaclavas" || /bandana|tubeneck|buff|balaclava/i.test(tLow)) {
+    guideTitle = "Dimensões - Bandana Tubular Seamless Multifuncional";
+    tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Largura (Plana)</th><th>Comprimento</th><th>Elasticidade</th></tr></thead><tbody><tr><td><strong>Tamanho Único</strong></td><td>Aprox. 24 cm</td><td>Aprox. 48 cm</td><td>Microfibra tubular elástica seamless com memória anatômica</td></tr></tbody></table>`;
+  } else {
+    return "";
+  }
+
+  return `  <!-- Tabela de Medidas Inteligente Integrada (Accordion Nativo) -->
+  <details class="brk-size-guide">
+    <summary class="brk-sg-summary">
+      <span class="brk-sg-title-wrap">
+        <span class="brk-sg-icon">${getSvgIcon('ruler', themeColor, 18)}</span>
+        <strong class="brk-sg-heading">${guideTitle}</strong>
+      </span>
+      <span class="brk-sg-trigger">Ver Medidas em cm ▾</span>
+    </summary>
+    <div class="brk-sg-body">
+      <div class="brk-sg-tip">
+        <span>📏</span>
+        <span><strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros. Em caso de dúvida entre dois tamanhos, opte pelo tamanho maior para garantir caimento livre e confortável.</span>
+      </div>
+      ${tableHtml}
+    </div>
+  </details>`;
+}
+
+function buildClientSchemaJsonLd(liveP) {
+  const originInfo = resolveClientOriginAndTitle(liveP);
+  const formattedTitle = liveP.formatted_title || originInfo.formattedTitle;
+  const brandName = liveP.brand_name || originInfo.brandName;
+  const sku = liveP.master_sku || liveP.sku || liveP.id || "";
+  const price = liveP.price || (liveP.variants && liveP.variants[0] && liveP.variants[0].price) || "0.00";
+
+  const rawImgs = (liveP.cdn_images && liveP.cdn_images.length > 0)
+    ? liveP.cdn_images
+    : (liveP.gallery && liveP.gallery.length > 0)
+      ? liveP.gallery
+      : ((liveP.images || []).map(img => (typeof img === "object" ? img.src : img)));
+  const images = [...new Set(rawImgs.filter(u => typeof u === "string" && u.startsWith("http")))].slice(0, 3);
+
+  const schemaObj = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": formattedTitle,
+    "description": `${formattedTitle} oficial com garantia e qualidade oficial BRK.`,
+    "sku": String(sku),
+    "brand": {
+      "@type": "Brand",
+      "name": brandName
+    },
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "BRL",
+      "price": String(price),
+      "availability": "https://schema.org/InStock",
+      "itemCondition": "https://schema.org/NewCondition"
+    }
+  };
+  if (images.length > 0) {
+    schemaObj["image"] = images;
+  }
+
+  return `  <!-- Schema.org Microdata JSON-LD para Google Search & Merchant Center -->
+  <script type="application/ld+json">
+${JSON.stringify(schemaObj, null, 2)}
+  </script>`;
+}
+
 function getProductModeBHTML(liveP) {
   if (!liveP) return "";
   const originInfo = resolveClientOriginAndTitle(liveP);
@@ -668,6 +945,15 @@ function getProductModeBHTML(liveP) {
     <h2 class="brk-desc-main-title">${formattedTitle}</h2>
   </div>`;
 
+  const archetypeId = liveP.archetype_id || (typeof detectClientArchetype === "function" ? detectClientArchetype(liveP.title, liveP.category, liveP.tags).id : "uv_performance");
+  const tLowTitle = (formattedTitle || liveP.title || "").toLowerCase();
+  const isKids = liveP.is_kids !== undefined ? liveP.is_kids : (/\b(infantil|kids|juvenil|mini)\b/i.test(tLowTitle) && !/\b(adulto|unissex adulto)\b/i.test(tLowTitle));
+  const isShortSleeve = liveP.is_short_sleeve !== undefined ? liveP.is_short_sleeve : (/\b(manga curta|manga-curta)\b/i.test(tLowTitle) && !/\b(manga longa|manga-longa)\b/i.test(tLowTitle));
+
+  const quickBadgesHtml = buildClientQuickBadges(themeColor, themeBg, archetypeId, liveP);
+  const sizeGuideHtml = buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortSleeve, liveP);
+  const schemaJsonLd = buildClientSchemaJsonLd(liveP);
+
   // 2. Blocos Narrativos
   const blocksHtml = [];
   blocks.forEach((block, idx) => {
@@ -828,6 +1114,57 @@ function getProductModeBHTML(liveP) {
       color: #0f172a;
       margin: 0;
       letter-spacing: -0.4px;
+    }
+
+    /* Selos Rapidos de Confianca e Tecnologia (Destaque Superior) */
+    .brk-quick-badges {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 34px;
+    }
+    .brk-badge-item {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+    }
+    .brk-badge-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: ${themeBg};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .brk-badge-content {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .brk-badge-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .brk-badge-sub {
+      font-size: 10.5px;
+      color: #64748b;
+      line-height: 1.25;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .brk-desc-copyright-box {
       background: #fffbeb;
@@ -1019,6 +1356,106 @@ function getProductModeBHTML(liveP) {
     .brk-care-text strong {
       color: #0f172a;
     }
+
+    /* Tabela de Medidas Inteligente (Accordion Nativo) */
+    .brk-size-guide {
+      margin-top: 32px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+    }
+    .brk-sg-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: #f8fafc;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 700;
+      font-size: 14px;
+      color: #0f172a;
+      border-bottom: 1px solid transparent;
+      transition: all 0.2s ease;
+      list-style: none;
+    }
+    .brk-sg-summary::-webkit-details-marker {
+      display: none;
+    }
+    .brk-size-guide[open] .brk-sg-summary {
+      border-bottom-color: #e2e8f0;
+      background: ${themeBg};
+    }
+    .brk-sg-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brk-sg-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .brk-sg-heading {
+      font-size: 14px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .brk-sg-trigger {
+      font-size: 11px;
+      font-weight: 700;
+      color: ${themeColor};
+      background: #ffffff;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      border: 1px solid ${themeColor}40;
+    }
+    .brk-sg-body {
+      padding: 20px;
+    }
+    .brk-sg-tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: #f8fafc;
+      border-left: 3px solid ${themeColor};
+      padding: 10px 14px;
+      border-radius: 0 8px 8px 0;
+      font-size: 12px;
+      color: #475569;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    .brk-sg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      text-align: left;
+    }
+    .brk-sg-table th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 10.5px;
+      letter-spacing: 0.5px;
+      padding: 10px 12px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .brk-sg-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #1e293b;
+    }
+    .brk-sg-table tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+    .brk-sg-table tr:hover td {
+      background: ${themeBg};
+    }
+
     .brk-desc-trust-bar {
       margin-top: 32px;
       display: grid;
@@ -1078,6 +1515,27 @@ function getProductModeBHTML(liveP) {
       .brk-desc-paragraph {
         font-size: 14px;
       }
+      .brk-quick-badges {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin-bottom: 26px;
+      }
+      .brk-badge-item {
+        padding: 10px;
+        gap: 8px;
+      }
+      .brk-badge-title {
+        font-size: 11px;
+      }
+      .brk-badge-sub {
+        font-size: 9.5px;
+      }
+      .brk-sg-table {
+        font-size: 11px;
+      }
+      .brk-sg-table th, .brk-sg-table td {
+        padding: 8px 6px;
+      }
       .brk-specs-grid {
         grid-template-columns: 1fr;
       }
@@ -1096,10 +1554,14 @@ function getProductModeBHTML(liveP) {
 
 ${headerHtml}
 
+${quickBadgesHtml}
+
   <!-- 3 Atos Narrativos de Alta Conversão -->
   ${blocksHtml.join("")}
 
 ${specsSection}
+
+${sizeGuideHtml}
 
   <!-- Selos de Confiança e Garantia BRK -->
   <div class="brk-desc-trust-bar">
@@ -1128,7 +1590,9 @@ ${specsSection}
 
 ${copyrightHtml}
 
-</div>`;
+</div>
+
+${schemaJsonLd}`;
 
   // Guarda Final de Segurança: Eliminação rigorosa de qualquer tag <img> com URL raiz repetida
   const seenImgRoots = new Set();

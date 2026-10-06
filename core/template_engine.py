@@ -1440,6 +1440,11 @@ class TemplateEngine:
             "image": img3
         }
 
+        sku = str(product.get("sku") or product.get("master_sku") or product.get("id") or "")
+        handle = str(product.get("handle") or "")
+        vendor = str(product.get("vendor") or brand_name or "BRK")
+        price = str(product.get("price") or (product.get("variants") and product.get("variants")[0].get("price")) or "0.00")
+
         return {
             "title": formatted_title,
             "formatted_title": formatted_title,
@@ -1455,6 +1460,15 @@ class TemplateEngine:
             "source_type": source_type,
             "source_label": source_label,
             "sibling_info": sibling_info,
+            "archetype_id": archetype_id,
+            "is_kids": is_kids,
+            "is_short_sleeve": is_short_sleeve,
+            "is_hooded": is_hooded,
+            "sku": sku,
+            "handle": handle,
+            "vendor": vendor,
+            "price": price,
+            "images": cdn_images,
             "act1": act1_dict,
             "act2": act2_dict,
             "act3": act3_dict,
