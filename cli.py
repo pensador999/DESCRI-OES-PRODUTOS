@@ -136,6 +136,14 @@ def cmd_audit(args):
     print("\n[+] Ciclo do Vigilante Diário concluído com sucesso!")
     print(json.dumps(summary.get("stores_summary", {}), indent=2, ensure_ascii=False))
 
+def cmd_validate(args):
+    """Executa o Agente Auditor de Conformidade Semântica"""
+    print("\n[🛡️] Disparando Agente Auditor de Conformidade Semântica...")
+    from core.semantic_auditor import run_semantic_audit
+    success = run_semantic_audit()
+    if not success:
+        sys.exit(1)
+
 def cmd_build(args):
     """Compila a distribuição modular otimizada para a Vercel"""
     print("\n[🔨] Executando Compilação Modular Vercel v5.0...")
@@ -180,6 +188,10 @@ def main():
     # Comando test
     p_test = subparsers.add_parser("test", help="Executa os testes de regressão das Regras de Ouro")
     p_test.set_defaults(func=cmd_test)
+
+    # Comando validate
+    p_validate = subparsers.add_parser("validate", help="Executa o Agente Auditor de Conformidade Semântica")
+    p_validate.set_defaults(func=cmd_validate)
 
     # Comando audit
     p_audit = subparsers.add_parser("audit", help="Executa o Sentinela Diário de catálogo")

@@ -155,6 +155,27 @@ class TestBRKRegressionGuardrails(unittest.TestCase):
         self.assertNotIn('<details class="brk-size-guide">', html, "Faca artesanal não pode ter tabela de medidas!")
         self.assertIn("Aço", html, "Faca artesanal deve destacar especificações de aço e lâmina.")
 
+    def test_fishing_rod_marine_sports_guardrail(self):
+        """Varas de Pesca e equipamentos JAMAIS podem ter atributos de camisa (Dry Fit, FPU 50+, Costura)."""
+        prod = {
+            "id": "VPMSGLADIUSC581MH",
+            "title": "Vara de Pesca Marine Sports Gladius GL-C581MHM 25lbs 1,73m - Carretilha (inteiriça)",
+            "product_type": "Varas",
+            "tags": "vara de pesca, marine sports, carretilha, pesca"
+        }
+        html = self._generate_html(prod, "brk_fishing")
+        html_low = html.lower()
+
+        # 1. Não pode conter atributos têxteis de camisa
+        self.assertNotIn("fpu 50+", html_low, "Vara de pesca JAMAIS pode ter FPU 50+!")
+        self.assertNotIn("dry fit", html_low, "Vara de pesca JAMAIS pode ter Tecnologia Dry Fit!")
+        self.assertNotIn("costura reforçada", html_low, "Vara de pesca JAMAIS pode ter Costura Reforçada!")
+        self.assertNotIn("pesponto", html_low, "Vara de pesca não pode ter menção a pesponto de tecido!")
+
+        # 2. Deve conter os badges mecânicos de pesca
+        self.assertIn("Sensibilidade & Precisão", html, "Vara de pesca deve ter badge de Sensibilidade & Precisão.")
+        self.assertIn("Tratamento Anti-Corrosão", html, "Vara de pesca deve ter badge de Tratamento Anti-Corrosão.")
+
     # --------------------------------------------------------------------------
     # 3. TESTE DE SCHEMA.ORG MICRODATA JSON-LD (PILAR 2)
     # --------------------------------------------------------------------------

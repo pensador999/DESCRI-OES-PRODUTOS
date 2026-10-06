@@ -83,22 +83,46 @@ class HTMLBuilder:
     def _build_quick_badges(self, theme_color: str, archetype_id: str, enriched_data: Dict[str, Any]) -> str:
         title_low = (enriched_data.get("formatted_title") or enriched_data.get("title") or "").lower()
         
-        # Determinar os 4 badges contextuais baseados no arquétipo e produto
-        if archetype_id in ("uv_performance", "sun_sleeves_manguitos", "neck_gaiters_balaclavas") or "uv" in title_low or "pesca" in title_low:
+        # 1. Equipamentos de Pesca & Revenda (Varas, Carretilhas, Molinetes, Linhas, Alicates)
+        if archetype_id == "fishing_tackle_gear" or any(w in title_low for w in ["vara ", "vara de", "carretilha", "molinete", "linha de pesca", "alicate de pesca", "alicate", "passaguá", "passagua", "anzol", "chumbada", "snap "]):
+            badges = [
+                {"icon": "fish", "title": "Sensibilidade & Precisão", "sub": "Ação Rápida e Resposta Imediata"},
+                {"icon": "gear", "title": "Mecânica Balanceada", "sub": "Componentes de Alta Engenharia"},
+                {"icon": "shield", "title": "Tratamento Anti-Corrosão", "sub": "Resistente à Água Doce e Salinidade"},
+                {"icon": "return", "title": "100% Original com Garantia", "sub": "Procedência Oficial com Nota"}
+            ]
+        # 2. Caixas de Pesca, Maletas e Estojos Organizadores
+        elif archetype_id == "tackle_boxes_storage" or any(w in title_low for w in ["caixa de pesca", "estojo", "maleta", "organizador", "caixa pesca"]):
+            badges = [
+                {"icon": "box", "title": "Polímero de Alta Dureza", "sub": "Anti-Impacto e Alta Durabilidade"},
+                {"icon": "shield", "title": "Travas de Alta Pressão", "sub": "Fechamento Seguro Anti-Abertura"},
+                {"icon": "gear", "title": "Divisórias Modulares", "sub": "Organização Prática Personalizada"},
+                {"icon": "return", "title": "Proteção para Tralhas", "sub": "Segurança para Iscas e Acessórios"}
+            ]
+        # 3. Iscas Artificiais
+        elif archetype_id == "fishing_lures" or "isca" in title_low:
+            badges = [
+                {"icon": "fish", "title": "Ação & Nado Realista", "sub": "Atratividade para Predadores"},
+                {"icon": "shield", "title": "Pitões & Garatéias Inox", "sub": "Componentes em Aço Inox"},
+                {"icon": "gear", "title": "Equilíbrio Hidrodinâmico", "sub": "Arremessos Precisos"},
+                {"icon": "sparkle", "title": "Garantia de Procedência", "sub": "100% Original e Testado"}
+            ]
+        # 4. Vestuário UV50+ Performance & Pesca (EXCLUSIVO PARA ROUPAS E ACESSÓRIOS TÊXTEIS)
+        elif archetype_id in ("uv_performance", "sun_sleeves_manguitos", "neck_gaiters_balaclavas") or (any(w in title_low for w in ["camisa", "camiseta", "manguito", "bandana", "baby look"]) and any(w in title_low for w in ["uv", "dry", "solar", "proteção"])):
             badges = [
                 {"icon": "sun", "title": "FPU 50+ Certificado", "sub": "Bloqueia 98% Raios UV"},
                 {"icon": "bolt", "title": "Tecnologia Dry Fit", "sub": "Secagem Ultra Rápida"},
                 {"icon": "shield", "title": "Costura Reforçada", "sub": "Pesponto Duplo Anti-Atrito"},
                 {"icon": "return", "title": "Troca Fácil BRK", "sub": "Satisfação 100% Garantida"}
             ]
-        elif archetype_id == "agro_field" or "agro" in title_low or "campo" in title_low:
+        elif archetype_id == "agro_field" or (any(w in title_low for w in ["camisa", "camiseta"]) and any(w in title_low for w in ["agro", "campo", "trator", "rural"])):
             badges = [
                 {"icon": "care", "title": "Algodão Premium", "sub": "Toque Nobre Aveludado"},
                 {"icon": "sparkle", "title": "Respirabilidade Natural", "sub": "Conforto no Campo"},
                 {"icon": "shield", "title": "Costura Dupla Ombro", "sub": "Estrutura Anti-Deformação"},
                 {"icon": "return", "title": "Troca Fácil BRK", "sub": "Procedência Garantida"}
             ]
-        elif archetype_id == "motors_speed" or "jersey" in title_low or "moto" in title_low or "trilha" in title_low:
+        elif archetype_id == "motors_speed" or any(w in title_low for w in ["jersey", "motocross", "off-road", "trilha"]):
             badges = [
                 {"icon": "bolt", "title": "Ventilação Ativa", "sub": "Painéis Microperfurados"},
                 {"icon": "gear", "title": "Aerodinâmica Pro", "sub": "Modelagem Anatômica"},
@@ -119,13 +143,6 @@ class HTMLBuilder:
                 {"icon": "care", "title": "Fácil Higienização", "sub": "Material Antibacteriano"},
                 {"icon": "return", "title": "Troca Fácil BRK", "sub": "Ajuste Perfeito Garantido"}
             ]
-        elif archetype_id == "fishing_lures" or "isca" in title_low:
-            badges = [
-                {"icon": "fish", "title": "Ação & Nado Realista", "sub": "Atratividade para Predadores"},
-                {"icon": "shield", "title": "Pitões Reforçados", "sub": "Componentes em Aço Inox"},
-                {"icon": "gear", "title": "Equilíbrio Hidrodinâmico", "sub": "Arremessos Precisos"},
-                {"icon": "sparkle", "title": "Garantia de Procedência", "sub": "100% Original e Testado"}
-            ]
         elif archetype_id == "drinkware_thermo" or any(w in title_low for w in ["copo", "garrafa", "caneca", "térmic", "termic"]):
             badges = [
                 {"icon": "shield", "title": "Inox 18/8 com Vácuo", "sub": "Parede Dupla Térmica"},
@@ -133,7 +150,7 @@ class HTMLBuilder:
                 {"icon": "care", "title": "Livre de BPA", "sub": "Sem Condensação Externa"},
                 {"icon": "return", "title": "Garantia BRK", "sub": "Qualidade Assegurada"}
             ]
-        elif archetype_id == "cutlery_unique" or "faca" in title_low:
+        elif archetype_id == "cutlery_unique" or any(w in title_low for w in ["faca", "cutelaria", "canivete", "lâmina", "lamina"]):
             badges = [
                 {"icon": "knife", "title": "Aço Especial Nobre", "sub": "Alta Retenção de Fio"},
                 {"icon": "gear", "title": "Tratamento Térmico", "sub": "Dureza e Tenacidade"},

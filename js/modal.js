@@ -541,21 +541,43 @@ function buildClientQuickBadges(themeColor, themeBg, archetypeId, liveP) {
   const tLow = (liveP.formatted_title || liveP.title || "").toLowerCase();
   let badges = [];
 
-  if (["uv_performance", "sun_sleeves_manguitos", "neck_gaiters_balaclavas"].includes(archetypeId) || tLow.includes("uv") || tLow.includes("pesca")) {
+  // 1. Equipamentos de Pesca & Revenda (Varas, Carretilhas, Molinetes, Linhas, Alicates)
+  if (archetypeId === "fishing_tackle_gear" || /vara |vara de|carretilha|molinete|linha de pesca|alicate de pesca|alicate|passaguá|passagua|anzol|chumbada|snap /i.test(tLow)) {
+    badges = [
+      { icon: "fish", title: "Sensibilidade & Precisão", sub: "Ação Rápida e Resposta Imediata" },
+      { icon: "gear", title: "Mecânica Balanceada", sub: "Componentes de Alta Engenharia" },
+      { icon: "shield", title: "Tratamento Anti-Corrosão", sub: "Resistente à Água Doce e Salinidade" },
+      { icon: "return", title: "100% Original com Garantia", sub: "Procedência Oficial com Nota" }
+    ];
+  } else if (archetypeId === "tackle_boxes_storage" || /caixa de pesca|estojo|maleta|organizador|caixa pesca/i.test(tLow)) {
+    badges = [
+      { icon: "box", title: "Polímero de Alta Dureza", sub: "Anti-Impacto e Alta Durabilidade" },
+      { icon: "shield", title: "Travas de Alta Pressão", sub: "Fechamento Seguro Anti-Abertura" },
+      { icon: "gear", title: "Divisórias Modulares", sub: "Organização Prática Personalizada" },
+      { icon: "return", title: "Proteção para Tralhas", sub: "Segurança para Iscas e Acessórios" }
+    ];
+  } else if (archetypeId === "fishing_lures" || tLow.includes("isca")) {
+    badges = [
+      { icon: "fish", title: "Ação & Nado Realista", sub: "Atratividade para Predadores" },
+      { icon: "shield", title: "Pitões & Garatéias Inox", sub: "Componentes em Aço Inox" },
+      { icon: "gear", title: "Equilíbrio Hidrodinâmico", sub: "Arremessos Precisos" },
+      { icon: "sparkle", title: "Garantia de Procedência", sub: "100% Original e Testado" }
+    ];
+  } else if (["uv_performance", "sun_sleeves_manguitos", "neck_gaiters_balaclavas"].includes(archetypeId) || (/camisa|camiseta|manguito|bandana|baby look/i.test(tLow) && /uv|dry|solar|proteção/i.test(tLow))) {
     badges = [
       { icon: "sun", title: "FPU 50+ Certificado", sub: "Bloqueia 98% Raios UV" },
       { icon: "bolt", title: "Tecnologia Dry Fit", sub: "Secagem Ultra Rápida" },
       { icon: "shield", title: "Costura Reforçada", sub: "Pesponto Duplo Anti-Atrito" },
       { icon: "return", title: "Troca Fácil BRK", sub: "Satisfação 100% Garantida" }
     ];
-  } else if (archetypeId === "agro_field" || tLow.includes("agro") || tLow.includes("campo")) {
+  } else if (archetypeId === "agro_field" || (/camisa|camiseta/i.test(tLow) && /agro|campo|trator|rural/i.test(tLow))) {
     badges = [
       { icon: "care", title: "Algodão Premium", sub: "Toque Nobre Aveludado" },
       { icon: "sparkle", title: "Respirabilidade Natural", sub: "Conforto no Campo" },
       { icon: "shield", title: "Costura Dupla Ombro", sub: "Estrutura Anti-Deformação" },
       { icon: "return", title: "Troca Fácil BRK", sub: "Procedência Garantida" }
     ];
-  } else if (archetypeId === "motors_speed" || tLow.includes("jersey") || tLow.includes("moto") || tLow.includes("trilha")) {
+  } else if (archetypeId === "motors_speed" || /jersey|motocross|off-road|trilha/i.test(tLow)) {
     badges = [
       { icon: "bolt", title: "Ventilação Ativa", sub: "Painéis Microperfurados" },
       { icon: "gear", title: "Aerodinâmica Pro", sub: "Modelagem Anatômica" },
@@ -576,13 +598,6 @@ function buildClientQuickBadges(themeColor, themeBg, archetypeId, liveP) {
       { icon: "care", title: "Fácil Higienização", sub: "Material Antibacteriano" },
       { icon: "return", title: "Troca Fácil BRK", sub: "Ajuste Perfeito Garantido" }
     ];
-  } else if (archetypeId === "fishing_lures" || tLow.includes("isca")) {
-    badges = [
-      { icon: "fish", title: "Ação & Nado Realista", sub: "Atratividade para Predadores" },
-      { icon: "shield", title: "Pitões Reforçados", sub: "Componentes em Aço Inox" },
-      { icon: "gear", title: "Equilíbrio Hidrodinâmico", sub: "Arremessos Precisos" },
-      { icon: "sparkle", title: "Garantia de Procedência", sub: "100% Original e Testado" }
-    ];
   } else if (archetypeId === "drinkware_thermo" || /copo|garrafa|caneca|térmic|termic/i.test(tLow)) {
     badges = [
       { icon: "shield", title: "Inox 18/8 com Vácuo", sub: "Parede Dupla Térmica" },
@@ -590,7 +605,7 @@ function buildClientQuickBadges(themeColor, themeBg, archetypeId, liveP) {
       { icon: "care", title: "Livre de BPA", sub: "Sem Condensação Externa" },
       { icon: "return", title: "Garantia BRK", sub: "Qualidade Assegurada" }
     ];
-  } else if (archetypeId === "cutlery_unique" || tLow.includes("faca")) {
+  } else if (archetypeId === "cutlery_unique" || /faca|cutelaria|canivete|lâmina|lamina/i.test(tLow)) {
     badges = [
       { icon: "knife", title: "Aço Especial Nobre", sub: "Alta Retenção de Fio" },
       { icon: "gear", title: "Tratamento Térmico", sub: "Dureza e Tenacidade" },
