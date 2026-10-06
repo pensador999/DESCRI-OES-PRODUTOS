@@ -276,8 +276,8 @@ class HTMLBuilder:
         </tbody>
       </table>"""
 
-        # 5. Calçados (footwear_sandals_boaonda, closed_footwear_sneakers)
-        elif archetype_id in ("footwear_sandals_boaonda", "closed_footwear_sneakers") or any(w in title_low for w in ["sandália", "sandalia", "babuche", "chinelo", "sapato", "tênis", "tenis", "bota"]):
+        # 5. Calçados (footwear_sandals_boaonda, closed_footwear_sneakers, calcados_botinas)
+        elif archetype_id in ("footwear_sandals_boaonda", "closed_footwear_sneakers", "calcados_botinas") or any(w in title_low for w in ["sandália", "sandalia", "babuche", "chinelo", "sapato", "tênis", "tenis", "bota", "botina"]):
             guide_title = "Guia de Tamanhos de Calçados (Medida da Palmilha)"
             rows = [
                 ("34", "23,0 cm"), ("35", "23,7 cm"), ("36", "24,3 cm"),

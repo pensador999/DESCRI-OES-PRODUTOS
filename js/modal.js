@@ -569,7 +569,7 @@ function buildClientQuickBadges(themeColor, themeBg, archetypeId, liveP) {
       { icon: "shield", title: "Ajuste Anatômico", sub: "Segurança Anti-Vento" },
       { icon: "return", title: "Troca Fácil BRK", sub: "Satisfação Garantida" }
     ];
-  } else if (["footwear_sandals_boaonda", "closed_footwear_sneakers"].includes(archetypeId) || /sandália|sandalia|babuche|chinelo/i.test(tLow)) {
+  } else if (["footwear_sandals_boaonda", "closed_footwear_sneakers", "calcados_botinas"].includes(archetypeId) || /sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina/i.test(tLow)) {
     badges = [
       { icon: "shoe", title: "Palmilha Antiestresse", sub: "Amortecimento Anatômico" },
       { icon: "shield", title: "Solado Antiderrapante", sub: "Aderência em Solo Molhado" },
@@ -670,7 +670,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
   } else if (["hats_safari_outdoor", "caps_trucker_snapback"].includes(archetypeId) || /chapéu|chapeu|boné|bone/i.test(tLow)) {
     guideTitle = "Guia de Dimensões - Chapéus & Bonés";
     tableHtml = `<table class="brk-sg-table"><thead><tr><th>Modelo</th><th>Circunferência da Cabeça</th><th>Aba / Profundidade</th><th>Regulagem & Ajuste</th></tr></thead><tbody><tr><td><strong>Chapéu Safári / Australiano</strong></td><td>56 cm a 60 cm (Veste P ao GG)</td><td>Aba 7,5 cm de proteção 360°</td><td>Cordão jugular com trava anti-vento</td></tr><tr><td><strong>Boné Trucker / Snapback</strong></td><td>54 cm a 61 cm (Ajustável)</td><td>Aba 7,0 cm estruturada curvada</td><td>Fecho regulador traseiro de alta pressão</td></tr></tbody></table>`;
-  } else if (["footwear_sandals_boaonda", "closed_footwear_sneakers"].includes(archetypeId) || /sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota/i.test(tLow)) {
+  } else if (["footwear_sandals_boaonda", "closed_footwear_sneakers", "calcados_botinas"].includes(archetypeId) || /sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina/i.test(tLow)) {
     guideTitle = "Guia de Tamanhos de Calçados (Medida da Palmilha)";
     const rows = [
       ["34", "23,0 cm"], ["35", "23,7 cm"], ["36", "24,3 cm"],

@@ -87,8 +87,8 @@ class ShopifyDirectSync:
             print(f"[-] Erro ao carregar produtos de {store_key}: {e}")
             return []
 
-    def update_product_body_html(self, store_key: str, product_id: Any, new_html: str, access_token: str) -> Dict[str, Any]:
-        """Executa a requisicao PUT REST para atualizar body_html na Shopify Admin API"""
+    def update_product_body_html(self, store_key: str, product_id: Any, new_html: str, access_token: str, max_retries: int = 3) -> Dict[str, Any]:
+        """Executa a requisicao PUT REST para atualizar body_html na Shopify Admin API com protecao contra rate-limit (429)"""
         if self.dry_run:
             return {"success": True, "dry_run": True, "product_id": product_id}
 
@@ -113,15 +113,23 @@ class ShopifyDirectSync:
             method="PUT"
         )
 
-        try:
-            with urllib.request.urlopen(req, timeout=20) as resp:
-                resp_data = json.loads(resp.read().decode("utf-8"))
-                return {"success": True, "data": resp_data, "product_id": product_id}
-        except urllib.error.HTTPError as e:
-            err_body = e.read().decode("utf-8") if e.fp else ""
-            return {"success": False, "status_code": e.code, "error": err_body, "product_id": product_id}
-        except Exception as e:
-            return {"success": False, "error": str(e), "product_id": product_id}
+        for attempt in range(max_retries):
+            try:
+                with urllib.request.urlopen(req, timeout=20) as resp:
+                    resp_data = json.loads(resp.read().decode("utf-8"))
+                    return {"success": True, "data": resp_data, "product_id": product_id}
+            except urllib.error.HTTPError as e:
+                if e.code == 429:
+                    retry_after = float(e.headers.get("Retry-After", 2.0 * (attempt + 1)))
+                    print(f"      [!] Rate-limit 429 atingido na Shopify API. Pausando {retry_after}s antes da tentativa {attempt+2}/{max_retries}...")
+                    time.sleep(retry_after)
+                    continue
+                err_body = e.read().decode("utf-8") if e.fp else ""
+                return {"success": False, "status_code": e.code, "error": err_body, "product_id": product_id}
+            except Exception as e:
+                return {"success": False, "error": str(e), "product_id": product_id}
+
+        return {"success": False, "status_code": 429, "error": "Excedido limite de tentativas por Rate Limit (429)", "product_id": product_id}
 
     def sync_store(self, store_key: str, limit: Optional[int] = None, token_override: Optional[str] = None) -> Dict[str, Any]:
         """Sincroniza um catalogo completo ou limitado de uma loja"""

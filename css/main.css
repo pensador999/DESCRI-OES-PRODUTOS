@@ -109,3 +109,114 @@ body {
     transform: rotate(360deg);
   }
 }
+
+/* ==========================================================================
+   BRK QUICK BADGES & SIZE GUIDE (PORTAL PREVIEW COMPATIBILITY)
+   ========================================================================== */
+.brk-quick-badges {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.brk-badge-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+.brk-badge-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #f0f9ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.brk-badge-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.brk-badge-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.brk-badge-sub {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 500;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.brk-size-guide {
+  margin: 36px 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+.brk-sg-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  cursor: pointer;
+  background: #f8fafc;
+  user-select: none;
+  font-weight: 700;
+  color: #0f172a;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.brk-sg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: center;
+}
+
+.brk-sg-table th {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 10px 12px;
+  font-weight: 700;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.brk-sg-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+}
+
+@media (max-width: 768px) {
+  .brk-quick-badges {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .brk-badge-item {
+    padding: 10px;
+  }
+}
