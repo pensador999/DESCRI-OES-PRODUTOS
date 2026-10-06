@@ -334,6 +334,15 @@ def build_dist():
         </div>
 
         <div class="flex items-center gap-3 flex-wrap">
+          <!-- BUSCA GLOBAL DE SKU (3 LOJAS) -->
+          <div id="sku-global-wrap" class="relative">
+            <div class="flex items-center gap-2 bg-slate-900 border border-slate-700/80 rounded-2xl p-1.5 px-3 shadow-md">
+              <span class="text-sm">🔎</span>
+              <input type="text" id="sku-global-input" autocomplete="off" spellcheck="false" placeholder="Buscar SKU nas 3 lojas (ex: C02846BL)" class="bg-transparent text-white placeholder-slate-500 text-[11px] font-bold w-56 focus:outline-none" />
+            </div>
+            <div id="sku-global-results" class="hidden absolute right-0 mt-2 w-[26rem] max-h-96 overflow-y-auto bg-white text-slate-900 rounded-2xl border border-slate-200 shadow-2xl z-50"></div>
+          </div>
+
           <!-- LIVE SYNC CONTROL CENTER (MONITOR POR SEGUNDOS) -->
           <div id="live-sync-panel" class="flex items-center gap-2 bg-slate-900 border border-slate-700/80 rounded-2xl p-1.5 px-3 shadow-md transition-all">
             <div class="flex items-center gap-2">
@@ -441,6 +450,12 @@ def build_dist():
         <button data-filter="broken" class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-red-50 text-red-700 hover:bg-red-100 border border-red-200">❌ Fotos Quebradas (<span id="count-broken">0</span>)</button>
         <button data-filter="empty" class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200">⚠️ Sem Descrição (<span id="count-empty">0</span>)</button>
         <button data-filter="healthy" class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200">✅ Saudáveis (<span id="count-healthy">0</span>)</button>
+        <button data-filter="colado" class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200" title="Descrições Modo B já coladas e confirmadas na vitrine">🛰️ Colados (<span id="count-colado">0</span>)</button>
+        <button data-filter="recolar" class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200" title="Modo B colado desatualizado ou sem marcador de rastreio: cole novamente">🔁 Recolar (<span id="count-recolar">0</span>)</button>
+      </div>
+      <div class="w-full flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100">
+        <button id="btn-live-agent" onclick="LiveAgent.refresh(true)" title="Lê a vitrine pública da loja (somente leitura) e atualiza o status real das descrições" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-700 text-white rounded-xl text-[11px] font-extrabold transition-all active:scale-95">🛰️ Verificar descrições ao vivo</button>
+        <span id="live-agent-status" class="text-[11px] font-semibold text-slate-500">🛰️ Aguardando verificação da vitrine…</span>
       </div>
     </section>
 
@@ -842,6 +857,7 @@ def build_dist():
   <script src="js/store_loader.js?v={build_ver}"></script>
   <script src="js/modal.js?v={build_ver}"></script>
   <script src="js/app.js?v={build_ver}"></script>
+  <script src="js/live_agent.js?v={build_ver}"></script>
 
 </body>
 </html>"""

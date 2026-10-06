@@ -308,9 +308,76 @@ class TestSemanticConformity(unittest.TestCase):
             total += r["errors"]
         self.assertEqual(total, 0, "Auditor semantico encontrou ERROs no catalogo (rode: py -3.14 cli.py validate)")
 
+class TestLiveAgentAndTracking(unittest.TestCase):
+    """Rastreio invisivel no Modo B + classificador do Agente ao Vivo + busca global de SKU."""
+
+    @classmethod
+    def setUpClass(cls):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("live_status", os.path.join(BASE_DIR, "api", "live_status.py"))
+        cls.live = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.live)
+        cls.engine = TemplateEngine()
+        cls.builder = HTMLBuilder()
+
+    def _mode_b(self, sku="C02846BL", title="Camisa de Pesca Brk Proteção Solar UV50+"):
+        prod = {"id": 1, "title": title, "master_sku": sku, "handle": "x", "tags": "camisa"}
+        arch = self.engine.detect_archetype(title, "", "")
+        enriched = self.engine.generate_narrative_from_template(
+            prod, arch, ["https://cdn.shopify.com/s/files/1/0612/8068/2177/files/a.jpg?v=1"], store_key="brk_fishing")
+        return arch, self.builder.build_shopify_html(enriched)
+
+    def test_modo_b_comeca_com_marcador_de_rastreio(self):
+        arch, html = self._mode_b()
+        self.assertTrue(html.lstrip().startswith("<!-- BRK-MODO-B v"), "Marcador deve ser a 1a linha")
+        m = self.live.MARKER_RE.search(html)
+        self.assertIsNotNone(m, "Marcador deve ser reconhecido pelo agente")
+        self.assertEqual(m.group(2).strip(), "C02846BL")
+        self.assertEqual(m.group(3).strip(), arch)
+        self.assertNotIn("--", m.group(0)[4:-3].replace(" | ", "").replace("BRK-MODO-B", ""), "Comentario HTML nao pode ter '--' no corpo")
+
+    def test_versao_paritaria_python_agente_js(self):
+        from core.html_builder import MODO_B_VERSION
+        self.assertEqual(MODO_B_VERSION, self.live.MODO_B_VERSION, "Versao do agente deve ser igual a do builder")
+        js = open(os.path.join(BASE_DIR, "js", "modal.js"), encoding="utf-8").read()
+        m = re.search(r'const MODO_B_VERSION = "(\d+)"', js)
+        self.assertIsNotNone(m)
+        self.assertEqual(m.group(1), MODO_B_VERSION, "Versao do modal.js diverge do html_builder.py")
+        self.assertIn("BRK-MODO-B v${MODO_B_VERSION} | sku:", js)
+
+    def test_classificador_estados(self):
+        c = self.live.classify
+        self.assertEqual(c("")["s"], "SEM_DESCRICAO")
+        self.assertEqual(c("A")["s"], "SEM_DESCRICAO")
+        self.assertEqual(c("<p>A</p>")["s"], "SEM_DESCRICAO")
+        legacy = "<p>" + "Camisa muito boa para pescaria com proteção solar. " * 8 + "</p>"
+        self.assertEqual(c(legacy)["s"], "SAUDAVEL")
+        self.assertEqual(c(legacy + '<img src="https://use-brk-images-s3.s3.amazonaws.com/a.jpg">')["s"], "IMAGENS_QUEBRADAS")
+        _, html = self._mode_b()
+        self.assertEqual(c(html)["s"], "COLADO_ATUAL")
+        old = html.replace("BRK-MODO-B v1", "BRK-MODO-B v0", 1)
+        self.assertEqual(c(old)["s"], "COLADO_DESATUALIZADO")
+        stripped = self.live.MARKER_RE.sub("", html)  # editor da Shopify removeu o comentario
+        self.assertEqual(c(stripped)["s"], "COLADO_SEM_MARCADOR")
+
+    def test_api_somente_leitura_e_cobre_3_lojas(self):
+        src = open(os.path.join(BASE_DIR, "api", "live_status.py"), encoding="utf-8").read()
+        self.assertEqual(set(self.live.PUBLIC_DOMAINS), {"brk_fishing", "brk_agro", "brk_motors"})
+        for forbidden in ('method="PUT"', 'method="POST"', "X-Shopify-Access-Token", "def do_POST"):
+            self.assertNotIn(forbidden, src, f"Agente ao vivo deve ser somente leitura: {forbidden}")
+
+    def test_front_tem_busca_sku_global_e_agente(self):
+        idx = open(os.path.join(BASE_DIR, "build_modular_dist.py"), encoding="utf-8").read()
+        for needle in ('id="sku-global-input"', 'id="sku-global-results"', 'data-filter="colado"',
+                       'data-filter="recolar"', 'id="btn-live-agent"', "js/live_agent.js"):
+            self.assertIn(needle, idx, f"Template do index sem: {needle}")
+        js = open(os.path.join(BASE_DIR, "js", "live_agent.js"), encoding="utf-8").read()
+        self.assertIn("/api/live_status", js)
+        self.assertIn("switchStore(storeKey)", js, "Resultado da busca deve trocar de loja automaticamente")
+
 def run_tests():
     suite = unittest.TestSuite()
-    for case in (TestBRKRegressionGuardrails, TestSemanticConformity):
+    for case in (TestBRKRegressionGuardrails, TestSemanticConformity, TestLiveAgentAndTracking):
         suite.addTests(unittest.TestLoader().loadTestsFromTestCase(case))
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)

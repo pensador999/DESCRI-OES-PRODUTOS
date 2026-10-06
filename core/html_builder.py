@@ -15,6 +15,7 @@ Implementa os 8 Pilares Estratégicos:
 7. Camisas C0 de Produção Própria: Aviso exclusivo de direitos autorais e proteção de estampas.
 """
 
+import re
 from typing import Dict, Any, List
 
 try:
@@ -25,6 +26,18 @@ except ImportError:
     except ImportError:
         def get_svg_icon(name: str, color: str = "currentColor", size: int = 16, extra_class: str = "") -> str:
             return ""
+
+# Versao do padrao Modo B. Ao evoluir moldes/layout, incremente: o catalogo ao vivo
+# passa a listar como "Desatualizado" tudo que estiver colado com versao anterior.
+MODO_B_VERSION = "1"
+
+
+def brk_tracking_marker(sku: str, archetype_id: str) -> str:
+    """Comentario HTML invisivel de rastreio: <!-- BRK-MODO-B v1 | sku:X | molde:Y -->"""
+    def clean(v):
+        return re.sub(r"[^A-Za-z0-9_.\-]", "", str(v or ""))[:60].replace("--", "-")
+    return f"<!-- BRK-MODO-B v{MODO_B_VERSION} | sku:{clean(sku)} | molde:{clean(archetype_id)} -->"
+
 
 _TROCA = {"icon": "return", "title": "Troca Fácil BRK", "sub": "Satisfação 100% Garantida"}
 
@@ -689,7 +702,8 @@ class HTMLBuilder:
   </div>"""
 
         # 5. Template Completo Encapsulado (100% Autônomo e sem Font Awesome)
-        full_html = f"""<!-- BRK GROUP - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL SHOPIFY) -->
+        full_html = f"""{brk_tracking_marker(enriched_data.get("sku"), archetype_id)}
+<!-- BRK GROUP - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL SHOPIFY) -->
 <div class="brk-desc-wrapper">
   <style>
     .brk-desc-wrapper {{

@@ -455,6 +455,9 @@ async function switchStore(storeKey) {
   }
 
   startLiveSync();
+
+  // Agente ao vivo: confere na vitrine publica o estado real das descricoes desta loja
+  if (typeof LiveAgent !== "undefined") LiveAgent.onStoreReady(storeKey);
 }
 
 // Atualizar Cockpit do Topo
@@ -492,6 +495,10 @@ function updateCockpit() {
   if (cEmpty) cEmpty.innerText = loadedEmpty;
   const cHealthy = document.getElementById("count-healthy");
   if (cHealthy) cHealthy.innerText = loadedHealthy;
+  const cColado = document.getElementById("count-colado");
+  if (cColado) cColado.innerText = products.filter(p => p.live && ["COLADO_ATUAL", "COLADO_DESATUALIZADO", "COLADO_SEM_MARCADOR"].includes(p.live.s)).length;
+  const cRecolar = document.getElementById("count-recolar");
+  if (cRecolar) cRecolar.innerText = products.filter(p => p.live && ["COLADO_DESATUALIZADO", "COLADO_SEM_MARCADOR"].includes(p.live.s)).length;
 }
 
 // Filtros Rápidos do Cockpit
@@ -593,6 +600,8 @@ function renderProducts() {
     if (currentFilter === "broken" && !isBroken) return false;
     if (currentFilter === "empty" && !isEmpty) return false;
     if (currentFilter === "healthy" && !isHealthy) return false;
+    if (currentFilter === "colado" && !(p.live && ["COLADO_ATUAL", "COLADO_DESATUALIZADO", "COLADO_SEM_MARCADOR"].includes(p.live.s))) return false;
+    if (currentFilter === "recolar" && !(p.live && ["COLADO_DESATUALIZADO", "COLADO_SEM_MARCADOR"].includes(p.live.s))) return false;
 
     if (searchQuery.trim() !== "") {
       const q = searchQuery.toLowerCase();
@@ -624,6 +633,13 @@ function renderProducts() {
     } else if (isEmpty) {
       borderClass = "border-amber-300 hover:border-amber-500 bg-amber-50/20";
       statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 flex items-center gap-1" title="Status na Loja Shopify: Produto sem descrição cadastrada">⚠️ Sem Descrição</span>`;
+    }
+
+    if (!isBroken && !isEmpty && typeof LiveAgent !== "undefined") {
+      const lb = LiveAgent.badgeFor(p.live);
+      if (lb) {
+        statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${lb.cls} flex items-center gap-1" title="${lb.title}">${lb.text}</span>`;
+      }
     }
 
     const card = document.createElement("div");

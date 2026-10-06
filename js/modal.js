@@ -1173,6 +1173,14 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
   </details>`;
 }
 
+// Versao do padrao Modo B (espelha core/html_builder.py::MODO_B_VERSION; teste de paridade garante).
+const MODO_B_VERSION = "1";
+
+function buildClientTrackingMarker(sku, archetypeId) {
+  const clean = (v) => String(v || "").replace(/[^A-Za-z0-9_.\-]/g, "").slice(0, 60).replace(/--/g, "-");
+  return `<!-- BRK-MODO-B v${MODO_B_VERSION} | sku:${clean(sku)} | molde:${clean(archetypeId)} -->`;
+}
+
 function buildClientSchemaJsonLd(liveP) {
   const originInfo = resolveClientOriginAndTitle(liveP);
   const formattedTitle = liveP.formatted_title || originInfo.formattedTitle;
@@ -1515,7 +1523,8 @@ function getProductModeBHTML(liveP) {
   }
 
   // 5. Estrutura HTML Completa com CSS Embutido Responsivo
-  return `<!-- BRK GROUP - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL SHOPIFY) -->
+  return `${buildClientTrackingMarker(liveP.master_sku || liveP.sku || liveP.id, archetypeId)}
+<!-- BRK GROUP - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL SHOPIFY) -->
 <div class="brk-desc-wrapper">
   <style>
     .brk-desc-wrapper {
