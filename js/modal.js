@@ -550,25 +550,59 @@ function getProductModeBHTML(liveP) {
     const tmpl = moldes[archKey] || moldes["uv_performance"];
 
     if (tmpl && tmpl.act1 && tmpl.act2 && tmpl.act3) {
+      const tLow = (liveP.title || "").toLowerCase();
+      const isHooded = /\b(capuz|hood|hoodie)\b/i.test(tLow);
+      const isKids = /\b(infantil|kids|juvenil|mini)\b/i.test(tLow) && !/\b(adulto|unissex adulto)\b/i.test(tLow);
+      const isShortSleeve = /\b(manga curta|manga-curta)\b/i.test(tLow) && !/\b(manga longa|manga-longa)\b/i.test(tLow);
+      const isRoundNeck = /\b(gola careca|gola redonda|sem zíper|sem ziper)\b/i.test(tLow) || (/\bcamiseta\b/i.test(tLow) && !/\b(ziper|zíper)\b/i.test(tLow));
+
+      let act1Title = tmpl.act1.title || "QUALIDADE E DESEMPENHO";
+      let act1Desc = (tmpl.act1.desc_tmpl || "").replace(/\{title\}/g, formattedTitle);
+      let act2Title = tmpl.act2.title || "CONFORTO E TECNOLOGIA";
+      let act2Desc = (tmpl.act2.desc_tmpl || "").replace(/\{title\}/g, formattedTitle);
+      let act3Title = tmpl.act3.title || "DURABILIDADE E ACABAMENTO";
+      let act3Desc = (tmpl.act3.desc_tmpl || "").replace(/\{title\}/g, formattedTitle);
+
+      if (isKids) {
+        act1Title = "CONFORTO E PROTEÇÃO SOLAR TOTAL PARA OS PEQUENOS AVENTUREIROS";
+        act1Desc = `Desenvolvida especialmente para crianças e jovens exploradores, o(a) ${formattedTitle} oferece proteção solar máxima FPU 50+ com toque extra suave na pele, garantindo segurança e liberdade total para brincar ao ar livre.`;
+        act2Title = "TECNOLOGIA DRY FIT QUE MANTÉM AS CRIANÇAS FRESCAS E SECAS";
+        act2Desc = "Tecido respirável de secagem ultra rápida que evapora o suor rapidamente, mantendo o corpo seco durante todas as brincadeiras e pescarias em família.";
+        if (!isHooded) {
+          act3Title = "COSTURAS PLANAS ANTI-ATRITO E MÁXIMA DURABILIDADE";
+          act3Desc = "Construída com acabamento elástico de alta resistência que não pinica nem irrita a pele sensível das crianças, oferecendo caimento confortável que aguenta todas as aventuras infantis.";
+        }
+      }
+
+      if (isHooded) {
+        act3Title = "CAPUZ ANATÔMICO INTEGRADO E COSTURA REFORÇADA";
+        act3Desc = "Equipada com capuz anatômico integrado que oferece proteção solar 360° para nuca, orelhas e laterais do rosto contra o sol forte e vento, dispensando o uso de acessórios extras.";
+      } else if (isShortSleeve) {
+        act3Desc = act3Desc.replace(/punhos anatômicos[^,;.]*/gi, "mangas curtas com barra reforçada em costura dupla");
+      } else if (isRoundNeck) {
+        act3Title = "COSTURA REFORÇADA E GOLA REDONDA ANATÔMICA";
+        act3Desc = "Acabamento de alto padrão com costuras planas anti-atrito, gola careca canelada que não deforma e ajuste confortável para uso contínuo.";
+      }
+
       blocks = [
         {
-          tag: tmpl.act1.tag || "Destaque",
-          title: tmpl.act1.title || "QUALIDADE E DESEMPENHO",
-          description: (tmpl.act1.desc_tmpl || "").replace(/\{title\}/g, formattedTitle),
+          tag: isKids ? "Proteção Infantil & Conforto" : (tmpl.act1.tag || "Destaque"),
+          title: act1Title,
+          description: act1Desc,
           image: img1,
           split_images: splitImages,
           variations_summary: variationsSummary
         },
         {
-          tag: tmpl.act2.tag || "Destaque",
-          title: tmpl.act2.title || "CONFORTO E TECNOLOGIA",
-          description: (tmpl.act2.desc_tmpl || "").replace(/\{title\}/g, formattedTitle),
+          tag: isKids ? "Respirabilidade & Frescor" : (tmpl.act2.tag || "Destaque"),
+          title: act2Title,
+          description: act2Desc,
           image: img2
         },
         {
-          tag: tmpl.act3.tag || "Destaque",
-          title: tmpl.act3.title || "DURABILIDADE E ACABAMENTO",
-          description: (tmpl.act3.desc_tmpl || "").replace(/\{title\}/g, formattedTitle),
+          tag: isHooded ? "Capuz Anatômico & Proteção 360°" : (tmpl.act3.tag || "Destaque"),
+          title: act3Title,
+          description: act3Desc,
           image: img3
         }
       ];

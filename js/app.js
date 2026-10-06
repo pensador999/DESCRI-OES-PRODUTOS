@@ -209,25 +209,43 @@ function detectClientArchetype(title, category, tags) {
     return { id: "accessories_car_care", name: "Aromatizantes Automotivos & Cuidados" };
   }
 
-  // 2. Chaveiros, Adesivos & Acessórios Gerais
-  if (/\b(chaveiro|adesivo|adesivos|sticker|stickers|patch|emblema)\b/i.test(t)) {
+  // 2. Óculos de Sol & Polarizados UV400 (se não for camisa, lenço, adesivo ou chaveiro)
+  if ((/\b(oculos|óculos|sunglasses)\b/i.test(t) || /\b(polarizado|polarizada|aviador|uv400|lente polarizada)\b/i.test(t)) && !/\b(camisa|camiseta|adesivo|chaveiro|lenço|lenco|bandana)\b/i.test(t)) {
+    return { id: "eyewear_sunglasses", name: "Óculos de Sol & Polarizados UV400" };
+  }
+
+  // 3. Luvas de Pesca, Táticas & Esportivas (se não for camisa)
+  if (/\b(luva|luvas)\b/i.test(t) && !/\b(camisa|camiseta)\b/i.test(t)) {
+    return { id: "gloves_tactical_fishing", name: "Luvas de Pesca, Táticas & Esportivas" };
+  }
+
+  // 4. Bandanas, Tubenecks, Lenços & Balaclavas (se não for camisa)
+  if (/\b(bandana|balaclava|tubeneck|buff|mascara facial|máscara facial|protetor de pescoço|lenço|lenco|lenços|lencos)\b/i.test(t) && !/\b(camisa|camiseta)\b/i.test(t)) {
+    return { id: "neck_gaiters_balaclavas", name: "Bandanas, Tubenecks & Balaclavas" };
+  }
+
+  // 5. Chaveiros, Adesivos, Camping & Acessórios Gerais
+  if (/\b(chaveiro|adesivo|adesivos|sticker|stickers|patch|emblema|capa de caiaque|caiaque|barraca|fogareiro|mesa dobrável|mesa dobravel|coleira|suporte magnético|suporte magnetico)\b/i.test(t)) {
     return { id: "accessories_general", name: "Acessórios, Chaveiros & Adesivos" };
   }
 
-  // 3. Calças & Bermudas (Evita cair em camisa)
+  // 6. Calças & Bermudas (Evita cair em camisa)
   if (/\b(calca|calça|calcas|calças|bermuda|bermudas|shorts|short|calcao|calção)\b/i.test(t) && !/\b(camisa|camiseta)\b/i.test(t)) {
     return { id: "pants_cargo_tactical", name: "Calças & Bermudas Táticas / Cargo / Pesca" };
   }
 
-  // 4. Chapéus: Country/Feltro/Pralana vs Safári/Outdoor/Pescador
+  // 7. Chapéus: Country/Feltro/Pralana vs Safári/Outdoor/Pescador
   if (/\b(chapeu|chapéu|chapeus|chapéus)\b/i.test(t)) {
-    if (/\b(feltro|pralana|american hat|karanda|karandá|country|cowboy|pantaneiro|lã|veludo|liso|marcatto)\b/i.test(t)) {
+    if (/\b(feltro|pralana|american hat|karanda|karandá|country|cowboy|pantaneiro|lã|veludo|liso|marcatto|eldorado|cury)\b/i.test(t)) {
       return { id: "hats_country_cowboy", name: "Chapéus Country, Feltro, Pralana & Cowboy" };
     }
     return { id: "hats_safari_outdoor", name: "Chapéus de Pesca, Safári & Outdoor" };
   }
+  if (/\b(pralana|american hat|karanda|karandá|feltro country)\b/i.test(t)) {
+    return { id: "hats_country_cowboy", name: "Chapéus Country, Feltro, Pralana & Cowboy" };
+  }
 
-  // 5. Camisas: Work/Botão vs Agro vs Motors vs UV50+
+  // 8. Camisas: Work/Botão vs Agro vs Motors vs UV50+
   if (/\b(camisa|camiseta|baby look|regata|t-shirt|polo)\b/i.test(t)) {
     if (/\b(work|safari sarja|manga longa sarja|manga curta sarja|sarja|militar|operacional|botao|botão|de botao|de botão|lisa|sem estampa)\b/i.test(t) && !/\b(ziper|zíper)\b/i.test(t)) {
       return { id: "shirts_button_work", name: "Camisas Work, Botão & Sarja Utilitária" };
@@ -251,13 +269,16 @@ function detectClientArchetype(title, category, tags) {
   if (/\b(bandana|balaclava|tubeneck|buff)\b/i.test(t)) return { id: "neck_gaiters_balaclavas", name: "Bandanas, Tubenecks & Balaclavas" };
   if (/\b(macacao|macacão|jardineira|jardineiras|salopete)\b/i.test(t)) return { id: "overalls_workwear", name: "Macacões, Jardineiras & Operacional" };
   if (/\b(isca|iscas|plug|jig|frog|soft|popper|stick|crankbait|minnow)\b/i.test(t)) return { id: "fishing_lures", name: "Iscas Artificiais & Alta Atratividade" };
-  if (/\b(vara|carretilha|molinete|linha|anzol|alicate|passagua|passaguá)\b/i.test(t)) return { id: "fishing_tackle_gear", name: "Equipamentos de Pesca & Revenda" };
-  if (/\b(caixa de pesca|caixa pesca|estojo|maleta|bolsa de pesca|organizador)\b/i.test(t)) return { id: "tackle_boxes_storage", name: "Caixas, Estojos & Organização" };
+  if (/\b(vara|carretilha|molinete|linha|anzol|alicate|passagua|passaguá|girador|giradores|snap|snaps|empate|chumbada|chumbo)\b/i.test(t)) return { id: "fishing_tackle_gear", name: "Equipamentos de Pesca & Revenda" };
+  if (/\b(caixa de pesca|caixa pesca|estojo|maleta|bolsa de pesca|organizador|multicase|zmc)\b/i.test(t)) return { id: "tackle_boxes_storage", name: "Caixas, Estojos & Organização" };
   if (/\b(copo|garrafa|caneca|cantil|cooler|termico|térmico|elber)\b/i.test(t)) return { id: "drinkware_thermo", name: "Copos, Garrafas & Térmicos" };
   if (/\b(livro|livros|cartilha|guia)\b/i.test(t)) return { id: "books_publications", name: "Livros, Guias & Publicações" };
 
   // Fallback Secundário via texto completo
   if (/\b(aromatizante|cheirinho|difusor)\b/i.test(text)) return { id: "accessories_car_care", name: "Aromatizantes Automotivos & Cuidados" };
+  if (/\b(oculos|óculos|polarizado|uv400)\b/i.test(text)) return { id: "eyewear_sunglasses", name: "Óculos de Sol & Polarizados UV400" };
+  if (/\b(luva|luvas)\b/i.test(text) && !/\b(camisa|camiseta)\b/i.test(text)) return { id: "gloves_tactical_fishing", name: "Luvas de Pesca, Táticas & Esportivas" };
+  if (/\b(lenço|lenco|bandana|balaclava)\b/i.test(text)) return { id: "neck_gaiters_balaclavas", name: "Bandanas, Tubenecks & Balaclavas" };
   if (/\b(chaveiro|adesivo)\b/i.test(text)) return { id: "accessories_general", name: "Acessórios, Chaveiros & Adesivos" };
   if (/\b(calca|calça|bermuda|shorts)\b/i.test(text)) return { id: "pants_cargo_tactical", name: "Calças & Bermudas Táticas / Cargo / Pesca" };
   if (/\b(pralana|american hat|karanda|karandá|feltro|country)\b/i.test(text)) return { id: "hats_country_cowboy", name: "Chapéus Country, Feltro, Pralana & Cowboy" };

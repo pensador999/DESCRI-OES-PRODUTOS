@@ -810,6 +810,81 @@ class TemplateEngine:
                     {"label": "Durabilidade", "default": "Resistente a água e exposição solar"}
                 ],
                 "care_tips": "Limpar com pano seco ou levemente umedecido em água. Não utilizar solventes químicos abrasivos."
+            },
+
+            # 22. Óculos de Sol & Polarizados UV400
+            "eyewear_sunglasses": {
+                "id": "eyewear_sunglasses",
+                "name": "Óculos de Sol & Polarizados UV400",
+                "fa_icon": "fa-solid fa-glasses",
+                "theme_color": "#0f766e",
+                "theme_bg": "#f0fdfa",
+                "category_keywords": ["oculos", "óculos", "polarizado", "polarizada", "aviador", "uv400", "lente polarizada"],
+                "default_tagline": "Visão Nítida sem Reflexos, Lentes Polarizadas UV400 e Armação Ultraleve",
+                "act1": {
+                    "tag": "Lentes & Polarização",
+                    "fa_icon": "fa-solid fa-glasses",
+                    "title": "LENTES POLARIZADAS DE ALTA DEFINIÇÃO COM PROTEÇÃO UV400",
+                    "desc_tmpl": "As lentes do(a) {title} contam com filtro polarizado de alta precisão que elimina reflexos da água, asfalto e superfícies brilhantes, garantindo visão nítida, contraste aprimorado e bloqueio de 100% dos raios UVA e UVB."
+                },
+                "act2": {
+                    "tag": "Estrutura & Conforto",
+                    "fa_icon": "fa-solid fa-feather",
+                    "title": "ARMAÇÃO ERGONÔMICA LEVE E RESISTENTE A IMPACTOS",
+                    "desc_tmpl": "Construída com materiais de alta tenacidade e flexibilidade balanceada, oferece encaixe anatômico confortável que não pressiona as têmporas nem o nariz durante longas horas de uso."
+                },
+                "act3": {
+                    "tag": "Fixação & Proteção",
+                    "fa_icon": "fa-solid fa-shield-halved",
+                    "title": "ACABAMENTO PREMIUM E ACOMPANHAMENTO DE ESTOJO E FLANELA",
+                    "desc_tmpl": "Design esportivo e elegante com dobradiças reforçadas e ponteiras anatômicas que garantem fixação firme no rosto, acompanhado de estojo rígido e flanela de microfibra para conservação."
+                },
+                "base_specs": [
+                    {"label": "Tecnologia das Lentes", "default": "Polarizadas TAC com filtro anti-reflexo HD"},
+                    {"label": "Proteção Solar", "default": "Fator UV400 com 100% de bloqueio contra raios UVA e UVB"},
+                    {"label": "Material da Armação", "default": "Polímero ultraleve de alta resistência / Liga metálica nobre"},
+                    {"label": "Apoio Nasal", "default": "Plaquetas anatômicas confortáveis que não marcam a pele"},
+                    {"label": "Itens Inclusos", "default": "Estojo protetor oficial e flanela especial de microfibra"},
+                    {"label": "Uso Recomendado", "default": "Pesca esportiva, náutica, direção, campo e uso diário ao ar livre"}
+                ],
+                "care_tips": "Lavar periodicamente com água corrente e detergente neutro. Secar com a flanela de microfibra limpa. Guardar sempre no estojo evitando contato com superfícies abrasivas."
+            },
+
+            # 23. Luvas de Pesca, Táticas & Esportivas
+            "gloves_tactical_fishing": {
+                "id": "gloves_tactical_fishing",
+                "name": "Luvas de Pesca, Táticas & Esportivas",
+                "fa_icon": "fa-solid fa-mitten",
+                "theme_color": "#475569",
+                "theme_bg": "#f8fafc",
+                "category_keywords": ["luva", "luvas", "meio dedo", "dedo inteiro", "grip", "tactical glove"],
+                "default_tagline": "Aderência Antiderrapante Firme, Dorso Respirável e Proteção Solar nas Mãos",
+                "act1": {
+                    "tag": "Aderência & Grip",
+                    "fa_icon": "fa-solid fa-hand",
+                    "title": "PALMA ANTIDERRAPANTE COM ADERÊNCIA REFORÇADA",
+                    "desc_tmpl": "A {title} conta com superfície texturizada de alta aderência na palma, garantindo pegada firme e controle absoluto sobre varas de pesca, guidões, ferramentas e rédeas, mesmo com as mãos molhadas."
+                },
+                "act2": {
+                    "tag": "Respirabilidade & Proteção",
+                    "fa_icon": "fa-solid fa-sun",
+                    "title": "DORSO RESPIRÁVEL COM PROTEÇÃO SOLAR E SECAGEM RÁPIDA",
+                    "desc_tmpl": "Confeccionada com tecido flexível e ventilado que dissipa o calor rapidamente, prevenindo queimaduras solares, bolhas e calosidades durante longas jornadas."
+                },
+                "act3": {
+                    "tag": "Ajuste & Firmeza",
+                    "fa_icon": "fa-solid fa-sliders",
+                    "title": "AJUSTE ANATÔMICO COM FECHO SEGURO NO PULSO",
+                    "desc_tmpl": "Fechamento ajustável no punho que impede a entrada de resíduos, garantindo firmeza sem restringir a circulação ou a mobilidade dos dedos nas atividades de precisão."
+                },
+                "base_specs": [
+                    {"label": "Palma da Mão", "default": "Material sintético texturizado antiderrapante com reforço no polegar"},
+                    {"label": "Dorso", "default": "Tecido elástico de alta respirabilidade e secagem ultra rápida (Quick Dry)"},
+                    {"label": "Ajuste no Punho", "default": "Fita regulável de fixação rápida para vedação confortável"},
+                    {"label": "Modelagem", "default": "Anatômica esportiva (corte meio dedo para sensibilidade tátil)"},
+                    {"label": "Indicação de Uso", "default": "Pesca esportiva, ciclismo, motociclismo, tiro e trabalho no campo"}
+                ],
+                "care_tips": "Lavar à mão com água fria e sabão neutro. Não usar alvejante. Secar à sombra e não torcer."
             }
         }
 
@@ -829,21 +904,35 @@ class TemplateEngine:
         if any(w in t for w in ["aromatizante", "cheirinho", "difusor", "aromatizador", "odorizador", "little trees", "odor"]):
             return "accessories_car_care"
 
-        # 2. Acessórios Gerais, Chaveiros & Adesivos
-        if any(w in t for w in ["chaveiro", "adesivo", "adesivos", "sticker", "stickers", "patch", "emblema", "pin "]):
+        # 2. Óculos de Sol & Polarizados UV400 (se não for camisa, lenço, adesivo ou chaveiro)
+        if (any(w in t for w in ["oculos", "óculos", "sunglasses"]) or any(w in t for w in ["polarizado", "polarizada", "aviador", "uv400", "lente polarizada"])) and not any(w in t for w in ["camisa", "camiseta", "adesivo", "chaveiro", "lenço", "lenco", "bandana"]):
+            return "eyewear_sunglasses"
+
+        # 3. Luvas de Pesca, Táticas & Esportivas (se não for camisa)
+        if any(w in t for w in ["luva", "luvas"]) and not any(w in t for w in ["camisa", "camiseta"]):
+            return "gloves_tactical_fishing"
+
+        # 4. Bandanas, Tubenecks, Lenços & Balaclavas (se não for camisa)
+        if any(w in t for w in ["bandana", "balaclava", "tubeneck", "buff", "mascara facial", "máscara facial", "protetor de pescoço", "lenço", "lenco", "lenços", "lencos"]) and not any(w in t for w in ["camisa", "camiseta"]):
+            return "neck_gaiters_balaclavas"
+
+        # 5. Acessórios Gerais, Chaveiros, Adesivos, Camping & Caiaque
+        if any(w in t for w in ["chaveiro", "adesivo", "adesivos", "sticker", "stickers", "patch", "emblema", "pin ", "capa de caiaque", "caiaque", "barraca", "fogareiro", "mesa dobrável", "mesa dobravel", "coleira", "suporte magnético", "suporte magnetico", "personalização nome", "personalizacao nome"]):
             return "accessories_general"
 
-        # 3. Calças, Bermudas & Shorts (Prioridade antes de camisa para não cair em uv_performance)
+        # 6. Calças, Bermudas & Shorts (Prioridade antes de camisa para não cair em uv_performance)
         if any(w in t for w in ["calca", "calça", "calcas", "calças", "bermuda", "bermudas", "shorts", "short", "calcao", "calção"]) and not any(w in t for w in ["camisa", "camiseta"]):
             return "pants_cargo_tactical"
 
-        # 4. Chapéus: Distinção estrita entre Country/Feltro/Cowboy vs Safári/Outdoor/Pescador
+        # 7. Chapéus: Distinção estrita entre Country/Feltro/Cowboy vs Safári/Outdoor/Pescador
         if any(w in t for w in ["chapeu", "chapéu", "chapeus", "chapéus"]):
-            if any(w in t for w in ["feltro", "pralana", "american hat", "karanda", "karandá", "country", "cowboy", "pantaneiro", "lã", "veludo", "liso", "marcatto"]):
+            if any(w in t for w in ["feltro", "pralana", "american hat", "karanda", "karandá", "country", "cowboy", "pantaneiro", "lã", "veludo", "liso", "marcatto", "eldorado", "cury"]):
                 return "hats_country_cowboy"
             return "hats_safari_outdoor"
+        if any(w in t for w in ["pralana", "american hat", "karanda", "karandá", "feltro country"]):
+            return "hats_country_cowboy"
 
-        # 5. Camisas / Vestuário Superior: Distinção estrita entre Camisas Work/Botão vs Agro vs Motors vs UV50+
+        # 8. Camisas / Vestuário Superior: Distinção estrita entre Camisas Work/Botão vs Agro vs Motors vs UV50+
         if any(w in t for w in ["camisa", "camiseta", "baby look", "regata", "t-shirt", "polo"]):
             # Camisas Work / Botão / Sarja / Lisas (Sem zíper, com botões e bolsos utilitários)
             if any(w in t for w in ["work", "safari sarja", "manga longa sarja", "manga curta sarja", "sarja", "militar", "operacional", "botao", "botão", "de botao", "de botão", "lisa", "sem estampa"]) and not any(w in t for w in ["ziper", "zíper"]):
@@ -891,12 +980,12 @@ class TemplateEngine:
         if any(w in t for w in ["isca", "iscas", "plug", "jig", "frog", "soft bait", "crankbait", "minnow", "popper", "stick", "twitch"]):
             return "fishing_lures"
 
-        # 14. Equipamentos de Pesca (Varas, Carretilhas, Molinetes)
-        if any(w in t for w in ["vara", "carretilha", "molinete", "linha", "anzol", "alicate", "passagua", "passaguá"]):
+        # 14. Equipamentos e Ferragens de Pesca (Varas, Carretilhas, Molinetes, Giradores, Snaps)
+        if any(w in t for w in ["vara", "carretilha", "molinete", "linha", "anzol", "anzóis", "alicate", "passagua", "passaguá", "girador", "giradores", "snap", "snaps", "empate", "chumbada", "chumbo"]):
             return "fishing_tackle_gear"
 
         # 15. Caixas de Pesca & Organização
-        if any(w in t for w in ["caixa de pesca", "caixa pesca", "estojo", "maleta", "organizador", "porta-vara", "porta vara", "tubo de vara"]):
+        if any(w in t for w in ["caixa de pesca", "caixa pesca", "estojo", "maleta", "organizador", "porta-vara", "porta vara", "tubo de vara", "multicase", "zmc"]):
             return "tackle_boxes_storage"
 
         # 16. Copos, Garrafas e Canecas Térmicas
@@ -910,6 +999,12 @@ class TemplateEngine:
         # 18. Fallback Secundário via Categoria / Tags / Vendor
         if any(w in text for w in ["aromatizante", "cheirinho", "difusor"]):
             return "accessories_car_care"
+        if any(w in text for w in ["oculos", "óculos", "polarizado", "uv400"]):
+            return "eyewear_sunglasses"
+        if any(w in text for w in ["luva", "luvas"]) and not any(w in text for w in ["camisa", "camiseta"]):
+            return "gloves_tactical_fishing"
+        if any(w in text for w in ["lenço", "lenco", "bandana", "balaclava", "tubeneck"]):
+            return "neck_gaiters_balaclavas"
         if any(w in text for w in ["chaveiro", "adesivo"]):
             return "accessories_general"
         if any(w in text for w in ["calca", "calça", "bermuda", "shorts"]):
@@ -918,8 +1013,6 @@ class TemplateEngine:
             return "hats_country_cowboy"
         if any(w in text for w in ["manguito", "manguitos"]):
             return "sun_sleeves_manguitos"
-        if any(w in text for w in ["bandana", "balaclava", "tubeneck"]):
-            return "neck_gaiters_balaclavas"
         if any(w in text for w in ["sandalia", "sandália", "chinelo", "boaonda"]):
             return "footwear_sandals_boaonda"
         if any(w in text for w in ["tenis", "tênis", "calcado", "calçado"]):
@@ -932,7 +1025,7 @@ class TemplateEngine:
             return "hats_safari_outdoor"
         if any(w in text for w in ["bone", "boné"]):
             return "caps_trucker_snapback"
-        if any(w in text for w in ["vara", "carretilha", "molinete"]):
+        if any(w in text for w in ["vara", "carretilha", "molinete", "girador", "snap", "empate"]):
             return "fishing_tackle_gear"
         if any(w in text for w in ["jersey", "moto", "motors"]):
             return "motors_speed"
@@ -970,6 +1063,26 @@ class TemplateEngine:
             # 4. Aromatizantes & Cuidados: ZERO vestuário, ZERO tecido, ZERO lavagem à máquina, ZERO passar a ferro
             elif archetype_id in ["accessories_car_care", "accessories_general"]:
                 if any(w in full for w in ["manga", "gola", "tecido", "poliéster", "algodão", "lavar à mão", "lavagem", "ferro", "modelagem"]):
+                    continue
+
+            # 5. Óculos de Sol: ZERO vestuário, ZERO mangas, ZERO gola, ZERO zíper, ZERO tecido
+            elif archetype_id == "eyewear_sunglasses":
+                if any(w in full for w in ["manga", "gola", "zíper", "ziper", "tecido", "poliéster", "algodão", "costura", "punho", "passador", "bolso", "modelagem"]):
+                    continue
+
+            # 6. Luvas de Pesca & Táticas: ZERO mangas compridas, ZERO gola, ZERO zíper frontal
+            elif archetype_id == "gloves_tactical_fishing":
+                if any(w in full for w in ["manga longa", "mangas longas", "gola", "zíper", "ziper", "passador", "bolso"]):
+                    continue
+
+            # 7. Lenços e Bandanas: ZERO mangas, ZERO gola padre, ZERO zíper
+            elif archetype_id == "neck_gaiters_balaclavas":
+                if any(w in full for w in ["manga", "gola padre", "zíper", "ziper", "punho", "passador", "bolso"]):
+                    continue
+
+            # 8. Equipamentos e Ferragens de Pesca: ZERO vestuário
+            elif archetype_id in ["fishing_tackle_gear", "fishing_lures", "tackle_boxes_storage"]:
+                if any(w in full for w in ["manga", "gola", "zíper", "ziper", "tecido", "poliéster", "algodão", "costura"]):
                     continue
 
             sanitized.append(s)
@@ -1149,7 +1262,9 @@ class TemplateEngine:
             "fishing_tackle_gear": "fa-solid fa-screwdriver-wrench",
             "motors_speed": "fa-solid fa-shield-halved",
             "agro_field": "fa-solid fa-seedling",
-            "uv_performance": "fa-solid fa-shirt"
+            "uv_performance": "fa-solid fa-shirt",
+            "eyewear_sunglasses": "fa-solid fa-glasses",
+            "gloves_tactical_fishing": "fa-solid fa-mitten"
         }
         care_icon = care_icons.get(archetype_id, template.get("fa_icon", "fa-solid fa-hand-sparkles"))
 
@@ -1177,13 +1292,122 @@ class TemplateEngine:
             img2 = cdn_images[1] if len(cdn_images) > 1 else ""
             img3 = cdn_images[2] if len(cdn_images) > 2 else ""
 
-        act1 = template["act1"]
-        act2 = template["act2"]
-        act3 = template["act3"]
+        act1 = dict(template["act1"])
+        act2 = dict(template["act2"])
+        act3 = dict(template["act3"])
+
+        # Contextual Intelligence Flags para Adaptação Narrativa Dinâmica
+        t_low = title.lower()
+        tags_list = tags if isinstance(tags, list) else [str(tags)]
+        tags_low = " ".join([str(t).lower() for t in tags_list])
+        body_low = (product.get("body_html") or "").lower()
+        all_info = f"{t_low} {tags_low} {body_low}"
+
+        is_apparel = archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work", "pants_cargo_tactical")
+        
+        is_hooded = is_apparel and any(w in t_low for w in ["capuz", "hood", "hoodie"])
+        is_kids = any(w in t_low for w in ["infantil", "kids", "juvenil"]) or bool(re.search(r'\bmini\b', t_low))
+        if any(w in t_low for w in ["adulto", "unissex adulto"]):
+            is_kids = False
+        is_short_sleeve = is_apparel and (any(w in t_low for w in ["manga curta", "manga-curta"]) or ("curta" in t_low and "manga" in t_low)) and not any(w in t_low for w in ["manga longa", "manga-longa"])
+        is_has_glove = is_apparel and any(w in t_low for w in ["com luva", "e luva", "luva integrada"])
+        is_female = (any(w in t_low for w in ["feminina", "feminino", "baby look", "babylook", "mulher"]) or "femin" in tags_low) and not is_kids
+        is_round_neck = is_apparel and (any(w in t_low for w in ["gola careca", "gola redonda", "sem zíper", "sem ziper", "t-shirt"]) or ("camiseta" in t_low and not any(w in t_low for w in ["ziper", "zíper"])))
+
+        # 1. Adaptação Kids / Infantil (Eliminação de "homem e mulher", foco em aventura e proteção suave)
+        if is_kids:
+            act1["tag"] = "Proteção Infantil & Conforto"
+            act1["fa_icon"] = "fa-solid fa-child"
+            act1["title"] = "CONFORTO E PROTEÇÃO SOLAR TOTAL PARA OS PEQUENOS AVENTUREIROS"
+            act1["desc_tmpl"] = "Desenvolvida especialmente para crianças e jovens exploradores, o(a) {title} oferece proteção solar máxima FPU 50+ com toque extra suave na pele, garantindo segurança, leveza e liberdade total para brincar e se divertir ao ar livre."
+
+            act2["tag"] = "Respirabilidade & Frescor"
+            act2["fa_icon"] = "fa-solid fa-sun"
+            act2["title"] = "TECNOLOGIA DRY FIT QUE MANTÉM AS CRIANÇAS FRESCAS E SECAS"
+            act2["desc_tmpl"] = "Tecido tecnológico respirável que absorve e dissipa o suor rapidamente, evitando o superaquecimento e mantendo o corpo seco e confortável durante todas as brincadeiras e pescarias em família."
+
+            if not is_hooded:
+                act3["tag"] = "Durabilidade & Liberdade"
+                act3["fa_icon"] = "fa-solid fa-shield-heart"
+                act3["title"] = "COSTURAS PLANAS ANTI-ATRITO E MÁXIMA DURABILIDADE"
+                act3["desc_tmpl"] = "Construída com acabamento elástico de alta resistência que não pinica nem irrita a pele sensível das crianças, oferecendo caimento confortável que aguenta todas as aventuras infantis."
+
+        # 2. Adaptação Feminina (Corte anatômico e caimento sob medida)
+        elif is_female and archetype_id == "uv_performance" and not is_hooded:
+            act1["title"] = "MODELAGEM FEMININA ANATÔMICA COM CAIMENTO IMPECÁVEL"
+            act1["desc_tmpl"] = "Projetada sob medida para a anatomia feminina, a {title} combina corte acinturado esportivo, máxima liberdade de movimentos e proteção solar FPU 50+ com toque suave e elegante."
+
+        # 3. Adaptação Capuz (Elimina 'gola padre', injeta cobertura 360° no rosto/nuca)
+        if is_hooded:
+            act3["tag"] = "Capuz Anatômico & Proteção 360°"
+            act3["fa_icon"] = "fa-solid fa-head-side-mask"
+            act3["title"] = "CAPUZ ANATÔMICO INTEGRADO E COSTURA REFORÇADA"
+            act3["desc_tmpl"] = "Equipada com capuz anatômico integrado que oferece proteção solar 360° para nuca, orelhas e laterais do rosto contra a radiação forte e o vento, dispensando acessórios extras, com costuras planas reforçadas anti-atrito."
+
+        # 4. Adaptação Manga Curta (Elimina 'punhos anatômicos', injeta ventilação e barra pespontada)
+        elif is_short_sleeve:
+            if "punhos anatômicos" in act3.get("desc_tmpl", "").lower():
+                act3["desc_tmpl"] = act3["desc_tmpl"].replace("punhos anatômicos que não laceiam com o uso frequente", "mangas curtas com barra em costura dupla reforçada que proporcionam ventilação ideal e liberdade nos braços")
+            if "manga longa" in act3.get("desc_tmpl", "").lower():
+                act3["desc_tmpl"] = act3["desc_tmpl"].replace("manga longa", "manga curta")
+
+        # 5. Adaptação Gola Redonda / Sem Zíper (Elimina 'zíper com trava', injeta gola careca canelada)
+        elif is_round_neck:
+            if "zíper" in act3.get("title", "").lower() or "ziper" in act3.get("title", "").lower():
+                act3["title"] = "COSTURA REFORÇADA E GOLA REDONDA ANATÔMICA"
+                act3["desc_tmpl"] = "Acabamento de alto padrão com costuras planas anti-atrito, gola careca canelada reforçada ombro a ombro e caimento confortável para uso prolongado."
+
+        # 6. Adaptação Camisa com Luva Integrada
+        elif is_has_glove:
+            act3["desc_tmpl"] = "Acabamento de alto padrão com costuras planas anti-atrito, gola alta anatômica e punhos estendidos com luva integrada para proteção estendida do dorso das mãos."
 
         sibling_specs = sibling_info.get("extracted_specs") if sibling_info else None
         specs = self.extract_product_specs(product, archetype_id, sibling_specs=sibling_specs)
         specs = self.sanitize_specs_for_archetype(specs, archetype_id)
+
+        # Adaptação Contextual de Ficha Técnica
+        new_specs = []
+        for s in specs:
+            lbl = s.get("label", "")
+            val = s.get("value", s.get("default", ""))
+
+            # Capuz: elimina 'gola padre'
+            if is_hooded:
+                if any(w in lbl.lower() for w in ["gola", "zíper", "ziper"]):
+                    lbl = "Capuz / Gola"
+                    val = "Capuz anatômico integrado de alta cobertura solar com acabamento elástico"
+                val = re.sub(r'gola padre[^,;.]*', 'capuz anatômico integrado', val, flags=re.IGNORECASE)
+
+            # Manga Curta: elimina punhos / manga longa
+            if is_short_sleeve:
+                if any(w in lbl.lower() for w in ["punho", "manga"]):
+                    lbl = "Mangas"
+                    val = "Mangas curtas com acabamento reforçado em pesponto duplo"
+                val = re.sub(r'punhos anatômicos[^,;.]*', 'mangas curtas reforçadas', val, flags=re.IGNORECASE)
+                val = re.sub(r'mangas raglan esportivas', 'mangas curtas com barra reforçada', val, flags=re.IGNORECASE)
+
+            # Kids: elimina jargão adulto
+            if is_kids:
+                val = re.sub(r'homem e da mulher do campo', 'pequenos aventureiros', val, flags=re.IGNORECASE)
+                val = re.sub(r'lida no campo|lida diária', 'atividades ao ar livre', val, flags=re.IGNORECASE)
+                if "modelagem" in lbl.lower():
+                    val = "Infantil / Juvenil anatômica confortável"
+
+            # Gola Redonda: elimina zíper
+            if is_round_neck and not is_hooded:
+                if any(w in lbl.lower() for w in ["zíper", "ziper"]):
+                    lbl = "Gola"
+                    val = "Gola redonda canelada anatômica com pesponto reforçado (sem zíper)"
+                val = re.sub(r'com zíper[^,;.]*', 'sem zíper', val, flags=re.IGNORECASE)
+
+            # Luva integrada em camisa
+            if is_has_glove and not is_short_sleeve:
+                if "punho" in lbl.lower():
+                    lbl = "Punhos / Luva"
+                    val = "Punhos estendidos anatômicos com luva integrada para o dorso da mão"
+
+            new_specs.append({"label": lbl, "value": val})
+        specs = new_specs
 
         # Regra de Negócio: Descartar detalhes técnicos apenas para camisas sublimadas genéricas no Agro e Motors
         if archetype_id in ("uv_performance", "agro_field", "motors_speed") and store_key in ("brk_agro", "brk_motors"):
