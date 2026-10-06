@@ -116,15 +116,15 @@ function updateModalView() {
     }
     htmlToShow = currentModalProduct.mode_b_html || "<p>HTML Modo B não disponível</p>";
     if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-emerald-50 border-emerald-200 text-emerald-800";
-    if (bannerDesc) bannerDesc.innerHTML = "<strong>Modo B Ativo:</strong> Redesenho persuasivo em 3 Atos narrativos com Badges Rápidos no topo, Tabela de Medidas Inteligente, Schema.org SEO e ícones vetoriais SVG estilo Font Awesome.";
+    if (bannerDesc) bannerDesc.innerHTML = "<strong>⭐ Modo B Oficial (Novo Padrão BRK 100/100):</strong> Recomendado para colar na Shopify! Estrutura persuasiva em 3 Atos narrativos com Badges Rápidos no topo, Tabela de Medidas Expansível, Schema.org SEO e SVGs embutidos.";
   } else if (currentModalMode === "a") {
     htmlToShow = currentModalProduct.mode_a_html || currentModalProduct.original_body_html || "<p>Sem HTML original</p>";
     if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-blue-50 border-blue-200 text-blue-800";
-    if (bannerDesc) bannerDesc.innerHTML = "<strong>Modo A Ativo:</strong> 100% do texto e tabelas originais preservados. Fotos antigas/mortas trocadas por fotos CDN da Shopify.";
+    if (bannerDesc) bannerDesc.innerHTML = "<strong>Modo A Ativo (Preservação):</strong> 100% do texto e tabelas originais preservados com fotos trocadas por CDN Shopify oficial.";
   } else if (currentModalMode === "orig") {
     htmlToShow = currentModalProduct.original_body_html || "<p class='text-slate-400 italic'>Este produto não continha descrição original cadastrada.</p>";
-    if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-red-50 border-red-200 text-red-800";
-    if (bannerDesc) bannerDesc.innerHTML = "<strong>Conteúdo Original:</strong> Exibe como o produto estava antes na loja (contendo imagens com erro 404 da AWS S3 se houver).";
+    if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-amber-50 border-amber-200 text-amber-900";
+    if (bannerDesc) bannerDesc.innerHTML = "<strong>⚠️ Conteúdo Legado Atual na Shopify:</strong> Exibe como a descrição está gravada hoje na loja (antiga, sem os novos badges, tabela expansível ou schema).";
   } else if (currentModalMode === "diff") {
     if (typeof getProductModeBHTML === "function") {
       currentModalProduct.mode_b_html = getProductModeBHTML(currentModalProduct);

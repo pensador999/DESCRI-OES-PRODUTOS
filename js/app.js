@@ -15,6 +15,7 @@ let selectedCategory = "all";
 let searchQuery = "";
 let selectedMassProductIds = new Set();
 let currentAuditFilter = "all";
+let currentActiveTab = "tab-catalog";
 
 // Elementos DOM
 const productsGrid = document.getElementById("products-grid");
@@ -34,6 +35,7 @@ function showToast(text) {
 
 // Navegação entre Abas Principais
 function switchMainTab(tabId) {
+  currentActiveTab = tabId;
   document.querySelectorAll(".main-tab").forEach(tab => {
     tab.classList.remove("active", "bg-slate-800", "text-white");
     tab.classList.add("text-slate-400");
@@ -347,7 +349,7 @@ function createEnrichedFromLiveProduct(liveP, storeKey) {
   };
 }
 
-// Alternador de Loja Assíncrono com Cache
+// Alternador de Loja Assíncrono com Cache Universal e Reatividade Multi-Abas
 async function switchStore(storeKey) {
   currentStore = storeKey;
   currentFilter = "all";
@@ -380,30 +382,78 @@ async function switchStore(storeKey) {
   const titleElem = document.getElementById("store-title-text");
   if (titleElem) titleElem.innerText = storeTitles[storeKey];
 
-  // Exibir estado de carregamento leve no grid se dados ainda não estiverem em memória
+  // Exibir feedback de carregamento no container da aba ATUALMENTE VISÍVEL
   if (!MASTER_PAYLOAD.stores[storeKey]) {
-    productsGrid.innerHTML = `
-      <div class="col-span-full loading-overlay">
-        <div class="spinner"></div>
-        <p class="text-xs font-bold text-slate-500">Carregando catálogo da ${storeTitles[storeKey]}...</p>
-      </div>`;
+    if (currentActiveTab === "tab-mass" && massTableBody) {
+      massTableBody.innerHTML = `
+        <tr>
+          <td colspan="7" class="py-12 text-center text-slate-500">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent mb-3"></div>
+            <p class="text-sm font-bold text-slate-700">Carregando fila de produtos da ${storeTitles[storeKey]}...</p>
+          </td>
+        </tr>`;
+    } else if (currentActiveTab === "tab-moldes") {
+      const moldesContainer = document.getElementById("moldes-cards-container");
+      if (moldesContainer) {
+        moldesContainer.innerHTML = `
+          <div class="col-span-full py-12 text-center text-slate-500">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent mb-3"></div>
+            <p class="text-sm font-bold text-slate-700">Carregando moldes da ${storeTitles[storeKey]}...</p>
+          </div>`;
+      }
+    } else if (currentActiveTab === "tab-analytics") {
+      const auditTbody = document.getElementById("audit-table-body");
+      if (auditTbody) {
+        auditTbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-12 text-center text-slate-500">
+              <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent mb-3"></div>
+              <p class="text-sm font-bold text-slate-700">Carregando análises da ${storeTitles[storeKey]}...</p>
+            </td>
+          </tr>`;
+      }
+    } else {
+      if (productsGrid) {
+        productsGrid.innerHTML = `
+          <div class="col-span-full loading-overlay">
+            <div class="spinner"></div>
+            <p class="text-xs font-bold text-slate-500">Carregando catálogo da ${storeTitles[storeKey]}...</p>
+          </div>`;
+      }
+    }
+
     try {
       const loadedData = await StoreLoader.loadStore(storeKey);
       MASTER_PAYLOAD.stores[storeKey] = loadedData;
     } catch (e) {
-      productsGrid.innerHTML = `
+      const errMsg = `
         <div class="col-span-full text-center py-12 text-slate-500">
           <p class="text-base font-bold text-red-500">Erro ao carregar dados da loja ${storeTitles[storeKey]}</p>
-          <p class="text-xs mt-1">Verifique sua conexão ou inicie um servidor local (ex: python -m http.server 8000).</p>
+          <p class="text-xs mt-1">Verifique os arquivos da loja em data/stores/.</p>
         </div>`;
+      if (productsGrid) productsGrid.innerHTML = errMsg;
+      showToast(`❌ Falha ao carregar dados da loja ${storeTitles[storeKey]}`);
       return;
     }
   }
 
+  // 1. Atualizar métricas globais do Cockpit e Badges
   updateCockpit();
+  updateMassCountBadge();
+
+  // 2. Sempre atualizar o catálogo em background
   renderCategories();
   renderProducts();
-  updateMassCountBadge();
+
+  // 3. ATUALIZAR REATIVAMENTE A ABA QUE ESTIVER VISÍVEL NO MOMENTO
+  if (currentActiveTab === "tab-mass") {
+    renderMassTable();
+  } else if (currentActiveTab === "tab-moldes") {
+    renderMoldesCards();
+  } else if (currentActiveTab === "tab-analytics") {
+    renderAnalyticsView();
+  }
+
   startLiveSync();
 }
 
@@ -566,14 +616,14 @@ function renderProducts() {
     const isEmpty = p.status === "SEM_DESCRICAO";
 
     let borderClass = "border-slate-200 hover:border-blue-400";
-    let statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1">${getSvgIcon('check', '#065f46', 10)} Saudável</span>`;
+    let statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1" title="Status na Loja Shopify: Sem fotos quebradas e com texto existente">${getSvgIcon('check', '#065f46', 10)} Na Loja: Sem Erro Crítico</span>`;
 
     if (isBroken) {
       borderClass = "border-red-300 hover:border-red-500 bg-red-50/20";
-      statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800 flex items-center gap-1">❌ Fotos Quebradas</span>`;
+      statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800 flex items-center gap-1" title="Status na Loja Shopify: Contém imagens da AWS S3 com erro 404">❌ Fotos Quebradas AWS</span>`;
     } else if (isEmpty) {
       borderClass = "border-amber-300 hover:border-amber-500 bg-amber-50/20";
-      statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 flex items-center gap-1">⚠️ Sem Descrição</span>`;
+      statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 flex items-center gap-1" title="Status na Loja Shopify: Produto sem descrição cadastrada">⚠️ Sem Descrição</span>`;
     }
 
     const card = document.createElement("div");
@@ -616,11 +666,11 @@ function renderProducts() {
       </div>
 
       <div class="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-        <span class="text-[10px] font-extrabold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
-          ${p.archetype_name || 'UV50+ Pesca'}
+        <span class="text-[10px] font-extrabold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md flex items-center gap-1" title="Molde de alta conversão pronto para este produto">
+          <span>✨</span> ${p.archetype_name || 'Modo B Oficial'}
         </span>
-        <button onclick="quickCopyProductHTML(event, '${p.master_sku}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 active:scale-95">
-          <span>📋 Copiar</span>
+        <button onclick="quickCopyProductHTML(event, '${p.master_sku}')" title="Copia o Novo Padrão Oficial Modo B (3 Atos + Badges + Tabela de Medidas + Schema SEO) pronto para colar no Admin da Shopify" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 border border-emerald-300 rounded-lg text-[10px] font-extrabold transition-all flex items-center gap-1 active:scale-95 shadow-sm">
+          <span>📋 Copiar Modo B</span>
         </button>
       </div>
     `;
@@ -646,7 +696,7 @@ function quickCopyProductHTML(event, sku) {
   }
 
   navigator.clipboard.writeText(htmlToCopy).then(() => {
-    showToast(`HTML (Modo B) do SKU ${sku} copiado com sucesso!`);
+    showToast(`✅ Modo B (Novo Padrão Oficial) copiado! Cole no Admin da Shopify.`);
     if (event && event.currentTarget) {
       const btn = event.currentTarget;
       const orig = btn.innerHTML;
