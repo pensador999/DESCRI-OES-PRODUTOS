@@ -59,14 +59,18 @@ Todos os ícones utilizam exclusivamente a biblioteca **Font Awesome 6.5.1** vet
 ## 📁 Estrutura do Projeto
 
 ```text
-├── index.html                   # Central Mestre Interativa Unificada (v4.5)
-├── build_master_index.py        # Compilador Mestre e gerador do portal
-├── generate_catalog_data.py     # Coletor auditado de produtos e SKUs Shopify
+├── index.html                   # Central Mestre Interativa Unificada (v5.0 Modular)
+├── cli.py                       # CLI Mestre Unificado de Operações
+├── .env.example                 # Modelo documentado para variáveis de ambiente
+├── tests/                       # Suíte de Testes de Regressão e Guardrails
+│   └── test_regression_guardrails.py # Validador estrito das Regras de Ouro
+├── build_modular_dist.py        # Compilador Mestre e empacotador Vercel v5.0
 ├── sync_github.py               # Automação de sincronização contínua com GitHub
 ├── core/                        # Módulos do motor de automação
+│   ├── shopify_direct_sync.py   # Ponte de sincronização cirúrgica com Shopify Admin API
 │   ├── realtime_sync.py         # Monitor de sincronização em tempo real (por segundos)
 │   ├── template_engine.py       # Motor de arquétipos técnicos e narrativas
-│   ├── html_builder.py          # Construtor do HTML padrão 3 Atos com Font Awesome
+│   ├── html_builder.py          # Construtor do HTML padrão 3 Atos com SVGs inline
 │   ├── html_replacer.py         # Construtor do Modo A (preserva HTML + CDN)
 │   ├── daily_sentinel.py        # Orquestrador do Vigilante Diário das 08:00
 │   ├── auditor.py               # Scanner de fotos quebradas e links proibidos
@@ -75,11 +79,35 @@ Todos os ícones utilizam exclusivamente a biblioteca **Font Awesome 6.5.1** vet
 │   ├── bunker_client.py         # Cliente do Cloudflare Worker (BRK Bunker)
 │   └── shopify_public_api.py    # Cliente da API pública da Shopify
 └── reports/                     # Dados auditados e histórico
-    ├── catalog_ui_data.json     # Catálogo completo BRK Fishing (12.582 SKUs)
-    ├── brk_agro/                # Catálogo completo BRK Agro (5.955 SKUs)
-    ├── brk_motors/              # Catálogo completo BRK Motors (6.758 SKUs)
-    ├── daily_fixes/             # Planilhas CSV geradas diariamente
+    ├── daily_fixes/             # Planilhas CSV segmentadas (< 15MB)
     └── historico_saude.json     # Registro temporal de métricas de saúde
+```
+
+---
+
+## 🛠️ CLI Mestre Unificado (`cli.py`)
+
+O projeto dispõe de um CLI central para todas as rotinas operacionais e de engenharia:
+
+```powershell
+# 1. Diagnóstico geral de tokens, produtos e relatórios
+py -3.14 cli.py status
+
+# 2. Executar testes de regressão e blindagem das Regras de Ouro
+py -3.14 cli.py test
+
+# 3. Executar o Sentinela Diário (Vigilante de Catálogo das 08:00)
+py -3.14 cli.py audit
+
+# 4. Recompilar distribuição modular para Vercel
+py -3.14 cli.py build
+
+# 5. Sincronização direta com a Shopify Admin API
+# Modo simulado (Dry-Run):
+py -3.14 cli.py sync --store brk_fishing --dry-run --limit 5
+
+# Modo produção (Gravação real restrita a body_html):
+py -3.14 cli.py sync --store brk_fishing --production --limit 2
 ```
 
 ---
@@ -89,3 +117,4 @@ Sempre que uma nova compilação ou melhoria é realizada, o script executa auto
 ```powershell
 py -3.14 sync_github.py
 ```
+

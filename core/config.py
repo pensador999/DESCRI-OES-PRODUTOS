@@ -3,7 +3,49 @@ Configurações para o ecossistema de Auditoria e Automação Shopify.
 Suporta múltiplos sites com foco inicial na BRK Fishing.
 """
 
+import os
 from typing import Dict, Any
+
+def load_env(env_path: str = None) -> Dict[str, str]:
+    """
+    Carregador universal e nativo de arquivos .env (zero dependências externas).
+    Procura na raiz do projeto e preenche os.environ para variáveis não definidas.
+    """
+    if env_path is None:
+        cur_dir = os.path.dirname(os.path.abspath(__file__))
+        root_dir = os.path.dirname(cur_dir)
+        candidates = [
+            os.path.join(root_dir, ".env"),
+            os.path.join(os.getcwd(), ".env"),
+            os.path.join(cur_dir, ".env")
+        ]
+        for c in candidates:
+            if os.path.exists(c):
+                env_path = c
+                break
+
+    loaded = {}
+    if env_path and os.path.exists(env_path):
+        try:
+            with open(env_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip().strip("'").strip('"')
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+                        loaded[k] = v
+        except Exception:
+            pass
+    return loaded
+
+# Carrega automaticamente se existir
+load_env()
+
 
 # Configurações dos Sites Monitorados (Ambientes Isolados)
 STORES: Dict[str, Dict[str, Any]] = {
