@@ -1,0 +1,267 @@
+"""
+Suíte Oficial de Testes de Regressão e Guardrails de Qualidade (tests/test_regression_guardrails.py)
+Garante 100% de conformidade com as Regras de Ouro e Pilares Estratégicos do Ecossistema BRK:
+
+1. Zero Quebra de Layout (CSS inline, SVGs autônomos, zero CDN Font Awesome externa).
+2. Fidelidade Cirúrgica de Arquétipos (Work botão sem zíper, calça sem termos superiores, aromatizante sem tabela/UV).
+3. Schema.org JSON-LD (Microdados Product com priceCurrency BRL e JSON válido).
+4. Quick Badges Tecnológicos (Grid de 4 selos dinâmicos com SVGs embutidos).
+5. Tabela de Medidas Expansível em <details>/<summary> HTML5 nativo (Adulto, Kids, Calças, Calçados, Bonés).
+6. Isolamento e Segurança de Payload Shopify (transmissão estrita e exclusiva de body_html).
+"""
+
+import os
+import sys
+import json
+import re
+import unittest
+from typing import Dict, Any
+
+# Assegurar UTF-8 no Windows
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
+# Adicionar raiz do projeto ao path
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+
+from core.template_engine import TemplateEngine
+from core.html_builder import HTMLBuilder
+from core.shopify_direct_sync import ShopifyDirectSync
+
+class TestBRKRegressionGuardrails(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.engine = TemplateEngine()
+        cls.builder = HTMLBuilder()
+        cls.sample_cdn_imgs = [
+            "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/img-1.jpg?v=1",
+            "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/img-2.jpg?v=2"
+        ]
+
+    def _generate_html(self, prod_dict: Dict[str, Any], store_key: str = "brk_fishing") -> str:
+        arch_id = prod_dict.get("archetype_id") or self.engine.detect_archetype(
+            prod_dict.get("title", ""),
+            str(prod_dict.get("product_type", "")),
+            str(prod_dict.get("tags", ""))
+        )
+        enriched = self.engine.generate_narrative_from_template(
+            prod_dict, arch_id, self.sample_cdn_imgs, store_key=store_key
+        )
+        return self.builder.build_shopify_html(enriched)
+
+    # --------------------------------------------------------------------------
+    # 1. TESTE DE AUTONOMIA DE LAYOUT & ZERO QUEBRA
+    # --------------------------------------------------------------------------
+    def test_layout_autonomy_and_inline_css(self):
+        """O HTML gerado deve ser 100% autônomo com bloco <style> e sem CDNs externas."""
+        prod = {
+            "id": 1001,
+            "title": "Camisa BRK Fishing Tucunaré Azul UV50+",
+            "product_type": "Camisas",
+            "tags": "camisa, uv50, pesca"
+        }
+        html = self._generate_html(prod, "brk_fishing")
+
+        # Deve conter <style> interno
+        self.assertIn("<style>", html, "HTML gerado deve conter bloco <style> embutido.")
+        self.assertIn(".brk-desc-wrapper", html, "CSS deve conter escopo .brk-desc-wrapper.")
+        self.assertIn(".brk-quick-badges", html, "CSS deve conter estilos para quick badges.")
+
+        # Não pode depender de CDN de Font Awesome externa na Shopify
+        self.assertNotIn("kit.fontawesome.com", html, "HTML não pode carregar Font Awesome via kit CDN externo.")
+        self.assertNotIn("cdnjs.cloudflare.com/ajax/libs/font-awesome", html, "HTML não pode usar CDN externa.")
+
+        # Deve conter SVGs embutidos
+        self.assertIn("<svg", html, "Ícones devem ser SVGs inline.")
+        self.assertIn("</svg>", html, "SVGs devem fechar corretamente.")
+
+    # --------------------------------------------------------------------------
+    # 2. TESTES DE FIDELIDADE CIRÚRGICA DE ARQUÉTIPOS (REGRAS DE OURO)
+    # --------------------------------------------------------------------------
+    def test_shirts_button_work_anti_zipper_rule(self):
+        """Camisas Work de Botão JAMAIS podem mencionar zíper ou fecho de engate."""
+        prod = {
+            "id": 2001,
+            "title": "Camisa Manga Curta Masculina Trabalho Botao BRK Agro",
+            "product_type": "Camisas",
+            "tags": "camisa, botao, trabalho, agro",
+            "body_html": "<p>Camisa com abotoamento frontal reforçado e bolsos com aba.</p>"
+        }
+        html = self._generate_html(prod, "brk_agro")
+
+        html_low = html.lower()
+        self.assertNotIn("zíper", html_low, "Camisa de botão não pode ter menção a zíper!")
+        self.assertNotIn("ziper", html_low, "Camisa de botão não pode ter menção a ziper!")
+        self.assertNotIn("fecho de engate", html_low, "Camisa de botão não pode ter fecho de engate!")
+
+    def test_pants_and_shorts_anti_upper_body_terms(self):
+        """Calças e Bermudas JAMAIS podem ter termos de vestuário superior (manga, gola)."""
+        prod = {
+            "id": 2002,
+            "title": "Calça Tática Ripstop Cargo BRK Motors Trilha",
+            "product_type": "Calças",
+            "tags": "calça, tática, ripstop, cargo",
+            "body_html": "<p>Calça com 6 bolsos reforçados para trilha e operações de campo.</p>"
+        }
+        html = self._generate_html(prod, "brk_motors")
+
+        # Excluir o bloco do size-guide (onde pode haver regras gerais de tabela) da análise de texto descritivo
+        desc_body = html.split('<details class="brk-size-guide">')[0]
+        desc_low = desc_body.lower()
+
+        self.assertNotIn("manga longa", desc_low, "Calça tática não pode ter menção a manga longa!")
+        self.assertNotIn("manga curta", desc_low, "Calça tática não pode ter menção a manga curta!")
+        self.assertNotIn("gola padre", desc_low, "Calça tática não pode ter menção a gola padre!")
+        self.assertNotIn("gola redonda", desc_low, "Calça tática não pode ter menção a gola redonda!")
+
+    def test_air_freshener_and_accessories_exclusions(self):
+        """Aromatizantes e itens de revenda NUNCA recebem tabela de medidas ou atributos têxteis/UV."""
+        prod = {
+            "id": 2003,
+            "title": "Aromatizante Folha Cheirinho Automotivo Carro BRK Motors",
+            "product_type": "Acessórios",
+            "tags": "aromatizante, carro, perfume, automotivo",
+            "body_html": "<p>Fragrância duradoura para o interior do seu veículo.</p>"
+        }
+        html = self._generate_html(prod, "brk_motors")
+
+        # Não pode ter tabela de medidas no corpo
+        self.assertNotIn('<details class="brk-size-guide">', html, "Aromatizante JAMAIS pode ter accordion de medidas!")
+        self.assertNotIn('<table class="brk-sg-table">', html, "Aromatizante JAMAIS pode ter tabela de medidas!")
+
+        # Não pode ter selo ou especificação de proteção solar
+        html_low = html.lower()
+        self.assertNotIn("fpu 50+", html_low, "Aromatizante não pode ter FPU 50+!")
+        self.assertNotIn("proteção solar", html_low, "Aromatizante não pode ter proteção solar!")
+        self.assertNotIn("dry fit", html_low, "Aromatizante não pode ter Dry Fit!")
+
+    def test_cutlery_and_knives_exclusions(self):
+        """Facas artesanais NUNCA recebem tabela de medidas de vestuário."""
+        prod = {
+            "id": 2004,
+            "title": "Faca Artesanal Campeira 8 Polegadas Aço Carbono BRK Agro",
+            "product_type": "Cutelaria",
+            "tags": "faca, cutelaria, churrasco, artesanal",
+            "body_html": "<p>Lâmina de alta retenção de fio forjada à mão.</p>"
+        }
+        html = self._generate_html(prod, "brk_agro")
+
+        self.assertNotIn('<details class="brk-size-guide">', html, "Faca artesanal não pode ter tabela de medidas!")
+        self.assertIn("Aço", html, "Faca artesanal deve destacar especificações de aço e lâmina.")
+
+    # --------------------------------------------------------------------------
+    # 3. TESTE DE SCHEMA.ORG MICRODATA JSON-LD (PILAR 2)
+    # --------------------------------------------------------------------------
+    def test_schema_org_json_ld_validity(self):
+        """Todo HTML deve conter Schema.org JSON-LD válido com @type Product e moeda BRL."""
+        prod = {
+            "id": 3001,
+            "title": "Camisa BRK Agro Manga Longa Soja Ouro",
+            "product_type": "Camisas",
+            "tags": "agro, camisa, uv50",
+            "price": "149.90",
+            "sku": "AGR-SOJA-01"
+        }
+        html = self._generate_html(prod, "brk_agro")
+
+        self.assertIn('<script type="application/ld+json">', html, "Deve conter tag de script JSON-LD.")
+        
+        # Extrair e fazer parse do JSON
+        json_match = re.search(r'<script type="application/ld\+json">\s*(\{.*?\})\s*</script>', html, re.DOTALL)
+        self.assertIsNotNone(json_match, "Bloco JSON-LD deve ser encontrado via regex.")
+
+        parsed = json.loads(json_match.group(1))
+        self.assertEqual(parsed.get("@context"), "https://schema.org/", "Contexto deve ser schema.org.")
+        self.assertEqual(parsed.get("@type"), "Product", "Tipo deve ser Product.")
+        self.assertIn("Camisa BRK Agro", parsed.get("name", ""))
+        self.assertEqual(parsed.get("offers", {}).get("priceCurrency"), "BRL", "Moeda deve ser estritamente BRL.")
+
+    # --------------------------------------------------------------------------
+    # 4. TESTE DE QUICK BADGES TECNOLÓGICOS (PILAR 3)
+    # --------------------------------------------------------------------------
+    def test_quick_badges_structure_and_count(self):
+        """O HTML deve conter exatamente 4 selos de alta conversão dinâmicos com SVGs inline."""
+        prod = {
+            "id": 4001,
+            "title": "Camisa de Pesca BRK Fishing Dourado UV50+",
+            "product_type": "Camisas",
+            "tags": "camisa, uv50, pesca"
+        }
+        html = self._generate_html(prod, "brk_fishing")
+
+        self.assertIn('<div class="brk-quick-badges">', html, "Deve conter container dos Quick Badges.")
+        badge_count = html.count('class="brk-badge-item"')
+        self.assertEqual(badge_count, 4, f"Deve conter exatamente 4 badges tecnológicos, encontrado: {badge_count}")
+
+    # --------------------------------------------------------------------------
+    # 5. TESTE DE TABELAS DE MEDIDAS EXPANSÍVEIS EM <details>/<summary> (PILAR 1)
+    # --------------------------------------------------------------------------
+    def test_size_guide_accordion_types(self):
+        """Valida que vestuário adulto, infantil, calças e calçados recebem seus respectivos guias."""
+        # Adulto
+        prod_adulto = {"id": 5001, "title": "Camisa BRK Adulto Gola Padre", "tags": "camisa, adulto"}
+        html_adulto = self._generate_html(prod_adulto)
+        self.assertIn('<details class="brk-size-guide">', html_adulto)
+        self.assertIn("Tabela de Medidas Adulto (P ao EXG)", html_adulto)
+
+        # Infantil (Kids)
+        prod_kids = {"id": 5002, "title": "Camisa BRK Kids Infantil Manga Longa Peixinho", "tags": "camisa, kids, infantil"}
+        html_kids = self._generate_html(prod_kids)
+        self.assertIn('<details class="brk-size-guide">', html_kids)
+        self.assertIn("Guia de Tamanhos Infantil (02 a 16 Anos)", html_kids)
+
+        # Calças
+        prod_calca = {"id": 5003, "title": "Calça Tática Ripstop Operacional", "tags": "calça, ripstop"}
+        html_calca = self._generate_html(prod_calca)
+        self.assertIn('<details class="brk-size-guide">', html_calca)
+        self.assertIn("Tabela de Medidas - Calças & Bermudas (38 ao 52)", html_calca)
+
+        # Calçados Boaonda
+        prod_sapato = {"id": 5004, "title": "Babuche Sandália Boaonda Antiestresse", "tags": "sandalia, babuche, calçado"}
+        html_sapato = self._generate_html(prod_sapato)
+        self.assertIn('<details class="brk-size-guide">', html_sapato)
+        self.assertIn("Guia de Tamanhos de Calçados (Medida da Palmilha)", html_sapato)
+
+        # Chapéus e Bonés
+        prod_bone = {"id": 5005, "title": "Boné Trucker BRK Snapback Aba Curva", "tags": "boné, trucker"}
+        html_bone = self._generate_html(prod_bone)
+        self.assertIn('<details class="brk-size-guide">', html_bone)
+        self.assertIn("Guia de Dimensões - Chapéus & Bonés", html_bone)
+
+    # --------------------------------------------------------------------------
+    # 6. TESTE DE ISOLAMENTO E SEGURANÇA DE PAYLOAD NA SHOPIFY (REGRA DE OURO 3)
+    # --------------------------------------------------------------------------
+    def test_direct_sync_payload_safety_and_scope(self):
+        """As chamadas à Shopify Admin API devem alterar EXCLUSIVAMENTE o campo body_html."""
+        syncer = ShopifyDirectSync(dry_run=True)
+        
+        # Testar chamada de dry-run
+        res = syncer.update_product_body_html("brk_fishing", 12345678, "<div>HTML Teste</div>", "token_fake")
+        self.assertTrue(res.get("success"), "Dry-run deve retornar sucesso.")
+        self.assertTrue(res.get("dry_run"), "Dry-run flag deve ser True.")
+        self.assertEqual(res.get("product_id"), 12345678)
+
+        # Inspecionar construção do payload no código fonte de update_product_body_html
+        import inspect
+        src = inspect.getsource(syncer.update_product_body_html)
+        self.assertIn('"body_html": new_html', src, "Payload deve conter body_html.")
+        self.assertNotIn('"title":', src, "Payload JAMAIS pode enviar title na sincronização de descrição!")
+        self.assertNotIn('"variants":', src, "Payload JAMAIS pode alterar variantes!")
+        self.assertNotIn('"images":', src, "Payload JAMAIS pode alterar imagens!")
+        self.assertNotIn('"price":', src, "Payload JAMAIS pode alterar preços!")
+
+def run_tests():
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestBRKRegressionGuardrails)
+    runner = unittest.TextTestRunner(verbosity=2)
+    result = runner.run(suite)
+    return result.wasSuccessful()
+
+if __name__ == "__main__":
+    success = run_tests()
+    sys.exit(0 if success else 1)
