@@ -706,6 +706,9 @@ def build_dist():
           <button id="btn-mode-orig" onclick="switchModalMode('orig')" class="px-3.5 py-1.5 rounded-lg font-bold transition-all text-slate-400 hover:text-red-600 flex items-center gap-1.5">
             <span>❌ Original (Quebrado)</span>
           </button>
+          <button id="btn-mode-diff" onclick="switchModalMode('diff')" class="px-3.5 py-1.5 rounded-lg font-bold transition-all text-indigo-700 hover:text-indigo-900 hover:bg-indigo-50 flex items-center gap-1.5" title="Comparador visual lado a lado (Original vs Novo)">
+            <span>⚖️ Comparador (Diff)</span>
+          </button>
         </div>
 
         <div class="flex items-center gap-2">
