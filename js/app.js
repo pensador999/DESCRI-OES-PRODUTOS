@@ -1022,12 +1022,34 @@ function renderAvailableCSVs() {
         <strong class="text-xs text-slate-800 block truncate max-w-[200px]">${c.filename}</strong>
         <span class="text-[10px] text-slate-400">Criado em: ${c.created_at}</span>
       </div>
-      <button onclick="downloadLatestDailyCSV()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all">
+      <button onclick="downloadDailyCSVByName('${c.filename}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all">
         Baixar ⬇️
       </button>
     `;
     listContainer.appendChild(card);
   });
+}
+
+async function downloadDailyCSVByName(filename) {
+  try {
+    const res = await fetch(`./reports/daily_fixes/${filename}`);
+    if (res.ok) {
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Planilha ${filename} baixada com sucesso!`);
+      return;
+    }
+  } catch(e) {
+    console.warn("Download local fallback...", e);
+  }
+  downloadLatestDailyCSV();
 }
 
 function downloadLatestDailyCSV() {

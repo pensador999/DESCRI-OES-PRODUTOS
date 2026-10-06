@@ -134,7 +134,7 @@ class HTMLBuilder:
         for idx, block in enumerate(blocks):
             is_reverse = (idx % 2 == 1)
             reverse_class = " reverse" if is_reverse else ""
-            img_src = block.get("image") or "https://placehold.co/800x600?text=BRK+Foto+Oficial"
+            img_src = block.get("image") or ""
             tag_text = block.get("tag", "Destaque")
             tag_icon = self._get_tag_icon_name(tag_text)
             act_title = block.get("title", "").upper()

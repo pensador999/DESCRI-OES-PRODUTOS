@@ -45,13 +45,19 @@ class DailySentinel:
         print(f"[SENTINEL] Iniciando ciclo do Vigilante Diário: {timestamp_str}")
 
         stores = [
-            {"key": "brk_fishing", "name": "BRK Fishing", "data_file": "reports/catalog_ui_data.json"},
-            {"key": "brk_agro", "name": "BRK Agro", "data_file": "reports/brk_agro/catalog_ui_data.json"},
-            {"key": "brk_motors", "name": "BRK Motors", "data_file": "reports/brk_motors/catalog_ui_data.json"}
+            {"key": "brk_fishing", "name": "BRK Fishing", "data_file": "data/stores/brk_fishing.json"},
+            {"key": "brk_agro", "name": "BRK Agro", "data_file": "data/stores/brk_agro.json"},
+            {"key": "brk_motors", "name": "BRK Motors", "data_file": "data/stores/brk_motors.json"}
         ]
 
         stores_summary = {}
         all_daily_corrections = []
+        corrections_by_category = {
+            "fishing_quebradas": [],
+            "fishing_sem_descricao": [],
+            "agro_todas": [],
+            "motors_todas": []
+        }
 
         for st in stores:
             print(f"  -> Auditando loja: {st['name']}...")
@@ -78,9 +84,9 @@ class DailySentinel:
             healthy_skus = total_skus - broken_skus
             health_pct = round((healthy_skus / total_skus * 100), 1) if total_skus > 0 else 100.0
 
-            # Gerar correções para itens com problema nesta loja
+            # Gerar correções para itens com problema nesta loja (sem limite artificial)
             store_corrections = []
-            for p in (broken_prods + empty_prods)[:40]:
+            for p in (broken_prods + empty_prods):
                 gallery = p.get("gallery") or []
                 if not gallery and p.get("cdn_images"):
                     gallery = p.get("cdn_images")
@@ -96,7 +102,7 @@ class DailySentinel:
 
                 vendor = p.get("vendor", "")
                 archetype_id = self.template_engine.detect_archetype(p.get("title", ""), p.get("category", ""), p.get("tags", []), vendor=vendor)
-                narrative = self.template_engine.generate_narrative_from_template(p, archetype_id, images)
+                narrative = self.template_engine.generate_narrative_from_template(p, archetype_id, images, store_key=st["key"])
                 new_html = self.html_builder.build_shopify_html(narrative)
 
                 corr_item = {
@@ -109,6 +115,16 @@ class DailySentinel:
                 }
                 store_corrections.append(corr_item)
                 all_daily_corrections.append(corr_item)
+
+                if st["key"] == "brk_fishing":
+                    if p.get("status") == "IMAGENS_QUEBRADAS":
+                        corrections_by_category["fishing_quebradas"].append(corr_item)
+                    else:
+                        corrections_by_category["fishing_sem_descricao"].append(corr_item)
+                elif st["key"] == "brk_agro":
+                    corrections_by_category["agro_todas"].append(corr_item)
+                elif st["key"] == "brk_motors":
+                    corrections_by_category["motors_todas"].append(corr_item)
 
             stores_summary[st["key"]] = {
                 "name": st["name"],
@@ -125,19 +141,30 @@ class DailySentinel:
                 "corrections_generated": len(store_corrections)
             }
 
-        # 1. Salvar Planilha Diária de Correções
+        # 1. Salvar Planilhas Diárias de Correções (Segmentadas e Mestre Consolidada)
         csv_filename = f"shopify_correcoes_{now.strftime('%Y%m%d')}.csv"
         csv_path = os.path.join(self.daily_fixes_dir, csv_filename)
-        with open(csv_path, "w", encoding="utf-8-sig", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=["Handle", "Title", "Body (HTML)"])
-            writer.writeheader()
-            for c in all_daily_corrections:
-                writer.writerow({
-                    "Handle": c["Handle"],
-                    "Title": c["Title"],
-                    "Body (HTML)": c["Body (HTML)"]
-                })
-        print(f"  -> Planilha diária gerada: {csv_path} ({len(all_daily_corrections)} correções)")
+        csv_files_to_save = {
+            csv_filename: all_daily_corrections,
+            "shopify_correcoes_todas_lojas.csv": all_daily_corrections,
+            "shopify_correcoes_fishing_fotos_quebradas.csv": corrections_by_category["fishing_quebradas"],
+            "shopify_correcoes_fishing_sem_descricao.csv": corrections_by_category["fishing_sem_descricao"],
+            "shopify_correcoes_agro.csv": corrections_by_category["agro_todas"],
+            "shopify_correcoes_motors.csv": corrections_by_category["motors_todas"]
+        }
+
+        for filename, data_rows in csv_files_to_save.items():
+            f_path = os.path.join(self.daily_fixes_dir, filename)
+            with open(f_path, "w", encoding="utf-8-sig", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=["Handle", "Title", "Body (HTML)"])
+                writer.writeheader()
+                for c in data_rows:
+                    writer.writerow({
+                        "Handle": c["Handle"],
+                        "Title": c["Title"],
+                        "Body (HTML)": c["Body (HTML)"]
+                    })
+            print(f"  -> Planilha gerada: {f_path} ({len(data_rows)} produtos)")
 
         # 2. Atualizar Histórico de Saúde Temporal
         history_path = os.path.join(self.reports_dir, "historico_saude.json")
