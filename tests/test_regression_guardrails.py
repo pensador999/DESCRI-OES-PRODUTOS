@@ -100,6 +100,31 @@ class TestBRKRegressionGuardrails(unittest.TestCase):
         self.assertNotIn("ziper", html_low, "Camisa de botão não pode ter menção a ziper!")
         self.assertNotIn("fecho de engate", html_low, "Camisa de botão não pode ter fecho de engate!")
 
+    def test_camisas_xtech_detalhes_tecnicos_specs(self):
+        """Camisas XTech (uv_performance) devem conter rigorosamente os Detalhes Técnicos oficiais."""
+        prod = {
+            "id": 1005,
+            "title": "Camisa ArmorX BRK Barkeiro Azul com Proteção UV50+",
+            "product_type": "Camisas",
+            "tags": "camisa, uv50, xtech, pesca",
+            "body_html": ""
+        }
+        html = self._generate_html(prod, "brk_fishing")
+
+        self.assertIn("Detalhes Técnicos & Cuidados de Conservação", html)
+        self.assertIn("Prazo de Produção", html)
+        self.assertIn("Pronta entrega", html)
+        self.assertIn("Composição", html)
+        self.assertIn("90% Poliéster 10% Elastano", html)
+        self.assertIn("Tecido", html)
+        self.assertIn("XTech Pro", html)
+        self.assertIn("Tecnologia", html)
+        self.assertIn("Secagem Rápida, Tecido Leve, Proteção Solar", html)
+        self.assertIn("Modelagem", html)
+        self.assertIn("Anatômica e confortável", html)
+        self.assertIn("Proteção", html)
+        self.assertIn("Proteção UV50+ (não sai na lavagem)", html)
+
     def test_pants_and_shorts_anti_upper_body_terms(self):
         """Calças e Bermudas JAMAIS podem ter termos de vestuário superior (manga, gola)."""
         prod = {

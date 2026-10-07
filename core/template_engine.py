@@ -65,12 +65,12 @@ class TemplateEngine:
                     "desc_tmpl": "Acabamento de alto padrão com costuras planas anti-atrito, gola padre com cobertura no cursor do zíper e punhos anatômicos que não laceiam com o uso frequente."
                 },
                 "base_specs": [
-                    {"label": "Proteção Solar", "default": "Fator FPU 50+ permanente certificado"},
-                    {"label": "Composição", "default": "100% Poliéster Tecnológico Dry Fit"},
-                    {"label": "Modelagem", "default": "Conforto com mangas raglan esportivas"},
-                    {"label": "Gola e Zíper", "default": "Gola alta anatômica com zíper frontal e trava"},
-                    {"label": "Secagem", "default": "Secagem ultra rápida (Quick Dry)"},
-                    {"label": "Cuidados", "default": "Lavar à mão ou máquina no ciclo delicado, dispensando ferro"}
+                    {"label": "Prazo de Produção", "default": "Pronta entrega"},
+                    {"label": "Composição", "default": "90% Poliéster 10% Elastano"},
+                    {"label": "Tecido", "default": "XTech Pro"},
+                    {"label": "Tecnologia", "default": "Secagem Rápida, Tecido Leve, Proteção Solar"},
+                    {"label": "Modelagem", "default": "Anatômica e confortável"},
+                    {"label": "Proteção", "default": "Proteção UV50+ (não sai na lavagem)"},
                 ],
                 "care_tips": "Lavar à mão ou em máquina no ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar)."
             },
@@ -1123,15 +1123,15 @@ class TemplateEngine:
             elif "boaonda" in full_text and label == "Material do Cabedal":
                 val = "Termoplástico nobre Boaonda flexível e lavável"
 
-            # 1. Proteção Solar
-            if "proteção" in label.lower() or "solar" in label.lower():
+            # 1. Proteção Solar (uv_performance usa padrão oficial XTech Pro)
+            if archetype_id != "uv_performance" and ("proteção" in label.lower() or "solar" in label.lower()):
                 if any(x in full_text for x in ["50+", "uv 50", "fps 50", "fpu 50"]):
                     val = "Fator FPU 50+ permanente certificado"
                 elif "uv" in full_text:
                     val = "Proteção UV integrada ao tecido"
             
-            # 2. Composição / Tecido
-            elif "composição" in label.lower() or "tecido" in label.lower():
+            # 2. Composição / Tecido (uv_performance usa padrão oficial 90% Poliéster 10% Elastano / XTech Pro)
+            elif archetype_id != "uv_performance" and ("composição" in label.lower() or "tecido" in label.lower()):
                 if any(x in full_text for x in ["dry fit", "dryfit", "dry"]):
                     val = "100% Poliéster Tecnológico Dry Fit respirável"
                 elif "algodão" in full_text or "algodao" in full_text:
@@ -1410,10 +1410,17 @@ class TemplateEngine:
                     val = "Punhos estendidos anatômicos com luva integrada para o dorso da mão"
 
             new_specs.append({"label": lbl, "value": val})
+
+        if is_has_glove and not is_short_sleeve and not any("luva" in s["label"].lower() for s in new_specs):
+            new_specs.append({"label": "Punhos / Luva", "value": "Punhos estendidos anatômicos com luva integrada para o dorso da mão"})
+
+        if is_hooded and not any("capuz" in s["label"].lower() for s in new_specs):
+            new_specs.append({"label": "Capuz", "value": "Capuz anatômico integrado para proteção solar estendida"})
+
         specs = new_specs
 
-        # Regra de Negócio: Descartar detalhes técnicos apenas para camisas sublimadas genéricas no Agro e Motors
-        if archetype_id in ("uv_performance", "agro_field", "motors_speed") and store_key in ("brk_agro", "brk_motors"):
+        # Regra de Negócio: Descartar detalhes técnicos apenas para camisetas casuais no Agro e Motors (mantendo uv_performance XTech)
+        if archetype_id in ("agro_field", "motors_speed") and store_key in ("brk_agro", "brk_motors"):
             specs = []
 
         source_type = "sibling_template" if sibling_info else "archetype_specialized"

@@ -679,7 +679,7 @@ class HTMLBuilder:
   <div class="brk-desc-specs-box">
     <h4 class="brk-desc-specs-title">
       <span class="brk-title-icon">{get_svg_icon('clipboard', color=theme_color, size=16)}</span>
-      <span>Ficha Técnica & Cuidados de Conservação</span>
+      <span>Detalhes Técnicos & Cuidados de Conservação</span>
     </h4>
     <div class="brk-specs-grid">{specs_markup}
     </div>
@@ -1299,7 +1299,7 @@ class HTMLBuilder:
                 md_parts.append(f"*🎨 **Variações:** {variations_summary}*\n")
 
         if specs and len(specs) > 0:
-            md_parts.append("### 📋 Ficha Técnica & Especificações\n")
+            md_parts.append("### 📋 Detalhes Técnicos & Especificações\n")
             md_parts.append("| Característica | Especificação |")
             md_parts.append("| :--- | :--- |")
             for spec in specs:

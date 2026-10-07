@@ -1487,7 +1487,7 @@ function getProductModeBHTML(liveP) {
   <div class="brk-desc-specs-box">
     <h4 class="brk-desc-specs-title">
       <span class="brk-title-icon">${getSvgIcon('clipboard', themeColor, 16)}</span>
-      <span>Ficha Técnica & Cuidados de Conservação</span>
+      <span>Detalhes Técnicos & Cuidados de Conservação</span>
     </h4>
     <div class="brk-specs-grid">${specsRows}
     </div>
