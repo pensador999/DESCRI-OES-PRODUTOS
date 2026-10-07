@@ -19,7 +19,8 @@
   ],
   "functions": {
     "api/*.py": {
-      "maxDuration": 30
+      "maxDuration": 30,
+      "includeFiles": "data/stores/*.json"
     }
   }
 }
