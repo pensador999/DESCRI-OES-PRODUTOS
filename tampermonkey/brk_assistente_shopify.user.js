@@ -350,7 +350,7 @@
             handleAfterSave();
           });
 
-          renderHudProductMode(activeLoadedProduct, "✨ Descrição Injetada com Sucesso!", "Clique em 'Salvar' (botão verde pulsando) no topo da página.");
+          renderHudProductMode(activeLoadedProduct, "✨ Modo B Injetado com Sucesso!", `Inseridos ${(htmlContent.length).toLocaleString('pt-BR')} caracteres oficiais no editor. Clique em 'Salvar' (verde pulsando).`);
         } else {
           // Fallback contenteditable
           const editable = document.querySelector("[contenteditable='true']");
@@ -359,7 +359,7 @@
             editable.innerHTML = htmlContent;
             editable.dispatchEvent(new Event("input", { bubbles: true }));
             highlightSaveButton(() => handleAfterSave());
-            renderHudProductMode(activeLoadedProduct, "✨ Injetado no Editor Visual!", "Clique em 'Salvar' no topo.");
+            renderHudProductMode(activeLoadedProduct, "✨ Injetado no Editor Visual!", `Inseridos ${(htmlContent.length).toLocaleString('pt-BR')} caracteres no editor visual. Clique em 'Salvar' no topo.`);
           } else {
             alert("Não foi possível localizar o editor de descrição da Shopify. Por favor, clique no botão '<>' do editor e use 'Copiar HTML' no painel.");
           }
@@ -446,13 +446,19 @@
         <div style="background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:8px 12px;margin-bottom:12px;">
           <div style="font-weight:700;color:#38bdf8;font-size:12px;">${statusTitle || "Pronto para Injeção"}</div>
           <div style="font-size:11px;color:#94a3b8;line-height:1.4;">${statusSub || "Clique em 'Injetar Modo B' para aplicar a descrição oficial."}</div>
+          ${prod && prod.mode_b_html ? `
+            <div style="margin-top:6px;font-size:11px;color:#4ade80;font-weight:700;display:flex;align-items:center;gap:6px;border-top:1px solid #1e293b;padding-top:4px;">
+              <span>⭐ Modo B Oficial:</span> <span>${(prod.mode_b_html.length).toLocaleString('pt-BR')} caracteres</span>
+              <span style="color:#94a3b8;font-weight:400;">(${prod.has_official_mode_b !== false ? 'Rastreio v1 ativo' : '3 Atos'})</span>
+            </div>
+          ` : ''}
         </div>
 
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-          <button id="brk-btn-inject" class="brk-hud-btn brk-hud-btn-primary">
+          <button id="brk-btn-inject" class="brk-hud-btn brk-hud-btn-primary" title="Injeta a narrativa completa Modo B no editor HTML">
             ⚡ Injetar Modo B
           </button>
-          <button id="brk-btn-copy" class="brk-hud-btn">
+          <button id="brk-btn-copy" class="brk-hud-btn" title="Copia o HTML oficial para a área de transferência">
             📋 Copiar HTML
           </button>
           ${inQueue ? `
@@ -479,8 +485,12 @@
       const btnCopy = document.getElementById("brk-btn-copy");
       if (btnCopy && prod) {
         btnCopy.onclick = () => {
-          GM_setClipboard(prod.mode_b_html);
-          renderHudProductMode(prod, "📋 HTML Copiado!", "Cole diretamente com Ctrl+V no campo de código HTML (<>).");
+          const html = prod.mode_b_html || "";
+          try { GM_setClipboard(html); } catch(e) {}
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(html).catch(() => {});
+          }
+          renderHudProductMode(prod, "📋 HTML Modo B Copiado!", `Copiados ${(html.length).toLocaleString('pt-BR')} caracteres da narrativa oficial Modo B. Cole com Ctrl+V no campo <> do editor.`);
         };
       }
 

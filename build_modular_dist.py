@@ -189,10 +189,11 @@ def build_dist():
             p_copy["care_tips"] = narrative.get("care_tips", "")
             p_copy["specs"] = narrative.get("specs", [])
             p_copy["mode_a_html"] = mode_a_html
-            # Salvar mode_b_html completo nos 5 primeiros itens como amostra;
-            # os demais são compilados instantaneamente pelo frontend via getProductModeBHTML()
-            p_copy["mode_b_html"] = mode_b_html if idx < 5 else ""
-            p_copy["mode_b_markdown"] = mode_b_markdown if idx < 5 else ""
+            # Salvar mode_b_html completo em todos os itens SEM_DESCRICAO e IMAGENS_QUEBRADAS,
+            # alem dos primeiros 25 de amostra. Para os demais, a API product_db compila on-the-fly.
+            save_mode_b = (p.get("status") in ("SEM_DESCRICAO", "IMAGENS_QUEBRADAS")) or (idx < 25)
+            p_copy["mode_b_html"] = mode_b_html if save_mode_b else ""
+            p_copy["mode_b_markdown"] = mode_b_markdown if save_mode_b else ""
             p_copy["prohibited_links"] = prohibited_links
             p_copy["orphaned_variants"] = p.get("orphaned_variants", [])
             enriched.append(p_copy)

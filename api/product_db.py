@@ -108,8 +108,50 @@ def load_store_database(store_key: str):
         print(f"[-] Erro ao carregar {json_path}: {e}")
         return None
 
-def sanitize_product(p: dict) -> dict:
-    """Retorna apenas os campos necessários para a injeção do Modo B"""
+_ENGINE = None
+_BUILDER = None
+
+def get_engine_and_builder():
+    global _ENGINE, _BUILDER
+    if _ENGINE is None:
+        base_dir = get_base_dir()
+        if base_dir not in sys.path:
+            sys.path.insert(0, base_dir)
+        try:
+            from core.template_engine import TemplateEngine
+            from core.html_builder import HTMLBuilder
+            _ENGINE = TemplateEngine()
+            _BUILDER = HTMLBuilder()
+        except Exception as e:
+            print(f"[-] Erro ao carregar TemplateEngine/HTMLBuilder: {e}")
+    return _ENGINE, _BUILDER
+
+def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
+    """Garante que a descrição seja o Modo B oficial compilado (>1000 chars, com 3 Atos e Badges)."""
+    raw_b = p.get("mode_b_html")
+    if raw_b and len(raw_b.strip()) > 500 and "<!-- BRK-MODO-B" in raw_b:
+        return raw_b
+
+    engine, builder = get_engine_and_builder()
+    if engine and builder:
+        try:
+            arch_id = p.get("archetype_id") or engine.detect_archetype(
+                p.get("title", ""), p.get("category", ""), p.get("tags", []), vendor=p.get("vendor", "")
+            )
+            images = p.get("gallery") or p.get("cdn_images") or []
+            narrative = engine.generate_narrative_from_template(p, arch_id, images, store_key=store_key)
+            compiled_b = builder.build_shopify_html(narrative)
+            p["mode_b_html"] = compiled_b
+            return compiled_b
+        except Exception as e:
+            print(f"[-] Erro na compilação do Modo B para {p.get('id')}: {e}")
+
+    # Fallback apenas se a compilação falhar
+    return p.get("mode_b_html") or p.get("body_html") or ""
+
+def sanitize_product(p: dict, store_key: str = "brk_fishing") -> dict:
+    """Retorna apenas os campos necessários para a injeção do Modo B garantido"""
+    mode_b = ensure_mode_b_html(p, store_key)
     return {
         "id": str(p.get("id", "")),
         "handle": p.get("handle", ""),
@@ -118,7 +160,9 @@ def sanitize_product(p: dict) -> dict:
         "status": p.get("status", "SAUDAVEL"),
         "archetype_id": p.get("archetype_id", "uv_performance"),
         "archetype_name": p.get("archetype_name", "Modo B"),
-        "mode_b_html": p.get("mode_b_html") or p.get("body_html") or "",
+        "mode_b_html": mode_b,
+        "mode_b_chars": len(mode_b),
+        "has_official_mode_b": "<!-- BRK-MODO-B" in mode_b,
         "updated_at": p.get("updated_at") or p.get("published_at") or ""
     }
 
@@ -182,7 +226,7 @@ class handler(BaseHTTPRequestHandler):
                 pool = db["products"]
 
             batch = pool[:limit]
-            sanitized_batch = [sanitize_product(p) for p in batch]
+            sanitized_batch = [sanitize_product(p, store_key) for p in batch]
 
             return self._respond_json(200, {
                 "success": True,
@@ -231,5 +275,5 @@ class handler(BaseHTTPRequestHandler):
         return self._respond_json(200, {
             "success": True,
             "store": store_key,
-            "product": sanitize_product(found_product)
+            "product": sanitize_product(found_product, store_key)
         }, cache_control="public, s-maxage=180")
