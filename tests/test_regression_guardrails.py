@@ -497,7 +497,8 @@ class TestProductDBApiAndDirectConnection(unittest.TestCase):
 
         fn_cfg = cfg.get("functions", {}).get("api/*.py", {})
         self.assertIn("includeFiles", fn_cfg, "vercel.json deve configurar includeFiles para funções Python.")
-        self.assertIn("data/stores/*.json", fn_cfg["includeFiles"], "includeFiles deve incluir data/stores/*.json no pacote serverless.")
+        self.assertIn("data/stores", fn_cfg["includeFiles"], "includeFiles deve incluir data/stores no pacote serverless.")
+        self.assertIn("core", fn_cfg["includeFiles"], "includeFiles deve incluir core no pacote serverless.")
 
 
 def run_tests():
