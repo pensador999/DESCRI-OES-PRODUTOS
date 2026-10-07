@@ -890,30 +890,30 @@ def build_dist():
         except Exception as e:
             print(f"  -> Alerta ao gravar {dest}: {e}")
 
-    # 6. Sincronização de todos os ativos com o repositório GitHub
+    # 6. Sincronização com repositório GitHub e espelhamento para Desktop (se existir)
     print("[5/5] Sincronizando estrutura modular com repositório no OneDrive e GitHub...")
-    target_onedrive_dir = r"C:\Users\lucas\OneDrive\Documentos\DESCRIÇOES"
-    if os.path.exists(target_onedrive_dir):
-        try:
+    target_onedrive_dir = os.path.dirname(os.path.abspath(__file__))
+    desktop_backup_dir = r"C:\Users\lucas\Desktop\PYTHON DATA"
+    try:
+        if os.path.exists(desktop_backup_dir) and os.path.abspath(desktop_backup_dir) != os.path.abspath(target_onedrive_dir):
             for folder in ["data", "css", "js", "api", "core", "reports"]:
-                src_f = os.path.join(r"C:\Users\lucas\Desktop\PYTHON DATA", folder)
-                dst_f = os.path.join(target_onedrive_dir, folder)
+                src_f = os.path.join(target_onedrive_dir, folder)
+                dst_f = os.path.join(desktop_backup_dir, folder)
                 if os.path.exists(src_f):
                     shutil.copytree(src_f, dst_f, dirs_exist_ok=True)
-                    print(f"  -> Pasta '{folder}/' copiada para OneDrive.")
+            for f_name in ["vercel.json", "build_modular_dist.py", "build_master_index.py"]:
+                src_file = os.path.join(target_onedrive_dir, f_name)
+                if os.path.exists(src_file):
+                    shutil.copy2(src_file, os.path.join(desktop_backup_dir, f_name))
+            print("  -> Backup espelhado com sucesso para Desktop\\PYTHON DATA.")
 
-            # Copiar vercel.json
-            shutil.copy2(r"C:\Users\lucas\Desktop\PYTHON DATA\vercel.json", os.path.join(target_onedrive_dir, "vercel.json"))
-            shutil.copy2(r"C:\Users\lucas\Desktop\PYTHON DATA\build_modular_dist.py", os.path.join(target_onedrive_dir, "build_modular_dist.py"))
-            shutil.copy2(r"C:\Users\lucas\Desktop\PYTHON DATA\build_master_index.py", os.path.join(target_onedrive_dir, "build_master_index.py"))
-
-            sync_script = os.path.join(target_onedrive_dir, "sync_github.py")
-            if os.path.exists(sync_script):
-                print("[GITHUB SYNC] Executando sync_github.py...")
-                res = subprocess.run([sys.executable, sync_script, "fix: auditoria do fluxo concluida, CSVs segmentados menores que 15MB para importacao Shopify sem timeout"], cwd=target_onedrive_dir, capture_output=True, text=True)
-                print("  -> Saída do Git Sync:", res.stdout.strip())
-        except Exception as e:
-            print(f"  -> Erro na sincronização com GitHub: {e}")
+        sync_script = os.path.join(target_onedrive_dir, "sync_github.py")
+        if os.path.exists(sync_script):
+            print("[GITHUB SYNC] Executando sync_github.py...")
+            res = subprocess.run([sys.executable, sync_script, "fix: aplicar medidas oficiais das fotos C0, coluna ALTURA e travas de isolamento"], cwd=target_onedrive_dir, capture_output=True, text=True)
+            print("  -> Saída do Git Sync:", res.stdout.strip())
+    except Exception as e:
+        print(f"  -> Erro na sincronização com GitHub: {e}")
 
     print("[CONCLUÍDO] Compilação modular v5.0 finalizada com sucesso absoluto!")
 

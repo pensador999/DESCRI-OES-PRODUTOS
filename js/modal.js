@@ -1074,40 +1074,96 @@ ${itemsHtml}
 
 function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortSleeve, liveP) {
   const tLow = (liveP.formatted_title || liveP.title || "").toLowerCase();
+  const skuLow = (liveP.sku || liveP.master_sku || "").toLowerCase();
+
+  // 0. Exclusão estrita de itens não-têxteis com UV ou termos ambíguos
+  const nonTextiles = ["óculos", "oculos", "faca", "facas", "canivete", "alicate", "vara", "varas", "molinete", "carretilha", "isca", "iscas", "linha", "linhas", "anzol", "anzois", "estojo", "garrafa", "copo", "chaveiro", "adesivo", "carteira", "protetor solar"];
+  if (nonTextiles.some(w => tLow.includes(w))) {
+    return "";
+  }
 
   let guideTitle = "";
   let tableHtml = "";
 
-  if (isKids && ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId)) {
-    guideTitle = "Guia de Tamanhos Infantil (02 a 16 Anos)";
-    const mHeader = isShortSleeve ? "Manga Curta" : "Manga Longa";
-    const rows = [
-      ["02 Anos", "64 cm", "42 cm", isShortSleeve ? "14 cm" : "40 cm"],
-      ["04 Anos", "70 cm", "46 cm", isShortSleeve ? "15 cm" : "44 cm"],
-      ["06 Anos", "76 cm", "50 cm", isShortSleeve ? "16 cm" : "48 cm"],
-      ["08 Anos", "82 cm", "54 cm", isShortSleeve ? "17 cm" : "52 cm"],
-      ["10 Anos", "88 cm", "58 cm", isShortSleeve ? "18 cm" : "56 cm"],
-      ["12 Anos", "92 cm", "62 cm", isShortSleeve ? "19 cm" : "60 cm"],
-      ["14 Anos", "96 cm", "65 cm", isShortSleeve ? "20 cm" : "64 cm"],
-      ["16 Anos", "100 cm", "68 cm", isShortSleeve ? "21 cm" : "68 cm"],
-    ];
-    tableHtml = `<table class="brk-sg-table"><thead><tr><th>Idade / Tam</th><th>Tórax / Peito</th><th>Comprimento</th><th>${mHeader}</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
-  } else if (["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId) || /camisa|camiseta|jersey|baby look/i.test(tLow)) {
-    guideTitle = "Tabela de Medidas Adulto (P ao EXG)";
-    const mHeader = isShortSleeve ? "Manga Curta" : "Manga Longa";
-    const rows = [
-      ["P", "102 cm", "68 cm", isShortSleeve ? "22 cm" : "75 cm"],
-      ["M", "108 cm", "71 cm", isShortSleeve ? "23 cm" : "77 cm"],
-      ["G", "114 cm", "74 cm", isShortSleeve ? "24 cm" : "79 cm"],
-      ["GG", "120 cm", "77 cm", isShortSleeve ? "25 cm" : "81 cm"],
-      ["XG", "126 cm", "80 cm", isShortSleeve ? "26 cm" : "83 cm"],
-      ["EXG (G1)", "132 cm", "83 cm", isShortSleeve ? "27 cm" : "85 cm"],
-      ["G2", "138 cm", "85 cm", isShortSleeve ? "28 cm" : "87 cm"],
-      ["G3", "144 cm", "87 cm", isShortSleeve ? "29 cm" : "89 cm"],
-    ];
-    tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Tórax / Circunferência</th><th>Comprimento Total</th><th>${mHeader}</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
-  } else if (["pants_cargo_tactical", "overalls_workwear"].includes(archetypeId) || /calça|calca|bermuda|shorts|macacão|macacao/i.test(tLow)) {
+  // 1. Identificar se o produto é comprovadamente de vestuário superior / camisa
+  const isShirt = (
+    ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId) ||
+    /camisa|camiseta|jersey|baby look|babylook/i.test(tLow) ||
+    skuLow.startsWith("c0") ||
+    skuLow.startsWith("cmb")
+  ) && !/calça|calca|bermuda|shorts|macacão|macacao|jeans|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|chapéu|chapeu|boné|bone|luva|manguito|bandana|tubeneck|buff|balaclava/i.test(tLow);
+
+  let tipText = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | Manga do ombro ao punho). Dica: compare com uma peça sua estendida para escolher o caimento ideal.";
+
+  if (isShirt) {
+    // 1.1 Camisas de Botão / Utilitárias Work (CMB - Sarja/Algodão corte reto de trabalho)
+    if (archetypeId === "shirts_button_work" || skuLow.includes("cmb") || (tLow.includes("work") && tLow.includes("camisa") && !tLow.includes("xtech") && !tLow.includes("dry"))) {
+      guideTitle = "Tabela de Medidas - Camisas Work & Utilitárias de Botão (P ao G2)";
+      tipText = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Comprimento da gola à barra | Manga). Modelagem confortável de trabalho.";
+      const mHeader = isShortSleeve ? "Manga Curta" : "Manga Longa";
+      const rows = [
+        ["P", "102 cm", "68 cm", isShortSleeve ? "22 cm" : "75 cm"],
+        ["M", "108 cm", "71 cm", isShortSleeve ? "23 cm" : "77 cm"],
+        ["G", "114 cm", "74 cm", isShortSleeve ? "24 cm" : "79 cm"],
+        ["GG", "120 cm", "77 cm", isShortSleeve ? "25 cm" : "81 cm"],
+        ["XG", "126 cm", "80 cm", isShortSleeve ? "26 cm" : "83 cm"],
+        ["EXG (G1)", "132 cm", "83 cm", isShortSleeve ? "27 cm" : "85 cm"],
+        ["G2", "138 cm", "85 cm", isShortSleeve ? "28 cm" : "87 cm"],
+      ];
+      tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Tórax / Circunferência</th><th>Comprimento Total</th><th>${mHeader}</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
+    }
+    // 1.2 Camisas UV C0 Infantil (1 a 13 Anos)
+    else if (isKids || /infantil|kids|juvenil|criança|crianca/i.test(tLow) || /kids|inf/i.test(skuLow)) {
+      guideTitle = "Guia de Tamanhos Infantil (1 a 13 Anos)";
+      const badgeTitle = "INFANTIL";
+      const subtitle = "Camisa Manga Longa UV50 | *As medidas podem variar de 2cm a 3cm";
+      const rows = [
+        ["1 a 2 Anos (PP)", "31 cm", "41 cm", "31 cm"],
+        ["2 a 3 Anos (P)", "33 cm", "45 cm", "35 cm"],
+        ["4 a 5 Anos (M)", "35 cm", "49 cm", "37 cm"],
+        ["6 a 7 Anos (G)", "38 cm", "52 cm", "39 cm"],
+        ["8 a 9 Anos (GG)", "39 cm", "55 cm", "42 cm"],
+        ["10 a 11 Anos (G1)", "41 cm", "58 cm", "44 cm"],
+        ["12 a 13 Anos (G2)", "43 cm", "61 cm", "45 cm"],
+      ];
+      tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">${badgeTitle}</div><div class="brk-sg-subtitle">${subtitle}</div></div><table class="brk-sg-table"><thead><tr class="brk-sg-th-row"><th>TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
+    }
+    // 1.3 Camisas UV C0 Feminina / Baby Look (PP ao G2)
+    else if (/feminina|feminino|baby look|fem|babylook/i.test(tLow) || skuLow.includes("bl")) {
+      guideTitle = "Tabela de Medidas Feminina - Baby Look (PP ao G2)";
+      const badgeTitle = "FEMININO";
+      const subtitle = "Camisa Manga Longa UV50 | *As medidas podem variar de 2cm a 3cm";
+      const rows = [
+        ["Baby Look PP", "33 cm", "51 cm", "53 cm"],
+        ["Baby Look P", "37 cm", "54 cm", "55 cm"],
+        ["Baby Look M", "43 cm", "57 cm", "59 cm"],
+        ["Baby Look G", "47 cm", "60 cm", "60 cm"],
+        ["Baby Look GG", "47 cm", "60 cm", "61 cm"],
+        ["Baby Look G1", "50 cm", "62 cm", "61 cm"],
+        ["Baby Look G2", "55 cm", "64 cm", "63 cm"],
+      ];
+      tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">${badgeTitle}</div><div class="brk-sg-subtitle">${subtitle}</div></div><table class="brk-sg-table"><thead><tr class="brk-sg-th-row"><th>TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
+    }
+    // 1.4 Camisas UV C0 Masculino / Unissex Padrão (PP ao G2)
+    else {
+      guideTitle = "Tabela de Medidas Masculino / Unissex (PP ao G2)";
+      const badgeTitle = "MASCULINO";
+      const subtitle = "Camisa Manga Longa UV50 | *As medidas podem variar de 2cm a 3cm";
+      const rows = [
+        ["PP", "49,5 cm", "67 cm", "56 cm"],
+        ["P", "51,5 cm", "69 cm", "59,5 cm"],
+        ["M", "54 cm", "71 cm", "62 cm"],
+        ["G", "56 cm", "72 cm", "64 cm"],
+        ["GG", "59 cm", "74 cm", "64 cm"],
+        ["G1", "62 cm", "75 cm", "66 cm"],
+        ["G2", "65 cm", "76,5 cm", "66 cm"],
+      ];
+      tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">${badgeTitle}</div><div class="brk-sg-subtitle">${subtitle}</div></div><table class="brk-sg-table"><thead><tr class="brk-sg-th-row"><th>TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
+    }
+  }
+  else if (["pants_cargo_tactical", "overalls_workwear"].includes(archetypeId) || /calça|calca|bermuda|shorts|macacão|macacao|jeans/i.test(tLow)) {
     guideTitle = "Tabela de Medidas - Calças & Bermudas (38 ao 52)";
+    tipText = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Cintura na altura do cós | Quadril na parte mais larga | Comprimento da cintura até a barra). Dica: compare com uma peça sua estendida.";
     const rows = [
       ["38", "78 - 82 cm", "98 cm", "104 cm"],
       ["40", "82 - 86 cm", "102 cm", "105 cm"],
@@ -1121,9 +1177,11 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
     tableHtml = `<table class="brk-sg-table"><thead><tr><th>Numeração</th><th>Cintura</th><th>Quadril</th><th>Comprimento</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
   } else if (["hats_safari_outdoor", "caps_trucker_snapback"].includes(archetypeId) || /chapéu|chapeu|boné|bone/i.test(tLow)) {
     guideTitle = "Guia de Dimensões - Chapéus & Bonés";
+    tipText = "<strong>Como medir com precisão:</strong> Passe uma fita métrica ao redor da cabeça, cerca de 1 dedo acima das orelhas e sobrancelhas.";
     tableHtml = `<table class="brk-sg-table"><thead><tr><th>Modelo</th><th>Circunferência da Cabeça</th><th>Aba / Profundidade</th><th>Regulagem & Ajuste</th></tr></thead><tbody><tr><td><strong>Chapéu Safári / Australiano</strong></td><td>56 cm a 60 cm (Veste P ao GG)</td><td>Aba 7,5 cm de proteção 360°</td><td>Cordão jugular com trava anti-vento</td></tr><tr><td><strong>Boné Trucker / Snapback</strong></td><td>54 cm a 61 cm (Ajustável)</td><td>Aba 7,0 cm estruturada curvada</td><td>Fecho regulador traseiro de alta pressão</td></tr></tbody></table>`;
-  } else if (["footwear_sandals_boaonda", "closed_footwear_sneakers", "calcados_botinas"].includes(archetypeId) || /sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina/i.test(tLow)) {
+  } else if (["footwear_sandals_boaonda", "closed_footwear_sneakers", "calcados_botinas"].includes(archetypeId) || /sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda/i.test(tLow)) {
     guideTitle = "Guia de Tamanhos de Calçados (Medida da Palmilha)";
+    tipText = "<strong>Como medir com precisão:</strong> Meça a palmilha interna de um calçado confortável do calcanhar até a ponta do dedão para escolher a numeração perfeita.";
     const rows = [
       ["34", "23,0 cm"], ["35", "23,7 cm"], ["36", "24,3 cm"],
       ["37", "25,0 cm"], ["38", "25,7 cm"], ["39", "26,3 cm"],
@@ -1133,6 +1191,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
     tableHtml = `<table class="brk-sg-table"><thead><tr><th>Numeração BR</th><th>Comprimento da Palmilha (cm)</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td></tr>`).join("")}</tbody></table>`;
   } else if (archetypeId === "gloves_tactical_fishing" || tLow.includes("luva")) {
     guideTitle = "Tabela de Medidas de Luvas (Largura da Palma)";
+    tipText = "<strong>Como medir com precisão:</strong> Meça a largura da palma da mão na parte mais larga (logo abaixo das articulações dos dedos).";
     const rows = [
       ["P", "8,0 a 8,5 cm", "19 cm"],
       ["M", "8,5 a 9,0 cm", "20 cm"],
@@ -1142,6 +1201,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
     tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Largura da Palma</th><th>Comprimento da Mão</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("")}</tbody></table>`;
   } else if (archetypeId === "sun_sleeves_manguitos" || tLow.includes("manguito")) {
     guideTitle = "Tabela de Medidas - Manguitos de Proteção Solar";
+    tipText = "<strong>Como medir com precisão:</strong> Meça a circunferência do bíceps e punho com o braço em repouso.";
     const rows = [
       ["P / M", "24 a 30 cm", "16 a 20 cm", "45 cm"],
       ["G / GG", "30 a 38 cm", "18 a 24 cm", "48 cm"]
@@ -1149,6 +1209,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
     tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Circunferência Bíceps</th><th>Circunferência Punho</th><th>Comprimento Total</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
   } else if (archetypeId === "neck_gaiters_balaclavas" || /bandana|tubeneck|buff|balaclava/i.test(tLow)) {
     guideTitle = "Dimensões - Bandana Tubular Seamless Multifuncional";
+    tipText = "<strong>Dimensões do produto:</strong> Microfibra tubular seamless de alta elasticidade com proteção UV50+ e memória anatômica.";
     tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Largura (Plana)</th><th>Comprimento</th><th>Elasticidade</th></tr></thead><tbody><tr><td><strong>Tamanho Único</strong></td><td>Aprox. 24 cm</td><td>Aprox. 48 cm</td><td>Microfibra tubular elástica seamless com memória anatômica</td></tr></tbody></table>`;
   } else {
     return "";
@@ -1166,7 +1227,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
     <div class="brk-sg-body">
       <div class="brk-sg-tip">
         <span>📏</span>
-        <span><strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros. Em caso de dúvida entre dois tamanhos, opte pelo tamanho maior para garantir caimento livre e confortável.</span>
+        <span>${tipText}</span>
       </div>
       ${tableHtml}
     </div>
@@ -1915,6 +1976,33 @@ function getProductModeBHTML(liveP) {
     }
     .brk-sg-table tr:hover td {
       background: ${themeBg};
+    }
+    .brk-sg-card-header {
+      background: #2e7d32;
+      color: #ffffff;
+      padding: 12px 16px;
+      border-radius: 10px 10px 0 0;
+      text-align: center;
+      margin-bottom: 0;
+    }
+    .brk-sg-card-title {
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin: 0;
+    }
+    .brk-sg-subtitle {
+      font-size: 11.5px;
+      color: #ffffff;
+      opacity: 0.95;
+      margin-top: 3px;
+      font-style: italic;
+    }
+    .brk-sg-th-row th {
+      background: #1e293b !important;
+      color: #ffffff !important;
     }
 
     .brk-desc-trust-bar {

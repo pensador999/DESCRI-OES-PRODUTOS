@@ -137,6 +137,10 @@ class TestBRKRegressionGuardrails(unittest.TestCase):
         }
         html = self._generate_html(prod, "brk_fishing")
         self.assertIn("Tabela de Medidas Masculino / Unissex (PP ao G2)", html)
+        self.assertIn("MASCULINO", html)
+        self.assertIn("ALTURA", html)
+        self.assertIn("TÓRAX", html)
+        self.assertIn("MANGA", html)
         self.assertIn("49,5 cm", html)
         self.assertIn("51,5 cm", html)
         self.assertIn("54 cm", html)
@@ -159,6 +163,8 @@ class TestBRKRegressionGuardrails(unittest.TestCase):
         }
         html = self._generate_html(prod, "brk_fishing")
         self.assertIn("Tabela de Medidas Feminina - Baby Look (PP ao G2)", html)
+        self.assertIn("FEMININO", html)
+        self.assertIn("ALTURA", html)
         self.assertIn("Baby Look PP", html)
         self.assertIn("Baby Look P", html)
         self.assertIn("Baby Look M", html)
@@ -185,6 +191,8 @@ class TestBRKRegressionGuardrails(unittest.TestCase):
         }
         html = self._generate_html(prod, "brk_fishing")
         self.assertIn("Guia de Tamanhos Infantil (1 a 13 Anos)", html)
+        self.assertIn("INFANTIL", html)
+        self.assertIn("ALTURA", html)
         self.assertIn("1 a 2 Anos (PP)", html)
         self.assertIn("2 a 3 Anos (P)", html)
         self.assertIn("4 a 5 Anos (M)", html)

@@ -134,7 +134,7 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
 
     # Se já tem o formato oficial, novos Detalhes Técnicos e o novo Guia de Tamanhos C0 (para UV/camisas), reaproveita direto
     if raw_b and len(raw_b.strip()) > 500 and "<!-- BRK-MODO-B" in raw_b:
-        has_new_sg = any(term in raw_b for term in ["49,5 cm", "Baby Look", "1 a 2 Anos", "brk-sg-subtitle"])
+        has_new_sg = any(term in raw_b for term in ["49,5 cm", "Baby Look", "1 a 2 Anos", "brk-sg-subtitle"]) and "ALTURA" in raw_b
         if not is_uv or ("Detalhes Técnicos" in raw_b and "XTech Pro" in raw_b and has_new_sg):
             return raw_b
 

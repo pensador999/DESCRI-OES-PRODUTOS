@@ -280,51 +280,52 @@ class HTMLBuilder:
 
     def _build_size_guide(self, theme_color: str, archetype_id: str, is_kids: bool, is_short_sleeve: bool, enriched_data: Dict[str, Any]) -> str:
         title_low = (enriched_data.get("formatted_title") or enriched_data.get("title") or "").lower()
+        sku_low = (enriched_data.get("sku") or enriched_data.get("master_sku") or "").lower()
 
-        # 1. Infantil (Kids) - a tabela é de CAMISA (tórax/comprimento/manga): só para arquétipos de camisa
-        if is_kids and archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work"):
-            guide_title = "Guia de Tamanhos Infantil (02 a 16 Anos)"
-            manga_header = "Manga Curta" if is_short_sleeve else "Manga Longa"
-            rows = [
-                ("02 Anos", "64 cm", "42 cm", "14 cm" if is_short_sleeve else "40 cm"),
-                ("04 Anos", "70 cm", "46 cm", "15 cm" if is_short_sleeve else "44 cm"),
-                ("06 Anos", "76 cm", "50 cm", "16 cm" if is_short_sleeve else "48 cm"),
-                ("08 Anos", "82 cm", "54 cm", "17 cm" if is_short_sleeve else "52 cm"),
-                ("10 Anos", "88 cm", "58 cm", "18 cm" if is_short_sleeve else "56 cm"),
-                ("12 Anos", "92 cm", "62 cm", "19 cm" if is_short_sleeve else "60 cm"),
-                ("14 Anos", "96 cm", "65 cm", "20 cm" if is_short_sleeve else "64 cm"),
-                ("16 Anos", "100 cm", "68 cm", "21 cm" if is_short_sleeve else "68 cm"),
-            ]
-            rows_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td></tr>\n" for r in rows])
-            table_html = f"""<table class="brk-sg-table">
-        <thead>
-          <tr>
-            <th>Idade / Tam</th>
-            <th>Tórax / Peito</th>
-            <th>Comprimento</th>
-            <th>{manga_header}</th>
-          </tr>
-        </thead>
-        <tbody>
-{rows_html}        </tbody>
-      </table>"""
+        # 0. Exclusão estrita de itens não-têxteis com UV ou termos ambíguos
+        non_textile_keywords = [
+            "óculos", "oculos", "faca", "facas", "canivete", "alicate",
+            "vara", "varas", "molinete", "carretilha", "isca", "iscas",
+            "linha", "linhas", "anzol", "anzois", "estojo", "garrafa",
+            "copo", "chaveiro", "adesivo", "carteira", "protetor solar"
+        ]
+        if any(w in title_low for w in non_textile_keywords):
+            return ""
 
-        # 2. Camisas Adulto (uv_performance, agro_field, motors_speed, shirts_button_work)
-        elif archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work") or any(w in title_low for w in ["camisa", "camiseta", "jersey", "baby look"]):
-            guide_title = "Tabela de Medidas Adulto (P ao EXG)"
-            manga_header = "Manga Curta" if is_short_sleeve else "Manga Longa"
-            rows = [
-                ("P", "102 cm", "68 cm", "22 cm" if is_short_sleeve else "75 cm"),
-                ("M", "108 cm", "71 cm", "23 cm" if is_short_sleeve else "77 cm"),
-                ("G", "114 cm", "74 cm", "24 cm" if is_short_sleeve else "79 cm"),
-                ("GG", "120 cm", "77 cm", "25 cm" if is_short_sleeve else "81 cm"),
-                ("XG", "126 cm", "80 cm", "26 cm" if is_short_sleeve else "83 cm"),
-                ("EXG (G1)", "132 cm", "83 cm", "27 cm" if is_short_sleeve else "85 cm"),
-                ("G2", "138 cm", "85 cm", "28 cm" if is_short_sleeve else "87 cm"),
-                ("G3", "144 cm", "87 cm", "29 cm" if is_short_sleeve else "89 cm"),
-            ]
-            rows_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td></tr>\n" for r in rows])
-            table_html = f"""<table class="brk-sg-table">
+        # 1. Identificar se o produto é comprovadamente de vestuário superior / camisa
+        is_shirt = (
+            archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work")
+            or any(w in title_low for w in ["camisa", "camiseta", "jersey", "baby look", "babylook"])
+            or sku_low.startswith("c0")
+            or sku_low.startswith("cmb")
+        ) and not any(w in title_low for w in [
+            "calça", "calca", "bermuda", "shorts", "macacão", "macacao", "jeans",
+            "sandália", "sandalia", "babuche", "chinelo", "sapato", "tênis", "tenis", "bota", "botina", "boaonda",
+            "chapéu", "chapeu", "boné", "bone",
+            "luva", "luvas",
+            "manguito", "manguitos",
+            "bandana", "tubeneck", "buff", "balaclava"
+        ])
+
+        tip_text = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | Manga do ombro ao punho). Dica: compare com uma peça sua estendida para escolher o caimento ideal."
+
+        if is_shirt:
+            # 1.1 Camisas de Botão / Utilitárias Work (CMB - Sarja/Algodão corte reto de trabalho)
+            if archetype_id == "shirts_button_work" or "cmb" in sku_low or ("work" in title_low and "camisa" in title_low and not any(w in title_low for w in ["xtech", "dry"])):
+                guide_title = "Tabela de Medidas - Camisas Work & Utilitárias de Botão (P ao G2)"
+                tip_text = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Comprimento da gola à barra | Manga). Modelagem confortável de trabalho."
+                manga_header = "Manga Curta" if is_short_sleeve else "Manga Longa"
+                rows = [
+                    ("P", "102 cm", "68 cm", "22 cm" if is_short_sleeve else "75 cm"),
+                    ("M", "108 cm", "71 cm", "23 cm" if is_short_sleeve else "77 cm"),
+                    ("G", "114 cm", "74 cm", "24 cm" if is_short_sleeve else "79 cm"),
+                    ("GG", "120 cm", "77 cm", "25 cm" if is_short_sleeve else "81 cm"),
+                    ("XG", "126 cm", "80 cm", "26 cm" if is_short_sleeve else "83 cm"),
+                    ("EXG (G1)", "132 cm", "83 cm", "27 cm" if is_short_sleeve else "85 cm"),
+                    ("G2", "138 cm", "85 cm", "28 cm" if is_short_sleeve else "87 cm"),
+                ]
+                rows_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td></tr>\n" for r in rows])
+                table_html = f"""<table class="brk-sg-table">
         <thead>
           <tr>
             <th>Tamanho</th>
@@ -337,9 +338,106 @@ class HTMLBuilder:
 {rows_html}        </tbody>
       </table>"""
 
-        # 3. Calças e Bermudas / Macacões (pants_cargo_tactical, overalls_workwear)
-        elif archetype_id in ("pants_cargo_tactical", "overalls_workwear") or any(w in title_low for w in ["calça", "calca", "bermuda", "shorts", "macacão", "macacao"]):
+            # 1.2 Camisas UV C0 Infantil (1 a 13 Anos)
+            elif is_kids or any(w in title_low for w in ["infantil", "kids", "juvenil", "criança", "crianca"]) or "kids" in sku_low or "inf" in sku_low:
+                guide_title = "Guia de Tamanhos Infantil (1 a 13 Anos)"
+                badge_title = "INFANTIL"
+                subtitle = "Camisa Manga Longa UV50 | *As medidas podem variar de 2cm a 3cm"
+                rows = [
+                    ("1 a 2 Anos (PP)", "31 cm", "41 cm", "31 cm"),
+                    ("2 a 3 Anos (P)", "33 cm", "45 cm", "35 cm"),
+                    ("4 a 5 Anos (M)", "35 cm", "49 cm", "37 cm"),
+                    ("6 a 7 Anos (G)", "38 cm", "52 cm", "39 cm"),
+                    ("8 a 9 Anos (GG)", "39 cm", "55 cm", "42 cm"),
+                    ("10 a 11 Anos (G1)", "41 cm", "58 cm", "44 cm"),
+                    ("12 a 13 Anos (G2)", "43 cm", "61 cm", "45 cm"),
+                ]
+                rows_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td></tr>\n" for r in rows])
+                table_html = f"""<div class="brk-sg-card-header">
+        <div class="brk-sg-card-title">{badge_title}</div>
+        <div class="brk-sg-subtitle">{subtitle}</div>
+      </div>
+      <table class="brk-sg-table">
+        <thead>
+          <tr class="brk-sg-th-row">
+            <th>TAMANHO</th>
+            <th>TÓRAX</th>
+            <th>ALTURA</th>
+            <th>MANGA</th>
+          </tr>
+        </thead>
+        <tbody>
+{rows_html}        </tbody>
+      </table>"""
+
+            # 1.3 Camisas UV C0 Feminina / Baby Look (PP ao G2)
+            elif any(w in title_low for w in ["feminina", "feminino", "baby look", "fem", "babylook"]) or "bl" in sku_low:
+                guide_title = "Tabela de Medidas Feminina - Baby Look (PP ao G2)"
+                badge_title = "FEMININO"
+                subtitle = "Camisa Manga Longa UV50 | *As medidas podem variar de 2cm a 3cm"
+                rows = [
+                    ("Baby Look PP", "33 cm", "51 cm", "53 cm"),
+                    ("Baby Look P", "37 cm", "54 cm", "55 cm"),
+                    ("Baby Look M", "43 cm", "57 cm", "59 cm"),
+                    ("Baby Look G", "47 cm", "60 cm", "60 cm"),
+                    ("Baby Look GG", "47 cm", "60 cm", "61 cm"),
+                    ("Baby Look G1", "50 cm", "62 cm", "61 cm"),
+                    ("Baby Look G2", "55 cm", "64 cm", "63 cm"),
+                ]
+                rows_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td></tr>\n" for r in rows])
+                table_html = f"""<div class="brk-sg-card-header">
+        <div class="brk-sg-card-title">{badge_title}</div>
+        <div class="brk-sg-subtitle">{subtitle}</div>
+      </div>
+      <table class="brk-sg-table">
+        <thead>
+          <tr class="brk-sg-th-row">
+            <th>TAMANHO</th>
+            <th>TÓRAX</th>
+            <th>ALTURA</th>
+            <th>MANGA</th>
+          </tr>
+        </thead>
+        <tbody>
+{rows_html}        </tbody>
+      </table>"""
+
+            # 1.4 Camisas UV C0 Masculino / Unissex Padrão (PP ao G2)
+            else:
+                guide_title = "Tabela de Medidas Masculino / Unissex (PP ao G2)"
+                badge_title = "MASCULINO"
+                subtitle = "Camisa Manga Longa UV50 | *As medidas podem variar de 2cm a 3cm"
+                rows = [
+                    ("PP", "49,5 cm", "67 cm", "56 cm"),
+                    ("P", "51,5 cm", "69 cm", "59,5 cm"),
+                    ("M", "54 cm", "71 cm", "62 cm"),
+                    ("G", "56 cm", "72 cm", "64 cm"),
+                    ("GG", "59 cm", "74 cm", "64 cm"),
+                    ("G1", "62 cm", "75 cm", "66 cm"),
+                    ("G2", "65 cm", "76,5 cm", "66 cm"),
+                ]
+                rows_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td></tr>\n" for r in rows])
+                table_html = f"""<div class="brk-sg-card-header">
+        <div class="brk-sg-card-title">{badge_title}</div>
+        <div class="brk-sg-subtitle">{subtitle}</div>
+      </div>
+      <table class="brk-sg-table">
+        <thead>
+          <tr class="brk-sg-th-row">
+            <th>TAMANHO</th>
+            <th>TÓRAX</th>
+            <th>ALTURA</th>
+            <th>MANGA</th>
+          </tr>
+        </thead>
+        <tbody>
+{rows_html}        </tbody>
+      </table>"""
+
+        # 2. Calças e Bermudas / Macacões (pants_cargo_tactical, overalls_workwear)
+        elif archetype_id in ("pants_cargo_tactical", "overalls_workwear") or any(w in title_low for w in ["calça", "calca", "bermuda", "shorts", "macacão", "macacao", "jeans"]):
             guide_title = "Tabela de Medidas - Calças & Bermudas (38 ao 52)"
+            tip_text = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Cintura na altura do cós | Quadril na parte mais larga | Comprimento da cintura até a barra). Dica: compare com uma peça sua estendida."
             rows = [
                 ("38", "78 - 82 cm", "98 cm", "104 cm"),
                 ("40", "82 - 86 cm", "102 cm", "105 cm"),
@@ -364,9 +462,10 @@ class HTMLBuilder:
 {rows_html}        </tbody>
       </table>"""
 
-        # 4. Chapéus e Bonés (hats_safari_outdoor, caps_trucker_snapback)
+        # 3. Chapéus e Bonés (hats_safari_outdoor, caps_trucker_snapback)
         elif archetype_id in ("hats_safari_outdoor", "caps_trucker_snapback") or any(w in title_low for w in ["chapéu", "chapeu", "boné", "bone"]):
             guide_title = "Guia de Dimensões - Chapéus & Bonés"
+            tip_text = "<strong>Como medir com precisão:</strong> Passe uma fita métrica ao redor da cabeça, cerca de 1 dedo acima das orelhas e sobrancelhas."
             table_html = """<table class="brk-sg-table">
         <thead>
           <tr>
@@ -392,9 +491,10 @@ class HTMLBuilder:
         </tbody>
       </table>"""
 
-        # 5. Calçados (footwear_sandals_boaonda, closed_footwear_sneakers, calcados_botinas)
-        elif archetype_id in ("footwear_sandals_boaonda", "closed_footwear_sneakers", "calcados_botinas") or any(w in title_low for w in ["sandália", "sandalia", "babuche", "chinelo", "sapato", "tênis", "tenis", "bota", "botina"]):
+        # 4. Calçados (footwear_sandals_boaonda, closed_footwear_sneakers, calcados_botinas)
+        elif archetype_id in ("footwear_sandals_boaonda", "closed_footwear_sneakers", "calcados_botinas") or any(w in title_low for w in ["sandália", "sandalia", "babuche", "chinelo", "sapato", "tênis", "tenis", "bota", "botina", "boaonda"]):
             guide_title = "Guia de Tamanhos de Calçados (Medida da Palmilha)"
+            tip_text = "<strong>Como medir com precisão:</strong> Meça a palmilha interna de um calçado confortável do calcanhar até a ponta do dedão para escolher a numeração perfeita."
             rows = [
                 ("34", "23,0 cm"), ("35", "23,7 cm"), ("36", "24,3 cm"),
                 ("37", "25,0 cm"), ("38", "25,7 cm"), ("39", "26,3 cm"),
@@ -413,9 +513,10 @@ class HTMLBuilder:
 {rows_html}        </tbody>
       </table>"""
 
-        # 6. Luvas (gloves_tactical_fishing)
+        # 5. Luvas (gloves_tactical_fishing)
         elif archetype_id == "gloves_tactical_fishing" or "luva" in title_low:
             guide_title = "Tabela de Medidas de Luvas (Largura da Palma)"
+            tip_text = "<strong>Como medir com precisão:</strong> Meça a largura da palma da mão na parte mais larga (logo abaixo das articulações dos dedos)."
             rows = [
                 ("P", "8,0 a 8,5 cm", "19 cm"),
                 ("M", "8,5 a 9,0 cm", "20 cm"),
@@ -435,9 +536,10 @@ class HTMLBuilder:
 {rows_html}        </tbody>
       </table>"""
 
-        # 7. Manguitos (sun_sleeves_manguitos)
+        # 6. Manguitos (sun_sleeves_manguitos)
         elif archetype_id == "sun_sleeves_manguitos" or "manguito" in title_low:
             guide_title = "Tabela de Medidas - Manguitos de Proteção Solar"
+            tip_text = "<strong>Como medir com precisão:</strong> Meça a circunferência do bíceps e punho com o braço em repouso."
             rows = [
                 ("P / M", "24 a 30 cm", "16 a 20 cm", "45 cm"),
                 ("G / GG", "30 a 38 cm", "18 a 24 cm", "48 cm"),
@@ -456,9 +558,10 @@ class HTMLBuilder:
 {rows_html}        </tbody>
       </table>"""
 
-        # 8. Bandanas / Balaclavas
+        # 7. Bandanas / Balaclavas
         elif archetype_id == "neck_gaiters_balaclavas" or any(w in title_low for w in ["bandana", "tubeneck", "buff", "balaclava"]):
             guide_title = "Dimensões - Bandana Tubular Seamless Multifuncional"
+            tip_text = "<strong>Dimensões do produto:</strong> Microfibra tubular seamless de alta elasticidade com proteção UV50+ e memória anatômica."
             table_html = """<table class="brk-sg-table">
         <thead>
           <tr>
@@ -493,7 +596,7 @@ class HTMLBuilder:
     <div class="brk-sg-body">
       <div class="brk-sg-tip">
         <span>📏</span>
-        <span><strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros. Em caso de dúvida entre dois tamanhos, opte pelo tamanho maior para garantir caimento livre e confortável.</span>
+        <span>{tip_text}</span>
       </div>
       {table_html}
     </div>
@@ -1110,6 +1213,34 @@ class HTMLBuilder:
     .brk-sg-table tr:hover td {{
       background: {theme_bg};
     }}
+    .brk-sg-card-header {{
+      background: #2e7d32;
+      color: #ffffff;
+      padding: 12px 16px;
+      border-radius: 10px 10px 0 0;
+      text-align: center;
+      margin-bottom: 0;
+    }}
+    .brk-sg-card-title {{
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin: 0;
+    }}
+    .brk-sg-subtitle {{
+      font-size: 11.5px;
+      color: #ffffff;
+      opacity: 0.95;
+      margin-top: 3px;
+      font-style: italic;
+    }}
+    .brk-sg-th-row th {{
+      background: #1e293b !important;
+      color: #ffffff !important;
+    }}
+
 
     /* Rodapé de Confiança e Garantia BRK */
     .brk-desc-trust-bar {{
