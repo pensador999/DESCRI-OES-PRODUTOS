@@ -127,19 +127,24 @@ def get_engine_and_builder():
     return _ENGINE, _BUILDER
 
 def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
-    """Garante que a descrição seja o Modo B oficial compilado (>1000 chars, com 3 Atos e Badges)."""
+    """Garante que a descrição seja o Modo B oficial compilado (>1000 chars, com 3 Atos e Detalhes Técnicos XTech Pro)."""
     raw_b = p.get("mode_b_html")
+    arch_id = p.get("archetype_id") or ""
+    is_uv = (arch_id == "uv_performance") or any(w in (p.get("title") or "").lower() for w in ["camisa", "uv", "armorx", "xtech"])
+
+    # Se já tem o formato oficial e os novos Detalhes Técnicos (para peças UV/camisas), reaproveita direto
     if raw_b and len(raw_b.strip()) > 500 and "<!-- BRK-MODO-B" in raw_b:
-        return raw_b
+        if not is_uv or ("Detalhes Técnicos" in raw_b and "XTech Pro" in raw_b):
+            return raw_b
 
     engine, builder = get_engine_and_builder()
     if engine and builder:
         try:
-            arch_id = p.get("archetype_id") or engine.detect_archetype(
+            detected_arch = arch_id or engine.detect_archetype(
                 p.get("title", ""), p.get("category", ""), p.get("tags", []), vendor=p.get("vendor", "")
             )
             images = p.get("gallery") or p.get("cdn_images") or []
-            narrative = engine.generate_narrative_from_template(p, arch_id, images, store_key=store_key)
+            narrative = engine.generate_narrative_from_template(p, detected_arch, images, store_key=store_key)
             compiled_b = builder.build_shopify_html(narrative)
             p["mode_b_html"] = compiled_b
             return compiled_b
