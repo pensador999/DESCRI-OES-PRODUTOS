@@ -456,6 +456,13 @@ def build_dist():
       <div class="w-full flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100">
         <button id="btn-live-agent" onclick="LiveAgent.refresh(true)" title="Lê a vitrine pública da loja (somente leitura) e atualiza o status real das descrições" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-700 text-white rounded-xl text-[11px] font-extrabold transition-all active:scale-95">🛰️ Verificar descrições ao vivo</button>
         <span id="live-agent-status" class="text-[11px] font-semibold text-slate-500">🛰️ Aguardando verificação da vitrine…</span>
+        <div class="h-4 w-[1px] bg-slate-200 hidden sm:block"></div>
+        <button id="btn-tm-queue" onclick="sendBatchToTampermonkey(25)" title="Envia os próximos 25 produtos sem descrição para o Assistente Tampermonkey no Chrome" class="px-3 py-1.5 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white rounded-xl text-[11px] font-extrabold shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
+          <span>⚡ Fila Tampermonkey (25)</span>
+        </button>
+        <button id="btn-tm-settings" onclick="openTampermonkeyModal()" title="Instruções e status do Userscript Tampermonkey" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-[11px] font-bold transition-all">
+          <span>⚙️ Script</span>
+        </button>
       </div>
     </section>
 
@@ -498,6 +505,9 @@ def build_dist():
         </button>
         <button onclick="downloadShopifyCSVBatch()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-extrabold shadow-lg transition-all flex items-center gap-2">
           <span>📥 Baixar Planilha CSV Shopify</span>
+        </button>
+        <button onclick="sendSelectedMassToTampermonkey()" class="px-4 py-2.5 bg-purple-700 hover:bg-purple-800 text-white rounded-xl text-xs font-extrabold shadow-lg transition-all flex items-center gap-2" title="Enviar os produtos selecionados diretamente para o Assistente Tampermonkey no Chrome">
+          <span>⚡ Fila Tampermonkey</span>
         </button>
       </div>
     </div>

@@ -375,9 +375,56 @@ class TestLiveAgentAndTracking(unittest.TestCase):
         self.assertIn("/api/live_status", js)
         self.assertIn("switchStore(storeKey)", js, "Resultado da busca deve trocar de loja automaticamente")
 
+
+class TestTampermonkeyIntegration(unittest.TestCase):
+    """Garante integridade e conformidade do Userscript Tampermonkey e da ponte no Portal."""
+
+    def test_userscript_metadata_and_matches(self):
+        script_path = os.path.join(BASE_DIR, "tampermonkey", "brk_assistente_shopify.user.js")
+        self.assertTrue(os.path.exists(script_path), "Arquivo do userscript deve existir em tampermonkey/")
+        with open(script_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        self.assertIn("// ==UserScript==", content)
+        self.assertIn("@match        https://admin.shopify.com/store/*/products*", content)
+        self.assertIn("@match        https://1025-ten.vercel.app/*", content)
+        self.assertIn("@grant        GM_setValue", content)
+        self.assertIn("@grant        GM_getValue", content)
+        self.assertIn("brkfishing", content)
+        self.assertIn("brkagro", content)
+        self.assertIn("brkmotors25", content)
+
+    def test_userscript_html_injection_and_tracking(self):
+        script_path = os.path.join(BASE_DIR, "tampermonkey", "brk_assistente_shopify.user.js")
+        with open(script_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        self.assertIn("injectDescriptionIntoShopify", content)
+        self.assertIn("highlightSaveButton", content)
+        self.assertIn("advanceToNextProduct", content)
+        self.assertIn("appendBackup", content, "Script deve conter rotina de backup antes de alterar")
+        self.assertIn("delaySeconds: 4", content, "Delay padrão deve ser de 4 segundos")
+
+    def test_portal_integration_buttons_and_functions(self):
+        app_js_path = os.path.join(BASE_DIR, "js", "app.js")
+        with open(app_js_path, "r", encoding="utf-8") as f:
+            app_js = f.read()
+
+        self.assertIn("function sendBatchToTampermonkey", app_js)
+        self.assertIn("function sendSelectedMassToTampermonkey", app_js)
+        self.assertIn("function openTampermonkeyModal", app_js)
+
+        build_dist_path = os.path.join(BASE_DIR, "build_modular_dist.py")
+        with open(build_dist_path, "r", encoding="utf-8") as f:
+            build_dist = f.read()
+
+        self.assertIn('id="btn-tm-queue"', build_dist)
+        self.assertIn('onclick="sendBatchToTampermonkey(25)"', build_dist)
+        self.assertIn('onclick="sendSelectedMassToTampermonkey()"', build_dist)
+
 def run_tests():
     suite = unittest.TestSuite()
-    for case in (TestBRKRegressionGuardrails, TestSemanticConformity, TestLiveAgentAndTracking):
+    for case in (TestBRKRegressionGuardrails, TestSemanticConformity, TestLiveAgentAndTracking, TestTampermonkeyIntegration):
         suite.addTests(unittest.TestLoader().loadTestsFromTestCase(case))
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)

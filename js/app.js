@@ -1165,6 +1165,210 @@ if (scrollL) scrollL.onclick = () => { categoriesRail.scrollBy({ left: -250, beh
 const scrollR = document.getElementById("scroll-right");
 if (scrollR) scrollR.onclick = () => { categoriesRail.scrollBy({ left: 250, behavior: 'smooth' }); };
 
+
+// =========================================================================
+// INTEGRAÇÃO COM USERSCRIPT TAMPERMONKEY (MODO ASSISTIDO SHOPIFY)
+// =========================================================================
+
+function buildQueueItem(p) {
+  let html = p.mode_b_html;
+  if (!html && typeof getProductModeBHTML === "function") {
+    html = getProductModeBHTML(p);
+  }
+  return {
+    id: String(p.id),
+    handle: p.handle,
+    master_sku: p.master_sku || p.sku || "",
+    title: p.title || "Sem Título",
+    mode_b_html: html || p.body_html || ""
+  };
+}
+
+function sendBatchToTampermonkey(limit = 25) {
+  const storeData = MASTER_PAYLOAD.stores[currentStore];
+  if (!storeData || !storeData.products) {
+    showToast("⚠️ Aguarde o carregamento do catálogo...");
+    return;
+  }
+
+  // Prioridade: produtos sem descrição
+  let candidates = storeData.products.filter(p => p.status === "SEM_DESCRICAO");
+  let label = "sem descrição";
+  if (candidates.length === 0) {
+    candidates = storeData.products.filter(p => p.status === "IMAGENS_QUEBRADAS");
+    label = "com fotos quebradas";
+  }
+  if (candidates.length === 0) {
+    candidates = storeData.products;
+    label = "do catálogo";
+  }
+
+  const batch = candidates.slice(0, limit);
+  if (batch.length === 0) {
+    alert("Nenhum produto disponível para envio.");
+    return;
+  }
+
+  const items = batch.map(buildQueueItem);
+  const storeSlugMap = {
+    "brk_fishing": "brkfishing",
+    "brk_agro": "brkagro",
+    "brk_motors": "brkmotors25"
+  };
+  const storeSlug = storeSlugMap[currentStore] || "brkfishing";
+
+  // Enviar postMessage para o Tampermonkey caso esteja rodando na página
+  window.postMessage({
+    type: "BRK_LOAD_QUEUE",
+    payload: {
+      items: items,
+      storeKey: currentStore,
+      storeSlug: storeSlug,
+      autoStart: true
+    }
+  }, "*");
+
+  // Salvar no localStorage como fallback
+  localStorage.setItem("BRK_TM_ACTIVE_QUEUE", JSON.stringify(items));
+  localStorage.setItem("BRK_TM_STORE_SLUG", storeSlug);
+
+  showToast(`⚡ Lote de ${items.length} produtos ${label} preparado para o Tampermonkey!`);
+
+  // Se o Tampermonkey não responder em 800ms, abre o modal de assistência
+  setTimeout(() => {
+    if (!window.__BRK_TAMPERMONKEY_INSTALLED) {
+      openTampermonkeyModal(items, storeSlug);
+    }
+  }, 600);
+}
+
+function sendSelectedMassToTampermonkey() {
+  const storeData = MASTER_PAYLOAD.stores[currentStore];
+  if (!storeData || !storeData.products) return;
+  const selected = storeData.products.filter(p => selectedMassProductIds.has(String(p.id)));
+
+  if (selected.length === 0) {
+    alert("Nenhum produto selecionado na tabela de massa.");
+    return;
+  }
+
+  const items = selected.map(buildQueueItem);
+  const storeSlugMap = {
+    "brk_fishing": "brkfishing",
+    "brk_agro": "brkagro",
+    "brk_motors": "brkmotors25"
+  };
+  const storeSlug = storeSlugMap[currentStore] || "brkfishing";
+
+  window.postMessage({
+    type: "BRK_LOAD_QUEUE",
+    payload: {
+      items: items,
+      storeKey: currentStore,
+      storeSlug: storeSlug,
+      autoStart: true
+    }
+  }, "*");
+
+  localStorage.setItem("BRK_TM_ACTIVE_QUEUE", JSON.stringify(items));
+  localStorage.setItem("BRK_TM_STORE_SLUG", storeSlug);
+
+  showToast(`⚡ ${items.length} produtos selecionados enviados para o Tampermonkey!`);
+
+  setTimeout(() => {
+    if (!window.__BRK_TAMPERMONKEY_INSTALLED) {
+      openTampermonkeyModal(items, storeSlug);
+    }
+  }, 600);
+}
+
+function openTampermonkeyModal(items = null, storeSlug = "brkfishing") {
+  let modal = document.getElementById("brk-tm-modal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "brk-tm-modal";
+    modal.className = "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm";
+    document.body.appendChild(modal);
+  }
+
+  const activeQueue = items || JSON.parse(localStorage.getItem("BRK_TM_ACTIVE_QUEUE") || "[]");
+  const count = activeQueue.length;
+  const firstId = count > 0 ? activeQueue[0].id : null;
+  const firstUrl = firstId ? `https://admin.shopify.com/store/${storeSlug}/products/${firstId}` : "#";
+
+  modal.innerHTML = `
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-xl w-full p-6 text-slate-800 space-y-5 animate-scale-in">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white text-xl shadow-md">
+            ⚡
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900 font-heading">Assistente Tampermonkey BRK</h3>
+            <p class="text-xs text-slate-500">Automação Assistida sem necessidade de Token ou API</p>
+          </div>
+        </div>
+        <button onclick="closeTampermonkeyModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center transition-all">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs leading-relaxed">
+        <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-700">Status da Fila Local:</span>
+            <span class="font-mono font-extrabold px-2 py-0.5 rounded-full ${count > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}">
+              ${count} produtos prontos
+            </span>
+          </div>
+          ${count > 0 ? `
+            <p class="text-slate-600 text-[11px]">Primeiro produto: <strong class="text-slate-900">${activeQueue[0].master_sku || ''}</strong> - ${activeQueue[0].title.slice(0, 45)}...</p>
+          ` : ''}
+        </div>
+
+        <div class="p-4 bg-purple-50 rounded-2xl border border-purple-200 space-y-2 text-purple-900">
+          <h4 class="font-bold flex items-center gap-1.5 text-xs text-purple-950">
+            <span>🔌</span> Como funciona em 2 passos:
+          </h4>
+          <ol class="list-decimal pl-4 space-y-1 text-[11px] text-purple-800">
+            <li>Instale o script no seu Chrome: <a href="tampermonkey/brk_assistente_shopify.user.js" target="_blank" class="font-bold underline text-purple-700 hover:text-purple-900">Clique aqui para instalar o Userscript</a>.</li>
+            <li>Abra a Shopify: ao abrir o produto, o script preencherá a descrição Modo B e você só clica em <strong>Salvar</strong>! Após 4 segundos, ele avança para o próximo.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+        <button onclick="copyTampermonkeyQueueJson()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+          <span>📋 Copiar Fila JSON</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="closeTampermonkeyModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
+            Fechar
+          </button>
+          ${firstId ? `
+            <a href="${firstUrl}" target="_blank" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-extrabold shadow-md transition-all flex items-center gap-1.5">
+              <span>🚀 Abrir no Shopify Admin</span>
+            </a>
+          ` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+  modal.classList.remove("hidden");
+}
+
+function closeTampermonkeyModal() {
+  const modal = document.getElementById("brk-tm-modal");
+  if (modal) modal.classList.add("hidden");
+}
+
+function copyTampermonkeyQueueJson() {
+  const activeQueue = localStorage.getItem("BRK_TM_ACTIVE_QUEUE") || "[]";
+  navigator.clipboard.writeText(activeQueue).then(() => {
+    showToast("📋 Fila JSON copiada para a área de transferência!");
+  }).catch(() => {
+    alert("Não foi possível copiar automaticamente.");
+  });
+}
+
 // Inicialização Inicial
 document.addEventListener("DOMContentLoaded", () => {
   switchStore("brk_fishing");
