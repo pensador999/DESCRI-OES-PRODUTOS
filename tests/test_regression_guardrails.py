@@ -422,13 +422,67 @@ class TestTampermonkeyIntegration(unittest.TestCase):
         self.assertIn('onclick="sendBatchToTampermonkey(25)"', build_dist)
         self.assertIn('onclick="sendSelectedMassToTampermonkey()"', build_dist)
 
+
+class TestProductDBApiAndDirectConnection(unittest.TestCase):
+    """Garante a conexão direta entre o userscript Tampermonkey e o banco de dados oficial (Vercel API)."""
+
+    def test_product_db_loading_and_indexing(self):
+        from api.product_db import load_store_database, sanitize_product, ALLOWED_STORES, STORE_SLUG_MAP
+
+        # Assegurar que as 3 lojas estão mapeadas
+        self.assertIn("brk_fishing", ALLOWED_STORES)
+        self.assertIn("brk_agro", ALLOWED_STORES)
+        self.assertIn("brk_motors", ALLOWED_STORES)
+        self.assertEqual(STORE_SLUG_MAP["brkfishing"], "brk_fishing")
+        self.assertEqual(STORE_SLUG_MAP["brkagro"], "brk_agro")
+        self.assertEqual(STORE_SLUG_MAP["brkmotors25"], "brk_motors")
+
+        # Carregar banco da BRK Fishing
+        db = load_store_database("brk_fishing")
+        self.assertIsNotNone(db, "Banco brk_fishing deve carregar com sucesso.")
+        self.assertGreater(db["total"], 2000, "BRK Fishing deve ter mais de 2.000 produtos.")
+        self.assertGreater(len(db["empty"]), 0, "Deve haver produtos com status SEM_DESCRICAO na BRK Fishing.")
+
+        # Verificar produto de amostra
+        sample_prod = db["empty"][0]
+        sanitized = sanitize_product(sample_prod)
+        self.assertIn("id", sanitized)
+        self.assertIn("master_sku", sanitized)
+        self.assertIn("title", sanitized)
+        self.assertIn("status", sanitized)
+        self.assertIn("mode_b_html", sanitized)
+        self.assertTrue(len(sanitized["mode_b_html"]) > 100, "Produto deve conter mode_b_html preenchido.")
+
+    def test_userscript_direct_db_headers(self):
+        script_path = os.path.join(BASE_DIR, "tampermonkey", "brk_assistente_shopify.user.js")
+        with open(script_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        self.assertIn("@grant        GM_xmlhttpRequest", content, "Userscript deve ter permissão GM_xmlhttpRequest para consultar a API.")
+        self.assertIn("@connect      1025-ten.vercel.app", content, "Userscript deve ter @connect liberado para o domínio da Vercel.")
+        self.assertIn("fetchFromBRKDatabase", content, "Userscript deve implementar a busca direta ao banco BRK.")
+        self.assertIn("setReactInputValue", content, "Userscript deve usar o descriptor nativo do React para input no Polaris.")
+        self.assertIn("startQueueFromDatabase", content, "Userscript deve permitir puxar a fila diretamente do banco.")
+
+    def test_vercel_config_includes_data_files(self):
+        vercel_json_path = os.path.join(BASE_DIR, "vercel.json")
+        self.assertTrue(os.path.exists(vercel_json_path))
+        with open(vercel_json_path, "r", encoding="utf-8") as f:
+            cfg = json.load(f)
+
+        fn_cfg = cfg.get("functions", {}).get("api/*.py", {})
+        self.assertIn("includeFiles", fn_cfg, "vercel.json deve configurar includeFiles para funções Python.")
+        self.assertIn("data/stores/*.json", fn_cfg["includeFiles"], "includeFiles deve incluir data/stores/*.json no pacote serverless.")
+
+
 def run_tests():
     suite = unittest.TestSuite()
-    for case in (TestBRKRegressionGuardrails, TestSemanticConformity, TestLiveAgentAndTracking, TestTampermonkeyIntegration):
+    for case in (TestBRKRegressionGuardrails, TestSemanticConformity, TestLiveAgentAndTracking, TestTampermonkeyIntegration, TestProductDBApiAndDirectConnection):
         suite.addTests(unittest.TestLoader().loadTestsFromTestCase(case))
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     return result.wasSuccessful()
+
 
 if __name__ == "__main__":
     success = run_tests()

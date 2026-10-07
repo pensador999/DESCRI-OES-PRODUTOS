@@ -1,14 +1,17 @@
 // ==UserScript==
-// @name         BRK Assistente de Descrições Shopify (Modo Assistido)
+// @name         BRK Assistente de Descrições Shopify (Conectado ao Banco Real)
 // @namespace    https://1025-ten.vercel.app/
-// @version      1.0.0
-// @description  Automação assistida para preenchimento de descrições comerciais Modo B no Admin da Shopify (BRK Fishing, Agro, Motors)
+// @version      2.0.0
+// @description  Automação assistida conectada diretamente ao banco de dados oficial BRK (Vercel API) para preenchimento de descrições Modo B no Shopify Admin.
 // @author       BRK Group & DeepMind Pair
 // @match        https://admin.shopify.com/store/*/products*
 // @match        https://1025-ten.vercel.app/*
 // @match        http://localhost:*/*
 // @match        http://127.0.0.1:*/*
-// @match        file://*
+// @connect      1025-ten.vercel.app
+// @connect      localhost
+// @connect      127.0.0.1
+// @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_deleteValue
@@ -20,22 +23,33 @@
 (function() {
   'use strict';
 
+  // Configuração da API do Banco de Dados BRK
+  const API_BASE = "https://1025-ten.vercel.app";
+
   const STORAGE_KEYS = {
     QUEUE: "BRK_AUTOSYNC_QUEUE",
     INDEX: "BRK_AUTOSYNC_INDEX",
     ACTIVE: "BRK_AUTOSYNC_ACTIVE",
     BACKUP: "BRK_AUTOSYNC_BACKUP",
-    SETTINGS: "BRK_AUTOSYNC_SETTINGS"
+    SETTINGS: "BRK_AUTOSYNC_SETTINGS",
+    LAST_STORE: "BRK_LAST_STORE"
+  };
+
+  const STORE_SLUG_MAP = {
+    "brkfishing": "brk_fishing",
+    "brkagro": "brk_agro",
+    "brkmotors25": "brk_motors"
+  };
+
+  const STORE_NAMES = {
+    "brk_fishing": "BRK Fishing",
+    "brk_agro": "BRK Agro",
+    "brk_motors": "BRK Motors"
   };
 
   const DEFAULT_SETTINGS = {
     delaySeconds: 4,
-    autoSave: false, // false = Modo Assistido (você clica em Salvar)
-    storeSlugMap: {
-      "brk_fishing": "brkfishing",
-      "brk_agro": "brkagro",
-      "brk_motors": "brkmotors25"
-    }
+    autoSave: false // Modo Assistido: o usuário confirma ou o script orienta
   };
 
   function getSettings() {
@@ -79,63 +93,65 @@
       saved_at: new Date().toISOString(),
       body_html: originalHtml
     });
-    if (arr.length > 100) arr = arr.slice(0, 100);
+    if (arr.length > 50) arr = arr.slice(0, 50);
     GM_setValue(STORAGE_KEYS.BACKUP, JSON.stringify(arr));
   }
 
   // =========================================================================
-  // 1. LÓGICA NO PORTAL (Vercel ou Local)
+  // COMUNICAÇÃO HTTP COM A API REAL DO BANCO DE DADOS BRK
   // =========================================================================
-  if (location.hostname === "1025-ten.vercel.app" || location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.protocol === "file:") {
-    console.log("[BRK-Tampermonkey] Conectado ao Portal de Descrições BRK.");
+  function fetchFromBRKDatabase(endpoint) {
+    return new Promise((resolve, reject) => {
+      const url = `${API_BASE}${endpoint}`;
+      console.log(`[BRK-DB] Requisitando: ${url}`);
+      GM_xmlhttpRequest({
+        method: "GET",
+        url: url,
+        headers: {
+          "Accept": "application/json"
+        },
+        onload: function(response) {
+          if (response.status >= 200 && response.status < 300) {
+            try {
+              const data = JSON.parse(response.responseText);
+              resolve(data);
+            } catch(e) {
+              reject(new Error("Resposta da API BRK não é um JSON válido."));
+            }
+          } else {
+            try {
+              const errData = JSON.parse(response.responseText);
+              reject(new Error(errData.error || `Erro HTTP ${response.status}`));
+            } catch(e) {
+              reject(new Error(`Erro HTTP ${response.status}: ${response.statusText}`));
+            }
+          }
+        },
+        onerror: function(err) {
+          console.error("[BRK-DB] Falha de rede:", err);
+          reject(new Error("Falha na conexão com a API da Vercel. Verifique a internet."));
+        }
+      });
+    });
+  }
 
-    // Avisar o portal que o Tampermonkey está presente e ativo
+  // =========================================================================
+  // 1. LÓGICA NO PORTAL LOCAL OU VERCEL (1025-ten.vercel.app)
+  // =========================================================================
+  if (location.hostname === "1025-ten.vercel.app" || location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+    console.log("[BRK-Tampermonkey] Conectado ao Portal de Descrições BRK.");
     window.__BRK_TAMPERMONKEY_INSTALLED = true;
     document.documentElement.setAttribute("data-tampermonkey-active", "true");
 
-    // Escutar comandos enviados pelo portal via postMessage
-    window.addEventListener("message", (event) => {
-      if (!event.data || typeof event.data !== "object") return;
-      const { type, payload } = event.data;
-
-      if (type === "BRK_LOAD_QUEUE") {
-        const items = payload.items || [];
-        const storeKey = payload.storeKey || "brk_fishing";
-        const autoStart = payload.autoStart !== false;
-
-        if (items.length === 0) {
-          alert("A fila enviada está vazia.");
-          return;
-        }
-
-        setQueue(items);
-        setQueueIndex(0);
-        setAutomationActive(autoStart);
-
-        console.log(`[BRK-Tampermonkey] Fila carregada com ${items.length} produtos.`);
-
-        const settings = getSettings();
-        const slug = settings.storeSlugMap[storeKey] || "brkfishing";
-        const firstId = items[0].id;
-        const targetUrl = `https://admin.shopify.com/store/${slug}/products/${firstId}`;
-
-        if (confirm(`⚡ Fila com ${items.length} produtos da ${storeKey.toUpperCase()} pronta no Tampermonkey!\n\nDeseja abrir o primeiro produto no Shopify Admin agora?\nURL: ${targetUrl}`)) {
-          window.open(targetUrl, "_blank");
-        }
-      }
-    });
-
-    // Badge visual no portal
     const badge = document.createElement("div");
     badge.id = "brk-tm-portal-badge";
-    badge.style.cssText = "position:fixed;bottom:12px;left:12px;z-index:99999;background:#0f172a;border:1px solid #334155;color:#38bdf8;padding:6px 12px;border-radius:9999px;font-size:11px;font-weight:800;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);cursor:pointer;font-family:sans-serif;";
-    badge.innerHTML = "<span>🤖 Tampermonkey Conectado</span>";
-    badge.title = "Clique para inspecionar a fila atual do Tampermonkey";
+    badge.style.cssText = "position:fixed;bottom:16px;left:16px;z-index:99999;background:#0f172a;border:1px solid #0284c7;color:#38bdf8;padding:8px 14px;border-radius:9999px;font-size:12px;font-weight:800;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.4);cursor:pointer;font-family:sans-serif;";
+    badge.innerHTML = "<span>🟢 Tampermonkey Conectado ao Banco BRK v2.0</span>";
     badge.onclick = () => {
       const q = getQueue();
       const idx = getQueueIndex();
       const active = isAutomationActive();
-      alert(`[Tampermonkey BRK Status]\n\nProdutos na Fila: ${q.length}\nÍndice Atual: ${idx + 1} de ${q.length}\nAutomação Ativa: ${active ? "SIM" : "NÃO"}`);
+      alert(`[Assistente BRK Status]\n\nFila no Tampermonkey: ${q.length} produtos\nÍndice Atual: ${idx + 1} de ${q.length}\nAutomação Ativa: ${active ? "SIM" : "NÃO"}`);
     };
     document.body.appendChild(badge);
     return;
@@ -147,25 +163,28 @@
   if (location.hostname === "admin.shopify.com") {
     const urlPath = location.pathname;
     const storeMatch = urlPath.match(/\/store\/([^\/]+)/);
-    const currentStoreSlug = storeMatch ? storeMatch[1] : "";
+    const shopifySlug = storeMatch ? storeMatch[1].toLowerCase() : "";
+    const storeKey = STORE_SLUG_MAP[shopifySlug] || "brk_fishing";
+    const storeName = STORE_NAMES[storeKey] || "BRK Fishing";
+
     const productMatch = urlPath.match(/\/products\/(\d+)/);
     const currentProductId = productMatch ? productMatch[1] : null;
 
-    console.log(`[BRK-Tampermonkey] Shopify Admin detectado: Loja '${currentStoreSlug}' | Produto '${currentProductId || 'Listagem'}'`);
+    console.log(`[BRK-Tampermonkey] Shopify Admin Detectado | Loja: ${storeName} (${shopifySlug}) | Produto ID: ${currentProductId || 'Listagem'}`);
 
-    // Injetar CSS de animação para destacar o botão Salvar
+    // Injetar Estilos Visuais do HUD e Pulso do Botão Salvar
     const styleEl = document.createElement("style");
     styleEl.id = "brk-tm-styles";
     styleEl.textContent = `
       @keyframes brkSaveGlow {
-        0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); transform: scale(1); }
-        50% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); transform: scale(1.03); }
+        0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.8); transform: scale(1); }
+        50% { box-shadow: 0 0 0 12px rgba(34, 197, 94, 0); transform: scale(1.04); }
         100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); transform: scale(1); }
       }
       .brk-pulse-save-button {
-        animation: brkSaveGlow 1.4s infinite !important;
-        background-color: #15803d !important;
-        border-color: #166534 !important;
+        animation: brkSaveGlow 1.2s infinite !important;
+        background-color: #16a34a !important;
+        border-color: #15803d !important;
         color: #ffffff !important;
         font-weight: 800 !important;
       }
@@ -174,36 +193,42 @@
         bottom: 24px;
         right: 24px;
         z-index: 999999;
-        background: #0f172a;
-        color: #f8fafc;
-        border: 2px solid #38bdf8;
+        background: #090d16;
+        color: #f1f5f9;
+        border: 2px solid #0284c7;
         border-radius: 16px;
         padding: 16px 20px;
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         font-size: 13px;
-        min-width: 320px;
-        max-width: 440px;
-        transition: all 0.3s ease;
+        min-width: 360px;
+        max-width: 480px;
+        backdrop-filter: blur(12px);
       }
-      #brk-tm-hud-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 10px;
-        border-bottom: 1px solid #334155;
-        padding-bottom: 8px;
+      .brk-badge-status {
+        font-size: 10px;
+        font-weight: 800;
+        padding: 2px 8px;
+        border-radius: 9999px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
       }
+      .brk-badge-empty { background: #991b1b; color: #fee2e2; }
+      .brk-badge-broken { background: #b45309; color: #fef3c7; }
+      .brk-badge-healthy { background: #166534; color: #dcfce7; }
       .brk-hud-btn {
         background: #1e293b;
         color: #e2e8f0;
         border: 1px solid #475569;
         border-radius: 8px;
-        padding: 5px 10px;
-        font-size: 11px;
+        padding: 6px 12px;
+        font-size: 12px;
         font-weight: 700;
         cursor: pointer;
-        transition: background 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
       }
       .brk-hud-btn:hover {
         background: #334155;
@@ -217,134 +242,50 @@
       .brk-hud-btn-primary:hover {
         background: #0369a1;
       }
+      .brk-hud-btn-success {
+        background: #16a34a;
+        border-color: #15803d;
+        color: #ffffff;
+      }
+      .brk-hud-btn-success:hover {
+        background: #15803d;
+      }
       .brk-hud-btn-danger {
-        background: #991b1b;
-        border-color: #7f1d1d;
-        color: #fee2e2;
+        background: #7f1d1d;
+        border-color: #991b1b;
+        color: #fecaca;
       }
       .brk-hud-btn-danger:hover {
-        background: #b91c1c;
+        background: #991b1b;
       }
     `;
     document.head.appendChild(styleEl);
 
-    // =========================================================================
-    // HUD FLUTUANTE DE CONTROLE
-    // =========================================================================
+    // Criar elemento do HUD
     const hud = document.createElement("div");
     hud.id = "brk-tm-hud";
     document.body.appendChild(hud);
 
-    function updateHud(statusText, subText, options = {}) {
-      const q = getQueue();
-      const idx = getQueueIndex();
-      const total = q.length;
-      const active = isAutomationActive();
-      const currentItem = q[idx] || null;
-
-      hud.innerHTML = `
-        <div id="brk-tm-hud-header">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:16px;">⚡</span>
-            <strong style="color:#38bdf8;font-size:13px;">Assistente BRK</strong>
-            <span style="background:${active ? '#166534' : '#475569'};color:#ffffff;font-size:10px;padding:2px 8px;border-radius:9999px;font-weight:800;">
-              ${active ? 'ATIVO' : 'PAUSADO'}
-            </span>
-          </div>
-          <span style="font-size:11px;color:#94a3b8;font-weight:700;">
-            ${total > 0 ? `Item ${idx + 1} de ${total}` : 'Fila Vazia'}
-          </span>
-        </div>
-        <div style="margin-bottom:10px;">
-          <div style="font-weight:700;color:#ffffff;margin-bottom:2px;">${statusText}</div>
-          <div style="font-size:11px;color:#94a3b8;line-height:1.4;">${subText || (currentItem ? `${currentItem.master_sku || ''} - ${currentItem.title.slice(0, 45)}...` : 'Aguardando lote')}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          ${active ? `<button id="brk-btn-pause" class="brk-hud-btn">⏸️ Pausar</button>` : `<button id="brk-btn-resume" class="brk-hud-btn brk-hud-btn-primary">▶️ Iniciar Lote</button>`}
-          <button id="brk-btn-next" class="brk-hud-btn">⏭️ Próximo</button>
-          <button id="brk-btn-paste-raw" class="brk-hud-btn" title="Inserir HTML manualmente se necessário">📋 Colar Aqui</button>
-          <button id="brk-btn-stop" class="brk-hud-btn brk-hud-btn-danger" title="Limpar fila atual">⏹️ Limpar Fila</button>
-        </div>
-      `;
-
-      // Eventos dos botões do HUD
-      const btnPause = document.getElementById("brk-btn-pause");
-      if (btnPause) btnPause.onclick = () => { setAutomationActive(false); updateHud("Pausado pelo usuário", "Clique em Iniciar para continuar de onde parou."); };
-
-      const btnResume = document.getElementById("brk-btn-resume");
-      if (btnResume) btnResume.onclick = () => {
-        setAutomationActive(true);
-        if (total > 0 && currentItem) {
-          const targetUrl = `https://admin.shopify.com/store/${currentStoreSlug}/products/${currentItem.id}`;
-          if (location.href !== targetUrl) {
-            location.href = targetUrl;
-          } else {
-            processCurrentProductPage();
-          }
-        } else {
-          alert("Fila vazia. Envie um lote pelo portal ou clique em Limpar Fila.");
-        }
-      };
-
-      const btnNext = document.getElementById("brk-btn-next");
-      if (btnNext) btnNext.onclick = () => advanceToNextProduct(0);
-
-      const btnPasteRaw = document.getElementById("brk-btn-paste-raw");
-      if (btnPasteRaw) btnPasteRaw.onclick = () => {
-        if (!currentItem) { alert("Nenhum produto selecionado."); return; }
-        injectDescriptionIntoShopify(currentItem.mode_b_html || currentItem.html);
-      };
-
-      const btnStop = document.getElementById("brk-btn-stop");
-      if (btnStop) btnStop.onclick = () => {
-        if (confirm("Deseja realmente limpar a fila atual do Tampermonkey?")) {
-          setQueue([]);
-          setQueueIndex(0);
-          setAutomationActive(false);
-          updateHud("Fila Limpa", "Nenhum produto em processamento.");
-        }
-      };
-    }
+    let activeLoadedProduct = null;
+    let countdownTimer = null;
 
     // =========================================================================
-    // NAVEGAÇÃO E PROCESSAMENTO DE PRODUTO
+    // INJEÇÃO COMPATÍVEL COM REACT NO EDITOR SHOPIFY POLARIS
     // =========================================================================
-    function advanceToNextProduct(delaySecs = 4) {
-      const q = getQueue();
-      const currentIdx = getQueueIndex();
-      const nextIdx = currentIdx + 1;
-
-      if (nextIdx >= q.length) {
-        setAutomationActive(false);
-        setQueueIndex(0);
-        updateHud("🎉 Lote Concluído!", `Todos os ${q.length} produtos foram processados com sucesso.`);
-        alert(`🎉 Parabéns! Lote de ${q.length} produtos concluído no Shopify Admin.`);
-        return;
+    function setReactInputValue(element, value) {
+      if (!element) return;
+      const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value")?.set;
+      if (nativeSetter) {
+        nativeSetter.call(element, value);
+      } else {
+        element.value = value;
       }
-
-      setQueueIndex(nextIdx);
-      const nextItem = q[nextIdx];
-      const targetUrl = `https://admin.shopify.com/store/${currentStoreSlug}/products/${nextItem.id}`;
-
-      let count = delaySecs;
-      if (count <= 0) {
-        location.href = targetUrl;
-        return;
-      }
-
-      const countdownInterval = setInterval(() => {
-        updateHud(`Avançando em ${count}s...`, `Próximo: ${nextItem.master_sku || ''} - ${nextItem.title.slice(0, 40)}`);
-        count--;
-        if (count < 0) {
-          clearInterval(countdownInterval);
-          location.href = targetUrl;
-        }
-      }, 1000);
+      element.dispatchEvent(new Event("input", { bubbles: true }));
+      element.dispatchEvent(new Event("change", { bubbles: true }));
+      element.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true }));
     }
 
-    // Localizar e destacar o botão Salvar da Shopify
-    function highlightSaveButton() {
-      // Procurar botões com texto 'Salvar' ou 'Save'
+    function highlightSaveButton(onSaveCallback) {
       const buttons = Array.from(document.querySelectorAll("button"));
       const saveBtn = buttons.find(b => {
         const text = (b.innerText || b.textContent || "").trim().toLowerCase();
@@ -355,28 +296,24 @@
         saveBtn.classList.add("brk-pulse-save-button");
         saveBtn.scrollIntoView({ behavior: "smooth", block: "nearest" });
 
-        // Escutar o clique no botão salvar para avançar automaticamente
-        const onSaveClick = () => {
+        const handler = () => {
           saveBtn.classList.remove("brk-pulse-save-button");
-          saveBtn.removeEventListener("click", onSaveClick);
-          console.log("[BRK-Tampermonkey] Botão Salvar clicado pelo usuário! Iniciando contagem de avanço...");
-
-          const settings = getSettings();
-          advanceToNextProduct(settings.delaySeconds || 4);
+          saveBtn.removeEventListener("click", handler);
+          if (onSaveCallback) onSaveCallback();
         };
-        saveBtn.addEventListener("click", onSaveClick);
+        saveBtn.addEventListener("click", handler);
+        return true;
       }
+      return false;
     }
 
-    // Injetar HTML no editor de texto da Shopify
-    function injectDescriptionIntoShopify(htmlContent) {
+    function injectModoBIntoEditor(htmlContent) {
       if (!htmlContent) {
-        alert("Erro: Conteúdo HTML vazio.");
+        alert("Conteúdo Modo B vazio no banco de dados.");
         return false;
       }
 
-      // 1. Procurar o botão de alternar HTML (<>)
-      // Polaris rich text editor geralmente tem botões com aria-label="Show HTML" ou "Exibir código HTML"
+      // 1. Procurar o botão de alternar modo HTML (<>)
       const allButtons = Array.from(document.querySelectorAll("button"));
       const htmlBtn = allButtons.find(b => {
         const aria = (b.getAttribute("aria-label") || "").toLowerCase();
@@ -387,13 +324,13 @@
 
       // 2. Procurar o textarea do editor
       let textarea = document.querySelector("textarea[name*='description']") || 
-                       document.querySelector("textarea[id*='description']") || 
-                       document.querySelector(".Polaris-Textarea__Input") ||
-                       document.querySelector("textarea");
+                     document.querySelector("textarea[id*='description']") || 
+                     document.querySelector(".Polaris-Textarea__Input") ||
+                     document.querySelector("textarea");
 
-      // Se encontrou botão HTML e o textarea ainda não está visível, clica no botão HTML
+      // Se achou o botão HTML e o textarea ainda não está visível, clica no botão HTML (<>)
       if (htmlBtn && (!textarea || textarea.offsetParent === null)) {
-        console.log("[BRK-Tampermonkey] Clicando no botão '<>' (Exibir HTML)...");
+        console.log("[BRK-Tampermonkey] Clicando no botão '<>' para abrir modo HTML...");
         htmlBtn.click();
       }
 
@@ -404,80 +341,360 @@
                    document.querySelector("textarea");
 
         if (textarea) {
-          // Backup do valor anterior
           appendBackup(currentProductId, location.pathname, textarea.value);
+          setReactInputValue(textarea, htmlContent);
+          console.log("[BRK-Tampermonkey] HTML Modo B injetado com sucesso no Textarea!");
 
-          console.log("[BRK-Tampermonkey] Textarea do HTML encontrado. Inserindo Modo B...");
-          textarea.value = htmlContent;
+          highlightSaveButton(() => {
+            console.log("[BRK-Tampermonkey] Botão Salvar clicado pelo usuário!");
+            handleAfterSave();
+          });
 
-          // Disparar eventos nativos para o React reconhecer o dirty state
-          textarea.dispatchEvent(new Event("input", { bubbles: true }));
-          textarea.dispatchEvent(new Event("change", { bubbles: true }));
-          textarea.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true }));
-
-          updateHud("✨ Modo B Inserido!", "Clique no botão verde SALVAR no topo para concluir.", { waitingSave: true });
-          highlightSaveButton();
+          renderHudProductMode(activeLoadedProduct, "✨ Descrição Injetada com Sucesso!", "Clique em 'Salvar' (botão verde pulsando) no topo da página.");
         } else {
-          // Fallback para contenteditable / iframe
-          const editableDiv = document.querySelector("[contenteditable='true']") || document.querySelector(".tox-edit-area iframe");
-          if (editableDiv) {
-            console.log("[BRK-Tampermonkey] Injetando no contenteditable...");
-            if (editableDiv.tagName === "IFRAME") {
-              editableDiv.contentDocument.body.innerHTML = htmlContent;
-            } else {
-              editableDiv.innerHTML = htmlContent;
-            }
-            editableDiv.dispatchEvent(new Event("input", { bubbles: true }));
-            updateHud("✨ Modo B Inserido no Editor!", "Clique no botão SALVAR para concluir.");
-            highlightSaveButton();
+          // Fallback contenteditable
+          const editable = document.querySelector("[contenteditable='true']");
+          if (editable) {
+            appendBackup(currentProductId, location.pathname, editable.innerHTML);
+            editable.innerHTML = htmlContent;
+            editable.dispatchEvent(new Event("input", { bubbles: true }));
+            highlightSaveButton(() => handleAfterSave());
+            renderHudProductMode(activeLoadedProduct, "✨ Injetado no Editor Visual!", "Clique em 'Salvar' no topo.");
           } else {
-            console.warn("[BRK-Tampermonkey] Editor da Shopify não encontrado automaticamente.");
-            updateHud("⚠️ Editor não detectado", "Clique no botão '<>' manualmente e use o botão 'Colar Aqui' do painel.");
+            alert("Não foi possível localizar o editor de descrição da Shopify. Por favor, clique no botão '<>' do editor e use 'Copiar HTML' no painel.");
           }
         }
-      }, 500);
+      }, 600);
 
       return true;
     }
 
-    function processCurrentProductPage() {
+    function handleAfterSave() {
       const q = getQueue();
       const idx = getQueueIndex();
-      const currentItem = q[idx];
+      const active = isAutomationActive();
 
-      if (!currentItem) {
-        updateHud("Fila Finalizada", "Todos os itens deste lote foram concluídos.");
-        return;
+      if (active && q.length > 0 && idx < q.length - 1) {
+        startCountdownToNext();
+      } else if (active && idx >= q.length - 1) {
+        setAutomationActive(false);
+        setQueueIndex(0);
+        alert(`🎉 Parabéns! O lote de ${q.length} produtos foi completamente finalizado com sucesso!`);
+        renderHudListMode();
       }
-
-      // Validar se o ID da página bate com o item atual
-      if (String(currentItem.id) !== String(currentProductId)) {
-        updateHud("Aguardando Produto Correto", `Página atual (${currentProductId}) difere da fila (${currentItem.id}). Redirecionando...`);
-        const targetUrl = `https://admin.shopify.com/store/${currentStoreSlug}/products/${currentItem.id}`;
-        setTimeout(() => { location.href = targetUrl; }, 1000);
-        return;
-      }
-
-      updateHud("Injetando Modo B...", `Produto: ${currentItem.title.slice(0, 45)}`);
-
-      // Aguardar 1.2 segundos para garantir que os componentes React do Polaris terminaram de montar
-      setTimeout(() => {
-        injectDescriptionIntoShopify(currentItem.mode_b_html || currentItem.html);
-      }, 1200);
     }
 
-    // Inicialização na página
-    const queue = getQueue();
-    const active = isAutomationActive();
+    function startCountdownToNext() {
+      const settings = getSettings();
+      let count = settings.delaySeconds || 4;
+      const q = getQueue();
+      const nextIdx = getQueueIndex() + 1;
+      const nextItem = q[nextIdx];
 
-    if (currentProductId && queue.length > 0 && active) {
-      processCurrentProductPage();
-    } else {
-      updateHud(
-        queue.length > 0 ? `${queue.length} produtos na fila` : "Assistente Pronto",
-        queue.length > 0 ? (active ? "Pronto para processar" : "Pausado. Clique em Iniciar Lote para começar.") : "Gere uma fila no Portal BRK para começar."
-      );
+      if (countdownTimer) clearInterval(countdownTimer);
+
+      countdownTimer = setInterval(() => {
+        if (count <= 0) {
+          clearInterval(countdownTimer);
+          setQueueIndex(nextIdx);
+          const nextUrl = `https://admin.shopify.com/store/${shopifySlug}/products/${nextItem.id}`;
+          location.href = nextUrl;
+        } else {
+          renderHudProductMode(activeLoadedProduct, `⏱️ Salvo! Avançando em ${count}s...`, `Próximo: ${nextItem.master_sku || ''} - ${nextItem.title.slice(0, 35)}...`);
+          count--;
+        }
+      }, 1000);
     }
+
+    const injectDescriptionIntoShopify = injectModoBIntoEditor;
+    const advanceToNextProduct = startCountdownToNext;
+
+    // =========================================================================
+    // RENDENRIZAÇÃO DO HUD NA PÁGINA DO PRODUTO (admin.shopify.com/.../products/{id})
+    // =========================================================================
+    function renderHudProductMode(prod, statusTitle, statusSub) {
+      const q = getQueue();
+      const idx = getQueueIndex();
+      const inQueue = q.length > 0 && q[idx] && String(q[idx].id) === String(currentProductId);
+      const active = isAutomationActive();
+
+      let statusBadgeClass = "brk-badge-healthy";
+      if (prod?.status === "SEM_DESCRICAO") statusBadgeClass = "brk-badge-empty";
+      else if (prod?.status === "IMAGENS_QUEBRADAS") statusBadgeClass = "brk-badge-broken";
+
+      hud.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e293b;padding-bottom:8px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:16px;">🟢</span>
+            <strong style="color:#38bdf8;font-size:13px;">BANCO BRK CONECTADO</strong>
+          </div>
+          <span style="font-size:11px;color:#94a3b8;font-weight:700;">
+            ${inQueue ? `Lote: Item ${idx + 1} de ${q.length}` : `${storeName}`}
+          </span>
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+            <span style="font-weight:800;color:#f8fafc;font-size:14px;">${prod ? (prod.master_sku || 'Sem SKU') : 'Carregando...'}</span>
+            ${prod ? `<span class="brk-badge-status ${statusBadgeClass}">${prod.status}</span>` : ''}
+          </div>
+          <div style="font-size:12px;color:#cbd5e1;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px;">
+            ${prod ? prod.title : 'Consultando dados reais na API...'}
+          </div>
+        </div>
+
+        <div style="background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:8px 12px;margin-bottom:12px;">
+          <div style="font-weight:700;color:#38bdf8;font-size:12px;">${statusTitle || "Pronto para Injeção"}</div>
+          <div style="font-size:11px;color:#94a3b8;line-height:1.4;">${statusSub || "Clique em 'Injetar Modo B' para aplicar a descrição oficial."}</div>
+        </div>
+
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <button id="brk-btn-inject" class="brk-hud-btn brk-hud-btn-primary">
+            ⚡ Injetar Modo B
+          </button>
+          <button id="brk-btn-copy" class="brk-hud-btn">
+            📋 Copiar HTML
+          </button>
+          ${inQueue ? `
+            <button id="brk-btn-next-now" class="brk-hud-btn">
+              ⏭️ Pular/Próximo
+            </button>
+            <button id="brk-btn-pause-queue" class="brk-hud-btn brk-hud-btn-danger">
+              ⏹️ Parar Lote
+            </button>
+          ` : `
+            <button id="brk-btn-start-queue-25" class="brk-hud-btn brk-hud-btn-success">
+              ▶️ Iniciar Lote 25
+            </button>
+          `}
+        </div>
+      `;
+
+      // Eventos dos botões
+      const btnInject = document.getElementById("brk-btn-inject");
+      if (btnInject && prod) {
+        btnInject.onclick = () => injectModoBIntoEditor(prod.mode_b_html);
+      }
+
+      const btnCopy = document.getElementById("brk-btn-copy");
+      if (btnCopy && prod) {
+        btnCopy.onclick = () => {
+          GM_setClipboard(prod.mode_b_html);
+          renderHudProductMode(prod, "📋 HTML Copiado!", "Cole diretamente com Ctrl+V no campo de código HTML (<>).");
+        };
+      }
+
+      const btnNextNow = document.getElementById("brk-btn-next-now");
+      if (btnNextNow) {
+        btnNextNow.onclick = () => {
+          if (countdownTimer) clearInterval(countdownTimer);
+          const nextIdx = idx + 1;
+          if (nextIdx < q.length) {
+            setQueueIndex(nextIdx);
+            location.href = `https://admin.shopify.com/store/${shopifySlug}/products/${q[nextIdx].id}`;
+          } else {
+            alert("Fim da fila de produtos!");
+          }
+        };
+      }
+
+      const btnPauseQueue = document.getElementById("brk-btn-pause-queue");
+      if (btnPauseQueue) {
+        btnPauseQueue.onclick = () => {
+          if (countdownTimer) clearInterval(countdownTimer);
+          setAutomationActive(false);
+          setQueue([]);
+          setQueueIndex(0);
+          renderHudProductMode(prod, "⏹️ Lote Cancelado", "Fila esvaziada. Você pode operar individualmente.");
+        };
+      }
+
+      const btnStart25 = document.getElementById("brk-btn-start-queue-25");
+      if (btnStart25) {
+        btnStart25.onclick = () => startQueueFromDatabase("SEM_DESCRICAO", 25);
+      }
+    }
+
+    // =========================================================================
+    // RENDENRIZAÇÃO DO HUD NA LISTAGEM DE PRODUTOS (admin.shopify.com/.../products)
+    // =========================================================================
+    function renderHudListMode(stats) {
+      const q = getQueue();
+      const idx = getQueueIndex();
+      const active = isAutomationActive();
+
+      hud.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e293b;padding-bottom:8px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:16px;">🟢</span>
+            <strong style="color:#38bdf8;font-size:13px;">BANCO DE DADOS BRK</strong>
+          </div>
+          <span style="font-size:11px;color:#94a3b8;font-weight:700;">${storeName}</span>
+        </div>
+
+        <div style="margin-bottom:12px;font-size:12px;color:#cbd5e1;line-height:1.4;">
+          ${stats ? `
+            <div>📦 Total no Banco: <strong>${stats.total_products}</strong></div>
+            <div style="color:#f87171;">⚠️ Sem Descrição: <strong>${stats.sem_descricao_count}</strong></div>
+            <div style="color:#fbbf24;">🖼️ Imagens Quebradas: <strong>${stats.imagens_quebradas_count}</strong></div>
+          ` : 'Conectado à API oficial Vercel.'}
+        </div>
+
+        <div style="background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:8px 12px;margin-bottom:12px;">
+          ${q.length > 0 ? `
+            <div style="font-weight:700;color:#38bdf8;font-size:12px;">Fila Ativa: Item ${idx + 1} de ${q.length}</div>
+            <div style="font-size:11px;color:#94a3b8;">Status: ${active ? 'Em andamento' : 'Pausado'}</div>
+          ` : `
+            <div style="font-weight:700;color:#38bdf8;font-size:12px;">Nenhum Lote em Execução</div>
+            <div style="font-size:11px;color:#94a3b8;">Clique abaixo para carregar 25 produtos reais sem descrição do banco.</div>
+          `}
+        </div>
+
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          ${q.length > 0 ? `
+            <button id="brk-btn-resume-queue" class="brk-hud-btn brk-hud-btn-primary">
+              ▶️ Continuar Lote (${idx + 1}/${q.length})
+            </button>
+            <button id="brk-btn-clear-queue" class="brk-hud-btn brk-hud-btn-danger">
+              ⏹️ Limpar Fila
+            </button>
+          ` : `
+            <button id="brk-btn-fetch-empty-25" class="brk-hud-btn brk-hud-btn-primary">
+              ▶️ Iniciar Lote 25 (Sem Descrição)
+            </button>
+            <button id="brk-btn-fetch-broken-25" class="brk-hud-btn">
+              🖼️ Puxar 25 (Imagens Quebradas)
+            </button>
+          `}
+        </div>
+      `;
+
+      const btnResume = document.getElementById("brk-btn-resume-queue");
+      if (btnResume) {
+        btnResume.onclick = () => {
+          setAutomationActive(true);
+          const currentItem = q[idx] || q[0];
+          location.href = `https://admin.shopify.com/store/${shopifySlug}/products/${currentItem.id}`;
+        };
+      }
+
+      const btnClear = document.getElementById("brk-btn-clear-queue");
+      if (btnClear) {
+        btnClear.onclick = () => {
+          setQueue([]);
+          setQueueIndex(0);
+          setAutomationActive(false);
+          renderHudListMode(stats);
+        };
+      }
+
+      const btnFetchEmpty = document.getElementById("brk-btn-fetch-empty-25");
+      if (btnFetchEmpty) {
+        btnFetchEmpty.onclick = () => startQueueFromDatabase("SEM_DESCRICAO", 25);
+      }
+
+      const btnFetchBroken = document.getElementById("brk-btn-fetch-broken-25");
+      if (btnFetchBroken) {
+        btnFetchBroken.onclick = () => startQueueFromDatabase("IMAGENS_QUEBRADAS", 25);
+      }
+    }
+
+    // =========================================================================
+    // INICIAR FILA REAL BUSCADA DIRETAMENTE DO BANCO DE DADOS
+    // =========================================================================
+    async function startQueueFromDatabase(statusFilter, limit = 25) {
+      hud.innerHTML = `
+        <div style="padding:10px;text-align:center;">
+          <div style="font-size:18px;margin-bottom:8px;">⏳</div>
+          <strong style="color:#38bdf8;">Consultando Banco de Dados BRK...</strong>
+          <div style="font-size:11px;color:#94a3b8;margin-top:4px;">Buscando ${limit} produtos com status '${statusFilter}' na loja ${storeName}...</div>
+        </div>
+      `;
+
+      try {
+        const res = await fetchFromBRKDatabase(`/api/product_db?store=${storeKey}&action=queue&status=${statusFilter}&limit=${limit}`);
+        if (!res.success || !res.items || res.items.length === 0) {
+          alert(`Nenhum produto encontrado com status '${statusFilter}' no banco da loja ${storeName}.`);
+          initAdmin();
+          return;
+        }
+
+        setQueue(res.items);
+        setQueueIndex(0);
+        setAutomationActive(true);
+
+        const firstProduct = res.items[0];
+        console.log(`[BRK-Tampermonkey] Lote de ${res.items.length} produtos carregado do banco. Primeiro: ID ${firstProduct.id} (${firstProduct.master_sku})`);
+
+        hud.innerHTML = `
+          <div style="padding:10px;text-align:center;">
+            <div style="font-size:18px;margin-bottom:8px;">🚀</div>
+            <strong style="color:#22c55e;">Lote de ${res.items.length} Produtos Carregado!</strong>
+            <div style="font-size:11px;color:#94a3b8;margin-top:4px;">Abrindo primeiro produto: ${firstProduct.master_sku}...</div>
+          </div>
+        `;
+
+        setTimeout(() => {
+          location.href = `https://admin.shopify.com/store/${shopifySlug}/products/${firstProduct.id}`;
+        }, 1200);
+
+      } catch(err) {
+        alert(`Erro ao buscar lote do banco de dados: ${err.message}`);
+        initAdmin();
+      }
+    }
+
+    // =========================================================================
+    // INICIALIZAÇÃO NO SHOPIFY ADMIN
+    // =========================================================================
+    async function initAdmin() {
+      // Caso 1: Estamos na página de edição de um produto específico
+      if (currentProductId) {
+        renderHudProductMode(null, "Consultando Banco BRK...", `Buscando produto ID ${currentProductId}...`);
+
+        try {
+          const res = await fetchFromBRKDatabase(`/api/product_db?store=${storeKey}&id=${currentProductId}`);
+          if (res.success && res.product) {
+            activeLoadedProduct = res.product;
+            console.log("[BRK-Tampermonkey] Produto carregado com sucesso do banco:", activeLoadedProduct.master_sku);
+
+            const q = getQueue();
+            const idx = getQueueIndex();
+            const inQueue = q.length > 0 && q[idx] && String(q[idx].id) === String(currentProductId);
+            const active = isAutomationActive();
+
+            if (inQueue && active) {
+              renderHudProductMode(activeLoadedProduct, "⚡ Modo Assistido Ativo", "Injetando descrição automaticamente...");
+              setTimeout(() => {
+                injectModoBIntoEditor(activeLoadedProduct.mode_b_html);
+              }, 1200);
+            } else {
+              renderHudProductMode(activeLoadedProduct, "Produto Identificado no Banco", "Clique em 'Injetar Modo B' ou 'Copiar HTML'.");
+            }
+          } else {
+            renderHudProductMode(null, "Produto não encontrado", `O ID ${currentProductId} não foi localizado no banco da loja ${storeName}.`);
+          }
+        } catch(err) {
+          console.error("[BRK-Tampermonkey] Erro ao carregar produto:", err);
+          renderHudProductMode(null, "Erro de Conexão com a API", err.message);
+        }
+      } 
+      // Caso 2: Estamos na listagem de produtos (/products)
+      else {
+        renderHudListMode(null);
+        try {
+          const stats = await fetchFromBRKDatabase(`/api/product_db?store=${storeKey}&action=stats`);
+          if (stats.success) {
+            renderHudListMode(stats);
+          }
+        } catch(e) {
+          console.warn("[BRK-Tampermonkey] Não foi possível carregar estatísticas:", e);
+        }
+      }
+    }
+
+    // Iniciar após pequeno delay para o DOM do Shopify Admin estabilizar
+    setTimeout(initAdmin, 1000);
   }
 
 })();
