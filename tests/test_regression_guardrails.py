@@ -125,7 +125,90 @@ class TestBRKRegressionGuardrails(unittest.TestCase):
         self.assertIn("Proteção", html)
         self.assertIn("Proteção UV50+ (não sai na lavagem)", html)
 
-    def test_pants_and_shorts_anti_upper_body_terms(self):
+    def test_camisas_c0_size_guide_masculino(self):
+        """Camisas padrão C0 Masculino / Unissex devem conter rigorosamente as 7 linhas oficiais."""
+        prod = {
+            "id": 1006,
+            "title": "Camisa de Pesca BRK Azul Ocean com Proteção UV50+",
+            "master_sku": "C01349P_FULL",
+            "product_type": "Camisas",
+            "tags": "camisa, uv50, pesca",
+            "body_html": ""
+        }
+        html = self._generate_html(prod, "brk_fishing")
+        self.assertIn("Tabela de Medidas Masculino / Unissex (PP ao G2)", html)
+        self.assertIn("49,5 cm", html)
+        self.assertIn("51,5 cm", html)
+        self.assertIn("54 cm", html)
+        self.assertIn("56 cm", html)
+        self.assertIn("59 cm", html)
+        self.assertIn("62 cm", html)
+        self.assertIn("65 cm", html)
+        self.assertIn("76,5 cm", html)
+        self.assertIn("As medidas podem variar de 2cm a 3cm", html)
+
+    def test_camisas_c0_size_guide_feminino_baby_look(self):
+        """Camisas padrão C0 Feminino / Baby Look devem conter rigorosamente as 7 linhas oficiais."""
+        prod = {
+            "id": 1007,
+            "title": "Camisa Feminina Brk Basic Cinza Claro com Proteção Solar UV50 Envio Imediato",
+            "master_sku": "C01046BLPP_FULL",
+            "product_type": "Camisas",
+            "tags": "camisa, feminina, uv50",
+            "body_html": ""
+        }
+        html = self._generate_html(prod, "brk_fishing")
+        self.assertIn("Tabela de Medidas Feminina - Baby Look (PP ao G2)", html)
+        self.assertIn("Baby Look PP", html)
+        self.assertIn("Baby Look P", html)
+        self.assertIn("Baby Look M", html)
+        self.assertIn("Baby Look G", html)
+        self.assertIn("Baby Look GG", html)
+        self.assertIn("Baby Look G1", html)
+        self.assertIn("Baby Look G2", html)
+        self.assertIn("33 cm", html)
+        self.assertIn("37 cm", html)
+        self.assertIn("43 cm", html)
+        self.assertIn("47 cm", html)
+        self.assertIn("50 cm", html)
+        self.assertIn("55 cm", html)
+
+    def test_camisas_c0_size_guide_infantil(self):
+        """Camisas padrão C0 Infantil devem conter rigorosamente as 7 faixas etárias oficiais."""
+        prod = {
+            "id": 1008,
+            "title": "Camisa Infantil BRK Dourado Kids UV50+",
+            "master_sku": "C0777KIDS",
+            "product_type": "Camisas",
+            "tags": "camisa, infantil, kids, uv50",
+            "body_html": ""
+        }
+        html = self._generate_html(prod, "brk_fishing")
+        self.assertIn("Guia de Tamanhos Infantil (1 a 13 Anos)", html)
+        self.assertIn("1 a 2 Anos (PP)", html)
+        self.assertIn("2 a 3 Anos (P)", html)
+        self.assertIn("4 a 5 Anos (M)", html)
+        self.assertIn("6 a 7 Anos (G)", html)
+        self.assertIn("8 a 9 Anos (GG)", html)
+        self.assertIn("10 a 11 Anos (G1)", html)
+        self.assertIn("12 a 13 Anos (G2)", html)
+        self.assertIn("31 cm", html)
+        self.assertIn("43 cm", html)
+
+    def test_camisas_button_work_and_cotton_isolation(self):
+        """Camisas Work de Botão NÃO devem receber medidas de elastano/baby look C0."""
+        prod = {
+            "id": 1009,
+            "title": "Camisa Work Verde Oliva com Proteção UV50+",
+            "master_sku": "CMB08",
+            "product_type": "Camisas",
+            "tags": "work, sarja, botão, operacional",
+            "body_html": ""
+        }
+        html = self._generate_html(prod, "brk_fishing")
+        self.assertIn("Tabela de Medidas - Camisas Work & Utilitárias de Botão (P ao G2)", html)
+        self.assertNotIn("Baby Look", html)
+        self.assertNotIn("49,5 cm", html)
         """Calças e Bermudas JAMAIS podem ter termos de vestuário superior (manga, gola)."""
         prod = {
             "id": 2002,
@@ -228,18 +311,30 @@ class TestBRKRegressionGuardrails(unittest.TestCase):
     # 5. TESTE DE TABELAS DE MEDIDAS EXPANSÍVEIS EM <details>/<summary> (PILAR 1)
     # --------------------------------------------------------------------------
     def test_size_guide_accordion_types(self):
-        """Valida que vestuário adulto, infantil, calças e calçados recebem seus respectivos guias."""
-        # Adulto
+        """Valida que vestuário adulto, feminino baby look, infantil, calças e calçados recebem seus respectivos guias."""
+        # Adulto Masculino / Unissex C0
         prod_adulto = {"id": 5001, "title": "Camisa BRK Adulto Gola Padre", "tags": "camisa, adulto"}
         html_adulto = self._generate_html(prod_adulto)
         self.assertIn('<details class="brk-size-guide">', html_adulto)
-        self.assertIn("Tabela de Medidas Adulto (P ao EXG)", html_adulto)
+        self.assertIn("Tabela de Medidas Masculino / Unissex (PP ao G2)", html_adulto)
+        self.assertIn("49,5 cm", html_adulto)
+        self.assertIn("As medidas podem variar de 2cm a 3cm", html_adulto)
 
-        # Infantil (Kids)
+        # Feminino Baby Look C0
+        prod_fem = {"id": 50012, "title": "Camisa Feminina BRK Tropical Baby Look", "tags": "camisa, feminina"}
+        html_fem = self._generate_html(prod_fem)
+        self.assertIn('<details class="brk-size-guide">', html_fem)
+        self.assertIn("Tabela de Medidas Feminina - Baby Look (PP ao G2)", html_fem)
+        self.assertIn("Baby Look PP", html_fem)
+        self.assertIn("33 cm", html_fem)
+
+        # Infantil (Kids) C0
         prod_kids = {"id": 5002, "title": "Camisa BRK Kids Infantil Manga Longa Peixinho", "tags": "camisa, kids, infantil"}
         html_kids = self._generate_html(prod_kids)
         self.assertIn('<details class="brk-size-guide">', html_kids)
-        self.assertIn("Guia de Tamanhos Infantil (02 a 16 Anos)", html_kids)
+        self.assertIn("Guia de Tamanhos Infantil (1 a 13 Anos)", html_kids)
+        self.assertIn("1 a 2 Anos (PP)", html_kids)
+        self.assertIn("12 a 13 Anos (G2)", html_kids)
 
         # Calças
         prod_calca = {"id": 5003, "title": "Calça Tática Ripstop Operacional", "tags": "calça, ripstop"}

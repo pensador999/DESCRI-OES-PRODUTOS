@@ -1,0 +1,1612 @@
+[
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7905667121218,
+  "title": "Vara Deyu Série D1 30lbs 1,80m - Molinete (2 Partes)",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7905618853954,
+  "title": "Vara Deyu Max Bull 10-17lb (7,7Kg) \"5'4 (1,65m) | Verde - Molinete (2 partes)",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 8370981929026,
+  "title": "Trava Varas Premium Aço Inox Fishing",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7546726219842,
+  "title": "Vara de Pesca Rapala Tonren 11RATRE58SH2 25lbs 1,73m - Molinete (2 partes)",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 8369525653570,
+  "title": "Vara Marine Sports Estrela EJF-S561MH 20-35lb (9-16Kg) 5'6\" (1,68m) - Molinete (Inteiriça)",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7703362437186,
+  "title": "Kit Vara E Molinete Okuma Steeler Xp Verde 1,68cm 2 Partes",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7703126966338,
+  "title": "Vara Rapala Concept 11RACON56CML 8-14lb (4-6Kg) 5'6\" (1,68m) - Carretilha (Inteiriça)",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7703362732098,
+  "title": "Vara Rapala Concept 11RACON58CHP 17-25lb (8-11Kg) 5'8\" (1,76m) - Carretilha (Inteiriça)",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7550267457602,
+  "title": "Vara de Pesca Marine Sports Gladius GL-C601 MLF 14lbs 1,83m - Carretilha (inteiriça)",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7550267555906,
+  "title": "Vara de Pesca Marine Sports Gladius GL-C581MHM 25lbs 1,73m - Carretilha (inteiriça)",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7547052163138,
+  "title": "Vara de Pesca Rapala Cyclow CYK56CMH 20lbs 1,68m - Carretilha (Inteiriça)",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7550334074946,
+  "title": "Vara de Pesca Marine Sports Super Cast SC-S3903 44lbs 3,90m - Molinete (3 partes)",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7550932779074,
+  "title": "Vara de Pesca Deyu Atlas A-SFS1502M 17lbs 1,50m | Azul - Molinete (2 Partes)",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7550334206018,
+  "title": "Vara de Pesca Marine Sports Super Cast SC-S3603 44lbs 3,60m - Molinete (3 partes)",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7550881333314,
+  "title": "Vara de Pesca Deyu Max Bull MB-CFS1651M 20lbs 1,65m | Dourada - Carretilha (Inteiriça)",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7550876811330,
+  "title": "Vara de Pesca Deyu Série D1 25lbs 1,50m - Molinete (2 partes)",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7550881235010,
+  "title": "Vara de Pesca Deyu Max Bull MB-CFS1651M 20lbs 1,65m | Vermelha - Carretilha (Inteiriça)",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7550881202242,
+  "title": "Vara de Pesca Deyu Max Bull MB-SFS1352M 17lbs 1,35m - Molinete (2 partes)",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7550881267778,
+  "title": "Vara de Pesca Deyu Max Bull MB-CFS1651M 20lbs 1,65m | Azul - Carretilha (Inteiriça)",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "rolamento_em_vara",
+  "severity": "WARNING",
+  "desc": "Ficha tecnica de vara citando rolamentos",
+  "evidence": "rolamentos (molde generico de equipamento aplicado a uma vara)",
+  "store": "brk_fishing",
+  "id": 7552887193666,
+  "title": "Alça De Transporte Para Varas de Pesca Marine Sports MS-PS12",
+  "archetype": "fishing_tackle_gear"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_fishing",
+  "id": 7554267512898,
+  "title": "Camiseta Agro Infantil Brk Patriota Azul com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_fishing",
+  "id": 7554268397634,
+  "title": "Camisa Agro Infantil Brk Bandeira do Brasil com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_fishing",
+  "id": 7554267971650,
+  "title": "Camisa Agro Infantil Brk Básica Patriota Preta Bandeira do Brasil com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_fishing",
+  "id": 7554267906114,
+  "title": "Camisa Agro Infantil Brk Básica Patriota Bandeira do Brasil Branca com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_fishing",
+  "id": 7554267807810,
+  "title": "Camisa Agro Infantil Brk Patriota Preta com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_fishing",
+  "id": 7525466996802,
+  "title": "Camisa Agro Infantil Brk Independência Brasil Verde com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_fishing",
+  "id": 7525466832962,
+  "title": "Camisa Agro Infantil Brk Bandeira Brasil Lateral com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_fishing",
+  "id": 7525466734658,
+  "title": "Camisa Agro Infantil Brk Independência Brasil Amarelo com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_fishing",
+  "id": 7525466636354,
+  "title": "Camisa Agro Infantil Brk Brasil Azul com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_fishing",
+  "id": 7525466538050,
+  "title": "Camisa Agro Infantil Brk Independência Brasil Azul com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_fishing",
+  "id": 7525466341442,
+  "title": "Camisa Agro Infantil Brk Brasil Verde com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_fishing",
+  "id": 7525466243138,
+  "title": "Camisa Agro Infantil Brk Independência Brasil com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_fishing",
+  "id": 7525466112066,
+  "title": "Camisa Agro Infantil Brk Independência do Brasil Verde Oliva com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_fishing",
+  "id": 7525465980994,
+  "title": "Camisa Agro Infantil Brk Brasil Verde Oliva com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_fishing",
+  "id": 7525465882690,
+  "title": "Camisa Agro Infantil Brk Patriota com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_fishing",
+  "id": 7732782497858,
+  "title": "Camisa Brk Agro Infantil Brasil com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9948605055273,
+  "title": "Camisa Agro Kids Brk Rosa Menina da Pecuária c/ UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10157628227881,
+  "title": "Camisa Agro Kids Mini Boiadeira Melhores Amigas Cowgirl Rosa com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10157628424489,
+  "title": "Camisa Agro Kids Made in Roça Patinho Cowboy Laranja com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10162662998313,
+  "title": "Camisa Agro Kids Brk Cowboy Xadrez Amarelo com Colete Marrom e Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10174747377961,
+  "title": "Camisa Agro Kids Brk Carreta Sonho de Criança com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10162663031081,
+  "title": "Camisa Agro Kids Brk Cowgirl Xadrez Rosa Claro com Colete Country e Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10157627998505,
+  "title": "Camisa Agro Kids Pecuária Animais da Fazenda Marrom com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10157627965737,
+  "title": "Camisa Agro Kids Mini Xerife Cowboy Xadrez Azul e Marrom com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10157628162345,
+  "title": "Camisa Agro Kids Made in Roça Pintinho Cowboy Xadrez Azul com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10157628129577,
+  "title": "Camisa Agro Kids Mini Fazendeiro Menino Cowboy com Cavalo Laranja com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10157628096809,
+  "title": "Camisa Agro Kids Mini Cowgirl Fazendinha Rosa Claro com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10157628031273,
+  "title": "Camisa Agro Kids Mini Cowboy Menino Cavaleiro Azul Claro com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10157628293417,
+  "title": "Camisa Agro Kids Mini Boiadeiro Melhores Amigos Cowboy Azul com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10157628260649,
+  "title": "Camisa Agro Kids Mini Boiadeira Vaquinha Cowgirl Rosa com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10157628195113,
+  "title": "Camisa Agro Kids Made in Roça Porquinho Trator Xadrez Verde com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10157628391721,
+  "title": "Camisa Agro Kids Mini Cowgirl Menina Country Rosa com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10157628358953,
+  "title": "Camisa Agro Kids Peão em Treinamento Cowboy Azul com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10157628326185,
+  "title": "Camisa Agro Kids Mini Boiadeiro Cowboy Sheriff Azul com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10109786456361,
+  "title": "Camisa Agro Infantil Brk São Bento Vitral Azul com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9842918555945,
+  "title": "Camisa UV50 Agro Infantil Brk Eu sou do Agro Verde Brasil",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9842918326569,
+  "title": "Camisa UV50 Agro Infantil Brk Eu sou do Agro Gados e Colheitadeira",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9842918293801,
+  "title": "Camisa UV50 Agro Infantil Brk Eu sou do Agro Trator e Plantação",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9788280504617,
+  "title": "Camisa Agro Kids Brk O Agro Não Para com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9788280340777,
+  "title": "Camisa Agro Kids Brk Agrogirl com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9788280176937,
+  "title": "Camisa Agro Kids Brk Laranja Animais do Campo com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9788279750953,
+  "title": "Camisa Agro Kids Brk Verde Colheitadeira com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9788279619881,
+  "title": "Camisa Agro Kids Brk Medalha de São Bento com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9788279357737,
+  "title": "Camisa Agro Kids Brk Rosa Menina da Pecuária com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9788279259433,
+  "title": "Camisa Agro Kids Brk Verde Menino do Agro com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9788278898985,
+  "title": "Camisa Agro Kids Brk Bandeira do Brasil Pecuária com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9788278669609,
+  "title": "Camisa Agro Kids Brk Verde Made in Roça com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10130763153705,
+  "title": "Camisa Brk Agro Infantil Apache Cinza com UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10130762694953,
+  "title": "Camisa Brk Agro Infantil Apache Cinza com UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10125733593385,
+  "title": "Camisa Infantil Dia dos Pais Agro no Sangue com UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10125733691689,
+  "title": "Camisa Infantil Dia dos Pais Tradição do Agro Cinza com UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10125733626153,
+  "title": "Camisa Infantil Dia dos Pais Tradição do Agro Verde com UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10125733986601,
+  "title": "Camisa Infantil Dia dos Pais Agro de Pai Verde para Filho com UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10125734150441,
+  "title": "Camisa Infantil Dia dos Pais Agro é Mais que Trabalho é Legado com UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10125734084905,
+  "title": "Camisa Infantil Dia dos Pais Pai Orgulho do Campo com UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10125734052137,
+  "title": "Camisa Infantil Dia dos Pais Força que Vem do Campo com UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10125734019369,
+  "title": "Camisa Infantil Dia dos Pais Agro de Pai Preta para Filho com UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9653352333609,
+  "title": "Camisa Infantil Agronomia Preta 2 com UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10125655802153,
+  "title": "Camiseta Infantil Agro Brk O Agro não Para Texas com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10125649609001,
+  "title": "Camiseta Infantil Agro Brk Não Para com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10125656588585,
+  "title": "Camiseta Infantil Agro Brk Mato Grosso é Agro com UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10125656457513,
+  "title": "Camiseta Infantil Brk Brasil é Agro 03 com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10125656883497,
+  "title": "Camiseta Infantil Agro Brk Brasil é Agro 05 com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10125657997609,
+  "title": "Camiseta Infantil Agro Brk Mulher do Agro com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10125657768233,
+  "title": "Camiseta Infantil Agro Brk Delicada Igual Coice de Mula com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10125657473321,
+  "title": "Camiseta Infantil Agro Brk Quem Manda é a Patroa com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104987910441,
+  "title": "Camisa Agro Infantil BRK Cavalo Haras com Proteção Solar UV50+ Preta",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104978178345,
+  "title": "Camisa Agro Infantil BRK Cavalo Haras com Proteção Solar UV50+ Bege",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104992596265,
+  "title": "Camisa Agro Infantil BRK Rédeas Cowboy com Proteção Solar UV50+ Preta",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104992432425,
+  "title": "Camisa Agro Infantil BRK Rédeas Cowboy com Proteção Solar UV50+ Bege",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104988631337,
+  "title": "Camisa Agro Infantil BRK Cowboy com Proteção Solar UV50+ Preta",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104988467497,
+  "title": "Camisa Agro Infantil BRK Cowboy com Proteção Solar UV50+ Azul Marinho",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104993022249,
+  "title": "Camisa Agro Infantil BRK Muladeiros Mula com Proteção Solar UV50+ Cinza",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104992923945,
+  "title": "Camisa Agro Infantil BRK Muladeiros Mula com Proteção Solar UV50+ Azul Marinho",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104992825641,
+  "title": "Camisa Agro Infantil BRK Vaquejada Cowboy com Proteção Solar UV50+ Preta",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104992694569,
+  "title": "Camisa Agro Infantil BRK Vaquejada Cowboy com Proteção Solar UV50+ Azul Marinho",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104993481001,
+  "title": "Camisa Agro Infantil BRK Cavalos Haras Estábulo com Proteção Solar UV50+ Preta",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104993349929,
+  "title": "Camisa Agro Infantil BRK Cavalgada Brasil com Proteção Solar UV50+ Verde Petróleo",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104993251625,
+  "title": "Camisa Agro Infantil  BRK Team Penning Cowboy Cavalo com Proteção Solar UV50+ Verde Turquesa",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104993120553,
+  "title": "Camisa Agro Infantil BRK Team Penning Cowboy Verde Petróleo com Proteção Solar UV50+ Verde Petróleo",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104993906985,
+  "title": "Camisa Agro Infantil BRK Cavalos Performance com Proteção Solar UV50+ Bege",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104993808681,
+  "title": "Camisa Agro Infantil BRK Cavalos Elite com Proteção Solar UV50+ Preta",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104993710377,
+  "title": "Camisa Agro Infantil BRK Cavalos Elite com Proteção Solar UV50+ Bege",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104993612073,
+  "title": "Camisa Agro Infantil BRK Cavalos Haras Fazenda com Proteção Solar UV50+ Azul Marinho",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104994332969,
+  "title": "Camisa Agro Infantil BRK Tropa de Laço Preta com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104994234665,
+  "title": "Camisa Agro Infantil BRK Laço em Dupla Cowboy  com Proteção Solar UV50+ Preta",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104994136361,
+  "title": "Camisa Agro Infantil BRK Laço em Dupla Cowboy  com Proteção Solar UV50+ Bege",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104994038057,
+  "title": "Camisa Agro Infantil BRK Cavalos Performance com Proteção Solar UV50+ Marrom",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104994824489,
+  "title": "Camisa Agro Infantil BRK Rainha do Tambor Preta e Amarela com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104994726185,
+  "title": "Camisa Agro Infantil BRK Cavalo Nobre Preto com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104994627881,
+  "title": "Camisa Agro Infantil BRK Cavalo Supremo Preto com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104994529577,
+  "title": "Camisa Agro infantil BRK Laço e Tradição com Proteção Solar UV50+ Preta",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10105097748777,
+  "title": "Camisa Agro Infantil BRK Cavalgada Brasil com Proteção Solar UV50+  Marrom",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104995316009,
+  "title": "Camisa Agro Infantil BRK Cavalgada Patriota com Proteção Solar UV50+ Preta",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10104994922793,
+  "title": "Camisa Agro Infantil BRK Rainha do Tambor Preta e Rosa com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10105098404137,
+  "title": "Camisa Agro Infantil BRK 3 Tambores Velocidade Máxima com Proteção UV50+ Preta",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10109787210025,
+  "title": "Camisa Agro Infantil Brk São Bento Preto e Rosa com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10109787144489,
+  "title": "Camisa Agro Infantil Brk São Bento Medalhão Preto com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10109787046185,
+  "title": "Camisa Agro Infantil Brk São Bento Preto e Cinza com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10109786947881,
+  "title": "Camisa Agro Infantil Brk São Bento Azul Detalhes em Branco com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10109786882345,
+  "title": "Camisa Agro Infantil Brk São Bento Branco com Detalhes Azul com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10109786816809,
+  "title": "Camisa Agro Infantil Brk São Bento Medalha Dourada com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10109786718505,
+  "title": "Camisa Agro Infantil Brk São Bento Vitral Preta com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10109786620201,
+  "title": "Camisa Agro Infantil Brk São Bento Preta Anjos com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10109786521897,
+  "title": "Camisa Agro Infantil Brk São Bento Vitral Rosa com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10109786358057,
+  "title": "Camisa Agro Infantil Brk São Bento Azul com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10109786226985,
+  "title": "Camisa Agro Infantil Brk São Bento Preta e Dourada com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9817748701481,
+  "title": "Camisa Agro Kids Brk Tigrinho com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9817748832553,
+  "title": "Camisa Agro Kids Brk Dino Land com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9788279095593,
+  "title": "Camisa Agro Kids Brk Azul Menino do Agro com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10039664705833,
+  "title": "Camisa Infantil Brk Agro Vaca Gir com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 10001070719273,
+  "title": "Camisa Agro Infantil Brk Básica Patriota Bandeira do Brasil Branca com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9821351903529,
+  "title": "Camisa Agro Infantil Brk Maisa Fazendeira  com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9801148465449,
+  "title": "Camisa Agro Infantil Brk Preto e Amarelo Terraplanagem com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9801147089193,
+  "title": "Camisa Agro Infantil Brk Trator de Esteiras Bulldozer com Proteção UV50",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9780435255593,
+  "title": "Camisa Agro Infantil Brk Agropecuária V2 com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9778127372585,
+  "title": "Camisa Agro Infantil Brk Pá Carregadeira com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9777176052009,
+  "title": "Camisa Agro Infantil Brk Brasil Azul com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9777175920937,
+  "title": "Camisa Agro Infantil Brk Independência Brasil Amarelo com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9777175822633,
+  "title": "Camisa Agro Infantil Brk Bandeira Brasil Lateral com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9777175363881,
+  "title": "Camisa Agro Infantil Brk Brasil Verde com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9761958232361,
+  "title": "Camisa Infantil Agro Brk A Força do Agro Produtor de Ovinos com UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9757035594025,
+  "title": "Camisa Agro Infantil Brk Camuflada Bandeira do Brasil com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9757035561257,
+  "title": "Camisa Infantil Agro Brk Força do Agro Colheitadeira com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9757035528489,
+  "title": "Camisa Agro Infantil Brk Força do Agro Colheitadeira Soja com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9757035331881,
+  "title": "Camisa Infantil Agro Brk Cavalgada Azul com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9755185873193,
+  "title": "Camisa Infantil Agro Brk Paixão por Cavalos com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9755113259305,
+  "title": "Camisa Brk Agro Infantil Bandeira Mato Grosso com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9748737753385,
+  "title": "Camisa Agro Infantil Brk Clean Cinza Texas Long Horn com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9748737818921,
+  "title": "Camisa Agro Infantil Brk Skull Long Horn USA com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9748737720617,
+  "title": "Camisa Agro Infantil Brk Skull Long Horn com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9748737687849,
+  "title": "Camisa Agro Infantil Brk Touro Long Horn com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9748737655081,
+  "title": "Camisa Agro Infantil Brk Texas Rodeio com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9748737622313,
+  "title": "Camisa Agro Infantil Brk Javali Bandeira EUA com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9748737589545,
+  "title": "Camisa Agro Infantil Brk Texas Cowboy 2 com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9748737556777,
+  "title": "Camisa Agro Infantil Brk Texas Cowboy com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9748737524009,
+  "title": "Camisa Agro Infantil Brk Skull Texas com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9748737458473,
+  "title": "Camisa Agro Infantil Brk Clean Bandeira dos EUA com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9748737425705,
+  "title": "Camisa Agro Infantil Brk Clean Bandeira EUA com Proteção UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9747969737001,
+  "title": "Camisa Infantil Agro Brk Agro Girl Power Rosa com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ },
+ {
+  "rule": "dryfit_em_camisa_de_algodao",
+  "severity": "WARNING",
+  "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
+  "evidence": "Dry Fit e Algodão no mesmo produto (contraditório)",
+  "store": "brk_agro",
+  "id": 9738361995561,
+  "title": "Camisa Agro Infantil Brk Trator MF 4707 Vermelho com Proteção Solar UV50+",
+  "archetype": "agro_field"
+ }
+]
