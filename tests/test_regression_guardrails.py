@@ -387,11 +387,12 @@ class TestBRKRegressionGuardrails(unittest.TestCase):
         self.assertIn('<details class="brk-size-guide">', html_sapato)
         self.assertIn("Guia de Tamanhos de Calçados (Medida da Palmilha)", html_sapato)
 
-        # Chapéus e Bonés
+        # Bonés e Chapéus recebem o novo layout D2C especializado
         prod_bone = {"id": 5005, "title": "Boné Trucker BRK Snapback Aba Curva", "tags": "boné, trucker"}
         html_bone = self._generate_html(prod_bone)
-        self.assertIn('<details class="brk-size-guide">', html_bone)
-        self.assertIn("Guia de Dimensões - Chapéus & Bonés", html_bone)
+        self.assertIn('brk-cap-description', html_bone)
+        self.assertIn('Aba Moldável', html_bone)
+        self.assertIn('Tamanho único com regulagem traseira', html_bone)
 
     # --------------------------------------------------------------------------
     # 6. TESTE DE ISOLAMENTO E SEGURANÇA DE PAYLOAD NA SHOPIFY (REGRA DE OURO 3)
@@ -704,6 +705,55 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         specs_hat = {s["label"]: s["value"] for s in narrative_hat.get("specs", [])}
         self.assertNotIn("Prazo de Produção", specs_hat)
         self.assertNotIn("9 dias úteis", str(specs_hat))
+
+    def test_caps_and_hats_dedicated_d2c_layout(self):
+        """Valida que bonés e chapéus recebem o layout D2C especializado com isolamento mútuo e sem vazamentos."""
+        # 1. Boné Trucker
+        prod_bone = {"id": 20, "title": "Boné Trucker BRK Fishing Peacemaker", "master_sku": "BA01"}
+        arch_bone = self.engine.detect_archetype(prod_bone["title"], "", [], "BRK", sku=prod_bone["master_sku"])
+        narrative_bone = self.engine.generate_narrative_from_template(prod_bone, arch_bone, [], store_key="brk_fishing")
+        html_bone = self.builder.build_shopify_html(narrative_bone)
+
+        self.assertIn("brk-cap-description", html_bone)
+        self.assertIn("Aba Moldável", html_bone)
+        self.assertIn("Interno em Tear", html_bone)
+        self.assertIn("Etiqueta BRK de Qualidade", html_bone)
+        self.assertIn("Design Exclusivo", html_bone)
+        self.assertIn("PRODUTO PREMIUM BRK", html_bone)
+        self.assertIn("ENTREGA SEGURA BRK", html_bone)
+        self.assertIn("1764962764537-CAIXA-BRK.webp", html_bone)
+
+        # 2. Chapéu Safári
+        prod_safari = {"id": 21, "title": "Chapéu de Pesca Australiano BRK com Protetor de Nuca UV50+", "master_sku": "CHP01"}
+        arch_safari = self.engine.detect_archetype(prod_safari["title"], "", [], "BRK", sku=prod_safari["master_sku"])
+        narrative_safari = self.engine.generate_narrative_from_template(prod_safari, arch_safari, [], store_key="brk_fishing")
+        html_safari = self.builder.build_shopify_html(narrative_safari)
+
+        self.assertIn("brk-cap-description", html_safari)
+        self.assertIn("Aba 360° UV50+", html_safari)
+        self.assertIn("Cordão Jugular Anti-Vento", html_safari)
+        self.assertIn("Protetor de Nuca Integrado", html_safari)
+        self.assertNotIn("estilo trucker", html_safari)
+
+        # 3. Chapéu Country
+        prod_country = {"id": 22, "title": "Chapéu American Hat Cattleman Chocolate Feltro", "master_sku": "CHC01"}
+        arch_country = self.engine.detect_archetype(prod_country["title"], "", [], "BRK", sku=prod_country["master_sku"])
+        narrative_country = self.engine.generate_narrative_from_template(prod_country, arch_country, [], store_key="brk_agro")
+        html_country = self.builder.build_shopify_html(narrative_country)
+
+        self.assertIn("brk-cap-description", html_country)
+        self.assertIn("Aba Larga Estruturada", html_country)
+        self.assertIn("Carneira Interna Confortável", html_country)
+        self.assertIn("Fita & Acabamento Premium", html_country)
+        self.assertNotIn("estilo trucker", html_country)
+
+        # 4. Camisa C0 NÃO recebe brk-cap-description
+        prod_shirt = {"id": 23, "title": "Camisa de Pesca Dourado com Proteção UV50", "master_sku": "C0100"}
+        arch_shirt = self.engine.detect_archetype(prod_shirt["title"], "", [], "BRK", sku=prod_shirt["master_sku"])
+        narrative_shirt = self.engine.generate_narrative_from_template(prod_shirt, arch_shirt, [], store_key="brk_fishing")
+        html_shirt = self.builder.build_shopify_html(narrative_shirt)
+        self.assertNotIn("brk-cap-description", html_shirt)
+
 
 
 def run_tests():
