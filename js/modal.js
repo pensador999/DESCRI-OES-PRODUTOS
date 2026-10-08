@@ -1089,8 +1089,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
   const isShirt = (
     ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId) ||
     /camisa|camiseta|jersey|baby look|babylook/i.test(tLow) ||
-    skuLow.startsWith("c0") ||
-    skuLow.startsWith("cmb")
+    /^(c0|ci|cadv|adv|hyb|cmb|raglan)/i.test(skuLow)
   ) && !/calça|calca|bermuda|shorts|macacão|macacao|jeans|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|chapéu|chapeu|boné|bone|luva|manguito|bandana|tubeneck|buff|balaclava/i.test(tLow);
 
   let tipText = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | Manga do ombro ao punho). Dica: compare com uma peça sua estendida para escolher o caimento ideal.";
@@ -1431,13 +1430,9 @@ function getProductModeBHTML(liveP) {
   }
 
   let specs = liveP.specs || [];
-  const isShirt = anyShirtWord(formattedTitle);
-  const isAgroOrMotors = (liveP.store_key === "brk_agro" || liveP.store_key === "brk_motors" || (typeof currentStore !== "undefined" && (currentStore === "brk_agro" || currentStore === "brk_motors")));
-  if (isShirt && isAgroOrMotors && liveP.archetype_id !== "shirts_button_work") {
-    specs = [];
-  } else if (specs.length === 0 && window.__STORE_MOLDES) {
+  if (specs.length === 0 && window.__STORE_MOLDES) {
     const archKey = liveP.archetype_id || "uv_performance";
-    const tmpl = window.__STORE_MOLDES[archKey];
+    const tmpl = window.__STORE_MOLDES[archKey] || window.__STORE_MOLDES["uv_performance"];
     if (tmpl && tmpl.base_specs) {
       specs = tmpl.base_specs.map(s => ({ label: s.label, value: s.default }));
     }

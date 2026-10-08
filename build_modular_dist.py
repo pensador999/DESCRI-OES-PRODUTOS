@@ -144,7 +144,8 @@ def build_dist():
 
             orig_html = p.get("original_body_html") or p.get("body_html") or ""
             vendor = p.get("vendor", "")
-            archetype_id = template_engine.detect_archetype(title, category, tags, vendor=vendor)
+            sku_code = p.get("master_sku") or p.get("sku") or (p.get("variants_skus") and p.get("variants_skus")[0]) or ""
+            archetype_id = template_engine.detect_archetype(title, category, tags, vendor=vendor, sku=sku_code)
             arch_info = template_engine.templates.get(archetype_id, template_engine.templates["uv_performance"])
             
             # Busca de irmão homólogo com trava estrita de arquétipo para produtos sem descrição ou com placeholder

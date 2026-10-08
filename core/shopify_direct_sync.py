@@ -167,8 +167,10 @@ class ShopifyDirectSync:
 
             # 1. Compilar Modo B Oficial (com Badges Rapidos, Tabela de Medidas e Schema)
             try:
+                vendor = prod.get("vendor", "")
+                sku_code = prod.get("master_sku") or prod.get("sku") or (prod.get("variants_skus") and prod.get("variants_skus")[0]) or ""
                 arch_id = prod.get("archetype_id") or self.template_engine.detect_archetype(
-                    p_title, str(prod.get("product_type", "")), str(prod.get("tags", ""))
+                    p_title, str(prod.get("product_type", "")), str(prod.get("tags", "")), vendor=vendor, sku=sku_code
                 )
                 raw_imgs = prod.get("cdn_images") or prod.get("gallery") or [img.get("src", img) if isinstance(img, dict) else img for img in prod.get("images", [])]
                 cdn_imgs = [u for u in raw_imgs if isinstance(u, str) and u.startswith("http")]

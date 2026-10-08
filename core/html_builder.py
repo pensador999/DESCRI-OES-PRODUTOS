@@ -296,8 +296,7 @@ class HTMLBuilder:
         is_shirt = (
             archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work")
             or any(w in title_low for w in ["camisa", "camiseta", "jersey", "baby look", "babylook"])
-            or sku_low.startswith("c0")
-            or sku_low.startswith("cmb")
+            or any(sku_low.startswith(pfx) for pfx in ["c0", "ci", "cadv", "adv", "hyb", "cmb", "raglan"])
         ) and not any(w in title_low for w in [
             "calça", "calca", "bermuda", "shorts", "macacão", "macacao", "jeans",
             "sandália", "sandalia", "babuche", "chinelo", "sapato", "tênis", "tenis", "bota", "botina", "boaonda",

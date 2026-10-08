@@ -101,7 +101,8 @@ class DailySentinel:
                 images = [img for img in gallery if img][:3]
 
                 vendor = p.get("vendor", "")
-                archetype_id = self.template_engine.detect_archetype(p.get("title", ""), p.get("category", ""), p.get("tags", []), vendor=vendor)
+                sku_code = p.get("master_sku") or p.get("sku") or (p.get("variants_skus") and p.get("variants_skus")[0]) or ""
+                archetype_id = self.template_engine.detect_archetype(p.get("title", ""), p.get("category", ""), p.get("tags", []), vendor=vendor, sku=sku_code)
                 narrative = self.template_engine.generate_narrative_from_template(p, archetype_id, images, store_key=st["key"])
                 new_html = self.html_builder.build_shopify_html(narrative)
 

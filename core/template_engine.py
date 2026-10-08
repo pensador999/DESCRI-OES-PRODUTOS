@@ -888,7 +888,7 @@ class TemplateEngine:
             }
         }
 
-    def detect_archetype(self, title: str, category: str = "", tags: List[str] = None, vendor: str = "") -> str:
+    def detect_archetype(self, title: str, category: str = "", tags: List[str] = None, vendor: str = "", sku: str = "") -> str:
         """
         Detecta com máxima precisão o arquétipo correto do produto.
         O TÍTULO DO PRODUTO É SOBERANO: previne que coleções multi-categoria
@@ -898,7 +898,8 @@ class TemplateEngine:
         cat = (category or "").lower().strip()
         tags_str = " ".join(tags or []).lower()
         vend = (vendor or "").lower().strip()
-        text = f"{t} {cat} {vend} {tags_str}"
+        sku_clean = (sku or "").upper().strip()
+        text = f"{t} {cat} {vend} {tags_str} {sku_clean}"
 
         # 1. Aromatizantes Automotivos & Cuidados (Prioridade máxima para evitar que caiam em camisas)
         if any(w in t for w in ["aromatizante", "cheirinho", "difusor", "aromatizador", "odorizador", "little trees", "odor"]):
@@ -933,15 +934,32 @@ class TemplateEngine:
         if any(w in t for w in ["pralana", "american hat", "karanda", "karandá", "feltro country"]):
             return "hats_country_cowboy"
 
-        # 8. Camisas / Vestuário Superior: Distinção estrita entre Camisas Work/Botão vs Agro vs Motors vs UV50+
-        if any(w in t for w in ["camisa", "camiseta", "baby look", "regata", "t-shirt", "polo"]):
-            # Camisas Work / Botão / Sarja / Lisas (Sem zíper, com botões e bolsos utilitários)
+        # 8. Camisas / Vestuário Superior: Distinção estrita entre Camisas Work/Botão vs Algodão vs Motors vs UV50+
+        is_c0_or_uv_sku = any(sku_clean.startswith(prefix) for prefix in ["C0", "CI", "CADV", "ADV", "HYB", "CMB", "RAGLAN"])
+        is_upper_body = any(w in t for w in ["camisa", "camiseta", "baby look", "babylook", "regata", "t-shirt", "polo", "jersey", "segunda pele"]) or is_c0_or_uv_sku
+
+        if is_upper_body:
+            # 8.1 Camisas Work / Botão / Sarja / Lisas (Sem zíper, com botões e bolsos utilitários)
             if any(w in t for w in ["work", "safari sarja", "manga longa sarja", "manga curta sarja", "sarja", "militar", "operacional", "botao", "botão", "de botao", "de botão", "lisa", "sem estampa"]) and not any(w in t for w in ["ziper", "zíper"]):
                 return "shirts_button_work"
-            if any(w in t for w in ["agro", "campo", "fazenda", "trator", "algodao", "algodão"]):
+
+            # 8.2 Se for camisa com proteção UV, código C0 ou tecnologia XTech / Dry Fit -> SEMPRE uv_performance
+            is_uv_shirt = (
+                is_c0_or_uv_sku or
+                any(w in t for w in ["uv", "uv50", "uv 50", "fpu", "fps", "xtech", "solar", "manga longa", "dry", "segunda pele"]) or
+                any(w in tags_str for w in ["uv50", "uv", "protecao solar", "proteção solar", "xtech"])
+            )
+            if is_uv_shirt and not any(w in t for w in ["algodao puro", "100% algodao", "100% algodão"]):
+                return "uv_performance"
+
+            # 8.3 Camisetas casuais de algodão (Agro / Campo)
+            if any(w in t for w in ["algodao", "algodão", "campo", "agro", "fazenda", "trator"]):
                 return "agro_field"
+
+            # 8.4 Jerseis de motocross sem proteção UV
             if any(w in t for w in ["jersey", "moto", "cross", "off-road", "trilha", "speed", "motors"]):
                 return "motors_speed"
+
             return "uv_performance"
 
         if "jersey" in t:
@@ -1093,7 +1111,12 @@ class TemplateEngine:
         """
         Extrai especificações autênticas do produto. Se o sibling_matcher encontrou
         especificações de um irmão homólogo, elas são priorizadas e sanitizadas para garantir fidelidade.
+        Para Camisas UV Performance, usa rigorosamente a Ficha Técnica Oficial XTech Pro.
         """
+        if archetype_id == "uv_performance":
+            base_specs = self.templates["uv_performance"]["base_specs"]
+            return [{"label": s["label"], "value": s["default"]} for s in base_specs]
+
         if sibling_specs and len(sibling_specs) >= 2:
             raw_specs = [{"label": s["label"], "value": s["default"]} for s in sibling_specs]
             return self.sanitize_specs_for_archetype(raw_specs, archetype_id)
@@ -1417,11 +1440,16 @@ class TemplateEngine:
         if is_hooded and not any("capuz" in s["label"].lower() for s in new_specs):
             new_specs.append({"label": "Capuz", "value": "Capuz anatômico integrado para proteção solar estendida"})
 
-        specs = new_specs
+        # Adaptação Temática de Público por Loja (Agro, Motors e Fishing) para Camisas UV
+        if archetype_id == "uv_performance" and not is_kids:
+            if store_key == "brk_agro" or any(w in t_low for w in ["agro", "campo", "rural", "trator", "fazenda", "pecuaria", "pecuária"]):
+                if "pescadores" in act1.get("desc_tmpl", ""):
+                    act1["desc_tmpl"] = act1["desc_tmpl"].replace("pescadores e entusiastas do ar livre", "o homem e a mulher do campo e entusiastas do ar livre").replace("arremessos e manobras", "a rotina intensa no campo e manobras")
+            elif store_key == "brk_motors" or any(w in t_low for w in ["moto", "trail", "cross", "velocidade", "motors", "pista"]):
+                if "pescadores" in act1.get("desc_tmpl", ""):
+                    act1["desc_tmpl"] = act1["desc_tmpl"].replace("pescadores e entusiastas do ar livre", "pilotos, motociclistas e aventureiros").replace("arremessos e manobras", "a pilotagem e manobras")
 
-        # Regra de Negócio: Descartar detalhes técnicos apenas para camisetas casuais no Agro e Motors (mantendo uv_performance XTech)
-        if archetype_id in ("agro_field", "motors_speed") and store_key in ("brk_agro", "brk_motors"):
-            specs = []
+        specs = new_specs
 
         source_type = "sibling_template" if sibling_info else "archetype_specialized"
         source_label = f"Molde Homólogo do Site ({sibling_info['sibling_title']})" if sibling_info else f"Arquétipo Especializado ({template['name']})"

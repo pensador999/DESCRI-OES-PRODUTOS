@@ -164,8 +164,10 @@ class SemanticAuditor:
     def render_mode_b(self, prod: Dict[str, Any], store_key: str) -> Dict[str, str]:
         """Mesmo caminho de geracao usado pela sincronizacao direta (shopify_direct_sync)."""
         title = prod.get("title", "")
+        vendor = prod.get("vendor", "")
+        sku_code = prod.get("master_sku") or prod.get("sku") or (prod.get("variants_skus") and prod.get("variants_skus")[0]) or ""
         arch = prod.get("archetype_id") or self.engine.detect_archetype(
-            title, str(prod.get("product_type", "")), str(prod.get("tags", ""))
+            title, str(prod.get("product_type", "")), str(prod.get("tags", "")), vendor=vendor, sku=sku_code
         )
         raw_imgs = prod.get("cdn_images") or prod.get("gallery") or [
             (i.get("src", i) if isinstance(i, dict) else i) for i in prod.get("images", [])
