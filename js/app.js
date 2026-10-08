@@ -887,21 +887,46 @@ async function renderMoldesCards() {
       specsItems += `<li class="flex items-start gap-1.5"><span class="text-emerald-500 font-bold">✓</span> <strong class="text-slate-800">${s.label}:</strong> <span class="text-slate-600">${s.default}</span></li>`;
     });
 
-    card.innerHTML = `
-      <div>
-        <div class="flex items-center justify-between mb-3">
-          <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">Molde Mestre</span>
-          <span class="text-xs text-slate-400 font-mono">ID: ${m.id}</span>
-        </div>
-        <h3 class="text-base font-extrabold text-slate-900 font-heading mb-1">${m.name}</h3>
-        <p class="text-xs font-semibold text-blue-600 mb-4">${m.default_tagline || ''}</p>
+    const isD2C = m.layout_format === "d2c_headwear" || (m.details_grid && m.details_grid.length > 0);
+    const badgeHtml = isD2C 
+      ? `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-300">Novo Formato D2C Oficial</span>`
+      : `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">Molde Mestre</span>`;
 
+    let structureBlockHtml = "";
+    if (isD2C && m.details_grid) {
+      const gridItems = m.details_grid.map(d => `<li class="flex items-start gap-1"><span class="text-emerald-500 font-bold">✓</span> <strong class="text-slate-800">${d.title}:</strong> <span class="text-slate-600">${d.desc.slice(0, 60)}...</span></li>`).join("");
+      structureBlockHtml = `
+        <div class="space-y-2 mb-4 bg-emerald-50/60 p-3 rounded-2xl border border-emerald-100 text-xs">
+          <span class="text-[10px] font-extrabold uppercase text-emerald-800 block tracking-wider">Estrutura D2C (Grid 4x + Split + Caixa BRK):</span>
+          <ul class="space-y-1 text-[11px]">
+            ${gridItems}
+          </ul>
+          <div class="mt-2 pt-2 border-t border-emerald-200/60 text-[10px] text-emerald-700 font-semibold flex items-center gap-1.5">
+            <span>📦 Seções Split: Selo Produto Premium (Tags) + Entrega Segura na Caixa BRK</span>
+          </div>
+        </div>
+      `;
+    } else {
+      structureBlockHtml = `
         <div class="space-y-2 mb-4 bg-slate-50 p-3 rounded-2xl border border-slate-100 text-xs">
           <span class="text-[10px] font-extrabold uppercase text-slate-400 block tracking-wider">Atos Narrativos:</span>
           <div class="font-bold text-slate-700">1. ${m.act1 ? m.act1.tag : 'Ato 1'}</div>
           <div class="font-bold text-slate-700">2. ${m.act2 ? m.act2.tag : 'Ato 2'}</div>
           <div class="font-bold text-slate-700">3. ${m.act3 ? m.act3.tag : 'Ato 3'}</div>
         </div>
+      `;
+    }
+
+    card.innerHTML = `
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          ${badgeHtml}
+          <span class="text-xs text-slate-400 font-mono">ID: ${m.id}</span>
+        </div>
+        <h3 class="text-base font-extrabold text-slate-900 font-heading mb-1">${m.name}</h3>
+        <p class="text-xs font-semibold ${isD2C ? 'text-emerald-700' : 'text-blue-600'} mb-4">${m.default_tagline || ''}</p>
+
+        ${structureBlockHtml}
 
         <div class="space-y-1.5 mb-4 text-xs">
           <span class="text-[10px] font-extrabold uppercase text-slate-400 block tracking-wider">Especificações Obrigatórias Preservadas:</span>

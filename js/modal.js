@@ -116,7 +116,15 @@ function updateModalView() {
     }
     htmlToShow = currentModalProduct.mode_b_html || "<p>HTML Modo B não disponível</p>";
     if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-emerald-50 border-emerald-200 text-emerald-800";
-    if (bannerDesc) bannerDesc.innerHTML = "<strong>⭐ Modo B Oficial (Novo Padrão BRK 100/100):</strong> Recomendado para colar na Shopify! Estrutura persuasiva em 3 Atos narrativos com Badges Rápidos no topo, Tabela de Medidas Expansível, Schema.org SEO e SVGs embutidos.";
+    if (bannerDesc) {
+      const arch = currentModalProduct.archetype_id || "";
+      const isHeadwear = ["caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy"].includes(arch);
+      if (isHeadwear) {
+        bannerDesc.innerHTML = "<strong>⭐ Modo B Oficial (Novo Formato D2C Bonés & Chapéus):</strong> Grid de Detalhes 4x, Características & Cuidados, Seções Split (Produto Premium e Entrega Segura na Caixa BRK anti-deformação) e Schema.org SEO.";
+      } else {
+        bannerDesc.innerHTML = "<strong>⭐ Modo B Oficial (Novo Padrão BRK 100/100):</strong> Recomendado para colar na Shopify! Estrutura persuasiva em 3 Atos narrativos com Badges Rápidos no topo, Tabela de Medidas Expansível, Schema.org SEO e SVGs embutidos.";
+      }
+    }
   } else if (currentModalMode === "a") {
     htmlToShow = currentModalProduct.mode_a_html || currentModalProduct.original_body_html || "<p>Sem HTML original</p>";
     if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-blue-50 border-blue-200 text-blue-800";

@@ -149,15 +149,68 @@ class TemplateEngine:
                 "care_tips": "Após a trilha ou pista, remover o excesso de barro com água antes da lavagem. Não lavar a seco nem utilizar ferro sobre as áreas sublimadas."
             },
 
-            # 4. Chapéus de Pesca / Safári / Australiano
+            # 4. Chapéus de Pesca / Safári / Australiano (Novo Padrão D2C Oficial BRK)
             "hats_safari_outdoor": {
                 "id": "hats_safari_outdoor",
                 "name": "Chapéus de Pesca, Safári & Outdoor",
+                "layout_format": "d2c_headwear",
                 "fa_icon": "fa-solid fa-hat-cowboy-side",
                 "theme_color": "#d97706",
                 "theme_bg": "#fffbeb",
                 "category_keywords": ["chapeu", "chapéu", "safari", "safári", "australiano", "pescador", "nuca", "palha"],
-                "default_tagline": "Proteção Solar Panorâmica 360° e Fixação Firme contra o Vento",
+                "default_tagline": "Proteção Solar 360° UV50+, Cordão Anti-Vento, Produto Premium & Caixa BRK",
+                "details_grid": [
+                    {
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg",
+                        "title": "Aba 360° UV50+",
+                        "desc": "Aba circular ampla com costuras reforçadas, bloqueando os raios solares diretos no rosto, orelhas e pescoço com máxima cobertura."
+                    },
+                    {
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/k2bupYT.jpg",
+                        "title": "Cordão Jugular Anti-Vento",
+                        "desc": "Ajuste seguro sob o queixo com trava regulável, mantendo o chapéu firme mesmo sob rajadas de vento e navegação rápida."
+                    },
+                    {
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/BYAO1Oj.jpg",
+                        "title": "Protetor de Nuca Integrado",
+                        "desc": "Cobertura estendida para a nuca que previne queimaduras solares durante longas jornadas sob sol intenso."
+                    },
+                    {
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/cjeqbhc.jpg",
+                        "title": "Tecido Respirável & Leve",
+                        "desc": "Construção de secagem rápida com ilhoses de ventilação lateral para dissipação imediata de calor e sensação de frescor contínuo."
+                    }
+                ],
+                "info_characteristics": [
+                    "Copa anatômica com ilhoses laterais que garantem circulação de ar constante.",
+                    "Aba larga circular de 360° com fator de proteção UV50+ permanente.",
+                    "Cordão jugular com trava ajustável de segurança contra quedas e vento forte.",
+                    "Protetor de nuca para proteção solar total na região posterior do pescoço.",
+                    "Tecido tecnológico leve de secagem ultra rápida e alta resistência ao desgaste."
+                ],
+                "info_care": [
+                    "Lavar à mão com água fria e sabão neutro.",
+                    "Não lavar em máquina e não torcer para preservar a estrutura da aba.",
+                    "Secar estendido à sombra em superfície plana.",
+                    "Não usar alvejantes, amaciantes ou produtos à base de cloro.",
+                    "Guardar sem dobrar a aba estruturada para manter o caimento original."
+                ],
+                "split_sections": [
+                    {
+                        "img": "https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764952819862-13-Tags.webp",
+                        "title": "PRODUTO PREMIUM BRK",
+                        "highlight": "Cada chapéu BRK é desenvolvido pensando na proteção de quem enfrenta longas jornadas ao ar livre.",
+                        "p1": "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem padrão de proteção solar certificado.",
+                        "p2": "Construído com materiais leves e resistentes, oferece o máximo de conforto térmico para pescarias e trabalho sob sol forte."
+                    },
+                    {
+                        "img": "https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764962764537-CAIXA-BRK.webp",
+                        "title": "ENTREGA SEGURA BRK",
+                        "highlight": "A sua experiência começa antes mesmo de abrir a caixa.",
+                        "p1": "O chapéu é enviado em embalagem protegida BRK, projetada para evitar deformações na aba durante o transporte.",
+                        "p2": "Seu novo chapéu chega pronto para encarar o sol com proteção e estilo incomparáveis."
+                    }
+                ],
                 "act1": {
                     "tag": "Aba 360° & Cobertura",
                     "fa_icon": "fa-solid fa-hat-cowboy-side",
@@ -181,46 +234,99 @@ class TemplateEngine:
                     {"label": "Proteção Solar", "default": "Fator UV50+ bloqueador de radiação solar nociva"},
                     {"label": "Fixação", "default": "Cordão jugular com regulador de pressão tipo tanca"},
                     {"label": "Ventilação", "default": "Ilhoses laterais para circulação e troca térmica"},
-                    {"label": "Ajuste de Tamanho", "default": "Circunferência ajustável de 56 a 60 cm"}
+                    {"label": "Embalagem de Envio", "default": "Embalagem protetora personalizada BRK"}
                 ],
                 "care_tips": "Lavar à mão com sabão neutro e água fria. Não torcer a aba para não deformar a estrutura. Secar à sombra."
             },
 
-            # 5. Bonés Trucker & Aba Curva
+            # 5. Bonés Trucker & Aba Curva (Novo Padrão D2C Oficial BRK)
             "caps_trucker_snapback": {
                 "id": "caps_trucker_snapback",
                 "name": "Bonés Trucker & Snapback",
+                "layout_format": "d2c_headwear",
                 "fa_icon": "fa-solid fa-hat-baseball",
-                "theme_color": "#d97706",
-                "theme_bg": "#fffbeb",
+                "theme_color": "#0284c7",
+                "theme_bg": "#f0f9ff",
                 "category_keywords": ["bone", "boné", "trucker", "snapback", "aba curva", "aba reta", "viseira"],
-                "default_tagline": "Design Anatômico, Copa Estruturada e Tela Respirável",
+                "default_tagline": "Aba Moldável, Interno em Tear, Produto Premium & Entrega Segura na Caixa BRK",
+                "details_grid": [
+                    {
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg",
+                        "title": "Aba Moldável",
+                        "desc": "Aba estruturada com diversas costuras e moldável, garantindo durabilidade e proteção extra contra o sol."
+                    },
+                    {
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/k2bupYT.jpg",
+                        "title": "Interno em Tear",
+                        "desc": "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de pesca e uso outdoor."
+                    },
+                    {
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/BYAO1Oj.jpg",
+                        "title": "Etiqueta BRK de Qualidade",
+                        "desc": "Etiqueta BRK aplicada com acabamento premium, garantindo autenticidade e padrão de qualidade rigoroso."
+                    },
+                    {
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/cjeqbhc.jpg",
+                        "title": "Design Exclusivo",
+                        "desc": "Arte exclusiva BRK inspirada na vida ao ar livre, para você se destacar em qualquer ambiente."
+                    }
+                ],
+                "info_characteristics": [
+                    "Copa estruturada estilo trucker, com frente firme e tela traseira que favorece a ventilação.",
+                    "Aba moldável com costuras reforçadas, oferecendo conforto e proteção para o rosto e os olhos.",
+                    "Tamanho único com regulagem traseira, se ajustando com precisão à maioria dos formatos de cabeça.",
+                    "Ideal para pesca esportiva, atividades ao ar livre, trabalho no campo e uso no dia a dia.",
+                    "Acabamento interno pensado para máximo conforto mesmo em longas jornadas de uso contínuo."
+                ],
+                "info_care": [
+                    "Não lave o boné na máquina e não utilize água quente.",
+                    "Para limpeza, use um pano macio levemente úmido com sabão neutro nas áreas sujas.",
+                    "Retire o excesso de sabão com outro pano levemente úmido apenas com água.",
+                    "Deixe secar à sombra, em superfície plana, longe de fontes diretas de calor.",
+                    "Não utilize alvejante, não passe a ferro e não leve à secadora."
+                ],
+                "split_sections": [
+                    {
+                        "img": "https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764952819862-13-Tags.webp",
+                        "title": "PRODUTO PREMIUM BRK",
+                        "highlight": "Cada boné BRK é desenvolvido pensando em quem vive a vida ao ar livre intensamente.",
+                        "p1": "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem que você está usando um item de alta performance.",
+                        "p2": "Da escolha dos materiais ao acabamento final, tudo é pensado para entregar conforto, durabilidade e estilo em qualquer pescaria ou evento."
+                    },
+                    {
+                        "img": "https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764962764537-CAIXA-BRK.webp",
+                        "title": "ENTREGA SEGURA BRK",
+                        "highlight": "A sua experiência começa antes mesmo de abrir a caixa.",
+                        "p1": "O boné é enviado em embalagem protegida e personalizada BRK, pensado para chegar até você em perfeitas condições, sem amassar ou deformar.",
+                        "p2": "Assim, seu novo boné chega pronto para encarar a próxima aventura, seja no campo, na pista ou nas águas."
+                    }
+                ],
                 "act1": {
-                    "tag": "Estrutura & Copa",
+                    "tag": "Aba Moldável & Copa",
                     "fa_icon": "fa-solid fa-hat-baseball",
-                    "title": "COPA ESTRUTURADA COM BORDADO DE ALTA DEFINIÇÃO",
-                    "desc_tmpl": "O {title} destaca-se pela frente firme e acabamento impecável, mantendo o formato clássico intacto em qualquer situação."
+                    "title": "ABA MOLDÁVEL COM COSTURAS REFORÇADAS E COPA ESTRUTURADA",
+                    "desc_tmpl": "O {title} destaca-se pela frente firme e acabamento com costuras reforçadas, mantendo o formato clássico trucker intacto e oferecendo proteção superior contra o sol."
                 },
                 "act2": {
-                    "tag": "Ventilação & Conforto",
+                    "tag": "Interno em Tear & Ventilação",
                     "fa_icon": "fa-solid fa-wind",
-                    "title": "TELA RESPIRÁVEL E CARNEIRA INTERNA MACIA",
-                    "desc_tmpl": "Garante circulação constante de ar para evitar suor excessivo na cabeça, aliado à carneira interna acolchoada para uso contínuo o dia todo."
+                    "title": "ACABAMENTO INTERNO EM TEAR E TELA TRASEIRA RESPIRÁVEL",
+                    "desc_tmpl": "Construção interna resistente em tear com carneira macia e tela traseira que garante circulação constante de ar para evitar acúmulo de suor."
                 },
                 "act3": {
-                    "tag": "Ajuste Personalizado",
-                    "fa_icon": "fa-solid fa-sliders",
-                    "title": "FECHO REGULÁVEL DE ALTA DURABILIDADE",
-                    "desc_tmpl": "Ajuste sob medida para diferentes circunferências cranianas com fecho tipo snapback seguro e aba com curvatura milimétrica."
+                    "tag": "Autenticidade & Envio",
+                    "fa_icon": "fa-solid fa-box",
+                    "title": "ETIQUETAS OFICIAIS BRK E ENVIO EM CAIXA PROTETORA EXCLUSIVA",
+                    "desc_tmpl": "Autenticidade garantida por etiquetas de alto padrão e envio em caixa rígida personalizada BRK para chegar impecável sem amassar."
                 },
                 "base_specs": [
-                    {"label": "Modelo", "default": "Trucker clássico com lateral e traseira em tela respirável"},
-                    {"label": "Aba", "default": "Aba curva com 6 costuras de reforço"},
-                    {"label": "Fechamento", "default": "Snapback regulável em polímero virgem de alta resistência"},
-                    {"label": "Acabamento Frontal", "default": "Bordado / aplique em alto relevo termo fixado"},
-                    {"label": "Tamanho", "default": "Único ajustável (54 a 60 cm de circunferência)"}
+                    {"label": "Modelo da Copa", "default": "Trucker clássico com lateral e traseira em tela respirável"},
+                    {"label": "Aba", "default": "Aba curva estruturada e moldável com diversas costuras de reforço"},
+                    {"label": "Fechamento", "default": "Snapback regulável de alta resistência (tamanho único ajustável)"},
+                    {"label": "Acabamento Interno", "default": "Tear reforçado com carneira acolchoada anti-suor"},
+                    {"label": "Embalagem de Envio", "default": "Caixa personalizada protetora BRK (anti-deformação)"}
                 ],
-                "care_tips": "Limpar com pano úmido e sabão neutro. Não mergulhar a copa em água nem lavar em máquina para manter a curvatura da aba perfeita."
+                "care_tips": "Limpar com pano macio levemente úmido e sabão neutro. Não mergulhar a copa em água nem lavar em máquina para manter a estrutura e curvatura intactas."
             },
 
             # 6. Iscas Artificiais
@@ -629,15 +735,68 @@ class TemplateEngine:
                 "care_tips": "Após uso em água salgada, lavar levemente com água doce corrente, secar e aplicar óleo lubrificante nos pontos móveis recomendados."
             },
 
-            # 17. Chapéus Country, Feltro, Pralana & Cowboy
+            # 17. Chapéus Country, Feltro, Pralana & Cowboy (Novo Padrão D2C Oficial BRK)
             "hats_country_cowboy": {
                 "id": "hats_country_cowboy",
                 "name": "Chapéus Country, Feltro, Pralana & Cowboy",
+                "layout_format": "d2c_headwear",
                 "fa_icon": "fa-solid fa-hat-cowboy",
                 "theme_color": "#854d0e",
                 "theme_bg": "#fefce8",
                 "category_keywords": ["feltro", "pralana", "american hat", "karanda", "karandá", "country", "cowboy", "pantaneiro", "lã", "veludo", "marcatto"],
                 "default_tagline": "Elegância Rústica, Copa Estruturada e Acabamento Premium em Couro e Fivela",
+                "details_grid": [
+                    {
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg",
+                        "title": "Aba Larga Estruturada",
+                        "desc": "Formato clássico com curvatura marcante e acabamento impecável, unindo tradição, imponência e proteção solar no campo."
+                    },
+                    {
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/k2bupYT.jpg",
+                        "title": "Carneira Interna Confortável",
+                        "desc": "Faixa interna com toque macio e anatômico, oferecendo fixação firme e confortável na cabeça sem marcar a testa."
+                    },
+                    {
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/BYAO1Oj.jpg",
+                        "title": "Fita & Acabamento Premium",
+                        "desc": "Banda decorativa exclusiva com detalhe refinado, reforçando a autenticidade e o visual rústico elegante."
+                    },
+                    {
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/cjeqbhc.jpg",
+                        "title": "Estrutura Nobre & Firme",
+                        "desc": "Matéria-prima nobre de alta densidade que preserva a forma da copa e a curvatura da aba mesmo com uso contínuo."
+                    }
+                ],
+                "info_characteristics": [
+                    "Copa alta estruturada e moldada no legítimo estilo western / campo.",
+                    "Aba larga de presença marcante que proporciona excelente sombra e proteção.",
+                    "Carneira interna acolchoada para conforto prolongado em cavalgadas e eventos.",
+                    "Fita externa com acabamento nobre e identidade autêntica do homem e da mulher do campo.",
+                    "Ideal para rodeios, feiras agropecuárias, lida na fazenda e dia a dia sertanejo."
+                ],
+                "info_care": [
+                    "Limpar delicadamente com escova de cerdas macias sempre no sentido das fibras.",
+                    "Evitar contato direto com chuva intensa ou umidade excessiva.",
+                    "Armazenar sempre apoiado pela copa ou em suporte adequado para não desformar a aba.",
+                    "Nunca dobrar, amassar ou deixar exposto no interior de veículos sob sol forte.",
+                    "Em caso de umidade leve, deixe secar naturalmente à sombra em local ventilado."
+                ],
+                "split_sections": [
+                    {
+                        "img": "https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764952819862-13-Tags.webp",
+                        "title": "PRODUTO PREMIUM BRK",
+                        "highlight": "A tradição e o orgulho do campo em cada detalhe artesanal.",
+                        "p1": "Desenvolvido com rigor técnico para quem valoriza a autêntica vida sertaneja.",
+                        "p2": "Estrutura nobre, acabamento de precisão e caimento perfeito para cavalgadas e ocasiões especiais."
+                    },
+                    {
+                        "img": "https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764962764537-CAIXA-BRK.webp",
+                        "title": "ENTREGA SEGURA NA CAIXA",
+                        "highlight": "A sua experiência começa antes mesmo de abrir a caixa.",
+                        "p1": "O chapéu é embalado com proteção reforçada contra amassados para preservar 100% da sua modelagem original.",
+                        "p2": "Receba sua peça pronta para o uso, com aba e copa perfeitamente alinhadas."
+                    }
+                ],
                 "act1": {
                     "tag": "Copa & Estrutura",
                     "fa_icon": "fa-solid fa-hat-cowboy",
@@ -661,9 +820,9 @@ class TemplateEngine:
                     {"label": "Formato da Copa", "default": "Tradicional Country Gota / Clássica Conformada"},
                     {"label": "Carneira Interna", "default": "Espuma Acolchoada de Alto Conforto e Toque Macio"},
                     {"label": "Acabamento Externo", "default": "Bandinha exclusiva em couro com fivela/passador metálico"},
-                    {"label": "Uso Indicado", "default": "Lida no campo, cavalgadas, feiras agropecuárias e ocasiões casuais"}
+                    {"label": "Embalagem de Envio", "default": "Caixa rígida protetora especial (anti-deformação)"}
                 ],
-                "care_tips": "Limpar periodicamente com escova de cerdas macias no sentido das fibras do feltro. Não molhar. Guardar apoiado pela copa ou pendurado em local seco."
+                "care_tips": "Limpar delicadamente com escova de cerdas macias no sentido das fibras do feltro. Evitar umidade excessiva e guardar sempre apoiado pela copa."
             },
 
             # 18. Camisas Work, Botão & Sarja Utilitária
@@ -1585,6 +1744,11 @@ class TemplateEngine:
             "source_label": source_label,
             "sibling_info": sibling_info,
             "archetype_id": archetype_id,
+            "layout_format": template.get("layout_format", "standard_3act"),
+            "details_grid": template.get("details_grid"),
+            "info_characteristics": template.get("info_characteristics"),
+            "info_care": template.get("info_care"),
+            "split_sections": template.get("split_sections"),
             "is_kids": is_kids,
             "is_short_sleeve": is_short_sleeve,
             "is_hooded": is_hooded,

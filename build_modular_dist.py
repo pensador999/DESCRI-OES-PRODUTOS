@@ -190,9 +190,16 @@ def build_dist():
             p_copy["care_tips"] = narrative.get("care_tips", "")
             p_copy["specs"] = narrative.get("specs", [])
             p_copy["mode_a_html"] = mode_a_html
+            is_headwear = archetype_id in ("caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy")
+            p_copy["layout_format"] = narrative.get("layout_format", "standard_3act")
+            if is_headwear:
+                p_copy["details_grid"] = narrative.get("details_grid")
+                p_copy["info_characteristics"] = narrative.get("info_characteristics")
+                p_copy["info_care"] = narrative.get("info_care")
+                p_copy["split_sections"] = narrative.get("split_sections")
             # Salvar mode_b_html completo em todos os itens SEM_DESCRICAO e IMAGENS_QUEBRADAS,
-            # alem dos primeiros 25 de amostra. Para os demais, a API product_db compila on-the-fly.
-            save_mode_b = (p.get("status") in ("SEM_DESCRICAO", "IMAGENS_QUEBRADAS")) or (idx < 25)
+            # alem de 100% dos bones e chapeus D2C e dos primeiros 25 de amostra.
+            save_mode_b = (p.get("status") in ("SEM_DESCRICAO", "IMAGENS_QUEBRADAS")) or (idx < 25) or is_headwear
             p_copy["mode_b_html"] = mode_b_html if save_mode_b else ""
             p_copy["mode_b_markdown"] = mode_b_markdown if save_mode_b else ""
             p_copy["prohibited_links"] = prohibited_links
