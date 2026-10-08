@@ -604,9 +604,57 @@ class TestProductDBApiAndDirectConnection(unittest.TestCase):
         self.assertIn("core", fn_cfg["includeFiles"], "includeFiles deve incluir core no pacote serverless.")
 
 
+class TestDeepFlowAuditGuardrails(unittest.TestCase):
+    """Garante que colisões de substrings (ex: capivara vs vara, jeansfit vs jeans) nunca quebrem guias de tamanho."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.engine = TemplateEngine()
+        cls.builder = HTMLBuilder()
+
+    def test_capivara_shirt_not_blocked_by_vara(self):
+        prod = {"id": 1, "title": "Camisa de Pesca Feminina Brk Amazon Capivara Floral com Proteção UV50", "master_sku": "C02492BLP_FULL"}
+        arch = self.engine.detect_archetype(prod["title"], "", [], "BRK", sku=prod["master_sku"])
+        narrative = self.engine.generate_narrative_from_template(prod, arch, [], store_key="brk_fishing")
+        html = self.builder.build_shopify_html(narrative)
+        self.assertIn("brk-size-guide", html, "Camisa Capivara deve possuir guia de tamanhos")
+        self.assertIn("ALTURA", html, "Camisa Capivara deve possuir coluna ALTURA")
+        self.assertIn("FEMININO", html, "Camisa Capivara Feminina deve possuir badge FEMININO")
+
+    def test_jeansfit_shirt_gets_shirt_guide_not_pants(self):
+        prod = {"id": 2, "title": "Camisa de Pesca Infantil Brk Select Pursuit Jeansfit com Proteção UV50+", "master_sku": "C01325I"}
+        arch = self.engine.detect_archetype(prod["title"], "", [], "BRK", sku=prod["master_sku"])
+        narrative = self.engine.generate_narrative_from_template(prod, arch, [], store_key="brk_fishing")
+        html = self.builder.build_shopify_html(narrative)
+        self.assertIn("INFANTIL", html, "Camisa Jeansfit Infantil deve receber guia infantil")
+        self.assertIn("ALTURA", html, "Camisa Jeansfit Infantil deve possuir coluna ALTURA")
+        self.assertNotIn("Calças & Bermudas", html, "Camisa Jeansfit não pode cair em Calças")
+
+    def test_hard_work_c0_shirt_gets_c0_guide(self):
+        prod = {"id": 3, "title": "Camisa de Pesca Brk Kayak Fishing Hard Work com Proteção UV50", "master_sku": "C02402"}
+        arch = self.engine.detect_archetype(prod["title"], "", [], "BRK", sku=prod["master_sku"])
+        narrative = self.engine.generate_narrative_from_template(prod, arch, [], store_key="brk_fishing")
+        html = self.builder.build_shopify_html(narrative)
+        self.assertIn("MASCULINO", html, "Camisa C0 Hard Work deve receber guia C0 Masculino")
+        self.assertIn("ALTURA", html, "Camisa C0 Hard Work deve possuir coluna ALTURA")
+        self.assertNotIn("Camisas Work & Utilitárias de Botão", html, "Camisa C0 não pode receber guia de botão")
+
+    def test_c0_shirts_have_official_xtech_pro_specs(self):
+        prod = {"id": 4, "title": "Camisa Agro Brk São Bento e Colheitadeira com Proteção UV50", "master_sku": "C02281P_FULL"}
+        arch = self.engine.detect_archetype(prod["title"], "", [], "BRK", sku=prod["master_sku"])
+        narrative = self.engine.generate_narrative_from_template(prod, arch, [], store_key="brk_agro")
+        specs = {s["label"]: s["value"] for s in narrative.get("specs", [])}
+        self.assertEqual(specs.get("Prazo de Produção"), "Pronta entrega")
+        self.assertEqual(specs.get("Composição"), "90% Poliéster 10% Elastano")
+        self.assertEqual(specs.get("Tecido"), "XTech Pro")
+        self.assertEqual(specs.get("Tecnologia"), "Secagem Rápida, Tecido Leve, Proteção Solar")
+        self.assertEqual(specs.get("Modelagem"), "Anatômica e confortável")
+        self.assertEqual(specs.get("Proteção"), "Proteção UV50+ (não sai na lavagem)")
+
+
 def run_tests():
     suite = unittest.TestSuite()
-    for case in (TestBRKRegressionGuardrails, TestSemanticConformity, TestLiveAgentAndTracking, TestTampermonkeyIntegration, TestProductDBApiAndDirectConnection):
+    for case in (TestBRKRegressionGuardrails, TestSemanticConformity, TestLiveAgentAndTracking, TestTampermonkeyIntegration, TestProductDBApiAndDirectConnection, TestDeepFlowAuditGuardrails):
         suite.addTests(unittest.TestLoader().loadTestsFromTestCase(case))
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
