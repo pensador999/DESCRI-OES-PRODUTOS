@@ -101,8 +101,8 @@ class TestBRKRegressionGuardrails(unittest.TestCase):
         self.assertNotIn("fecho de engate", html_low, "Camisa de botão não pode ter fecho de engate!")
 
     def test_camisas_xtech_detalhes_tecnicos_specs(self):
-        """Camisas XTech (uv_performance) padrão devem ter 9 dias úteis e _FULL/_OUT pronta entrega."""
-        # 1. Padrão (sem _FULL / sem _OUT) -> 9 dias úteis
+        """Camisas XTech (uv_performance) padrão devem ter 10 dias úteis e _FULL/_OUT pronta entrega."""
+        # 1. Padrão (sem _FULL / sem _OUT) -> 10 dias úteis
         prod_std = {
             "id": 1005,
             "title": "Camisa ArmorX BRK Barkeiro Azul com Proteção UV50+",
@@ -115,7 +115,7 @@ class TestBRKRegressionGuardrails(unittest.TestCase):
 
         self.assertIn("Detalhes Técnicos & Cuidados de Conservação", html_std)
         self.assertIn("Prazo de Produção", html_std)
-        self.assertIn("9 dias úteis", html_std)
+        self.assertIn("10 dias úteis", html_std)
         self.assertNotIn("Pronta entrega", html_std)
         self.assertIn("Composição", html_std)
         self.assertIn("90% Poliéster 10% Elastano", html_std)
@@ -140,7 +140,7 @@ class TestBRKRegressionGuardrails(unittest.TestCase):
         html_full = self._generate_html(prod_full, "brk_fishing")
         self.assertIn("Prazo de Produção", html_full)
         self.assertIn("Pronta entrega", html_full)
-        self.assertNotIn("9 dias úteis", html_full)
+        self.assertNotIn("10 dias úteis", html_full)
 
         # 3. Com _OUT -> Pronta entrega
         prod_out = {
@@ -154,7 +154,7 @@ class TestBRKRegressionGuardrails(unittest.TestCase):
         html_out = self._generate_html(prod_out, "brk_fishing")
         self.assertIn("Prazo de Produção", html_out)
         self.assertIn("Pronta entrega", html_out)
-        self.assertNotIn("9 dias úteis", html_out)
+        self.assertNotIn("10 dias úteis", html_out)
 
     def test_camisas_c0_size_guide_masculino(self):
         """Camisas padrão C0 Masculino / Unissex devem conter rigorosamente as 7 linhas oficiais."""
@@ -684,12 +684,12 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         self.assertEqual(specs_full.get("Modelagem"), "Anatômica e confortável")
         self.assertEqual(specs_full.get("Proteção"), "Proteção UV50+ (não sai na lavagem)")
 
-        # 2. Padrão (sem _FULL e sem _OUT) -> 9 dias úteis
+        # 2. Padrão (sem _FULL e sem _OUT) -> 10 dias úteis
         prod_std = {"id": 5, "title": "Camisa Agro Brk São Bento e Colheitadeira com Proteção UV50", "master_sku": "C02281P"}
         arch_std = self.engine.detect_archetype(prod_std["title"], "", [], "BRK", sku=prod_std["master_sku"])
         narrative_std = self.engine.generate_narrative_from_template(prod_std, arch_std, [], store_key="brk_agro")
         specs_std = {s["label"]: s["value"] for s in narrative_std.get("specs", [])}
-        self.assertEqual(specs_std.get("Prazo de Produção"), "9 dias úteis")
+        self.assertEqual(specs_std.get("Prazo de Produção"), "10 dias úteis")
 
         # 3. Com _OUT -> Pronta entrega
         prod_out = {"id": 6, "title": "Camisa Agro Brk São Bento e Colheitadeira com Proteção UV50", "master_sku": "C02281P_OUT"}
@@ -698,13 +698,13 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         specs_out = {s["label"]: s["value"] for s in narrative_out.get("specs", [])}
         self.assertEqual(specs_out.get("Prazo de Produção"), "Pronta entrega")
 
-        # 4. Produto Não-C0 (Chapéu / Acessório) -> NÃO recebe 9 dias úteis nem Prazo de Produção têxtil
+        # 4. Produto Não-C0 (Chapéu / Acessório) -> NÃO recebe 10 dias úteis nem Prazo de Produção têxtil
         prod_hat = {"id": 7, "title": "Chapéu BRK Agro Campo Aba Larga", "master_sku": "CHP100"}
         arch_hat = self.engine.detect_archetype(prod_hat["title"], "", [], "BRK", sku=prod_hat["master_sku"])
         narrative_hat = self.engine.generate_narrative_from_template(prod_hat, arch_hat, [], store_key="brk_agro")
         specs_hat = {s["label"]: s["value"] for s in narrative_hat.get("specs", [])}
         self.assertNotIn("Prazo de Produção", specs_hat)
-        self.assertNotIn("9 dias úteis", str(specs_hat))
+        self.assertNotIn("10 dias úteis", str(specs_hat))
 
     def test_caps_and_hats_dedicated_d2c_layout(self):
         """Valida que bonés e chapéus recebem o layout D2C especializado com isolamento mútuo e sem vazamentos."""
@@ -827,7 +827,62 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
             self.assertIn("Interno em Tear", prod.get("mode_b_html", ""))
             self.assertIn("CAIXA-BRK", prod.get("mode_b_html", ""))
 
+    def test_fusion_and_hybrid_anti_zipper_and_hood_rules(self):
+        """Valida que camisas Fusion e Hybrid JAMAIS contêm menção a zíper e possuem capuz/máscara/dedeira e regras de prazo."""
+        # 1. Fusion Padrão (sem zíper, com máscara facial integrada, dedeira e 10 dias úteis)
+        prod_fusion = {
+            "id": 8801,
+            "title": "Camisa de Pesca FusionX BRK Tucunaré Azul UV50+",
+            "category": "Camisas",
+            "master_sku": "C0FUSION01"
+        }
+        arch_fusion = self.engine.detect_archetype(prod_fusion["title"], prod_fusion["category"], [], "BRK", sku=prod_fusion["master_sku"])
+        narrative_fusion = self.engine.generate_narrative_from_template(prod_fusion, arch_fusion, [], store_key="brk_fishing")
+        html_fusion = self.builder.build_shopify_html(narrative_fusion)
+        html_fusion_low = html_fusion.lower()
 
+        self.assertNotIn("zíper", html_fusion_low, "Fusion NÃO pode conter palavra zíper!")
+        self.assertNotIn("ziper", html_fusion_low, "Fusion NÃO pode conter palavra ziper!")
+        self.assertIn("máscara facial", html_fusion_low)
+        self.assertIn("dedeira", html_fusion_low)
+        self.assertIn("Capuz & Máscara", html_fusion)
+        self.assertIn("Punhos", html_fusion)
+        self.assertIn("10 dias úteis", html_fusion)
+        self.assertNotIn("Pronta entrega", html_fusion)
+
+        # 2. Fusion com _FULL (Pronta entrega e sem zíper)
+        prod_fusion_full = {
+            "id": 8802,
+            "title": "Camisa Fusion BRK Robalo Cinza com Proteção Solar",
+            "category": "Camisas",
+            "master_sku": "C0FUSION02_FULL"
+        }
+        narrative_ff = self.engine.generate_narrative_from_template(prod_fusion_full, arch_fusion, [], store_key="brk_fishing")
+        html_ff = self.builder.build_shopify_html(narrative_ff)
+        self.assertNotIn("zíper", html_ff.lower())
+        self.assertNotIn("ziper", html_ff.lower())
+        self.assertIn("Pronta entrega", html_ff)
+        self.assertNotIn("10 dias úteis", html_ff)
+
+        # 3. Hybrid Padrão (sem zíper, com capuz integrado, dedeira e 10 dias úteis)
+        prod_hybrid = {
+            "id": 8803,
+            "title": "Camisa Hybrid BRK Bass Hunter UV50+",
+            "category": "Camisas",
+            "master_sku": "C0HYBRID01"
+        }
+        arch_hybrid = self.engine.detect_archetype(prod_hybrid["title"], prod_hybrid["category"], [], "BRK", sku=prod_hybrid["master_sku"])
+        narrative_hybrid = self.engine.generate_narrative_from_template(prod_hybrid, arch_hybrid, [], store_key="brk_fishing")
+        html_hybrid = self.builder.build_shopify_html(narrative_hybrid)
+        html_hybrid_low = html_hybrid.lower()
+
+        self.assertNotIn("zíper", html_hybrid_low, "Hybrid NÃO pode conter palavra zíper!")
+        self.assertNotIn("ziper", html_hybrid_low, "Hybrid NÃO pode conter palavra ziper!")
+        self.assertIn("capuz anatômico integrado", html_hybrid_low)
+        self.assertIn("dedeira", html_hybrid_low)
+        self.assertIn("Punhos", html_hybrid)
+        self.assertIn("10 dias úteis", html_hybrid)
+        self.assertNotIn("Pronta entrega", html_hybrid)
 
 
 def run_tests():

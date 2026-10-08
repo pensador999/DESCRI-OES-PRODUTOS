@@ -66,7 +66,7 @@ class TemplateEngine:
                     "desc_tmpl": "Acabamento de alto padrão com costuras planas anti-atrito, gola padre com cobertura no cursor do zíper e punhos anatômicos que não laceiam com o uso frequente."
                 },
                 "base_specs": [
-                    {"label": "Prazo de Produção", "default": "9 dias úteis"},
+                    {"label": "Prazo de Produção", "default": "10 dias úteis"},
                     {"label": "Composição", "default": "90% Poliéster 10% Elastano"},
                     {"label": "Tecido", "default": "XTech Pro"},
                     {"label": "Tecnologia", "default": "Secagem Rápida, Tecido Leve, Proteção Solar"},
@@ -1348,12 +1348,21 @@ class TemplateEngine:
         Extrai especificações autênticas do produto. Se o sibling_matcher encontrou
         especificações de um irmão homólogo, elas são priorizadas e sanitizadas para garantir fidelidade.
         Para Camisas UV Performance (C0), usa rigorosamente a Ficha Técnica Oficial XTech Pro
-        com Prazo de Produção dinâmico (Pronta entrega para _FULL e _OUT, 9 dias úteis para códigos padrão).
+        com Prazo de Produção dinâmico (Pronta entrega para _FULL e _OUT, 10 dias úteis para códigos padrão)
+        e detalhes anatômicos exclusivos para Fusion (máscara integrada + dedeira) e Hybrid (capuz + dedeira).
         """
         if archetype_id == "uv_performance":
             is_pronta = self.is_ready_delivery(product)
-            prazo_val = "Pronta entrega" if is_pronta else "9 dias úteis"
-            return [
+            prazo_val = "Pronta entrega" if is_pronta else "10 dias úteis"
+            
+            t_low = (product.get("title") or "").lower()
+            sku_low = str(product.get("master_sku") or product.get("sku") or "").lower()
+            tags_low = " ".join([str(t).lower() for t in (product.get("tags") or [])]) if isinstance(product.get("tags"), list) else str(product.get("tags") or "").lower()
+            
+            is_fusion = any(w in t_low for w in ["fusion", "fusionx"]) or "fusion" in sku_low or "fusion" in tags_low
+            is_hybrid = any(w in t_low for w in ["hybrid"]) or sku_low.startswith("hyb") or "hybrid" in sku_low or "hybrid" in tags_low
+            
+            specs = [
                 {"label": "Prazo de Produção", "value": prazo_val},
                 {"label": "Composição", "value": "90% Poliéster 10% Elastano"},
                 {"label": "Tecido", "value": "XTech Pro"},
@@ -1361,6 +1370,13 @@ class TemplateEngine:
                 {"label": "Modelagem", "value": "Anatômica e confortável"},
                 {"label": "Proteção", "value": "Proteção UV50+ (não sai na lavagem)"},
             ]
+            if is_fusion:
+                specs.append({"label": "Capuz & Máscara", "value": "Capuz anatômico integrado com máscara facial de proteção UV50+"})
+                specs.append({"label": "Punhos", "value": "Punhos anatômicos com abertura para o polegar (dedeira)"})
+            elif is_hybrid:
+                specs.append({"label": "Capuz", "value": "Capuz anatômico integrado de alta cobertura solar"})
+                specs.append({"label": "Punhos", "value": "Punhos anatômicos com abertura para o polegar (dedeira)"})
+            return specs
 
         if sibling_specs and len(sibling_specs) >= 2:
             raw_specs = [{"label": s["label"], "value": s["default"]} for s in sibling_specs]
@@ -1574,7 +1590,19 @@ class TemplateEngine:
 
         is_apparel = archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work", "pants_cargo_tactical")
         
-        is_hooded = is_apparel and any(w in t_low for w in ["capuz", "hood", "hoodie"])
+        sku_clean_for_flags = str(product.get("master_sku") or product.get("sku") or "").lower()
+        is_fusion = is_apparel and (
+            any(w in t_low for w in ["fusion", "fusionx"]) or
+            "fusion" in sku_clean_for_flags or
+            "fusion" in tags_low
+        )
+        is_hybrid = is_apparel and (
+            any(w in t_low for w in ["hybrid"]) or
+            sku_clean_for_flags.startswith("hyb") or
+            "hybrid" in sku_clean_for_flags or
+            "hybrid" in tags_low
+        )
+        is_hooded = (is_apparel and any(w in t_low for w in ["capuz", "hood", "hoodie"])) or is_fusion or is_hybrid
         # is_kids só vale para vestuário: o texto/tabela infantil é de roupa (FPU 50+, Dry Fit, tórax/manga).
         # Óculos, calçados etc. com "Infantil" no título NÃO podem receber essa narrativa.
         is_kids = is_apparel and (any(w in t_low for w in ["infantil", "kids", "juvenil"]) or bool(re.search(r'\bmini\b', t_low)))
@@ -1608,8 +1636,22 @@ class TemplateEngine:
             act1["title"] = "MODELAGEM FEMININA ANATÔMICA COM CAIMENTO IMPECÁVEL"
             act1["desc_tmpl"] = "Projetada sob medida para a anatomia feminina, a {title} combina corte acinturado esportivo, máxima liberdade de movimentos e proteção solar FPU 50+ com toque suave e elegante."
 
-        # 3. Adaptação Capuz (Elimina 'gola padre', injeta cobertura 360° no rosto/nuca)
-        if is_hooded:
+        # 3. Adaptação Fusion (Capuz com Máscara Facial Integrada e Punhos com Dedeira - SEM ZÍPER)
+        if is_fusion:
+            act3["tag"] = "Capuz com Máscara Integrada & Proteção 360°"
+            act3["fa_icon"] = "fa-solid fa-head-side-mask"
+            act3["title"] = "CAPUZ COM MÁSCARA FACIAL INTEGRADA E PUNHO COM DEDEIRA"
+            act3["desc_tmpl"] = "Desenvolvida com modelagem anatômica contínua para máximo conforto e zero atrito, a camisa FusionX conta com capuz anatômico acoplado com máscara facial protetora (balaclava integrada) que protege cabeça, nuca e rosto contra o sol forte e o vento, além de punhos anatômicos com abertura para o polegar (dedeira) que mantêm o dorso da mão sempre protegido."
+
+        # 3.1 Adaptação Hybrid (Capuz Anatômico e Punhos com Dedeira - SEM ZÍPER)
+        elif is_hybrid:
+            act3["tag"] = "Capuz Anatômico & Punho com Dedeira"
+            act3["fa_icon"] = "fa-solid fa-head-side-mask"
+            act3["title"] = "CAPUZ ANATÔMICO INTEGRADO E PUNHO COM ABERTURA PARA POLEGAR"
+            act3["desc_tmpl"] = "Projetada com caimento leve, contínuo e livre de atrito, a camisa Hybrid integra capuz anatômico de proteção solar 360° para nuca e cabeça, mangas com costuras planas reforçadas e punhos com abertura para o polegar (dedeira) que protegem o dorso das mãos durante toda a pescaria ou atividade ao ar livre."
+
+        # 3.2 Adaptação Capuz Geral (Elimina 'gola padre', injeta cobertura 360° no rosto/nuca)
+        elif is_hooded:
             act3["tag"] = "Capuz Anatômico & Proteção 360°"
             act3["fa_icon"] = "fa-solid fa-head-side-mask"
             act3["title"] = "CAPUZ ANATÔMICO INTEGRADO E COSTURA REFORÇADA"
@@ -1642,8 +1684,20 @@ class TemplateEngine:
             lbl = s.get("label", "")
             val = s.get("value", s.get("default", ""))
 
-            # Capuz: elimina 'gola padre'
-            if is_hooded:
+            # Fusion e Hybrid: Capuz e Dedeira sem zíper
+            if is_fusion:
+                if any(w in lbl.lower() for w in ["gola", "capuz", "zíper", "ziper"]):
+                    lbl = "Capuz & Máscara"
+                    val = "Capuz anatômico integrado com máscara facial de proteção UV50+"
+                val = re.sub(r'gola padre[^,;.]*', 'capuz com máscara facial integrada', val, flags=re.IGNORECASE)
+                val = re.sub(r'punhos anatômicos[^,;.]*', 'punhos anatômicos com abertura para o polegar (dedeira)', val, flags=re.IGNORECASE)
+            elif is_hybrid:
+                if any(w in lbl.lower() for w in ["gola", "capuz", "zíper", "ziper"]):
+                    lbl = "Capuz"
+                    val = "Capuz anatômico integrado de alta cobertura solar"
+                val = re.sub(r'gola padre[^,;.]*', 'capuz anatômico integrado', val, flags=re.IGNORECASE)
+                val = re.sub(r'punhos anatômicos[^,;.]*', 'punhos anatômicos com abertura para o polegar (dedeira)', val, flags=re.IGNORECASE)
+            elif is_hooded:
                 if any(w in lbl.lower() for w in ["gola", "zíper", "ziper"]):
                     lbl = "Capuz / Gola"
                     val = "Capuz anatômico integrado de alta cobertura solar com acabamento elástico"
@@ -1668,8 +1722,8 @@ class TemplateEngine:
             if is_round_neck and not is_hooded:
                 if any(w in lbl.lower() for w in ["zíper", "ziper"]):
                     lbl = "Gola"
-                    val = "Gola redonda canelada anatômica com pesponto reforçado (sem zíper)"
-                val = re.sub(r'com zíper[^,;.]*', 'sem zíper', val, flags=re.IGNORECASE)
+                    val = "Gola redonda canelada anatômica com pesponto reforçado"
+                val = re.sub(r'com zíper[^,;.]*', '', val, flags=re.IGNORECASE)
 
             # Luva integrada em camisa
             if is_has_glove and not is_short_sleeve:
@@ -1682,8 +1736,33 @@ class TemplateEngine:
         if is_has_glove and not is_short_sleeve and not any("luva" in s["label"].lower() for s in new_specs):
             new_specs.append({"label": "Punhos / Luva", "value": "Punhos estendidos anatômicos com luva integrada para o dorso da mão"})
 
-        if is_hooded and not any("capuz" in s["label"].lower() for s in new_specs):
+        if is_fusion:
+            if not any("capuz" in s["label"].lower() or "máscara" in s["label"].lower() for s in new_specs):
+                new_specs.append({"label": "Capuz & Máscara", "value": "Capuz anatômico integrado com máscara facial de proteção UV50+"})
+            if not any("punho" in s["label"].lower() for s in new_specs):
+                new_specs.append({"label": "Punhos", "value": "Punhos anatômicos com abertura para o polegar (dedeira)"})
+        elif is_hybrid:
+            if not any("capuz" in s["label"].lower() for s in new_specs):
+                new_specs.append({"label": "Capuz", "value": "Capuz anatômico integrado de alta cobertura solar"})
+            if not any("punho" in s["label"].lower() for s in new_specs):
+                new_specs.append({"label": "Punhos", "value": "Punhos anatômicos com abertura para o polegar (dedeira)"})
+        elif is_hooded and not any("capuz" in s["label"].lower() for s in new_specs):
             new_specs.append({"label": "Capuz", "value": "Capuz anatômico integrado para proteção solar estendida"})
+
+        if is_fusion or is_hybrid:
+            act3["title"] = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', act3["title"], flags=re.IGNORECASE).strip()
+            act3["desc_tmpl"] = re.sub(r'gola padre com cobertura no cursor do z[íi]per', 'capuz anatômico contínuo', act3["desc_tmpl"], flags=re.IGNORECASE)
+            act3["desc_tmpl"] = re.sub(r'\bcursor do z[íi]per\b', 'acabamento anatômico', act3["desc_tmpl"], flags=re.IGNORECASE)
+            act3["desc_tmpl"] = re.sub(r'\bz[íi]per com trava de seguran[çc]a\b', 'conforto anatômico contínuo', act3["desc_tmpl"], flags=re.IGNORECASE)
+            act3["desc_tmpl"] = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', act3["desc_tmpl"], flags=re.IGNORECASE)
+            new_clean_specs = []
+            for sp in new_specs:
+                lbl_c = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', sp["label"], flags=re.IGNORECASE).strip()
+                val_c = re.sub(r'gola padre[^,;.]*', 'capuz anatômico', sp["value"], flags=re.IGNORECASE)
+                val_c = re.sub(r'\bcursor do z[íi]per\b', 'acabamento contínuo', val_c, flags=re.IGNORECASE)
+                val_c = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', val_c, flags=re.IGNORECASE)
+                new_clean_specs.append({"label": lbl_c or "Acabamento", "value": val_c})
+            new_specs = new_clean_specs
 
         # Adaptação Temática de Público por Loja (Agro, Motors e Fishing) para Camisas UV
         if archetype_id == "uv_performance" and not is_kids:

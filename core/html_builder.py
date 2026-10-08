@@ -1321,6 +1321,34 @@ class HTMLBuilder:
         specs = enriched_data.get("specs", [])
         care_tips = enriched_data.get("care_tips", "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar).")
 
+        # Trava Estrita Anti-Zíper para Linhas Fusion, Hybrid, Gola Careca e Camisas de Botão
+        t_low = (formatted_title or "").lower()
+        sku_low = str(enriched_data.get("sku") or enriched_data.get("master_sku") or "").lower()
+        is_anti_zipper = (
+            any(w in t_low for w in ["fusion", "hybrid", "careca", "redonda", "sem zíper", "sem ziper"]) or
+            "fusion" in sku_low or sku_low.startswith("hyb") or "hybrid" in sku_low or
+            archetype_id == "shirts_button_work"
+        )
+        if is_anti_zipper:
+            for b in blocks:
+                if isinstance(b, dict):
+                    if "title" in b:
+                        b["title"] = re.sub(r'\b(zíper|ziper)\b', '', b["title"], flags=re.IGNORECASE).strip()
+                    if "description" in b:
+                        b["description"] = re.sub(r'gola padre com cobertura no cursor do z[íi]per', 'capuz anatômico contínuo sem zíper', b["description"], flags=re.IGNORECASE)
+                        b["description"] = re.sub(r'\bcursor do z[íi]per\b', 'acabamento anatômico', b["description"], flags=re.IGNORECASE)
+                        b["description"] = re.sub(r'\bz[íi]per com trava de seguran[çc]a\b', 'conforto anatômico sem zíper', b["description"], flags=re.IGNORECASE)
+                        b["description"] = re.sub(r'\b(com zíper|com ziper)\b', 'sem zíper', b["description"], flags=re.IGNORECASE)
+                        b["description"] = re.sub(r'\b(zíper|ziper)\b', '', b["description"], flags=re.IGNORECASE)
+            new_clean_specs = []
+            for sp in specs:
+                lbl_c = re.sub(r'\b(zíper|ziper)\b', '', sp["label"], flags=re.IGNORECASE).strip()
+                val_c = re.sub(r'gola padre[^,;.]*', 'capuz anatômico (sem zíper)', sp["value"], flags=re.IGNORECASE)
+                val_c = re.sub(r'\bcursor do z[íi]per\b', 'acabamento contínuo', val_c, flags=re.IGNORECASE)
+                val_c = re.sub(r'\b(com zíper|com ziper)\b', 'sem zíper', val_c, flags=re.IGNORECASE)
+                new_clean_specs.append({"label": lbl_c or "Acabamento", "value": val_c})
+            specs = new_clean_specs
+
         # 1. Cabeçalho com Título Oficial e Origem
         if origin_type == "revenda":
             origin_badge = f'<span class="brk-desc-origin-badge revenda">{get_svg_icon("sparkle", color="#b45309", size=12)} PRODUTO ORIGINAL • MARCA {brand_name.upper()}</span>'

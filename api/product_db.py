@@ -149,9 +149,14 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
             has_new_sg = any(term in raw_b for term in ["49,5 cm", "Baby Look", "1 a 2 Anos", "brk-sg-subtitle"]) and "ALTURA" in raw_b
             engine, builder = get_engine_and_builder()
             is_ready = engine.is_ready_delivery(p) if engine else False
-            expected_prazo = "Pronta entrega" if is_ready else "9 dias úteis"
+            expected_prazo = "Pronta entrega" if is_ready else "10 dias úteis"
             has_correct_prazo = expected_prazo in raw_b
-            if "Detalhes Técnicos" in raw_b and "XTech Pro" in raw_b and has_new_sg and has_correct_prazo:
+            
+            sku_low = str(p.get("master_sku") or p.get("sku") or "").lower()
+            is_fusion_or_hyb = "fusion" in title_l or "fusion" in sku_low or "hybrid" in title_l or sku_low.startswith("hyb")
+            has_no_zipper_violation = not is_fusion_or_hyb or (not bool(re.search(r'\b(zíper|ziper)\b', raw_b, re.I)))
+            
+            if "Detalhes Técnicos" in raw_b and "XTech Pro" in raw_b and has_new_sg and has_correct_prazo and has_no_zipper_violation:
                 return raw_b
 
     engine, builder = get_engine_and_builder()

@@ -1982,7 +1982,12 @@ function getProductModeBHTML(liveP) {
 
     if (tmpl && tmpl.act1 && tmpl.act2 && tmpl.act3) {
       const tLow = (liveP.title || "").toLowerCase();
-      const isHooded = /\b(capuz|hood|hoodie)\b/i.test(tLow);
+      const skuLow = (liveP.sku || liveP.master_sku || "").toLowerCase();
+      const tagsLow = (Array.isArray(liveP.tags) ? liveP.tags.join(" ") : (liveP.tags || "")).toLowerCase();
+
+      const isFusion = /\b(fusion|fusionx)\b/i.test(tLow) || /fusion/i.test(skuLow) || /fusion/i.test(tagsLow);
+      const isHybrid = /\bhybrid\b/i.test(tLow) || /^hyb/i.test(skuLow) || /hybrid/i.test(skuLow) || /hybrid/i.test(tagsLow);
+      const isHooded = /\b(capuz|hood|hoodie)\b/i.test(tLow) || isFusion || isHybrid;
       const isKids = /\b(infantil|kids|juvenil|mini)\b/i.test(tLow) && !/\b(adulto|unissex adulto)\b/i.test(tLow);
       const isShortSleeve = /\b(manga curta|manga-curta)\b/i.test(tLow) && !/\b(manga longa|manga-longa)\b/i.test(tLow);
       const isRoundNeck = /\b(gola careca|gola redonda|sem zíper|sem ziper)\b/i.test(tLow) || (/\bcamiseta\b/i.test(tLow) && !/\b(ziper|zíper)\b/i.test(tLow));
@@ -1993,6 +1998,7 @@ function getProductModeBHTML(liveP) {
       let act2Desc = (tmpl.act2.desc_tmpl || "").replace(/\{title\}/g, formattedTitle);
       let act3Title = tmpl.act3.title || "DURABILIDADE E ACABAMENTO";
       let act3Desc = (tmpl.act3.desc_tmpl || "").replace(/\{title\}/g, formattedTitle);
+      let act3Tag = tmpl.act3.tag || "Destaque";
 
       if (isKids) {
         act1Title = "CONFORTO E PROTEÇÃO SOLAR TOTAL PARA OS PEQUENOS AVENTUREIROS";
@@ -2005,7 +2011,16 @@ function getProductModeBHTML(liveP) {
         }
       }
 
-      if (isHooded) {
+      if (isFusion) {
+        act3Tag = "Capuz com Máscara Integrada & Proteção 360°";
+        act3Title = "CAPUZ COM MÁSCARA FACIAL INTEGRADA E PUNHO COM DEDEIRA";
+        act3Desc = "Desenvolvida sem zíper para máximo conforto e zero atrito, a camisa FusionX conta com capuz anatômico acoplado com máscara facial protetora (balaclava integrada) que protege cabeça, nuca e rosto contra o sol forte e o vento, além de punhos anatômicos com abertura para o polegar (dedeira) que mantêm o dorso da mão sempre protegido.";
+      } else if (isHybrid) {
+        act3Tag = "Capuz Anatômico & Punho com Dedeira";
+        act3Title = "CAPUZ ANATÔMICO INTEGRADO E PUNHO COM ABERTURA PARA POLEGAR";
+        act3Desc = "Projetada sem zíper para caimento leve e livre de atrito, a camisa Hybrid integra capuz anatômico de proteção solar 360° para nuca e cabeça, mangas com costuras planas reforçadas e punhos com abertura para o polegar (dedeira) que protegem o dorso das mãos durante toda a pescaria ou atividade ao ar livre.";
+      } else if (isHooded) {
+        act3Tag = "Capuz Anatômico & Proteção 360°";
         act3Title = "CAPUZ ANATÔMICO INTEGRADO E COSTURA REFORÇADA";
         act3Desc = "Equipada com capuz anatômico integrado que oferece proteção solar 360° para nuca, orelhas e laterais do rosto contra o sol forte e vento, dispensando o uso de acessórios extras.";
       } else if (isShortSleeve) {
@@ -2031,7 +2046,7 @@ function getProductModeBHTML(liveP) {
           image: img2
         },
         {
-          tag: isHooded ? "Capuz Anatômico & Proteção 360°" : (tmpl.act3.tag || "Destaque"),
+          tag: act3Tag,
           title: act3Title,
           description: act3Desc,
           image: img3
@@ -2087,18 +2102,62 @@ function getProductModeBHTML(liveP) {
     }
   }
 
-  // Ajuste inteligente do Prazo de Produção para Camisas C0 (Pronta entrega para _FULL e _OUT, 9 dias úteis para padrão)
+  // Ajuste inteligente do Prazo de Produção para Camisas C0 (Pronta entrega para _FULL e _OUT, 10 dias úteis para padrão)
   const isC0Shirt = (liveP.archetype_id === "uv_performance") ||
                     (liveP.sku && /^(c0|ci|cadv|adv)/i.test(liveP.sku)) ||
                     (liveP.master_sku && /^(c0|ci|cadv|adv)/i.test(liveP.master_sku));
   if (isC0Shirt && specs.length > 0) {
-    const prazoVal = isReadyDelivery(liveP) ? "Pronta entrega" : "9 dias úteis";
+    const prazoVal = isReadyDelivery(liveP) ? "Pronta entrega" : "10 dias úteis";
     specs = specs.map(s => {
       if (s.label === "Prazo de Produção") {
         return { ...s, value: prazoVal };
       }
       return s;
     });
+  }
+
+  const tLowModal = (liveP.title || "").toLowerCase();
+  const skuLowModal = (liveP.sku || liveP.master_sku || "").toLowerCase();
+  const tagsLowModal = (Array.isArray(liveP.tags) ? liveP.tags.join(" ") : (liveP.tags || "")).toLowerCase();
+  const isFusionModal = /\b(fusion|fusionx)\b/i.test(tLowModal) || /fusion/i.test(skuLowModal) || /fusion/i.test(tagsLowModal);
+  const isHybridModal = /\bhybrid\b/i.test(tLowModal) || /^hyb/i.test(skuLowModal) || /hybrid/i.test(skuLowModal) || /hybrid/i.test(tagsLowModal);
+
+  if (isFusionModal) {
+    if (!specs.some(s => /capuz|máscara/i.test(s.label))) {
+      specs.push({ label: "Capuz & Máscara", value: "Capuz anatômico integrado com máscara facial de proteção UV50+ (sem zíper)" });
+    }
+    if (!specs.some(s => /punho/i.test(s.label))) {
+      specs.push({ label: "Punhos", value: "Punhos anatômicos com abertura para o polegar (dedeira)" });
+    }
+  } else if (isHybridModal) {
+    if (!specs.some(s => /capuz/i.test(s.label))) {
+      specs.push({ label: "Capuz", value: "Capuz anatômico integrado de alta cobertura solar (sem zíper)" });
+    }
+    if (!specs.some(s => /punho/i.test(s.label))) {
+      specs.push({ label: "Punhos", value: "Punhos anatômicos com abertura para o polegar (dedeira)" });
+    }
+  }
+
+  // Trava Estrita Anti-Zíper no Modal para Fusion, Hybrid e Botão
+  if (isFusionModal || isHybridModal || liveP.archetype_id === "shirts_button_work") {
+    blocks.forEach(b => {
+      if (b.title) b.title = b.title.replace(/\b(zíper|ziper)\b/gi, "").trim();
+      if (b.description) {
+        b.description = b.description
+          .replace(/gola padre com cobertura no cursor do z[íi]per/gi, "capuz anatômico contínuo sem zíper")
+          .replace(/\bcursor do z[íi]per\b/gi, "acabamento anatômico")
+          .replace(/\bz[íi]per com trava de seguran[çc]a\b/gi, "conforto anatômico sem zíper")
+          .replace(/\b(com zíper|com ziper)\b/gi, "sem zíper")
+          .replace(/\b(zíper|ziper)\b/gi, "");
+      }
+    });
+    specs = specs.map(s => ({
+      label: s.label.replace(/\b(zíper|ziper)\b/gi, "").trim() || "Acabamento",
+      value: s.value
+        .replace(/gola padre[^,;.]*/gi, "capuz anatômico (sem zíper)")
+        .replace(/\bcursor do z[íi]per\b/gi, "acabamento contínuo")
+        .replace(/\b(com zíper|com ziper)\b/gi, "sem zíper")
+    }));
   }
 
   let careTips = liveP.care_tips;
