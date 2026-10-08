@@ -289,16 +289,16 @@ class TemplateEngine:
                     {
                         "img": "https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764952819862-13-Tags.webp",
                         "title": "PRODUTO PREMIUM BRK",
-                        "highlight": "Cada boné BRK é desenvolvido pensando em quem vive a vida ao ar livre intensamente.",
+                        "highlight": "Cada boné BRK é desenvolvido pensando no pescador que vive a pesca esportiva intensamente.",
                         "p1": "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem que você está usando um item de alta performance.",
-                        "p2": "Da escolha dos materiais ao acabamento final, tudo é pensado para entregar conforto, durabilidade e estilo em qualquer pescaria ou evento."
+                        "p2": "Da escolha dos materiais ao acabamento final, tudo é pensado para entregar conforto, durabilidade e estilo em qualquer pescaria."
                     },
                     {
                         "img": "https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764962764537-CAIXA-BRK.webp",
                         "title": "ENTREGA SEGURA BRK",
                         "highlight": "A sua experiência começa antes mesmo de abrir a caixa.",
-                        "p1": "O boné é enviado em embalagem protegida e personalizada BRK, pensado para chegar até você em perfeitas condições, sem amassar ou deformar.",
-                        "p2": "Assim, seu novo boné chega pronto para encarar a próxima aventura, seja no campo, na pista ou nas águas."
+                        "p1": "O boné é enviado em embalagem protegida e personalizada BRK, pensado para chegar até você em perfeitas condições.",
+                        "p2": "Assim, seu novo boné de pesca chega pronto para encarar a próxima aventura, seja na beira do rio, na represa ou em alto mar."
                     }
                 ],
                 "act1": {

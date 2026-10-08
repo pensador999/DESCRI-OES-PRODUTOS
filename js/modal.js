@@ -1323,6 +1323,15 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
   let split1_p1, split1_p2, split1_p3, split2_p1, split2_p2, split2_p3;
 
   if (archetypeId === "caps_trucker_snapback") {
+    let exclusiveDesc = "Arte exclusiva inspirada no lifestyle BRK, combinando atitude e identidade visual marcante.";
+    if (storeKey === "brk_fishing") {
+      exclusiveDesc = "Arte exclusiva BRK Fishing inspirada no universo da pesca esportiva, para você se destacar em qualquer ambiente.";
+    } else if (storeKey === "brk_agro") {
+      exclusiveDesc = "Arte exclusiva BRK Agro inspirada na força do campo e do agronegócio, feita para quem tem orgulho da terra.";
+    } else if (storeKey === "brk_motors") {
+      exclusiveDesc = "Arte exclusiva BRK Motors com pegada esportiva e adrenalina do automobilismo.";
+    }
+
     details = [
       {
         img: "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg",
@@ -1334,19 +1343,21 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
         img: "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/k2bupYT.jpg",
         alt: `Parte interna do boné ${formattedTitle} com costuras em tear`,
         title: "Interno em Tear",
-        desc: "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de pesca e uso outdoor."
+        desc: storeKey === "brk_fishing"
+          ? "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de pesca."
+          : "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de uso contínuo."
       },
       {
         img: "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/BYAO1Oj.jpg",
         alt: `Etiqueta BRK de qualidade aplicada no boné ${formattedTitle}`,
         title: "Etiqueta BRK de Qualidade",
-        desc: "Etiqueta BRK aplicada com acabamento premium, garantindo autenticidade e padrão de qualidade rigoroso."
+        desc: "Etiqueta BRK aplicada com acabamento premium, garantindo autenticidade e padrão de qualidade."
       },
       {
         img: "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/cjeqbhc.jpg",
         alt: `Design exclusivo do boné ${formattedTitle}`,
         title: "Design Exclusivo",
-        desc: `Arte exclusiva ${brandLabel} inspirada na vida ao ar livre, para você se destacar em qualquer ambiente.`
+        desc: exclusiveDesc
       }
     ];
     caractTitle = "Características do Boné BRK";
@@ -1354,23 +1365,49 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
       "Copa estruturada estilo trucker, com frente firme e tela traseira que favorece a ventilação.",
       "Aba moldável com costuras reforçadas, oferecendo conforto e proteção para o rosto e os olhos.",
       "Tamanho único com regulagem traseira, se ajustando com precisão à maioria dos formatos de cabeça.",
-      "Ideal para pesca esportiva, atividades ao ar livre, trabalho no campo e uso no dia a dia.",
-      "Acabamento interno pensado para máximo conforto mesmo em longas jornadas de uso contínuo."
+      "Ideal para pesca esportiva, atividades ao ar livre e uso no dia a dia.",
+      storeKey === "brk_fishing"
+        ? "Acabamento interno pensado para máximo conforto mesmo em longas jornadas de pesca."
+        : "Acabamento interno pensado para máximo conforto mesmo em longas jornadas de uso contínuo."
     ];
     cuidadosTitle = "Cuidados com o Seu Boné";
     cuidadosItems = [
       "Não lave o boné na máquina e não utilize água quente.",
-      "Para limpeza, use um pano macio levemente úmido com sabão neutro nas áreas sujas.",
-      "Retire o excesso de sabão com outro pano levemente úmido apenas com água.",
-      "Deixe secar à sombra, em superfície plana, longe de fontes diretas de calor.",
+      "Para limpeza, use um pano úmido com sabão neutro nas áreas sujas.",
+      "Retire o excesso de sabão com outro pano levemente úmido.",
+      "Deixe secar à sombra, em superfície plana, longe de fontes de calor.",
       "Não utilize alvejante, não passe a ferro e não leve à secadora."
     ];
-    split1_p1 = "<strong>Cada boné BRK é desenvolvido pensando em quem vive a vida ao ar livre intensamente.</strong>";
-    split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem que você está usando um item de alta performance.";
-    split1_p3 = "Da escolha dos materiais ao acabamento final, tudo é pensado para entregar conforto, durabilidade e estilo em qualquer pescaria ou evento.";
-    split2_p1 = "<strong>A sua experiência começa antes mesmo de abrir a caixa.</strong>";
-    split2_p2 = "O boné é enviado em embalagem protegida e personalizada BRK, pensado para chegar até você em perfeitas condições, sem amassar ou deformar.";
-    split2_p3 = "Assim, seu novo boné chega pronto para encarar a próxima aventura, seja no campo, na pista ou nas águas.";
+
+    if (storeKey === "brk_fishing") {
+      split1_p1 = "Cada boné BRK é desenvolvido pensando no pescador que vive a pesca esportiva intensamente.";
+      split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem que você está usando um item de alta performance.";
+      split1_p3 = "Da escolha dos materiais ao acabamento final, tudo é pensado para entregar conforto, durabilidade e estilo em qualquer pescaria.";
+      split2_p1 = "A sua experiência começa antes mesmo de abrir a caixa.";
+      split2_p2 = "O boné é enviado em embalagem protegida e personalizada BRK, pensado para chegar até você em perfeitas condições.";
+      split2_p3 = "Assim, seu novo boné de pesca chega pronto para encarar a próxima aventura, seja na beira do rio, na represa ou em alto mar.";
+    } else if (storeKey === "brk_agro") {
+      split1_p1 = "Cada boné BRK é desenvolvido pensando em quem vive o agronegócio com paixão e orgulho da terra.";
+      split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem padrão de acabamento robusto e durável.";
+      split1_p3 = "Da escolha dos tecidos ao acabamento das costuras, tudo é projetado para suportar o dia a dia pesado na lida da fazenda e nas feiras agrícolas.";
+      split2_p1 = "A sua experiência começa antes mesmo de abrir a caixa.";
+      split2_p2 = "O boné é enviado em embalagem protegida e personalizada BRK, pensada para chegar impecável até você, sem amassar e pronto para o uso.";
+      split2_p3 = "Assim, seu novo boné chega pronto para encarar a lida na fazenda, nos eventos ou na cidade com presença marcante.";
+    } else if (storeKey === "brk_motors") {
+      split1_p1 = "Cada boné BRK é desenvolvido com o DNA da velocidade, alta performance e adrenalina das pistas.";
+      split1_p2 = "As etiquetas exclusivas BRK garantem a autenticidade de um produto feito para apaixonados por velocidade.";
+      split1_p3 = "Da modelagem ergonômica à escolha dos tecidos, cada detalhe expressa a atitude marcante do universo motorizado.";
+      split2_p1 = "A sua experiência começa antes mesmo de abrir a caixa.";
+      split2_p2 = "O boné é enviado em embalagem protegida e personalizada BRK, pensada para chegar impecável até você, sem amassar e pronto para o uso.";
+      split2_p3 = "Assim, seu novo boné chega pronto para acompanhar você nas pistas, nos track days ou no dia a dia com estilo único.";
+    } else {
+      split1_p1 = "Cada boné BRK é desenvolvido pensando em quem vive a vida ao ar livre intensamente.";
+      split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem que você está usando um item original e de alta performance.";
+      split1_p3 = "Da escolha dos tecidos ao acabamento das costuras, tudo é pensado para entregar conforto e estilo na aventura ou no dia a dia.";
+      split2_p1 = "A sua experiência começa antes mesmo de abrir a caixa.";
+      split2_p2 = "O boné é enviado em embalagem protegida e personalizada BRK, pensada para que ele chegue impecável até você, sem amassar e pronto para o uso.";
+      split2_p3 = "Assim, seu novo boné chega pronto para encarar a próxima aventura, seja no campo, na pista ou nas águas.";
+    }
   } else if (archetypeId === "hats_safari_outdoor") {
     const rawImgs = (liveP.cdn_images && liveP.cdn_images.length > 0) ? liveP.cdn_images : (liveP.gallery || liveP.images || []);
     const gallery = rawImgs.map(img => (typeof img === "object" ? img.src : img));
@@ -1421,10 +1458,10 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
       "Não usar alvejantes, amaciantes ou produtos à base de cloro.",
       "Guardar sem dobrar a aba estruturada para manter o caimento original."
     ];
-    split1_p1 = "<strong>Cada chapéu BRK é desenvolvido pensando na proteção de quem enfrenta longas jornadas ao ar livre.</strong>";
+    split1_p1 = "Cada chapéu BRK é desenvolvido pensando na proteção de quem enfrenta longas jornadas ao ar livre.";
     split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem padrão de proteção solar certificado.";
     split1_p3 = "Construído com materiais leves e resistentes, oferece o máximo de conforto térmico para pescarias e trabalho sob sol forte.";
-    split2_p1 = "<strong>A sua experiência começa antes mesmo de abrir a caixa.</strong>";
+    split2_p1 = "A sua experiência começa antes mesmo de abrir a caixa.";
     split2_p2 = "O chapéu é enviado em embalagem protegida BRK, projetada para evitar deformações na aba durante o transporte.";
     split2_p3 = "Seu novo chapéu chega pronto para encarar o sol com proteção e estilo incomparáveis.";
   } else {
@@ -1477,19 +1514,27 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
       "Nunca dobrar, amassar ou deixar exposto no interior de veículos sob sol forte.",
       "Em caso de umidade leve, deixe secar naturalmente à sombra em local ventilado."
     ];
-    split1_p1 = "<strong>A tradição e o orgulho do campo em cada detalhe artesanal.</strong>";
+    split1_p1 = "A tradição e o orgulho do campo em cada detalhe artesanal.";
     split1_p2 = "Cada chapéu é selecionado para entregar autenticidade, robustez e elegância para os amantes do estilo country.";
     split1_p3 = "Acabamento primoroso que valoriza a cultura sertaneja e a presença marcante onde quer que você esteja.";
-    split2_p1 = "<strong>Embalagem especial anti-deformação.</strong>";
+    split2_p1 = "Embalagem especial anti-deformação.";
     split2_p2 = "O chapéu é embalado em caixa reforçada para garantir que a copa e a aba cheguem impecáveis e sem amassados.";
     split2_p3 = "Pronto para usar na lida, nas cavalgadas ou nos grandes eventos do agronegócio.";
   }
 
-  const detailsMarkup = details.map(d => `    <article class="brk-cap-detail-item">
-      <div class="brk-cap-detail-image"><img src="${d.img}" alt="${d.alt}" loading="lazy" referrerpolicy="no-referrer"></div>
-      <h3>${d.title}</h3>
-      <p>${d.desc}</p>
-    </article>`).join("\n");
+  let radialColor = "rgba(0, 168, 255, 0.15)";
+  if (storeKey === "brk_agro") {
+    radialColor = "rgba(21, 128, 61, 0.15)";
+  } else if (storeKey === "brk_motors") {
+    radialColor = "rgba(234, 88, 12, 0.15)";
+  }
+
+  const detailsMarkup = details.map(d => `      <!-- ${d.title} -->
+      <article class="brk-cap-detail-item">
+        <div class="brk-cap-detail-image"><img src="${d.img}" alt="${d.alt}"></div>
+        <h3>${d.title}</h3>
+        <p>${d.desc}</p>
+      </article>`).join("\n");
 
   const caractLi = caractItems.map(item => `            <li>${item}</li>`).join("\n");
   const cuidadosLi = cuidadosItems.map(item => `            <li>${item}</li>`).join("\n");
@@ -1507,19 +1552,21 @@ ${schemaJsonLd}
     color: #222222;
     line-height: 1.5;
     font-size: 15px;
-    max-width: 1000px;
-    margin: 0 auto;
   }
+
   .brk-cap-description * {
     box-sizing: border-box;
   }
+
   .brk-cap-section {
-    margin: 28px 0;
+    margin: 24px 0;
   }
+
   .brk-cap-section-header {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
   }
+
   .brk-cap-section-title {
     display: inline-block;
     font-size: 20px;
@@ -1528,46 +1575,40 @@ ${schemaJsonLd}
     letter-spacing: 0.08em;
     position: relative;
     padding-bottom: 6px;
-    margin: 0;
-    color: #111827;
   }
+
   .brk-cap-section-title::after {
     content: "";
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     bottom: 0;
-    width: 48px;
+    width: 42px;
     height: 3px;
     border-radius: 999px;
     background: ${gradHoriz};
   }
+
+  /* DETALHES – GRID DE IMAGENS 260x260 + TEXTO */
   .brk-cap-details-grid {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 18px;
+    gap: 16px;
   }
+
   .brk-cap-detail-item {
     text-align: center;
     max-width: 260px;
     flex: 1 1 220px;
-    background: #ffffff;
-    border-radius: 14px;
-    padding: 10px;
-    border: 1px solid rgba(0, 0, 0, 0.04);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
-  .brk-cap-detail-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-  }
+
   .brk-cap-detail-image {
     width: 100%;
     max-width: 260px;
-    margin: 0 auto 10px;
+    margin: 0 auto 8px;
   }
+
   .brk-cap-detail-image img {
     display: block;
     width: 100%;
@@ -1575,38 +1616,43 @@ ${schemaJsonLd}
     object-fit: cover;
     border-radius: 12px;
   }
+
   .brk-cap-detail-item h3 {
     font-size: 14px;
     font-weight: 700;
     text-transform: uppercase;
     margin: 6px 0 4px;
     letter-spacing: 0.04em;
-    color: #1f2937;
   }
+
   .brk-cap-detail-item p {
     font-size: 13px;
     margin: 0;
-    color: #4b5563;
-    line-height: 1.45;
+    color: #555555;
   }
+
+  /* INFORMAÇÕES – CARDS SUTIS + LISTA COM QUADRADOS + SVG NO TÍTULO */
   .brk-cap-info-wrapper {
     display: grid;
     grid-template-columns: minmax(0, 1.25fr);
     gap: 20px;
   }
+
   .brk-cap-info-block {
-    padding: 20px 22px 22px;
+    padding: 16px 18px 18px;
     border-radius: 16px;
     background: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.05);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
   }
+
   .brk-cap-info-title {
     position: relative;
     display: inline-block;
     padding: 4px 0;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
+
   .brk-cap-info-title h3 {
     font-size: 15px;
     font-weight: 700;
@@ -1615,8 +1661,8 @@ ${schemaJsonLd}
     margin: 0;
     position: relative;
     z-index: 1;
-    color: #111827;
   }
+
   .brk-cap-info-title svg {
     position: absolute;
     left: -10px;
@@ -1626,26 +1672,29 @@ ${schemaJsonLd}
     opacity: 0.18;
     z-index: 0;
   }
+
   .brk-cap-info-icon--care {
     transform: translateX(-4px);
   }
+
   .brk-cap-info-list {
     margin: 4px 0 0;
     padding: 0;
   }
+
   .brk-cap-info-block ul {
     margin: 0;
     padding-left: 0;
     list-style: none;
   }
+
   .brk-cap-info-block li {
     position: relative;
     padding-left: 20px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-size: 14px;
-    color: #374151;
-    line-height: 1.5;
   }
+
   .brk-cap-info-block li::before {
     content: "";
     position: absolute;
@@ -1656,56 +1705,62 @@ ${schemaJsonLd}
     border-radius: 3px;
     background: ${gradHoriz};
   }
+
   @media (min-width: 900px) {
     .brk-cap-info-block ul {
       column-count: 2;
       column-gap: 28px;
     }
+
     .brk-cap-info-block li {
       break-inside: avoid;
     }
   }
+
+  /* SEÇÕES DIVIDIDAS (IMAGEM + TEXTO) */
   .brk-cap-split-sections {
     display: flex;
     flex-direction: column;
     gap: 24px;
   }
+
   .brk-cap-split {
     display: flex;
     align-items: center;
     gap: 24px;
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 16px;
-    border: 1px solid rgba(0, 0, 0, 0.04);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
   }
+
   .brk-cap-split.reverse {
     flex-direction: row-reverse;
   }
+
   .brk-cap-split-image {
-    flex: 1 1 45%;
+    flex: 1 1 50%;
     max-width: 450px;
-    border-radius: 16px;
+    border-radius: 18px;
     overflow: hidden;
-    background: radial-gradient(circle at top left, rgba(0, 168, 255, 0.12), transparent 60%);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    background: radial-gradient(circle at top left, ${radialColor}, transparent 55%);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
   }
+
   .brk-cap-split-image img {
     display: block;
     width: 100%;
     height: auto;
-    object-fit: cover;
   }
+
   .brk-cap-split-content {
-    flex: 1 1 55%;
+    flex: 1 1 50%;
     position: relative;
-    padding-left: 20px;
+    padding-left: 18px;
   }
+
   .brk-cap-split.reverse .brk-cap-split-content {
     padding-left: 0;
-    padding-right: 20px;
+    padding-right: 18px;
   }
+
+  /* Barrinha vertical atrás de todo o texto */
   .brk-cap-split-content::before {
     content: "";
     position: absolute;
@@ -1716,72 +1771,67 @@ ${schemaJsonLd}
     background: ${gradVert};
     left: 0;
   }
+
   .brk-cap-split.reverse .brk-cap-split-content::before {
     left: auto;
     right: 0;
   }
+
   .brk-cap-split-content h2 {
     font-size: 18px;
     font-weight: 800;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    margin-top: 0;
-    margin-bottom: 10px;
-    color: #111827;
+    margin-bottom: 8px;
   }
+
   .brk-cap-split-content p {
-    margin: 0 0 8px;
+    margin: 0 0 4px;
     font-size: 14px;
-    color: #4b5563;
-    line-height: 1.5;
   }
-  .brk-cap-split-content p strong {
-    font-weight: 700;
-    color: #1f2937;
-  }
-  @media (max-width: 900px) {
+
+  /* RESPONSIVIDADE */
+  @media (max-width: 768px) {
+    .brk-cap-details-grid {
+      justify-content: center;
+    }
+
     .brk-cap-detail-item {
       flex: 1 1 45%;
-      max-width: 240px;
+      max-width: 220px;
     }
-  }
-  @media (max-width: 640px) {
-    .brk-cap-section {
-      margin: 20px 0;
-    }
-    .brk-cap-section-title {
-      font-size: 18px;
-    }
-    .brk-cap-detail-item {
-      flex: 1 1 100%;
-      max-width: 100%;
-    }
+
     .brk-cap-split,
     .brk-cap-split.reverse {
       flex-direction: column;
-      padding: 14px;
     }
-    .brk-cap-split-image {
+
+    .brk-cap-split-image,
+    .brk-cap-split-content {
+      flex: 1 1 100%;
       max-width: 100%;
       width: 100%;
-      flex: none;
     }
+
     .brk-cap-split-content {
       padding-left: 14px;
-      padding-right: 0;
-      width: 100%;
     }
+
     .brk-cap-split.reverse .brk-cap-split-content {
       padding-right: 0;
       padding-left: 14px;
     }
-    .brk-cap-split-content::before,
+
     .brk-cap-split.reverse .brk-cap-split-content::before {
-      left: 0;
       right: auto;
+      left: 0;
     }
-    .brk-cap-split-content h2 {
-      font-size: 16px;
+  }
+
+  @media (max-width: 480px) {
+    .brk-cap-detail-item {
+      flex: 1 1 100%;
+      max-width: 260px;
     }
   }
 </style>
@@ -1835,11 +1885,11 @@ ${cuidadosLi}
     <!-- 1ª seção: Etiquetas BRK (FOTO -> TEXTO) -->
     <div class="brk-cap-split">
       <div class="brk-cap-split-image">
-        <img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764952819862-13-Tags.webp" alt="Etiquetas BRK aplicadas em produtos originais" loading="lazy" referrerpolicy="no-referrer">
+        <img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764952819862-13-Tags.webp" alt="Etiquetas BRK aplicadas em produtos originais">
       </div>
       <div class="brk-cap-split-content">
         <h2>PRODUTO PREMIUM BRK</h2>
-        <p>${split1_p1}</p>
+        <p><strong>${split1_p1}</strong></p>
         <p>${split1_p2}</p>
         <p>${split1_p3}</p>
       </div>
@@ -1848,11 +1898,11 @@ ${cuidadosLi}
     <!-- 2ª seção: Caixa / Entrega (TEXTO <- FOTO) -->
     <div class="brk-cap-split reverse">
       <div class="brk-cap-split-image">
-        <img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764962764537-CAIXA-BRK.webp" alt="Caixa personalizada BRK para envio seguro" loading="lazy" referrerpolicy="no-referrer">
+        <img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764962764537-CAIXA-BRK.webp" alt="Caixa personalizada BRK para envio seguro">
       </div>
       <div class="brk-cap-split-content">
         <h2>ENTREGA SEGURA BRK</h2>
-        <p>${split2_p1}</p>
+        <p><strong>${split2_p1}</strong></p>
         <p>${split2_p2}</p>
         <p>${split2_p3}</p>
       </div>

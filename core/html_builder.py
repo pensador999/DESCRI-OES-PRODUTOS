@@ -676,54 +676,95 @@ class HTMLBuilder:
         # 1. Configuração Específica por Categoria
         if archetype_id == "caps_trucker_snapback":
             item_type_label = "Boné"
+            if store_key == "brk_agro":
+                exclusive_desc = "Arte exclusiva BRK Agro inspirada no campo e no agronegócio, para você se destacar em qualquer ambiente."
+                caract_items = [
+                    "Copa estruturada estilo trucker, com frente firme e tela traseira que favorece a ventilação.",
+                    "Aba moldável com costuras reforçadas, oferecendo conforto e proteção para o rosto e os olhos.",
+                    "Tamanho único com regulagem traseira, se ajustando à maioria dos formatos de cabeça.",
+                    "Ideal para o campo, atividades ao ar livre e uso no dia a dia.",
+                    "Acabamento interno pensado para máximo conforto mesmo em longas jornadas de trabalho."
+                ]
+                split1_strong = "Cada boné BRK é desenvolvido pensando em quem vive a vida no campo intensamente."
+                split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem que você está usando um item de alta performance."
+                split1_p3 = "Da escolha dos materiais ao acabamento final, tudo é pensado para entregar conforto, durabilidade e estilo no campo ou na cidade."
+                split2_strong = "A sua experiência começa antes mesmo de abrir a caixa."
+                split2_p2 = "O boné é enviado em embalagem protegida e personalizada BRK, pensado para chegar até você em perfeitas condições."
+                split2_p3 = "Assim, seu novo boné chega pronto para encarar a lida na fazenda, feiras agropecuárias ou eventos sertanejos."
+                split1_alt = "Etiquetas BRK aplicadas em produtos agropecuários"
+                split2_alt = "Caixa personalizada BRK para envio seguro"
+            elif store_key == "brk_motors":
+                exclusive_desc = "Arte exclusiva BRK Motors inspirada na velocidade e no off-road, para você se destacar dentro e fora das pistas."
+                caract_items = [
+                    "Copa estruturada estilo trucker, com frente firme e tela traseira que favorece a ventilação.",
+                    "Aba moldável com costuras reforçadas, oferecendo conforto e proteção para o rosto e os olhos.",
+                    "Tamanho único com regulagem traseira, se ajustando à maioria dos formatos de cabeça.",
+                    "Ideal para trilha, velocidade, eventos automotivos e uso no dia a dia.",
+                    "Acabamento interno pensado para máximo conforto mesmo em longas jornadas."
+                ]
+                split1_strong = "Cada boné BRK é desenvolvido pensando no piloto e entusiasta que vive a velocidade intensamente."
+                split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem que você está usando um item de alta performance."
+                split1_p3 = "Da escolha dos materiais ao acabamento final, tudo é pensado para entregar conforto, durabilidade e estilo em qualquer aventura sobre rodas."
+                split2_strong = "A sua experiência começa antes mesmo de abrir a caixa."
+                split2_p2 = "O boné é enviado em embalagem protegida e personalizada BRK, pensado para chegar até você em perfeitas condições."
+                split2_p3 = "Assim, seu novo boné chega pronto para encarar a próxima trilha, viagem ou pista com atitude e proteção."
+                split1_alt = "Etiquetas BRK aplicadas em produtos esportivos"
+                split2_alt = "Caixa personalizada BRK para envio seguro"
+            else:
+                exclusive_desc = "Arte exclusiva BRK Fishing inspirada na pesca esportiva, para você se destacar dentro e fora da água."
+                caract_items = [
+                    "Copa estruturada estilo trucker, com frente firme e tela traseira que favorece a ventilação.",
+                    "Aba moldável com costuras reforçadas, oferecendo conforto e proteção para o rosto e os olhos.",
+                    "Tamanho único com regulagem traseira, se ajustando à maioria dos formatos de cabeça.",
+                    "Ideal para pesca esportiva, atividades ao ar livre e uso no dia a dia.",
+                    "Acabamento interno pensado para máximo conforto mesmo em longas jornadas de pesca."
+                ]
+                split1_strong = "Cada boné BRK é desenvolvido pensando no pescador que vive a pesca esportiva intensamente."
+                split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem que você está usando um item de alta performance."
+                split1_p3 = "Da escolha dos materiais ao acabamento final, tudo é pensado para entregar conforto, durabilidade e estilo em qualquer pescaria."
+                split2_strong = "A sua experiência começa antes mesmo de abrir a caixa."
+                split2_p2 = "O boné é enviado em embalagem protegida e personalizada BRK, pensado para chegar até você em perfeitas condições."
+                split2_p3 = "Assim, seu novo boné de pesca chega pronto para encarar a próxima aventura, seja na beira do rio, na represa ou em alto mar."
+                split1_alt = "Etiquetas BRK aplicadas em produtos de pesca"
+                split2_alt = "Caixa personalizada BRK para envio dos bonés"
+
             details = [
                 {
                     "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg",
-                    "alt": f"Aba do boné {formatted_title} com costuras reforçadas e estrutura moldável",
+                    "alt": "Aba do boné BRK com costuras reforçadas e estrutura moldável",
                     "title": "Aba Moldável",
                     "desc": "Aba estruturada com diversas costuras e moldável, garantindo durabilidade e proteção extra contra o sol."
                 },
                 {
                     "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/k2bupYT.jpg",
-                    "alt": f"Parte interna do boné {formatted_title} com costuras em tear",
+                    "alt": "Parte interna do boné BRK com costuras em tear",
                     "title": "Interno em Tear",
-                    "desc": "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de pesca e uso outdoor."
+                    "desc": "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de pesca." if store_key == "brk_fishing" else "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de uso contínuo."
                 },
                 {
                     "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/BYAO1Oj.jpg",
-                    "alt": f"Etiqueta BRK de qualidade aplicada no boné {formatted_title}",
+                    "alt": "Etiqueta BRK de qualidade aplicada no boné",
                     "title": "Etiqueta BRK de Qualidade",
-                    "desc": "Etiqueta BRK aplicada com acabamento premium, garantindo autenticidade e padrão de qualidade rigoroso."
+                    "desc": "Etiqueta BRK aplicada com acabamento premium, garantindo autenticidade e padrão de qualidade."
                 },
                 {
                     "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/cjeqbhc.jpg",
-                    "alt": f"Design exclusivo do boné {formatted_title}",
+                    "alt": f"Design exclusivo do boné {brand_label}",
                     "title": "Design Exclusivo",
-                    "desc": f"Arte exclusiva {brand_label} inspirada na vida ao ar livre, para você se destacar em qualquer ambiente."
+                    "desc": exclusive_desc
                 }
             ]
             caract_title = "Características do Boné BRK"
-            caract_items = [
-                "Copa estruturada estilo trucker, com frente firme e tela traseira que favorece a ventilação.",
-                "Aba moldável com costuras reforçadas, oferecendo conforto e proteção para o rosto e os olhos.",
-                "Tamanho único com regulagem traseira, se ajustando com precisão à maioria dos formatos de cabeça.",
-                "Ideal para pesca esportiva, atividades ao ar livre, trabalho no campo e uso no dia a dia.",
-                "Acabamento interno pensado para máximo conforto mesmo em longas jornadas de uso contínuo."
-            ]
             cuidados_title = "Cuidados com o Seu Boné"
             cuidados_items = [
                 "Não lave o boné na máquina e não utilize água quente.",
-                "Para limpeza, use um pano macio levemente úmido com sabão neutro nas áreas sujas.",
-                "Retire o excesso de sabão com outro pano levemente úmido apenas com água.",
-                "Deixe secar à sombra, em superfície plana, longe de fontes diretas de calor.",
+                "Para limpeza, use um pano úmido com sabão neutro nas áreas sujas.",
+                "Retire o excesso de sabão com outro pano levemente úmido.",
+                "Deixe secar à sombra, em superfície plana, longe de fontes de calor.",
                 "Não utilize alvejante, não passe a ferro e não leve à secadora."
             ]
-            split1_p1 = "<strong>Cada boné BRK é desenvolvido pensando em quem vive a vida ao ar livre intensamente.</strong>"
-            split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem que você está usando um item de alta performance."
-            split1_p3 = "Da escolha dos materiais ao acabamento final, tudo é pensado para entregar conforto, durabilidade e estilo em qualquer pescaria ou evento."
-            split2_p1 = "<strong>A sua experiência começa antes mesmo de abrir a caixa.</strong>"
-            split2_p2 = "O boné é enviado em embalagem protegida e personalizada BRK, pensado para chegar até você em perfeitas condições, sem amassar ou deformar."
-            split2_p3 = "Assim, seu novo boné chega pronto para encarar a próxima aventura, seja no campo, na pista ou nas águas."
+            split1_p1 = f"<strong>{split1_strong}</strong>"
+            split2_p1 = f"<strong>{split2_strong}</strong>"
 
         elif archetype_id == "hats_safari_outdoor":
             item_type_label = "Chapéu"
@@ -781,6 +822,8 @@ class HTMLBuilder:
             split2_p1 = "<strong>A sua experiência começa antes mesmo de abrir a caixa.</strong>"
             split2_p2 = "O chapéu é enviado em embalagem protegida BRK, projetada para evitar deformações na aba durante o transporte."
             split2_p3 = "Seu novo chapéu chega pronto para encarar o sol com proteção e estilo incomparáveis."
+            split1_alt = f"Etiquetas BRK aplicadas no chapéu {formatted_title}"
+            split2_alt = f"Embalagem protegida BRK para envio do chapéu {formatted_title}"
 
         else:  # hats_country_cowboy
             item_type_label = "Chapéu Country"
@@ -838,23 +881,33 @@ class HTMLBuilder:
             split2_p1 = "<strong>Embalagem especial anti-deformação.</strong>"
             split2_p2 = "O chapéu é embalado em caixa reforçada para garantir que a copa e a aba cheguem impecáveis e sem amassados."
             split2_p3 = "Pronto para usar na lida, nas cavalgadas ou nos grandes eventos do agronegócio."
+            split1_alt = f"Etiquetas de autenticidade do chapéu country {formatted_title}"
+            split2_alt = f"Caixa reforçada anti-deformação para envio do chapéu {formatted_title}"
+
+        # Cor radial sutil por loja para a foto do split
+        if store_key == "brk_agro":
+            radial_color = "rgba(21, 128, 61, 0.15)"
+        elif store_key == "brk_motors":
+            radial_color = "rgba(234, 88, 12, 0.15)"
+        else:
+            radial_color = "rgba(0, 168, 255, 0.15)"
 
         # Montagem dos Detalhes em HTML
         details_html = []
         for d in details:
-            details_html.append(f"""    <article class="brk-cap-detail-item">
-      <div class="brk-cap-detail-image"><img src="{d['img']}" alt="{d['alt']}" loading="lazy" referrerpolicy="no-referrer"></div>
-      <h3>{d['title']}</h3>
-      <p>{d['desc']}</p>
-    </article>""")
+            details_html.append(f"""<!-- {d['title']} -->
+<article class="brk-cap-detail-item">
+<div class="brk-cap-detail-image"><img src="{d['img']}" alt="{d['alt']}"></div>
+<h3>{d['title']}</h3>
+<p>{d['desc']}</p>
+</article>""")
         details_markup = "\n".join(details_html)
 
         # Montagem das Características e Cuidados
-        caract_li = "\n".join([f"            <li>{item}</li>" for item in caract_items])
-        cuidados_li = "\n".join([f"            <li>{item}</li>" for item in cuidados_items])
+        caract_li = "\n".join([f"<li>{item}</li>" for item in caract_items])
+        cuidados_li = "\n".join([f"<li>{item}</li>" for item in cuidados_items])
 
-        svg_sparkle = get_svg_icon("sparkle", color=color_accent, size=36)
-        svg_care = get_svg_icon("care", color=color_accent, size=36, extra_class="brk-cap-info-icon--care")
+        svg_care_extra = ' class="brk-cap-info-icon--care"' if color_accent != "#00a8ff" else ''
 
         return f"""{brk_tracking_marker(sku, archetype_id)}
 {schema_json_ld}
@@ -864,8 +917,6 @@ class HTMLBuilder:
     color: #222222;
     line-height: 1.5;
     font-size: 15px;
-    max-width: 1000px;
-    margin: 0 auto;
   }}
 
   .brk-cap-description * {{
@@ -873,12 +924,12 @@ class HTMLBuilder:
   }}
 
   .brk-cap-section {{
-    margin: 28px 0;
+    margin: 24px 0;
   }}
 
   .brk-cap-section-header {{
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
   }}
 
   .brk-cap-section-title {{
@@ -889,8 +940,6 @@ class HTMLBuilder:
     letter-spacing: 0.08em;
     position: relative;
     padding-bottom: 6px;
-    margin: 0;
-    color: #111827;
   }}
 
   .brk-cap-section-title::after {{
@@ -899,7 +948,7 @@ class HTMLBuilder:
     left: 50%;
     transform: translateX(-50%);
     bottom: 0;
-    width: 48px;
+    width: 42px;
     height: 3px;
     border-radius: 999px;
     background: {grad_horiz};
@@ -910,30 +959,19 @@ class HTMLBuilder:
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 18px;
+    gap: 16px;
   }}
 
   .brk-cap-detail-item {{
     text-align: center;
     max-width: 260px;
     flex: 1 1 220px;
-    background: #ffffff;
-    border-radius: 14px;
-    padding: 10px;
-    border: 1px solid rgba(0, 0, 0, 0.04);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }}
-
-  .brk-cap-detail-item:hover {{
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
   }}
 
   .brk-cap-detail-image {{
     width: 100%;
     max-width: 260px;
-    margin: 0 auto 10px;
+    margin: 0 auto 8px;
   }}
 
   .brk-cap-detail-image img {{
@@ -950,17 +988,15 @@ class HTMLBuilder:
     text-transform: uppercase;
     margin: 6px 0 4px;
     letter-spacing: 0.04em;
-    color: #1f2937;
   }}
 
   .brk-cap-detail-item p {{
     font-size: 13px;
     margin: 0;
-    color: #4b5563;
-    line-height: 1.45;
+    color: #555555;
   }}
 
-  /* INFORMAÇÕES – CARDS SUTIS + LISTA COM QUADRADOS */
+  /* INFORMAÇÕES – CARDS SUTIS + LISTA COM QUADRADOS + SVG NO TÍTULO */
   .brk-cap-info-wrapper {{
     display: grid;
     grid-template-columns: minmax(0, 1.25fr);
@@ -968,7 +1004,7 @@ class HTMLBuilder:
   }}
 
   .brk-cap-info-block {{
-    padding: 20px 22px 22px;
+    padding: 16px 18px 18px;
     border-radius: 16px;
     background: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.05);
@@ -979,7 +1015,7 @@ class HTMLBuilder:
     position: relative;
     display: inline-block;
     padding: 4px 0;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }}
 
   .brk-cap-info-title h3 {{
@@ -990,7 +1026,6 @@ class HTMLBuilder:
     margin: 0;
     position: relative;
     z-index: 1;
-    color: #111827;
   }}
 
   .brk-cap-info-title svg {{
@@ -1021,10 +1056,8 @@ class HTMLBuilder:
   .brk-cap-info-block li {{
     position: relative;
     padding-left: 20px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-size: 14px;
-    color: #374151;
-    line-height: 1.5;
   }}
 
   .brk-cap-info-block li::before {{
@@ -1060,11 +1093,6 @@ class HTMLBuilder:
     display: flex;
     align-items: center;
     gap: 24px;
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 16px;
-    border: 1px solid rgba(0, 0, 0, 0.04);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
   }}
 
   .brk-cap-split.reverse {{
@@ -1072,32 +1100,32 @@ class HTMLBuilder:
   }}
 
   .brk-cap-split-image {{
-    flex: 1 1 45%;
+    flex: 1 1 50%;
     max-width: 450px;
-    border-radius: 16px;
+    border-radius: 18px;
     overflow: hidden;
-    background: radial-gradient(circle at top left, rgba(0, 168, 255, 0.12), transparent 60%);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    background: radial-gradient(circle at top left, {radial_color}, transparent 55%);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
   }}
 
   .brk-cap-split-image img {{
     display: block;
     width: 100%;
     height: auto;
-    object-fit: cover;
   }}
 
   .brk-cap-split-content {{
-    flex: 1 1 55%;
+    flex: 1 1 50%;
     position: relative;
-    padding-left: 20px;
+    padding-left: 18px;
   }}
 
   .brk-cap-split.reverse .brk-cap-split-content {{
     padding-left: 0;
-    padding-right: 20px;
+    padding-right: 18px;
   }}
 
+  /* Barrinha vertical atrás de todo o texto */
   .brk-cap-split-content::before {{
     content: "";
     position: absolute;
@@ -1117,29 +1145,25 @@ class HTMLBuilder:
   .brk-cap-split-content h2 {{
     font-size: 18px;
     font-weight: 800;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    margin-top: 0;
-    margin-bottom: 10px;
-    color: #111827;
+    margin-bottom: 8px;
   }}
 
   .brk-cap-split-content p {{
-    margin: 0 0 8px;
+    margin: 0 0 4px;
     font-size: 14px;
-    color: #4b5563;
-    line-height: 1.5;
   }}
 
   .brk-cap-split-content p strong {{
     font-weight: 700;
-    color: #1f2937;
   }}
 
+  /* RESPONSIVO */
   @media (max-width: 900px) {{
     .brk-cap-detail-item {{
-      flex: 1 1 45%;
-      max-width: 240px;
+      flex: 1 1 85%;
+      max-width: 220px;
     }}
   }}
 
@@ -1154,13 +1178,15 @@ class HTMLBuilder:
 
     .brk-cap-detail-item {{
       flex: 1 1 100%;
-      max-width: 100%;
+      max-width: 260px;
     }}
 
-    .brk-cap-split,
+    .brk-cap-split {{
+      flex-direction: column;
+    }}
+
     .brk-cap-split.reverse {{
       flex-direction: column;
-      padding: 14px;
     }}
 
     .brk-cap-split-image {{
@@ -1172,18 +1198,11 @@ class HTMLBuilder:
     .brk-cap-split-content {{
       padding-left: 14px;
       padding-right: 0;
-      width: 100%;
     }}
 
     .brk-cap-split.reverse .brk-cap-split-content {{
-      padding-right: 0;
-      padding-left: 14px;
-    }}
-
-    .brk-cap-split-content::before,
-    .brk-cap-split.reverse .brk-cap-split-content::before {{
-      left: 0;
-      right: auto;
+      padding-right: 14px;
+      padding-left: 0;
     }}
 
     .brk-cap-split-content h2 {{
@@ -1192,78 +1211,67 @@ class HTMLBuilder:
   }}
 </style>
 <div class="brk-cap-description">
-  <!-- SEÇÃO DETALHES -->
-  <section class="brk-cap-section brk-cap-details">
-    <header class="brk-cap-section-header">
-      <h2 class="brk-cap-section-title">Detalhes</h2>
-    </header>
-    <div class="brk-cap-details-grid">
+<!-- SEÇÃO DETALHES -->
+<section class="brk-cap-section brk-cap-details"><header class="brk-cap-section-header">
+<h2 class="brk-cap-section-title">Detalhes</h2>
+</header>
+<div class="brk-cap-details-grid">
 {details_markup}
-    </div>
-  </section>
-
-  <!-- SEÇÃO INFORMAÇÕES -->
-  <section class="brk-cap-section brk-cap-information">
-    <header class="brk-cap-section-header">
-      <h2 class="brk-cap-section-title">Informações</h2>
-    </header>
-    <div class="brk-cap-info-wrapper">
-      <!-- BLOCO 1: CARACTERÍSTICAS -->
-      <div class="brk-cap-info-block">
-        <div class="brk-cap-info-title">
-          {svg_sparkle}
-          <h3>{caract_title}</h3>
-        </div>
-        <div class="brk-cap-info-list">
-          <ul>
+</div>
+</section>
+<!-- SEÇÃO INFORMAÇÕES -->
+<section class="brk-cap-section brk-cap-information"><header class="brk-cap-section-header">
+<h2 class="brk-cap-section-title">Informações</h2>
+</header>
+<div class="brk-cap-info-wrapper">
+<!-- BLOCO 1: CARACTERÍSTICAS -->
+<div class="brk-cap-info-block">
+<div class="brk-cap-info-title">
+<svg class="brk-svg-icon" width="36" height="36" viewBox="0 0 512 512" fill="{color_accent}" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M256 0l40 160 160 40-160 40-40 160-40-160-160-40 160-40 40-160z"/></svg>
+<h3>{caract_title}</h3>
+</div>
+<div class="brk-cap-info-list">
+<ul>
 {caract_li}
-          </ul>
-        </div>
-      </div>
-
-      <!-- BLOCO 2: CUIDADOS -->
-      <div class="brk-cap-info-block">
-        <div class="brk-cap-info-title">
-          {svg_care}
-          <h3>{cuidados_title}</h3>
-        </div>
-        <div class="brk-cap-info-list">
-          <ul>
+</ul>
+</div>
+</div>
+<!-- BLOCO 2: CUIDADOS -->
+<div class="brk-cap-info-block">
+<div class="brk-cap-info-title">
+<svg class="brk-svg-icon brk-cap-info-icon--care" width="36" height="36" viewBox="0 0 512 512" fill="{color_accent}" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M256 32c12.5 0 24.1 6.4 30.8 17l40 64c6.7 10.7 6.7 24.3 0 35l-40 64c-6.7 10.7-18.3 17-30.8 17s-24.1-6.4-30.8-17l-40-64c-6.7-10.7-6.7-24.3 0-35l40-64c6.7-10.7 18.3-17 30.8-17zm160 192c12.5 0 24.1 6.4 30.8 17l40 64c6.7 10.7 6.7 24.3 0 35l-40 64c-6.7 10.7-18.3 17-30.8 17s-24.1-6.4-30.8-17l-40-64c-6.7-10.7-6.7-24.3 0-35l40-64c6.7-10.7 18.3-17 30.8-17zM96 224c12.5 0 24.1 6.4 30.8 17l40 64c6.7 10.7 6.7 24.3 0 35l-40 64c-6.7 10.7-18.3 17-30.8 17s-24.1-6.4-30.8-17l-40-64c-6.7-10.7-6.7-24.3 0-35l40-64c6.7-10.7 18.3-17 30.8-17z"/></svg>
+<h3>{cuidados_title}</h3>
+</div>
+<div class="brk-cap-info-list">
+<ul>
 {cuidados_li}
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SEÇÕES IMAGEM + TEXTO -->
-  <section class="brk-cap-section brk-cap-split-sections">
-    <!-- 1ª seção: Etiquetas BRK (FOTO -> TEXTO) -->
-    <div class="brk-cap-split">
-      <div class="brk-cap-split-image">
-        <img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764952819862-13-Tags.webp" alt="Etiquetas BRK aplicadas em produtos originais" loading="lazy" referrerpolicy="no-referrer">
-      </div>
-      <div class="brk-cap-split-content">
-        <h2>PRODUTO PREMIUM BRK</h2>
-        <p>{split1_p1}</p>
-        <p>{split1_p2}</p>
-        <p>{split1_p3}</p>
-      </div>
-    </div>
-
-    <!-- 2ª seção: Caixa / Entrega (TEXTO <- FOTO) -->
-    <div class="brk-cap-split reverse">
-      <div class="brk-cap-split-image">
-        <img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764962764537-CAIXA-BRK.webp" alt="Caixa personalizada BRK para envio seguro" loading="lazy" referrerpolicy="no-referrer">
-      </div>
-      <div class="brk-cap-split-content">
-        <h2>ENTREGA SEGURA BRK</h2>
-        <p>{split2_p1}</p>
-        <p>{split2_p2}</p>
-        <p>{split2_p3}</p>
-      </div>
-    </div>
-  </section>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<!-- SEÇÕES IMAGEM + TEXTO -->
+<section class="brk-cap-section brk-cap-split-sections"><!-- 1ª seção: Etiquetas BRK (FOTO -> TEXTO) -->
+<div class="brk-cap-split">
+<div class="brk-cap-split-image"><img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764952819862-13-Tags.webp" alt="{split1_alt}"></div>
+<div class="brk-cap-split-content">
+<h2>PRODUTO PREMIUM BRK</h2>
+<p>{split1_p1}</p>
+<p>{split1_p2}</p>
+<p>{split1_p3}</p>
+</div>
+</div>
+<!-- 2ª seção: Caixa / Entrega (TEXTO <- FOTO) -->
+<div class="brk-cap-split reverse">
+<div class="brk-cap-split-image"><img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764962764537-CAIXA-BRK.webp" alt="{split2_alt}"></div>
+<div class="brk-cap-split-content">
+<h2>ENTREGA SEGURA BRK</h2>
+<p>{split2_p1}</p>
+<p>{split2_p2}</p>
+<p>{split2_p3}</p>
+</div>
+</div>
+</section>
 </div>"""
 
     def build_shopify_html(self, enriched_data: Dict[str, Any]) -> str:
