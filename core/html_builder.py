@@ -455,7 +455,10 @@ class HTMLBuilder:
       </table>"""
 
         # 3. Chapéus e Bonés (hats_safari_outdoor, caps_trucker_snapback)
-        elif archetype_id in ("hats_safari_outdoor", "caps_trucker_snapback") or any(w in title_low for w in ["chapéu", "chapeu", "boné", "bone"]):
+        elif archetype_id in ("hats_safari_outdoor", "caps_trucker_snapback") or (
+            (any(w in title_low for w in ["trucker", "snapback", "chapéu", "chapeu"]) or bool(re.search(r'\b(boné|bone|bonés)\b', title_low)))
+            and not any(w in title_low for w in ["copo", "garrafa", "camisa", "till the bones"])
+        ):
             guide_title = "Guia de Dimensões - Chapéus & Bonés"
             tip_text = "<strong>Como medir com precisão:</strong> Passe uma fita métrica ao redor da cabeça, cerca de 1 dedo acima das orelhas e sobrancelhas."
             table_html = """<table class="brk-sg-table">
@@ -1272,7 +1275,7 @@ class HTMLBuilder:
         archetype_id = enriched_data.get("archetype_id", "")
         if not archetype_id:
             title_low = (formatted_title or enriched_data.get("title") or "").lower()
-            if any(w in title_low for w in ["boné", "bone", "trucker", "snapback"]):
+            if (any(w in title_low for w in ["trucker", "snapback"]) or bool(re.search(r'\b(boné|bone|bonés)\b', title_low))) and not any(w in title_low for w in ["copo", "garrafa", "camisa", "till the bones"]):
                 archetype_id = "caps_trucker_snapback"
             elif any(w in title_low for w in ["chapéu", "chapeu"]) and any(w in title_low for w in ["country", "feltro", "cowboy"]):
                 archetype_id = "hats_country_cowboy"

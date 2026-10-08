@@ -21,6 +21,7 @@ from urllib.parse import urlparse, parse_qs
 import json
 import os
 import sys
+import re
 
 # Cache em memória para processos warm da Vercel
 _CACHED_STORES = {}
@@ -130,8 +131,12 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
     """Garante que a descrição seja o Modo B oficial compilado (>1000 chars, com 3 Atos e Detalhes Técnicos XTech Pro)."""
     raw_b = p.get("mode_b_html")
     arch_id = p.get("archetype_id") or ""
-    is_cap_or_hat = arch_id in ("caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy") or any(w in (p.get("title") or "").lower() for w in ["boné", "bone", "chapéu", "chapeu"])
-    is_uv = (arch_id == "uv_performance") or any(w in (p.get("title") or "").lower() for w in ["camisa", "uv", "armorx", "xtech"])
+    title_l = (p.get("title") or "").lower()
+    is_cap_or_hat = arch_id in ("caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy") or (
+        bool(re.search(r'\b(boné|bone|bonés|chapéu|chapeu|chapéus|chapeus)\b', title_l))
+        and not any(w in title_l for w in ["copo", "garrafa", "camisa", "till the bones"])
+    )
+    is_uv = (arch_id == "uv_performance") or any(w in title_l for w in ["camisa", "uv", "armorx", "xtech"])
 
     # Se já tem o formato oficial correspondente, reaproveita direto
     if raw_b and len(raw_b.strip()) > 500 and "<!-- BRK-MODO-B" in raw_b:

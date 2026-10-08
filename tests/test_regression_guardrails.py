@@ -754,6 +754,43 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         html_shirt = self.builder.build_shopify_html(narrative_shirt)
         self.assertNotIn("brk-cap-description", html_shirt)
 
+    def test_caixa_de_pesca_and_containers_not_lures(self):
+        """Valida que caixas organizadoras de iscas são tackle_boxes_storage e JAMAIS recebem specs de isca viva ou nado."""
+        prod_caixa = {
+            "id": 991,
+            "title": "Caixa de Pesca Organizadora de Iscas Artificiais Brk - até 80 Iscas",
+            "category": "Equipamentos & Iscas",
+            "master_sku": "CX01"
+        }
+        arch = self.engine.detect_archetype(prod_caixa["title"], prod_caixa["category"], [], "BRK", sku=prod_caixa["master_sku"])
+        self.assertEqual(arch, "tackle_boxes_storage")
+        
+        narrative = self.engine.generate_narrative_from_template(prod_caixa, arch, [], store_key="brk_fishing")
+        html = self.builder.build_shopify_html(narrative)
+        
+        # Não pode alucinar atributos de isca
+        self.assertNotIn("NADO REALISTA", html)
+        self.assertNotIn("Garatéias", html)
+        self.assertNotIn("Rattling", html)
+        self.assertNotIn("brk-cap-description", html)
+        self.assertNotIn("<details class=\"brk-size-guide\"", html)
+        self.assertIn("DIVISÓRIAS MODULARES", html)
+        self.assertIn("TRAVAS DUPLAS", html)
+
+    def test_copos_termicos_and_sunglasses_disambiguation(self):
+        """Valida que Copo Térmico com 'iscas' ou 'bones' não cai em isca ou boné, e óculos com acento grave são detectados."""
+        # Copo Térmico com Iscas no título
+        arch_copo_iscas = self.engine.detect_archetype("Copo Térmico Iscas BRK", "Térmicos", [], "BRK")
+        self.assertEqual(arch_copo_iscas, "drinkware_thermo")
+
+        # Copo Térmico com Bones em inglês
+        arch_copo_bones = self.engine.detect_archetype("Copo Térmico Hooked Till The Bones BRK", "Térmicos", [], "BRK")
+        self.assertEqual(arch_copo_bones, "drinkware_thermo")
+
+        # Óculos com acento grave Ò
+        arch_oculos = self.engine.detect_archetype("\xd2culos de Sol Retro Black", "Acessórios", [], "BRK")
+        self.assertEqual(arch_oculos, "eyewear_sunglasses")
+
 
 
 def run_tests():
