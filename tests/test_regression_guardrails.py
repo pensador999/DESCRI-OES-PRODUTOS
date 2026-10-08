@@ -791,6 +791,43 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         arch_oculos = self.engine.detect_archetype("\xd2culos de Sol Retro Black", "Acessórios", [], "BRK")
         self.assertEqual(arch_oculos, "eyewear_sunglasses")
 
+    def test_headwear_d2c_moldes_and_products_conformity(self):
+        """Valida que os moldes de Bonés e Chapéus possuem layout_format d2c_headwear e os produtos têm mode_b_html 100% preenchido."""
+        # 1. Verifica moldes mestres no template_engine
+        for arch_id in ("caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy"):
+            tmpl = self.engine.templates.get(arch_id)
+            self.assertIsNotNone(tmpl)
+            self.assertEqual(tmpl.get("layout_format"), "d2c_headwear")
+            self.assertEqual(len(tmpl.get("details_grid", [])), 4)
+            self.assertEqual(len(tmpl.get("info_characteristics", [])), 5)
+            self.assertEqual(len(tmpl.get("info_care", [])), 5)
+            self.assertEqual(len(tmpl.get("split_sections", [])), 2)
+
+        # 2. Verifica exportação em moldes.json
+        moldes_path = os.path.join(BASE_DIR, "data", "stores", "moldes.json")
+        if os.path.exists(moldes_path):
+            with open(moldes_path, "r", encoding="utf-8") as f:
+                moldes_data = json.load(f)
+            cap_m = moldes_data.get("caps_trucker_snapback", {})
+            self.assertEqual(cap_m.get("layout_format"), "d2c_headwear")
+            self.assertEqual(len(cap_m.get("details_grid", [])), 4)
+
+        # 3. Verifica que o produto 'Boné Trucker de Pesca Brk Isca Artificial - Preto e Vermelho' tem o HTML D2C oficial
+        fishing_path = os.path.join(BASE_DIR, "data", "stores", "brk_fishing.json")
+        if os.path.exists(fishing_path):
+            with open(fishing_path, "r", encoding="utf-8") as f:
+                fishing_data = json.load(f)
+            prod = next((p for p in fishing_data.get("products", []) if "Boné Trucker de Pesca Brk Isca Artificial - Preto e Vermelho" in p.get("title", "")), None)
+            self.assertIsNotNone(prod)
+            self.assertEqual(prod.get("archetype_id"), "caps_trucker_snapback")
+            self.assertEqual(prod.get("layout_format"), "d2c_headwear")
+            self.assertTrue(len(prod.get("mode_b_html", "")) > 1000)
+            self.assertIn("brk-cap-description", prod.get("mode_b_html", ""))
+            self.assertIn("Aba Moldável", prod.get("mode_b_html", ""))
+            self.assertIn("Interno em Tear", prod.get("mode_b_html", ""))
+            self.assertIn("CAIXA-BRK", prod.get("mode_b_html", ""))
+
+
 
 
 def run_tests():
