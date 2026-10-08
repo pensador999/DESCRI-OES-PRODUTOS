@@ -130,17 +130,24 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
     """Garante que a descrição seja o Modo B oficial compilado (>1000 chars, com 3 Atos e Detalhes Técnicos XTech Pro)."""
     raw_b = p.get("mode_b_html")
     arch_id = p.get("archetype_id") or ""
+    is_cap_or_hat = arch_id in ("caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy") or any(w in (p.get("title") or "").lower() for w in ["boné", "bone", "chapéu", "chapeu"])
     is_uv = (arch_id == "uv_performance") or any(w in (p.get("title") or "").lower() for w in ["camisa", "uv", "armorx", "xtech"])
 
-    # Se já tem o formato oficial, novos Detalhes Técnicos, o novo Guia de Tamanhos C0 (para UV/camisas) e o Prazo correto, reaproveita direto
+    # Se já tem o formato oficial correspondente, reaproveita direto
     if raw_b and len(raw_b.strip()) > 500 and "<!-- BRK-MODO-B" in raw_b:
-        has_new_sg = any(term in raw_b for term in ["49,5 cm", "Baby Look", "1 a 2 Anos", "brk-sg-subtitle"]) and "ALTURA" in raw_b
-        engine, builder = get_engine_and_builder()
-        is_ready = engine.is_ready_delivery(p) if engine else False
-        expected_prazo = "Pronta entrega" if is_ready else "9 dias úteis"
-        has_correct_prazo = expected_prazo in raw_b
-        if not is_uv or ("Detalhes Técnicos" in raw_b and "XTech Pro" in raw_b and has_new_sg and has_correct_prazo):
+        if is_cap_or_hat:
+            if "brk-cap-description" in raw_b:
+                return raw_b
+        elif not is_uv:
             return raw_b
+        else:
+            has_new_sg = any(term in raw_b for term in ["49,5 cm", "Baby Look", "1 a 2 Anos", "brk-sg-subtitle"]) and "ALTURA" in raw_b
+            engine, builder = get_engine_and_builder()
+            is_ready = engine.is_ready_delivery(p) if engine else False
+            expected_prazo = "Pronta entrega" if is_ready else "9 dias úteis"
+            has_correct_prazo = expected_prazo in raw_b
+            if "Detalhes Técnicos" in raw_b and "XTech Pro" in raw_b and has_new_sg and has_correct_prazo:
+                return raw_b
 
     engine, builder = get_engine_and_builder()
     if engine and builder:

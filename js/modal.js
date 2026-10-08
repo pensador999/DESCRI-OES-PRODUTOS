@@ -1282,12 +1282,589 @@ ${JSON.stringify(schemaObj, null, 2)}
   </script>`;
 }
 
+function buildClientCapOrHatHtml(liveP, archetypeId) {
+  const originInfo = resolveClientOriginAndTitle(liveP);
+  const formattedTitle = liveP.formatted_title || originInfo.formattedTitle || liveP.title || "Boné BRK";
+  const sku = liveP.sku || liveP.master_sku || "";
+  const stKey = liveP.store_key || (typeof currentStore !== "undefined" ? currentStore : "brk_fishing");
+  const schemaJsonLd = buildClientSchemaJsonLd(liveP);
+
+  let gradHoriz, gradVert, colorAccent, brandLabel;
+  if (stKey === "brk_agro") {
+    gradHoriz = "linear-gradient(90deg, #15803d, #ca8a04)";
+    gradVert = "linear-gradient(180deg, #15803d, #ca8a04)";
+    colorAccent = "#15803d";
+    brandLabel = "BRK Agro";
+  } else if (stKey === "brk_motors") {
+    gradHoriz = "linear-gradient(90deg, #ea580c, #dc2626)";
+    gradVert = "linear-gradient(180deg, #ea580c, #dc2626)";
+    colorAccent = "#ea580c";
+    brandLabel = "BRK Motors";
+  } else {
+    gradHoriz = "linear-gradient(90deg, #00a8ff, #00d084)";
+    gradVert = "linear-gradient(180deg, #00a8ff, #00d084)";
+    colorAccent = "#00a8ff";
+    brandLabel = "BRK Fishing";
+  }
+
+  let details = [];
+  let caractTitle = "";
+  let caractItems = [];
+  let cuidadosTitle = "";
+  let cuidadosItems = [];
+  let split1_p1, split1_p2, split1_p3, split2_p1, split2_p2, split2_p3;
+
+  if (archetypeId === "caps_trucker_snapback") {
+    details = [
+      {
+        img: "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg",
+        alt: `Aba do boné ${formattedTitle} com costuras reforçadas e estrutura moldável`,
+        title: "Aba Moldável",
+        desc: "Aba estruturada com diversas costuras e moldável, garantindo durabilidade e proteção extra contra o sol."
+      },
+      {
+        img: "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/k2bupYT.jpg",
+        alt: `Parte interna do boné ${formattedTitle} com costuras em tear`,
+        title: "Interno em Tear",
+        desc: "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de pesca e uso outdoor."
+      },
+      {
+        img: "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/BYAO1Oj.jpg",
+        alt: `Etiqueta BRK de qualidade aplicada no boné ${formattedTitle}`,
+        title: "Etiqueta BRK de Qualidade",
+        desc: "Etiqueta BRK aplicada com acabamento premium, garantindo autenticidade e padrão de qualidade rigoroso."
+      },
+      {
+        img: "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/cjeqbhc.jpg",
+        alt: `Design exclusivo do boné ${formattedTitle}`,
+        title: "Design Exclusivo",
+        desc: `Arte exclusiva ${brandLabel} inspirada na vida ao ar livre, para você se destacar em qualquer ambiente.`
+      }
+    ];
+    caractTitle = "Características do Boné BRK";
+    caractItems = [
+      "Copa estruturada estilo trucker, com frente firme e tela traseira que favorece a ventilação.",
+      "Aba moldável com costuras reforçadas, oferecendo conforto e proteção para o rosto e os olhos.",
+      "Tamanho único com regulagem traseira, se ajustando com precisão à maioria dos formatos de cabeça.",
+      "Ideal para pesca esportiva, atividades ao ar livre, trabalho no campo e uso no dia a dia.",
+      "Acabamento interno pensado para máximo conforto mesmo em longas jornadas de uso contínuo."
+    ];
+    cuidadosTitle = "Cuidados com o Seu Boné";
+    cuidadosItems = [
+      "Não lave o boné na máquina e não utilize água quente.",
+      "Para limpeza, use um pano macio levemente úmido com sabão neutro nas áreas sujas.",
+      "Retire o excesso de sabão com outro pano levemente úmido apenas com água.",
+      "Deixe secar à sombra, em superfície plana, longe de fontes diretas de calor.",
+      "Não utilize alvejante, não passe a ferro e não leve à secadora."
+    ];
+    split1_p1 = "<strong>Cada boné BRK é desenvolvido pensando em quem vive a vida ao ar livre intensamente.</strong>";
+    split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem que você está usando um item de alta performance.";
+    split1_p3 = "Da escolha dos materiais ao acabamento final, tudo é pensado para entregar conforto, durabilidade e estilo em qualquer pescaria ou evento.";
+    split2_p1 = "<strong>A sua experiência começa antes mesmo de abrir a caixa.</strong>";
+    split2_p2 = "O boné é enviado em embalagem protegida e personalizada BRK, pensado para chegar até você em perfeitas condições, sem amassar ou deformar.";
+    split2_p3 = "Assim, seu novo boné chega pronto para encarar a próxima aventura, seja no campo, na pista ou nas águas.";
+  } else if (archetypeId === "hats_safari_outdoor") {
+    const rawImgs = (liveP.cdn_images && liveP.cdn_images.length > 0) ? liveP.cdn_images : (liveP.gallery || liveP.images || []);
+    const gallery = rawImgs.map(img => (typeof img === "object" ? img.src : img));
+    const img1 = gallery[0] || "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg";
+    const img2 = gallery[1] || img1;
+    const img3 = gallery[2] || img1;
+    const img4 = gallery[3] || img2;
+
+    details = [
+      {
+        img: img1,
+        alt: `Aba 360° com proteção solar do chapéu ${formattedTitle}`,
+        title: "Aba 360° UV50+",
+        desc: "Aba circular ampla com costuras reforçadas, bloqueando os raios solares diretos no rosto, orelhas e pescoço com máxima cobertura."
+      },
+      {
+        img: img2,
+        alt: `Cordão jugular com trava anti-vento do chapéu ${formattedTitle}`,
+        title: "Cordão Jugular Anti-Vento",
+        desc: "Ajuste seguro sob o queixo com trava regulável, mantendo o chapéu firme mesmo sob rajadas de vento e navegação rápida."
+      },
+      {
+        img: img3,
+        alt: `Protetor de nuca e acabamento do chapéu ${formattedTitle}`,
+        title: "Protetor de Nuca Integrado",
+        desc: "Cobertura estendida para a nuca que previne queimaduras solares durante longas jornadas sob sol intenso."
+      },
+      {
+        img: img4,
+        alt: `Tecido leve e respirável do chapéu ${formattedTitle}`,
+        title: "Tecido Respirável & Leve",
+        desc: "Construção de secagem rápida com ilhoses de ventilação lateral para dissipação imediata de calor e sensação de frescor contínuo."
+      }
+    ];
+    caractTitle = "Características do Chapéu Safári BRK";
+    caractItems = [
+      "Copa anatômica com ilhoses laterais que garantem circulação de ar constante.",
+      "Aba larga circular de 360° com fator de proteção UV50+ permanente.",
+      "Cordão jugular com trava ajustável de segurança contra quedas e vento forte.",
+      "Protetor de nuca para proteção solar total na região posterior do pescoço.",
+      "Tecido tecnológico leve de secagem ultra rápida e alta resistência ao desgaste."
+    ];
+    cuidadosTitle = "Cuidados com o Seu Chapéu";
+    cuidadosItems = [
+      "Lavar à mão com água fria e sabão neutro.",
+      "Não lavar em máquina e não torcer para preservar a estrutura da aba.",
+      "Secar estendido à sombra em superfície plana.",
+      "Não usar alvejantes, amaciantes ou produtos à base de cloro.",
+      "Guardar sem dobrar a aba estruturada para manter o caimento original."
+    ];
+    split1_p1 = "<strong>Cada chapéu BRK é desenvolvido pensando na proteção de quem enfrenta longas jornadas ao ar livre.</strong>";
+    split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem padrão de proteção solar certificado.";
+    split1_p3 = "Construído com materiais leves e resistentes, oferece o máximo de conforto térmico para pescarias e trabalho sob sol forte.";
+    split2_p1 = "<strong>A sua experiência começa antes mesmo de abrir a caixa.</strong>";
+    split2_p2 = "O chapéu é enviado em embalagem protegida BRK, projetada para evitar deformações na aba durante o transporte.";
+    split2_p3 = "Seu novo chapéu chega pronto para encarar o sol com proteção e estilo incomparáveis.";
+  } else {
+    const rawImgs = (liveP.cdn_images && liveP.cdn_images.length > 0) ? liveP.cdn_images : (liveP.gallery || liveP.images || []);
+    const gallery = rawImgs.map(img => (typeof img === "object" ? img.src : img));
+    const img1 = gallery[0] || "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg";
+    const img2 = gallery[1] || img1;
+    const img3 = gallery[2] || img1;
+    const img4 = gallery[3] || img2;
+
+    details = [
+      {
+        img: img1,
+        alt: `Aba larga estruturada do chapéu ${formattedTitle}`,
+        title: "Aba Larga Estruturada",
+        desc: "Formato clássico com curvatura marcante e acabamento impecável, unindo tradição, imponência e proteção solar no campo."
+      },
+      {
+        img: img2,
+        alt: `Carneira interna do chapéu ${formattedTitle}`,
+        title: "Carneira Interna Confortável",
+        desc: "Faixa interna com toque macio e anatômico, oferecendo fixação firme e confortável na cabeça sem marcar a testa."
+      },
+      {
+        img: img3,
+        alt: `Fita decorativa e acabamento do chapéu ${formattedTitle}`,
+        title: "Fita & Acabamento Premium",
+        desc: "Banda decorativa exclusiva com detalhe refinado, reforçando a autenticidade e o visual rústico elegante."
+      },
+      {
+        img: img4,
+        alt: `Estrutura de alta densidade do chapéu ${formattedTitle}`,
+        title: "Estrutura Nobre & Firme",
+        desc: "Matéria-prima nobre de alta densidade que preserva a forma da copa e a curvatura da aba mesmo com uso contínuo."
+      }
+    ];
+    caractTitle = "Características do Chapéu Country";
+    caractItems = [
+      "Copa alta estruturada e moldada no legítimo estilo western / campo.",
+      "Aba larga de presença marcante que proporciona excelente sombra e proteção.",
+      "Carneira interna acolchoada para conforto prolongado em cavalgadas e eventos.",
+      "Fita externa com acabamento nobre e identidade autêntica do homem e da mulher do campo.",
+      "Ideal para rodeios, feiras agropecuárias, lida na fazenda e dia a dia sertanejo."
+    ];
+    cuidadosTitle = "Cuidados & Conservação do Chapéu";
+    cuidadosItems = [
+      "Limpar delicadamente com escova de cerdas macias sempre no sentido das fibras.",
+      "Evitar contato direto com chuva intensa ou umidade excessiva.",
+      "Armazenar sempre apoiado pela copa ou em suporte adequado para não desformar a aba.",
+      "Nunca dobrar, amassar ou deixar exposto no interior de veículos sob sol forte.",
+      "Em caso de umidade leve, deixe secar naturalmente à sombra em local ventilado."
+    ];
+    split1_p1 = "<strong>A tradição e o orgulho do campo em cada detalhe artesanal.</strong>";
+    split1_p2 = "Cada chapéu é selecionado para entregar autenticidade, robustez e elegância para os amantes do estilo country.";
+    split1_p3 = "Acabamento primoroso que valoriza a cultura sertaneja e a presença marcante onde quer que você esteja.";
+    split2_p1 = "<strong>Embalagem especial anti-deformação.</strong>";
+    split2_p2 = "O chapéu é embalado em caixa reforçada para garantir que a copa e a aba cheguem impecáveis e sem amassados.";
+    split2_p3 = "Pronto para usar na lida, nas cavalgadas ou nos grandes eventos do agronegócio.";
+  }
+
+  const detailsMarkup = details.map(d => `    <article class="brk-cap-detail-item">
+      <div class="brk-cap-detail-image"><img src="${d.img}" alt="${d.alt}" loading="lazy" referrerpolicy="no-referrer"></div>
+      <h3>${d.title}</h3>
+      <p>${d.desc}</p>
+    </article>`).join("\n");
+
+  const caractLi = caractItems.map(item => `            <li>${item}</li>`).join("\n");
+  const cuidadosLi = cuidadosItems.map(item => `            <li>${item}</li>`).join("\n");
+
+  const svgSparkle = getSvgIcon("sparkle", colorAccent, 36);
+  const svgCare = getSvgIcon("care", colorAccent, 36, "brk-cap-info-icon--care");
+
+  const trackingMarker = `<!-- BRK-MODO-B v1 | sku:${(sku || "").replace(/[^A-Za-z0-9_.-]/g, "").slice(0, 60)} | molde:${archetypeId} -->`;
+
+  return `${trackingMarker}
+${schemaJsonLd}
+<style>
+  .brk-cap-description {
+    font-family: inherit;
+    color: #222222;
+    line-height: 1.5;
+    font-size: 15px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .brk-cap-description * {
+    box-sizing: border-box;
+  }
+  .brk-cap-section {
+    margin: 28px 0;
+  }
+  .brk-cap-section-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .brk-cap-section-title {
+    display: inline-block;
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    position: relative;
+    padding-bottom: 6px;
+    margin: 0;
+    color: #111827;
+  }
+  .brk-cap-section-title::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    width: 48px;
+    height: 3px;
+    border-radius: 999px;
+    background: ${gradHoriz};
+  }
+  .brk-cap-details-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 18px;
+  }
+  .brk-cap-detail-item {
+    text-align: center;
+    max-width: 260px;
+    flex: 1 1 220px;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .brk-cap-detail-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  }
+  .brk-cap-detail-image {
+    width: 100%;
+    max-width: 260px;
+    margin: 0 auto 10px;
+  }
+  .brk-cap-detail-image img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+  .brk-cap-detail-item h3 {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 6px 0 4px;
+    letter-spacing: 0.04em;
+    color: #1f2937;
+  }
+  .brk-cap-detail-item p {
+    font-size: 13px;
+    margin: 0;
+    color: #4b5563;
+    line-height: 1.45;
+  }
+  .brk-cap-info-wrapper {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr);
+    gap: 20px;
+  }
+  .brk-cap-info-block {
+    padding: 20px 22px 22px;
+    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+  }
+  .brk-cap-info-title {
+    position: relative;
+    display: inline-block;
+    padding: 4px 0;
+    margin-bottom: 12px;
+  }
+  .brk-cap-info-title h3 {
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    color: #111827;
+  }
+  .brk-cap-info-title svg {
+    position: absolute;
+    left: -10px;
+    top: -8px;
+    width: 44px;
+    height: 44px;
+    opacity: 0.18;
+    z-index: 0;
+  }
+  .brk-cap-info-icon--care {
+    transform: translateX(-4px);
+  }
+  .brk-cap-info-list {
+    margin: 4px 0 0;
+    padding: 0;
+  }
+  .brk-cap-info-block ul {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+  }
+  .brk-cap-info-block li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #374151;
+    line-height: 1.5;
+  }
+  .brk-cap-info-block li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 9px;
+    height: 9px;
+    border-radius: 3px;
+    background: ${gradHoriz};
+  }
+  @media (min-width: 900px) {
+    .brk-cap-info-block ul {
+      column-count: 2;
+      column-gap: 28px;
+    }
+    .brk-cap-info-block li {
+      break-inside: avoid;
+    }
+  }
+  .brk-cap-split-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .brk-cap-split {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
+  }
+  .brk-cap-split.reverse {
+    flex-direction: row-reverse;
+  }
+  .brk-cap-split-image {
+    flex: 1 1 45%;
+    max-width: 450px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: radial-gradient(circle at top left, rgba(0, 168, 255, 0.12), transparent 60%);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+  .brk-cap-split-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+  .brk-cap-split-content {
+    flex: 1 1 55%;
+    position: relative;
+    padding-left: 20px;
+  }
+  .brk-cap-split.reverse .brk-cap-split-content {
+    padding-left: 0;
+    padding-right: 20px;
+  }
+  .brk-cap-split-content::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    border-radius: 999px;
+    background: ${gradVert};
+    left: 0;
+  }
+  .brk-cap-split.reverse .brk-cap-split-content::before {
+    left: auto;
+    right: 0;
+  }
+  .brk-cap-split-content h2 {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #111827;
+  }
+  .brk-cap-split-content p {
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.5;
+  }
+  .brk-cap-split-content p strong {
+    font-weight: 700;
+    color: #1f2937;
+  }
+  @media (max-width: 900px) {
+    .brk-cap-detail-item {
+      flex: 1 1 45%;
+      max-width: 240px;
+    }
+  }
+  @media (max-width: 640px) {
+    .brk-cap-section {
+      margin: 20px 0;
+    }
+    .brk-cap-section-title {
+      font-size: 18px;
+    }
+    .brk-cap-detail-item {
+      flex: 1 1 100%;
+      max-width: 100%;
+    }
+    .brk-cap-split,
+    .brk-cap-split.reverse {
+      flex-direction: column;
+      padding: 14px;
+    }
+    .brk-cap-split-image {
+      max-width: 100%;
+      width: 100%;
+      flex: none;
+    }
+    .brk-cap-split-content {
+      padding-left: 14px;
+      padding-right: 0;
+      width: 100%;
+    }
+    .brk-cap-split.reverse .brk-cap-split-content {
+      padding-right: 0;
+      padding-left: 14px;
+    }
+    .brk-cap-split-content::before,
+    .brk-cap-split.reverse .brk-cap-split-content::before {
+      left: 0;
+      right: auto;
+    }
+    .brk-cap-split-content h2 {
+      font-size: 16px;
+    }
+  }
+</style>
+<div class="brk-cap-description">
+  <!-- SEÇÃO DETALHES -->
+  <section class="brk-cap-section brk-cap-details">
+    <header class="brk-cap-section-header">
+      <h2 class="brk-cap-section-title">Detalhes</h2>
+    </header>
+    <div class="brk-cap-details-grid">
+${detailsMarkup}
+    </div>
+  </section>
+
+  <!-- SEÇÃO INFORMAÇÕES -->
+  <section class="brk-cap-section brk-cap-information">
+    <header class="brk-cap-section-header">
+      <h2 class="brk-cap-section-title">Informações</h2>
+    </header>
+    <div class="brk-cap-info-wrapper">
+      <!-- BLOCO 1: CARACTERÍSTICAS -->
+      <div class="brk-cap-info-block">
+        <div class="brk-cap-info-title">
+          ${svgSparkle}
+          <h3>${caractTitle}</h3>
+        </div>
+        <div class="brk-cap-info-list">
+          <ul>
+${caractLi}
+          </ul>
+        </div>
+      </div>
+
+      <!-- BLOCO 2: CUIDADOS -->
+      <div class="brk-cap-info-block">
+        <div class="brk-cap-info-title">
+          ${svgCare}
+          <h3>${cuidadosTitle}</h3>
+        </div>
+        <div class="brk-cap-info-list">
+          <ul>
+${cuidadosLi}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEÇÕES IMAGEM + TEXTO -->
+  <section class="brk-cap-section brk-cap-split-sections">
+    <!-- 1ª seção: Etiquetas BRK (FOTO -> TEXTO) -->
+    <div class="brk-cap-split">
+      <div class="brk-cap-split-image">
+        <img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764952819862-13-Tags.webp" alt="Etiquetas BRK aplicadas em produtos originais" loading="lazy" referrerpolicy="no-referrer">
+      </div>
+      <div class="brk-cap-split-content">
+        <h2>PRODUTO PREMIUM BRK</h2>
+        <p>${split1_p1}</p>
+        <p>${split1_p2}</p>
+        <p>${split1_p3}</p>
+      </div>
+    </div>
+
+    <!-- 2ª seção: Caixa / Entrega (TEXTO <- FOTO) -->
+    <div class="brk-cap-split reverse">
+      <div class="brk-cap-split-image">
+        <img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764962764537-CAIXA-BRK.webp" alt="Caixa personalizada BRK para envio seguro" loading="lazy" referrerpolicy="no-referrer">
+      </div>
+      <div class="brk-cap-split-content">
+        <h2>ENTREGA SEGURA BRK</h2>
+        <p>${split2_p1}</p>
+        <p>${split2_p2}</p>
+        <p>${split2_p3}</p>
+      </div>
+    </div>
+  </section>
+</div>`;
+}
+
 function getProductModeBHTML(liveP) {
   if (!liveP) return "";
   const originInfo = resolveClientOriginAndTitle(liveP);
   const formattedTitle = liveP.formatted_title || originInfo.formattedTitle;
   const brandName = liveP.brand_name || originInfo.brandName;
   const originType = liveP.origin_type || originInfo.originType;
+  const archetypeId = liveP.archetype_id || (typeof detectClientArchetype === "function" ? detectClientArchetype(liveP.title, liveP.category, liveP.tags).id : "uv_performance");
+
+  // Despacho especializado para Bonés e Chapéus (Layout D2C Oficial com Detalhes, Info e Split)
+  if (["caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy"].includes(archetypeId)) {
+    return buildClientCapOrHatHtml(liveP, archetypeId);
+  }
   const showCopyright = (liveP.show_copyright !== undefined) ? liveP.show_copyright : originInfo.showCopyright;
 
   const themeColor = liveP.theme_color || (liveP.store_key === "brk_agro" ? "#16a34a" : liveP.store_key === "brk_motors" ? "#f97316" : "#0284c7");

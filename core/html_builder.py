@@ -642,12 +642,646 @@ class HTMLBuilder:
 {json_str}
   </script>"""
 
+    def _build_cap_or_hat_html(self, enriched_data: Dict[str, Any], archetype_id: str) -> str:
+        """
+        Compila a descrição especializada de alta conversão para Bonés e Chapéus BRK,
+        utilizando o design com Grid de Detalhes 260x260, Cards de Características & Cuidados,
+        e Seções Split Intercaladas (Produto Premium + Entrega Segura na Caixa BRK).
+        """
+        formatted_title = enriched_data.get("formatted_title") or enriched_data.get("title", "Boné BRK")
+        sku = str(enriched_data.get("sku") or enriched_data.get("master_sku") or "")
+        store_key = enriched_data.get("store_key", "brk_fishing")
+        schema_json_ld = self._build_schema_json_ld(enriched_data)
+
+        # Gradientes e Identidade por Loja
+        if store_key == "brk_agro":
+            grad_horiz = "linear-gradient(90deg, #15803d, #ca8a04)"
+            grad_vert = "linear-gradient(180deg, #15803d, #ca8a04)"
+            color_accent = "#15803d"
+            brand_label = "BRK Agro"
+        elif store_key == "brk_motors":
+            grad_horiz = "linear-gradient(90deg, #ea580c, #dc2626)"
+            grad_vert = "linear-gradient(180deg, #ea580c, #dc2626)"
+            color_accent = "#ea580c"
+            brand_label = "BRK Motors"
+        else:
+            grad_horiz = "linear-gradient(90deg, #00a8ff, #00d084)"
+            grad_vert = "linear-gradient(180deg, #00a8ff, #00d084)"
+            color_accent = "#00a8ff"
+            brand_label = "BRK Fishing"
+
+        # 1. Configuração Específica por Categoria
+        if archetype_id == "caps_trucker_snapback":
+            item_type_label = "Boné"
+            details = [
+                {
+                    "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg",
+                    "alt": f"Aba do boné {formatted_title} com costuras reforçadas e estrutura moldável",
+                    "title": "Aba Moldável",
+                    "desc": "Aba estruturada com diversas costuras e moldável, garantindo durabilidade e proteção extra contra o sol."
+                },
+                {
+                    "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/k2bupYT.jpg",
+                    "alt": f"Parte interna do boné {formatted_title} com costuras em tear",
+                    "title": "Interno em Tear",
+                    "desc": "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de pesca e uso outdoor."
+                },
+                {
+                    "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/BYAO1Oj.jpg",
+                    "alt": f"Etiqueta BRK de qualidade aplicada no boné {formatted_title}",
+                    "title": "Etiqueta BRK de Qualidade",
+                    "desc": "Etiqueta BRK aplicada com acabamento premium, garantindo autenticidade e padrão de qualidade rigoroso."
+                },
+                {
+                    "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/cjeqbhc.jpg",
+                    "alt": f"Design exclusivo do boné {formatted_title}",
+                    "title": "Design Exclusivo",
+                    "desc": f"Arte exclusiva {brand_label} inspirada na vida ao ar livre, para você se destacar em qualquer ambiente."
+                }
+            ]
+            caract_title = "Características do Boné BRK"
+            caract_items = [
+                "Copa estruturada estilo trucker, com frente firme e tela traseira que favorece a ventilação.",
+                "Aba moldável com costuras reforçadas, oferecendo conforto e proteção para o rosto e os olhos.",
+                "Tamanho único com regulagem traseira, se ajustando com precisão à maioria dos formatos de cabeça.",
+                "Ideal para pesca esportiva, atividades ao ar livre, trabalho no campo e uso no dia a dia.",
+                "Acabamento interno pensado para máximo conforto mesmo em longas jornadas de uso contínuo."
+            ]
+            cuidados_title = "Cuidados com o Seu Boné"
+            cuidados_items = [
+                "Não lave o boné na máquina e não utilize água quente.",
+                "Para limpeza, use um pano macio levemente úmido com sabão neutro nas áreas sujas.",
+                "Retire o excesso de sabão com outro pano levemente úmido apenas com água.",
+                "Deixe secar à sombra, em superfície plana, longe de fontes diretas de calor.",
+                "Não utilize alvejante, não passe a ferro e não leve à secadora."
+            ]
+            split1_p1 = "<strong>Cada boné BRK é desenvolvido pensando em quem vive a vida ao ar livre intensamente.</strong>"
+            split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem que você está usando um item de alta performance."
+            split1_p3 = "Da escolha dos materiais ao acabamento final, tudo é pensado para entregar conforto, durabilidade e estilo em qualquer pescaria ou evento."
+            split2_p1 = "<strong>A sua experiência começa antes mesmo de abrir a caixa.</strong>"
+            split2_p2 = "O boné é enviado em embalagem protegida e personalizada BRK, pensado para chegar até você em perfeitas condições, sem amassar ou deformar."
+            split2_p3 = "Assim, seu novo boné chega pronto para encarar a próxima aventura, seja no campo, na pista ou nas águas."
+
+        elif archetype_id == "hats_safari_outdoor":
+            item_type_label = "Chapéu"
+            gallery = enriched_data.get("images") or enriched_data.get("gallery") or []
+            img1 = gallery[0] if len(gallery) > 0 else "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg"
+            img2 = gallery[1] if len(gallery) > 1 else img1
+            img3 = gallery[2] if len(gallery) > 2 else img1
+            img4 = gallery[3] if len(gallery) > 3 else img2
+
+            details = [
+                {
+                    "img": img1,
+                    "alt": f"Aba 360° com proteção solar do chapéu {formatted_title}",
+                    "title": "Aba 360° UV50+",
+                    "desc": "Aba circular ampla com costuras reforçadas, bloqueando os raios solares diretos no rosto, orelhas e pescoço com máxima cobertura."
+                },
+                {
+                    "img": img2,
+                    "alt": f"Cordão jugular com trava anti-vento do chapéu {formatted_title}",
+                    "title": "Cordão Jugular Anti-Vento",
+                    "desc": "Ajuste seguro sob o queixo com trava regulável, mantendo o chapéu firme mesmo sob rajadas de vento e navegação rápida."
+                },
+                {
+                    "img": img3,
+                    "alt": f"Protetor de nuca e acabamento do chapéu {formatted_title}",
+                    "title": "Protetor de Nuca Integrado",
+                    "desc": "Cobertura estendida para a nuca que previne queimaduras solares durante longas jornadas sob sol intenso."
+                },
+                {
+                    "img": img4,
+                    "alt": f"Tecido leve e respirável do chapéu {formatted_title}",
+                    "title": "Tecido Respirável & Leve",
+                    "desc": "Construção de secagem rápida com ilhoses de ventilação lateral para dissipação imediata de calor e sensação de frescor contínuo."
+                }
+            ]
+            caract_title = "Características do Chapéu Safári BRK"
+            caract_items = [
+                "Copa anatômica com ilhoses laterais que garantem circulação de ar constante.",
+                "Aba larga circular de 360° com fator de proteção UV50+ permanente.",
+                "Cordão jugular com trava ajustável de segurança contra quedas e vento forte.",
+                "Protetor de nuca para proteção solar total na região posterior do pescoço.",
+                "Tecido tecnológico leve de secagem ultra rápida e alta resistência ao desgaste."
+            ]
+            cuidados_title = "Cuidados com o Seu Chapéu"
+            cuidados_items = [
+                "Lavar à mão com água fria e sabão neutro.",
+                "Não lavar em máquina e não torcer para preservar a estrutura da aba.",
+                "Secar estendido à sombra em superfície plana.",
+                "Não usar alvejantes, amaciantes ou produtos à base de cloro.",
+                "Guardar sem dobrar a aba estruturada para manter o caimento original."
+            ]
+            split1_p1 = "<strong>Cada chapéu BRK é desenvolvido pensando na proteção de quem enfrenta longas jornadas ao ar livre.</strong>"
+            split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem padrão de proteção solar certificado."
+            split1_p3 = "Construído com materiais leves e resistentes, oferece o máximo de conforto térmico para pescarias e trabalho sob sol forte."
+            split2_p1 = "<strong>A sua experiência começa antes mesmo de abrir a caixa.</strong>"
+            split2_p2 = "O chapéu é enviado em embalagem protegida BRK, projetada para evitar deformações na aba durante o transporte."
+            split2_p3 = "Seu novo chapéu chega pronto para encarar o sol com proteção e estilo incomparáveis."
+
+        else:  # hats_country_cowboy
+            item_type_label = "Chapéu Country"
+            gallery = enriched_data.get("images") or enriched_data.get("gallery") or []
+            img1 = gallery[0] if len(gallery) > 0 else "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg"
+            img2 = gallery[1] if len(gallery) > 1 else img1
+            img3 = gallery[2] if len(gallery) > 2 else img1
+            img4 = gallery[3] if len(gallery) > 3 else img2
+
+            details = [
+                {
+                    "img": img1,
+                    "alt": f"Aba larga estruturada do chapéu {formatted_title}",
+                    "title": "Aba Larga Estruturada",
+                    "desc": "Formato clássico com curvatura marcante e acabamento impecável, unindo tradição, imponência e proteção solar no campo."
+                },
+                {
+                    "img": img2,
+                    "alt": f"Carneira interna do chapéu {formatted_title}",
+                    "title": "Carneira Interna Confortável",
+                    "desc": "Faixa interna com toque macio e anatômico, oferecendo fixação firme e confortável na cabeça sem marcar a testa."
+                },
+                {
+                    "img": img3,
+                    "alt": f"Fita decorativa e acabamento do chapéu {formatted_title}",
+                    "title": "Fita & Acabamento Premium",
+                    "desc": "Banda decorativa exclusiva com detalhe refinado, reforçando a autenticidade e o visual rústico elegante."
+                },
+                {
+                    "img": img4,
+                    "alt": f"Estrutura de alta densidade do chapéu {formatted_title}",
+                    "title": "Estrutura Nobre & Firme",
+                    "desc": "Matéria-prima nobre de alta densidade que preserva a forma da copa e a curvatura da aba mesmo com uso contínuo."
+                }
+            ]
+            caract_title = "Características do Chapéu Country"
+            caract_items = [
+                "Copa alta estruturada e moldada no legítimo estilo western / campo.",
+                "Aba larga de presença marcante que proporciona excelente sombra e proteção.",
+                "Carneira interna acolchoada para conforto prolongado em cavalgadas e eventos.",
+                "Fita externa com acabamento nobre e identidade autêntica do homem e da mulher do campo.",
+                "Ideal para rodeios, feiras agropecuárias, lida na fazenda e dia a dia sertanejo."
+            ]
+            cuidados_title = "Cuidados & Conservação do Chapéu"
+            cuidados_items = [
+                "Limpar delicadamente com escova de cerdas macias sempre no sentido das fibras.",
+                "Evitar contato direto com chuva intensa ou umidade excessiva.",
+                "Armazenar sempre apoiado pela copa ou em suporte adequado para não desformar a aba.",
+                "Nunca dobrar, amassar ou deixar exposto no interior de veículos sob sol forte.",
+                "Em caso de umidade leve, deixe secar naturalmente à sombra em local ventilado."
+            ]
+            split1_p1 = "<strong>A tradição e o orgulho do campo em cada detalhe artesanal.</strong>"
+            split1_p2 = "Cada chapéu é selecionado para entregar autenticidade, robustez e elegância para os amantes do estilo country."
+            split1_p3 = "Acabamento primoroso que valoriza a cultura sertaneja e a presença marcante onde quer que você esteja."
+            split2_p1 = "<strong>Embalagem especial anti-deformação.</strong>"
+            split2_p2 = "O chapéu é embalado em caixa reforçada para garantir que a copa e a aba cheguem impecáveis e sem amassados."
+            split2_p3 = "Pronto para usar na lida, nas cavalgadas ou nos grandes eventos do agronegócio."
+
+        # Montagem dos Detalhes em HTML
+        details_html = []
+        for d in details:
+            details_html.append(f"""    <article class="brk-cap-detail-item">
+      <div class="brk-cap-detail-image"><img src="{d['img']}" alt="{d['alt']}" loading="lazy" referrerpolicy="no-referrer"></div>
+      <h3>{d['title']}</h3>
+      <p>{d['desc']}</p>
+    </article>""")
+        details_markup = "\n".join(details_html)
+
+        # Montagem das Características e Cuidados
+        caract_li = "\n".join([f"            <li>{item}</li>" for item in caract_items])
+        cuidados_li = "\n".join([f"            <li>{item}</li>" for item in cuidados_items])
+
+        svg_sparkle = get_svg_icon("sparkle", color=color_accent, size=36)
+        svg_care = get_svg_icon("care", color=color_accent, size=36, extra_class="brk-cap-info-icon--care")
+
+        return f"""{brk_tracking_marker(sku, archetype_id)}
+{schema_json_ld}
+<style>
+  .brk-cap-description {{
+    font-family: inherit;
+    color: #222222;
+    line-height: 1.5;
+    font-size: 15px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }}
+
+  .brk-cap-description * {{
+    box-sizing: border-box;
+  }}
+
+  .brk-cap-section {{
+    margin: 28px 0;
+  }}
+
+  .brk-cap-section-header {{
+    text-align: center;
+    margin-bottom: 20px;
+  }}
+
+  .brk-cap-section-title {{
+    display: inline-block;
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    position: relative;
+    padding-bottom: 6px;
+    margin: 0;
+    color: #111827;
+  }}
+
+  .brk-cap-section-title::after {{
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    width: 48px;
+    height: 3px;
+    border-radius: 999px;
+    background: {grad_horiz};
+  }}
+
+  /* DETALHES – GRID DE IMAGENS 260x260 + TEXTO */
+  .brk-cap-details-grid {{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 18px;
+  }}
+
+  .brk-cap-detail-item {{
+    text-align: center;
+    max-width: 260px;
+    flex: 1 1 220px;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }}
+
+  .brk-cap-detail-item:hover {{
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  }}
+
+  .brk-cap-detail-image {{
+    width: 100%;
+    max-width: 260px;
+    margin: 0 auto 10px;
+  }}
+
+  .brk-cap-detail-image img {{
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 12px;
+  }}
+
+  .brk-cap-detail-item h3 {{
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 6px 0 4px;
+    letter-spacing: 0.04em;
+    color: #1f2937;
+  }}
+
+  .brk-cap-detail-item p {{
+    font-size: 13px;
+    margin: 0;
+    color: #4b5563;
+    line-height: 1.45;
+  }}
+
+  /* INFORMAÇÕES – CARDS SUTIS + LISTA COM QUADRADOS */
+  .brk-cap-info-wrapper {{
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr);
+    gap: 20px;
+  }}
+
+  .brk-cap-info-block {{
+    padding: 20px 22px 22px;
+    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+  }}
+
+  .brk-cap-info-title {{
+    position: relative;
+    display: inline-block;
+    padding: 4px 0;
+    margin-bottom: 12px;
+  }}
+
+  .brk-cap-info-title h3 {{
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    color: #111827;
+  }}
+
+  .brk-cap-info-title svg {{
+    position: absolute;
+    left: -10px;
+    top: -8px;
+    width: 44px;
+    height: 44px;
+    opacity: 0.18;
+    z-index: 0;
+  }}
+
+  .brk-cap-info-icon--care {{
+    transform: translateX(-4px);
+  }}
+
+  .brk-cap-info-list {{
+    margin: 4px 0 0;
+    padding: 0;
+  }}
+
+  .brk-cap-info-block ul {{
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+  }}
+
+  .brk-cap-info-block li {{
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #374151;
+    line-height: 1.5;
+  }}
+
+  .brk-cap-info-block li::before {{
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 9px;
+    height: 9px;
+    border-radius: 3px;
+    background: {grad_horiz};
+  }}
+
+  @media (min-width: 900px) {{
+    .brk-cap-info-block ul {{
+      column-count: 2;
+      column-gap: 28px;
+    }}
+
+    .brk-cap-info-block li {{
+      break-inside: avoid;
+    }}
+  }}
+
+  /* SEÇÕES DIVIDIDAS (IMAGEM + TEXTO) */
+  .brk-cap-split-sections {{
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }}
+
+  .brk-cap-split {{
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
+  }}
+
+  .brk-cap-split.reverse {{
+    flex-direction: row-reverse;
+  }}
+
+  .brk-cap-split-image {{
+    flex: 1 1 45%;
+    max-width: 450px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: radial-gradient(circle at top left, rgba(0, 168, 255, 0.12), transparent 60%);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }}
+
+  .brk-cap-split-image img {{
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }}
+
+  .brk-cap-split-content {{
+    flex: 1 1 55%;
+    position: relative;
+    padding-left: 20px;
+  }}
+
+  .brk-cap-split.reverse .brk-cap-split-content {{
+    padding-left: 0;
+    padding-right: 20px;
+  }}
+
+  .brk-cap-split-content::before {{
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    border-radius: 999px;
+    background: {grad_vert};
+    left: 0;
+  }}
+
+  .brk-cap-split.reverse .brk-cap-split-content::before {{
+    left: auto;
+    right: 0;
+  }}
+
+  .brk-cap-split-content h2 {{
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #111827;
+  }}
+
+  .brk-cap-split-content p {{
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.5;
+  }}
+
+  .brk-cap-split-content p strong {{
+    font-weight: 700;
+    color: #1f2937;
+  }}
+
+  @media (max-width: 900px) {{
+    .brk-cap-detail-item {{
+      flex: 1 1 45%;
+      max-width: 240px;
+    }}
+  }}
+
+  @media (max-width: 640px) {{
+    .brk-cap-section {{
+      margin: 20px 0;
+    }}
+
+    .brk-cap-section-title {{
+      font-size: 18px;
+    }}
+
+    .brk-cap-detail-item {{
+      flex: 1 1 100%;
+      max-width: 100%;
+    }}
+
+    .brk-cap-split,
+    .brk-cap-split.reverse {{
+      flex-direction: column;
+      padding: 14px;
+    }}
+
+    .brk-cap-split-image {{
+      max-width: 100%;
+      width: 100%;
+      flex: none;
+    }}
+
+    .brk-cap-split-content {{
+      padding-left: 14px;
+      padding-right: 0;
+      width: 100%;
+    }}
+
+    .brk-cap-split.reverse .brk-cap-split-content {{
+      padding-right: 0;
+      padding-left: 14px;
+    }}
+
+    .brk-cap-split-content::before,
+    .brk-cap-split.reverse .brk-cap-split-content::before {{
+      left: 0;
+      right: auto;
+    }}
+
+    .brk-cap-split-content h2 {{
+      font-size: 16px;
+    }}
+  }}
+</style>
+<div class="brk-cap-description">
+  <!-- SEÇÃO DETALHES -->
+  <section class="brk-cap-section brk-cap-details">
+    <header class="brk-cap-section-header">
+      <h2 class="brk-cap-section-title">Detalhes</h2>
+    </header>
+    <div class="brk-cap-details-grid">
+{details_markup}
+    </div>
+  </section>
+
+  <!-- SEÇÃO INFORMAÇÕES -->
+  <section class="brk-cap-section brk-cap-information">
+    <header class="brk-cap-section-header">
+      <h2 class="brk-cap-section-title">Informações</h2>
+    </header>
+    <div class="brk-cap-info-wrapper">
+      <!-- BLOCO 1: CARACTERÍSTICAS -->
+      <div class="brk-cap-info-block">
+        <div class="brk-cap-info-title">
+          {svg_sparkle}
+          <h3>{caract_title}</h3>
+        </div>
+        <div class="brk-cap-info-list">
+          <ul>
+{caract_li}
+          </ul>
+        </div>
+      </div>
+
+      <!-- BLOCO 2: CUIDADOS -->
+      <div class="brk-cap-info-block">
+        <div class="brk-cap-info-title">
+          {svg_care}
+          <h3>{cuidados_title}</h3>
+        </div>
+        <div class="brk-cap-info-list">
+          <ul>
+{cuidados_li}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEÇÕES IMAGEM + TEXTO -->
+  <section class="brk-cap-section brk-cap-split-sections">
+    <!-- 1ª seção: Etiquetas BRK (FOTO -> TEXTO) -->
+    <div class="brk-cap-split">
+      <div class="brk-cap-split-image">
+        <img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764952819862-13-Tags.webp" alt="Etiquetas BRK aplicadas em produtos originais" loading="lazy" referrerpolicy="no-referrer">
+      </div>
+      <div class="brk-cap-split-content">
+        <h2>PRODUTO PREMIUM BRK</h2>
+        <p>{split1_p1}</p>
+        <p>{split1_p2}</p>
+        <p>{split1_p3}</p>
+      </div>
+    </div>
+
+    <!-- 2ª seção: Caixa / Entrega (TEXTO <- FOTO) -->
+    <div class="brk-cap-split reverse">
+      <div class="brk-cap-split-image">
+        <img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764962764537-CAIXA-BRK.webp" alt="Caixa personalizada BRK para envio seguro" loading="lazy" referrerpolicy="no-referrer">
+      </div>
+      <div class="brk-cap-split-content">
+        <h2>ENTREGA SEGURA BRK</h2>
+        <p>{split2_p1}</p>
+        <p>{split2_p2}</p>
+        <p>{split2_p3}</p>
+      </div>
+    </div>
+  </section>
+</div>"""
+
     def build_shopify_html(self, enriched_data: Dict[str, Any]) -> str:
         """
         Compila a descrição em HTML no padrão verticalizado BRK, 100% autônomo com SVGs inline estilo Font Awesome.
         """
         formatted_title = enriched_data.get("formatted_title") or enriched_data.get("title", "Produto BRK")
         brand_name = enriched_data.get("brand_name", "BRK")
+        archetype_id = enriched_data.get("archetype_id", "")
+        if not archetype_id:
+            title_low = (formatted_title or enriched_data.get("title") or "").lower()
+            if any(w in title_low for w in ["boné", "bone", "trucker", "snapback"]):
+                archetype_id = "caps_trucker_snapback"
+            elif any(w in title_low for w in ["chapéu", "chapeu"]) and any(w in title_low for w in ["country", "feltro", "cowboy"]):
+                archetype_id = "hats_country_cowboy"
+            elif any(w in title_low for w in ["chapéu", "chapeu"]):
+                archetype_id = "hats_safari_outdoor"
+
+        # Despacho especializado para Bonés e Chapéus (Layout D2C Oficial com Detalhes, Info e Split)
+        if archetype_id in ("caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy"):
+            return self._build_cap_or_hat_html(enriched_data, archetype_id)
         origin_type = enriched_data.get("origin_type", "producao_propria")
         show_copyright = enriched_data.get("show_copyright", False)
         has_multiple_variations = enriched_data.get("has_multiple_variations", False)
