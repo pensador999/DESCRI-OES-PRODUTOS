@@ -282,35 +282,28 @@ class HTMLBuilder:
         title_low = (enriched_data.get("formatted_title") or enriched_data.get("title") or "").lower()
         sku_low = (enriched_data.get("sku") or enriched_data.get("master_sku") or "").lower()
 
-        # 0. Exclusão estrita de itens não-têxteis com UV ou termos ambíguos
-        non_textile_keywords = [
-            "óculos", "oculos", "faca", "facas", "canivete", "alicate",
-            "vara", "varas", "molinete", "carretilha", "isca", "iscas",
-            "linha", "linhas", "anzol", "anzois", "estojo", "garrafa",
-            "copo", "chaveiro", "adesivo", "carteira", "protetor solar"
-        ]
-        if any(w in title_low for w in non_textile_keywords):
-            return ""
-
         # 1. Identificar se o produto é comprovadamente de vestuário superior / camisa
         is_shirt = (
             archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work")
             or any(w in title_low for w in ["camisa", "camiseta", "jersey", "baby look", "babylook"])
             or any(sku_low.startswith(pfx) for pfx in ["c0", "ci", "cadv", "adv", "hyb", "cmb", "raglan"])
-        ) and not any(w in title_low for w in [
-            "calça", "calca", "bermuda", "shorts", "macacão", "macacao", "jeans",
-            "sandália", "sandalia", "babuche", "chinelo", "sapato", "tênis", "tenis", "bota", "botina", "boaonda",
-            "chapéu", "chapeu", "boné", "bone",
-            "luva", "luvas",
-            "manguito", "manguitos",
-            "bandana", "tubeneck", "buff", "balaclava"
-        ])
+        ) and not bool(re.search(r'\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|chapéu|chapeu|boné|bone|luva|luvas|manguito|manguitos|bandana|tubeneck|buff|balaclava)\b', title_low))
+
+        # 0. Exclusão estrita de itens não-têxteis com UV ou termos ambíguos (apenas se NÃO for camisa)
+        if not is_shirt:
+            non_textile_pattern = r'\b(óculos|oculos|faca|facas|canivete|alicate|vara|varas|molinete|carretilha|isca|iscas|linha|linhas|anzol|anzois|anzóis|estojo|garrafa|copo|chaveiro|adesivo|carteira|protetor solar)\b'
+            if re.search(non_textile_pattern, title_low):
+                return ""
 
         tip_text = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | Manga do ombro ao punho). Dica: compare com uma peça sua estendida para escolher o caimento ideal."
 
         if is_shirt:
             # 1.1 Camisas de Botão / Utilitárias Work (CMB - Sarja/Algodão corte reto de trabalho)
-            if archetype_id == "shirts_button_work" or "cmb" in sku_low or ("work" in title_low and "camisa" in title_low and not any(w in title_low for w in ["xtech", "dry"])):
+            is_work_guide = (
+                (archetype_id == "shirts_button_work" or "cmb" in sku_low or "cbt" in sku_low or ("work" in title_low and "camisa" in title_low and not any(w in title_low for w in ["xtech", "dry", "uv", "uv50", "pesca"])))
+                and not sku_low.startswith("c0") and not sku_low.startswith("ci")
+            )
+            if is_work_guide:
                 guide_title = "Tabela de Medidas - Camisas Work & Utilitárias de Botão (P ao G2)"
                 tip_text = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Comprimento da gola à barra | Manga). Modelagem confortável de trabalho."
                 manga_header = "Manga Curta" if is_short_sleeve else "Manga Longa"
@@ -434,7 +427,7 @@ class HTMLBuilder:
       </table>"""
 
         # 2. Calças e Bermudas / Macacões (pants_cargo_tactical, overalls_workwear)
-        elif archetype_id in ("pants_cargo_tactical", "overalls_workwear") or any(w in title_low for w in ["calça", "calca", "bermuda", "shorts", "macacão", "macacao", "jeans"]):
+        elif archetype_id in ("pants_cargo_tactical", "overalls_workwear") or (not is_shirt and bool(re.search(r'\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao)\b', title_low))):
             guide_title = "Tabela de Medidas - Calças & Bermudas (38 ao 52)"
             tip_text = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Cintura na altura do cós | Quadril na parte mais larga | Comprimento da cintura até a barra). Dica: compare com uma peça sua estendida."
             rows = [

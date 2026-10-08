@@ -1076,27 +1076,26 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
   const tLow = (liveP.formatted_title || liveP.title || "").toLowerCase();
   const skuLow = (liveP.sku || liveP.master_sku || "").toLowerCase();
 
-  // 0. Exclusão estrita de itens não-têxteis com UV ou termos ambíguos
-  const nonTextiles = ["óculos", "oculos", "faca", "facas", "canivete", "alicate", "vara", "varas", "molinete", "carretilha", "isca", "iscas", "linha", "linhas", "anzol", "anzois", "estojo", "garrafa", "copo", "chaveiro", "adesivo", "carteira", "protetor solar"];
-  if (nonTextiles.some(w => tLow.includes(w))) {
-    return "";
-  }
-
-  let guideTitle = "";
-  let tableHtml = "";
-
   // 1. Identificar se o produto é comprovadamente de vestuário superior / camisa
   const isShirt = (
     ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId) ||
     /camisa|camiseta|jersey|baby look|babylook/i.test(tLow) ||
     /^(c0|ci|cadv|adv|hyb|cmb|raglan)/i.test(skuLow)
-  ) && !/calça|calca|bermuda|shorts|macacão|macacao|jeans|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|chapéu|chapeu|boné|bone|luva|manguito|bandana|tubeneck|buff|balaclava/i.test(tLow);
+  ) && !/\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|chapéu|chapeu|boné|bone|luva|luvas|manguito|manguitos|bandana|tubeneck|buff|balaclava)\b/i.test(tLow);
+
+  // 0. Exclusão estrita de itens não-têxteis com UV ou termos ambíguos (apenas se NÃO for camisa)
+  if (!isShirt) {
+    if (/\b(óculos|oculos|faca|facas|canivete|alicate|vara|varas|molinete|carretilha|isca|iscas|linha|linhas|anzol|anzois|anzóis|estojo|garrafa|copo|chaveiro|adesivo|carteira|protetor solar)\b/i.test(tLow)) {
+      return "";
+    }
+  }
 
   let tipText = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | Manga do ombro ao punho). Dica: compare com uma peça sua estendida para escolher o caimento ideal.";
 
   if (isShirt) {
     // 1.1 Camisas de Botão / Utilitárias Work (CMB - Sarja/Algodão corte reto de trabalho)
-    if (archetypeId === "shirts_button_work" || skuLow.includes("cmb") || (tLow.includes("work") && tLow.includes("camisa") && !tLow.includes("xtech") && !tLow.includes("dry"))) {
+    const isWorkGuide = (archetypeId === "shirts_button_work" || skuLow.includes("cmb") || skuLow.includes("cbt") || (tLow.includes("work") && tLow.includes("camisa") && !tLow.includes("xtech") && !tLow.includes("dry") && !tLow.includes("uv") && !tLow.includes("pesca"))) && !skuLow.startsWith("c0") && !skuLow.startsWith("ci");
+    if (isWorkGuide) {
       guideTitle = "Tabela de Medidas - Camisas Work & Utilitárias de Botão (P ao G2)";
       tipText = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Comprimento da gola à barra | Manga). Modelagem confortável de trabalho.";
       const mHeader = isShortSleeve ? "Manga Curta" : "Manga Longa";
@@ -1160,7 +1159,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
       tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">${badgeTitle}</div><div class="brk-sg-subtitle">${subtitle}</div></div><table class="brk-sg-table"><thead><tr class="brk-sg-th-row"><th>TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
     }
   }
-  else if (["pants_cargo_tactical", "overalls_workwear"].includes(archetypeId) || /calça|calca|bermuda|shorts|macacão|macacao|jeans/i.test(tLow)) {
+  else if (["pants_cargo_tactical", "overalls_workwear"].includes(archetypeId) || (!isShirt && /\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao)\b/i.test(tLow))) {
     guideTitle = "Tabela de Medidas - Calças & Bermudas (38 ao 52)";
     tipText = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Cintura na altura do cós | Quadril na parte mais larga | Comprimento da cintura até a barra). Dica: compare com uma peça sua estendida.";
     const rows = [
