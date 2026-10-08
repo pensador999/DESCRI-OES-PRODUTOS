@@ -132,10 +132,14 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
     arch_id = p.get("archetype_id") or ""
     is_uv = (arch_id == "uv_performance") or any(w in (p.get("title") or "").lower() for w in ["camisa", "uv", "armorx", "xtech"])
 
-    # Se já tem o formato oficial, novos Detalhes Técnicos e o novo Guia de Tamanhos C0 (para UV/camisas), reaproveita direto
+    # Se já tem o formato oficial, novos Detalhes Técnicos, o novo Guia de Tamanhos C0 (para UV/camisas) e o Prazo correto, reaproveita direto
     if raw_b and len(raw_b.strip()) > 500 and "<!-- BRK-MODO-B" in raw_b:
         has_new_sg = any(term in raw_b for term in ["49,5 cm", "Baby Look", "1 a 2 Anos", "brk-sg-subtitle"]) and "ALTURA" in raw_b
-        if not is_uv or ("Detalhes Técnicos" in raw_b and "XTech Pro" in raw_b and has_new_sg):
+        engine, builder = get_engine_and_builder()
+        is_ready = engine.is_ready_delivery(p) if engine else False
+        expected_prazo = "Pronta entrega" if is_ready else "9 dias úteis"
+        has_correct_prazo = expected_prazo in raw_b
+        if not is_uv or ("Detalhes Técnicos" in raw_b and "XTech Pro" in raw_b and has_new_sg and has_correct_prazo):
             return raw_b
 
     engine, builder = get_engine_and_builder()

@@ -101,29 +101,60 @@ class TestBRKRegressionGuardrails(unittest.TestCase):
         self.assertNotIn("fecho de engate", html_low, "Camisa de botão não pode ter fecho de engate!")
 
     def test_camisas_xtech_detalhes_tecnicos_specs(self):
-        """Camisas XTech (uv_performance) devem conter rigorosamente os Detalhes Técnicos oficiais."""
-        prod = {
+        """Camisas XTech (uv_performance) padrão devem ter 9 dias úteis e _FULL/_OUT pronta entrega."""
+        # 1. Padrão (sem _FULL / sem _OUT) -> 9 dias úteis
+        prod_std = {
             "id": 1005,
             "title": "Camisa ArmorX BRK Barkeiro Azul com Proteção UV50+",
             "product_type": "Camisas",
             "tags": "camisa, uv50, xtech, pesca",
-            "body_html": ""
+            "body_html": "",
+            "sku": "C01005P"
         }
-        html = self._generate_html(prod, "brk_fishing")
+        html_std = self._generate_html(prod_std, "brk_fishing")
 
-        self.assertIn("Detalhes Técnicos & Cuidados de Conservação", html)
-        self.assertIn("Prazo de Produção", html)
-        self.assertIn("Pronta entrega", html)
-        self.assertIn("Composição", html)
-        self.assertIn("90% Poliéster 10% Elastano", html)
-        self.assertIn("Tecido", html)
-        self.assertIn("XTech Pro", html)
-        self.assertIn("Tecnologia", html)
-        self.assertIn("Secagem Rápida, Tecido Leve, Proteção Solar", html)
-        self.assertIn("Modelagem", html)
-        self.assertIn("Anatômica e confortável", html)
-        self.assertIn("Proteção", html)
-        self.assertIn("Proteção UV50+ (não sai na lavagem)", html)
+        self.assertIn("Detalhes Técnicos & Cuidados de Conservação", html_std)
+        self.assertIn("Prazo de Produção", html_std)
+        self.assertIn("9 dias úteis", html_std)
+        self.assertNotIn("Pronta entrega", html_std)
+        self.assertIn("Composição", html_std)
+        self.assertIn("90% Poliéster 10% Elastano", html_std)
+        self.assertIn("Tecido", html_std)
+        self.assertIn("XTech Pro", html_std)
+        self.assertIn("Tecnologia", html_std)
+        self.assertIn("Secagem Rápida, Tecido Leve, Proteção Solar", html_std)
+        self.assertIn("Modelagem", html_std)
+        self.assertIn("Anatômica e confortável", html_std)
+        self.assertIn("Proteção", html_std)
+        self.assertIn("Proteção UV50+ (não sai na lavagem)", html_std)
+
+        # 2. Com _FULL -> Pronta entrega
+        prod_full = {
+            "id": 1006,
+            "title": "Camisa ArmorX BRK Barkeiro Azul com Proteção UV50+",
+            "product_type": "Camisas",
+            "tags": "camisa, uv50, xtech, pesca",
+            "body_html": "",
+            "sku": "C01005P_FULL"
+        }
+        html_full = self._generate_html(prod_full, "brk_fishing")
+        self.assertIn("Prazo de Produção", html_full)
+        self.assertIn("Pronta entrega", html_full)
+        self.assertNotIn("9 dias úteis", html_full)
+
+        # 3. Com _OUT -> Pronta entrega
+        prod_out = {
+            "id": 1007,
+            "title": "Camisa ArmorX BRK Barkeiro Azul com Proteção UV50+",
+            "product_type": "Camisas",
+            "tags": "camisa, uv50, xtech, pesca",
+            "body_html": "",
+            "sku": "C01005P_OUT"
+        }
+        html_out = self._generate_html(prod_out, "brk_fishing")
+        self.assertIn("Prazo de Produção", html_out)
+        self.assertIn("Pronta entrega", html_out)
+        self.assertNotIn("9 dias úteis", html_out)
 
     def test_camisas_c0_size_guide_masculino(self):
         """Camisas padrão C0 Masculino / Unissex devem conter rigorosamente as 7 linhas oficiais."""
@@ -640,16 +671,39 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         self.assertNotIn("Camisas Work & Utilitárias de Botão", html, "Camisa C0 não pode receber guia de botão")
 
     def test_c0_shirts_have_official_xtech_pro_specs(self):
-        prod = {"id": 4, "title": "Camisa Agro Brk São Bento e Colheitadeira com Proteção UV50", "master_sku": "C02281P_FULL"}
-        arch = self.engine.detect_archetype(prod["title"], "", [], "BRK", sku=prod["master_sku"])
-        narrative = self.engine.generate_narrative_from_template(prod, arch, [], store_key="brk_agro")
-        specs = {s["label"]: s["value"] for s in narrative.get("specs", [])}
-        self.assertEqual(specs.get("Prazo de Produção"), "Pronta entrega")
-        self.assertEqual(specs.get("Composição"), "90% Poliéster 10% Elastano")
-        self.assertEqual(specs.get("Tecido"), "XTech Pro")
-        self.assertEqual(specs.get("Tecnologia"), "Secagem Rápida, Tecido Leve, Proteção Solar")
-        self.assertEqual(specs.get("Modelagem"), "Anatômica e confortável")
-        self.assertEqual(specs.get("Proteção"), "Proteção UV50+ (não sai na lavagem)")
+        # 1. Com _FULL -> Pronta entrega
+        prod_full = {"id": 4, "title": "Camisa Agro Brk São Bento e Colheitadeira com Proteção UV50", "master_sku": "C02281P_FULL"}
+        arch_full = self.engine.detect_archetype(prod_full["title"], "", [], "BRK", sku=prod_full["master_sku"])
+        narrative_full = self.engine.generate_narrative_from_template(prod_full, arch_full, [], store_key="brk_agro")
+        specs_full = {s["label"]: s["value"] for s in narrative_full.get("specs", [])}
+        self.assertEqual(specs_full.get("Prazo de Produção"), "Pronta entrega")
+        self.assertEqual(specs_full.get("Composição"), "90% Poliéster 10% Elastano")
+        self.assertEqual(specs_full.get("Tecido"), "XTech Pro")
+        self.assertEqual(specs_full.get("Tecnologia"), "Secagem Rápida, Tecido Leve, Proteção Solar")
+        self.assertEqual(specs_full.get("Modelagem"), "Anatômica e confortável")
+        self.assertEqual(specs_full.get("Proteção"), "Proteção UV50+ (não sai na lavagem)")
+
+        # 2. Padrão (sem _FULL e sem _OUT) -> 9 dias úteis
+        prod_std = {"id": 5, "title": "Camisa Agro Brk São Bento e Colheitadeira com Proteção UV50", "master_sku": "C02281P"}
+        arch_std = self.engine.detect_archetype(prod_std["title"], "", [], "BRK", sku=prod_std["master_sku"])
+        narrative_std = self.engine.generate_narrative_from_template(prod_std, arch_std, [], store_key="brk_agro")
+        specs_std = {s["label"]: s["value"] for s in narrative_std.get("specs", [])}
+        self.assertEqual(specs_std.get("Prazo de Produção"), "9 dias úteis")
+
+        # 3. Com _OUT -> Pronta entrega
+        prod_out = {"id": 6, "title": "Camisa Agro Brk São Bento e Colheitadeira com Proteção UV50", "master_sku": "C02281P_OUT"}
+        arch_out = self.engine.detect_archetype(prod_out["title"], "", [], "BRK", sku=prod_out["master_sku"])
+        narrative_out = self.engine.generate_narrative_from_template(prod_out, arch_out, [], store_key="brk_agro")
+        specs_out = {s["label"]: s["value"] for s in narrative_out.get("specs", [])}
+        self.assertEqual(specs_out.get("Prazo de Produção"), "Pronta entrega")
+
+        # 4. Produto Não-C0 (Chapéu / Acessório) -> NÃO recebe 9 dias úteis nem Prazo de Produção têxtil
+        prod_hat = {"id": 7, "title": "Chapéu BRK Agro Campo Aba Larga", "master_sku": "CHP100"}
+        arch_hat = self.engine.detect_archetype(prod_hat["title"], "", [], "BRK", sku=prod_hat["master_sku"])
+        narrative_hat = self.engine.generate_narrative_from_template(prod_hat, arch_hat, [], store_key="brk_agro")
+        specs_hat = {s["label"]: s["value"] for s in narrative_hat.get("specs", [])}
+        self.assertNotIn("Prazo de Produção", specs_hat)
+        self.assertNotIn("9 dias úteis", str(specs_hat))
 
 
 def run_tests():

@@ -1428,6 +1428,21 @@ function getProductModeBHTML(liveP) {
     }
   }
 
+  const isReadyDelivery = (p) => {
+    if (!p) return false;
+    const fullOutPattern = /(_FULL|_OUT|\bFULL\b|\bOUT\b|-FULL|-OUT)/i;
+    const skus = [p.sku, p.master_sku, ...(p.variants_skus || [])].filter(Boolean);
+    if (skus.some(s => fullOutPattern.test(s))) return true;
+    if (p.variants && Array.isArray(p.variants)) {
+      if (p.variants.some(v => v && fullOutPattern.test(v.sku || ""))) return true;
+    }
+    const title = p.title || "";
+    const tags = Array.isArray(p.tags) ? p.tags.join(" ") : (p.tags || "");
+    if (fullOutPattern.test(title) || fullOutPattern.test(tags)) return true;
+    if (/pronta entrega|envio imediato/i.test(title)) return true;
+    return false;
+  };
+
   let specs = liveP.specs || [];
   if (specs.length === 0 && window.__STORE_MOLDES) {
     const archKey = liveP.archetype_id || "uv_performance";
@@ -1435,6 +1450,20 @@ function getProductModeBHTML(liveP) {
     if (tmpl && tmpl.base_specs) {
       specs = tmpl.base_specs.map(s => ({ label: s.label, value: s.default }));
     }
+  }
+
+  // Ajuste inteligente do Prazo de Produção para Camisas C0 (Pronta entrega para _FULL e _OUT, 9 dias úteis para padrão)
+  const isC0Shirt = (liveP.archetype_id === "uv_performance") ||
+                    (liveP.sku && /^(c0|ci|cadv|adv)/i.test(liveP.sku)) ||
+                    (liveP.master_sku && /^(c0|ci|cadv|adv)/i.test(liveP.master_sku));
+  if (isC0Shirt && specs.length > 0) {
+    const prazoVal = isReadyDelivery(liveP) ? "Pronta entrega" : "9 dias úteis";
+    specs = specs.map(s => {
+      if (s.label === "Prazo de Produção") {
+        return { ...s, value: prazoVal };
+      }
+      return s;
+    });
   }
 
   let careTips = liveP.care_tips;

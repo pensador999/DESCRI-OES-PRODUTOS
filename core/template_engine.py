@@ -65,7 +65,7 @@ class TemplateEngine:
                     "desc_tmpl": "Acabamento de alto padrão com costuras planas anti-atrito, gola padre com cobertura no cursor do zíper e punhos anatômicos que não laceiam com o uso frequente."
                 },
                 "base_specs": [
-                    {"label": "Prazo de Produção", "default": "Pronta entrega"},
+                    {"label": "Prazo de Produção", "default": "9 dias úteis"},
                     {"label": "Composição", "default": "90% Poliéster 10% Elastano"},
                     {"label": "Tecido", "default": "XTech Pro"},
                     {"label": "Tecnologia", "default": "Secagem Rápida, Tecido Leve, Proteção Solar"},
@@ -1115,15 +1115,68 @@ class TemplateEngine:
             sanitized.append(s)
         return sanitized
 
+    def is_ready_delivery(self, product: Dict[str, Any]) -> bool:
+        """
+        Identifica se o produto é de pronta entrega / envio imediato.
+        Regra Oficial BRK:
+        - Códigos/SKUs contendo _FULL ou _OUT (ex: C02496BLP_FULL, C01046BLP_OUT, -FULL, -OUT)
+        - Menção expressa de pronta entrega / envio imediato no título ou tags
+        """
+        if not product:
+            return False
+
+        skus_to_check = []
+        for k in ["sku", "master_sku"]:
+            val = str(product.get(k) or "").strip()
+            if val:
+                skus_to_check.append(val)
+
+        for vsku in product.get("variants_skus", []):
+            if vsku:
+                skus_to_check.append(str(vsku).strip())
+
+        for v in product.get("variants", []):
+            if isinstance(v, dict):
+                v_s = str(v.get("sku") or "").strip()
+                if v_s:
+                    skus_to_check.append(v_s)
+
+        title = str(product.get("title") or "")
+        tags = product.get("tags", [])
+        if isinstance(tags, str):
+            tags = [t.strip() for t in tags.split(",") if t.strip()]
+        tags_str = " ".join(tags)
+
+        full_out_pattern = re.compile(r'(_FULL|_OUT|\bFULL\b|\bOUT\b|-FULL|-OUT)', re.IGNORECASE)
+        for s in skus_to_check:
+            if full_out_pattern.search(s):
+                return True
+
+        if full_out_pattern.search(title) or full_out_pattern.search(tags_str):
+            return True
+        if any(term in title.lower() for term in ["pronta entrega", "envio imediato"]):
+            return True
+
+        return False
+
     def extract_product_specs(self, product: Dict[str, Any], archetype_id: str, sibling_specs: List[Dict[str, str]] = None) -> List[Dict[str, str]]:
         """
         Extrai especificações autênticas do produto. Se o sibling_matcher encontrou
         especificações de um irmão homólogo, elas são priorizadas e sanitizadas para garantir fidelidade.
-        Para Camisas UV Performance, usa rigorosamente a Ficha Técnica Oficial XTech Pro.
+        Para Camisas UV Performance (C0), usa rigorosamente a Ficha Técnica Oficial XTech Pro
+        com Prazo de Produção dinâmico (Pronta entrega para _FULL e _OUT, 9 dias úteis para códigos padrão).
         """
         if archetype_id == "uv_performance":
-            base_specs = self.templates["uv_performance"]["base_specs"]
-            return [{"label": s["label"], "value": s["default"]} for s in base_specs]
+            is_pronta = self.is_ready_delivery(product)
+            prazo_val = "Pronta entrega" if is_pronta else "9 dias úteis"
+            return [
+                {"label": "Prazo de Produção", "value": prazo_val},
+                {"label": "Composição", "value": "90% Poliéster 10% Elastano"},
+                {"label": "Tecido", "value": "XTech Pro"},
+                {"label": "Tecnologia", "value": "Secagem Rápida, Tecido Leve, Proteção Solar"},
+                {"label": "Modelagem", "value": "Anatômica e confortável"},
+                {"label": "Proteção", "value": "Proteção UV50+ (não sai na lavagem)"},
+            ]
 
         if sibling_specs and len(sibling_specs) >= 2:
             raw_specs = [{"label": s["label"], "value": s["default"]} for s in sibling_specs]
