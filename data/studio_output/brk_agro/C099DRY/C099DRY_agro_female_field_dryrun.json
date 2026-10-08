@@ -1,0 +1,23 @@
+{
+  "success": true,
+  "provider": "dry_run_simulation",
+  "message": "Simulação de pipeline realizada com sucesso. Para gerar a imagem real, configure REPLICATE_API_TOKEN ou COLAB_GRADIO_URL.",
+  "human_model": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1000&q=80",
+  "garment_url": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/pBekKbx.jpg?v=1758912299",
+  "persona": {
+    "persona_id": "agro_female_field",
+    "store_key": "brk_agro",
+    "gender": "feminina",
+    "name": "Mulher do Agronegócio na Lavoura",
+    "setting": "Plantação de soja ou milho com maquinário moderno",
+    "prompt_scene": "Photorealistic commercial shot of an active Brazilian woman working in agribusiness (32 years old), standing by the edge of an expansive golden grain field with modern green agricultural machinery softly blurred behind. Warm natural sunlight, proud and welcoming smile, authentic country lifestyle ambiance. Flawless tailored fit of the garment, vibrant colors and sharp graphic details.",
+    "recommended_for": [
+      "uv_performance",
+      "caps_trucker_snapback",
+      "hats_safari_outdoor"
+    ],
+    "base_model_url": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1000&q=80"
+  },
+  "sku": "C099DRY",
+  "title": "Camisa Feminina Brk Agro Teste UV50+"
+}

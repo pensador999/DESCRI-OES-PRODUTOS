@@ -885,9 +885,48 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         self.assertNotIn("Pronta entrega", html_hybrid)
 
 
+class TestBRKStudioVerticalization(unittest.TestCase):
+    def test_persona_manager_coverage(self):
+        """Valida que todas as 3 lojas possuem personas masculinas e femininas cadastradas com prompts de alta fidelidade."""
+        from services.studio import persona_manager
+        for st in ("brk_fishing", "brk_agro", "brk_motors"):
+            personas = persona_manager.list_by_store(st)
+            self.assertTrue(len(personas) >= 2, f"Loja {st} deve ter pelo menos 2 personas (masculina e feminina)")
+            genders = {p.gender for p in personas}
+            self.assertIn("masculino", genders)
+            self.assertIn("feminina", genders)
+            for p in personas:
+                self.assertTrue(len(p.prompt_scene) > 50)
+                self.assertTrue(p.base_model_url.startswith("http"))
+
+    def test_garment_processor_extraction(self):
+        """Valida que o extrator de peças identifica a URL primária da Shopify e define o cache."""
+        from services.studio import garment_processor
+        prod = {
+            "master_sku": "C099TEST",
+            "title": "Camisa Teste UV50+",
+            "gallery": ["https://cdn.shopify.com/s/files/1/0628/1445/3826/files/test.jpg"]
+        }
+        url = garment_processor.extract_primary_image_url(prod)
+        self.assertEqual(url, "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/test.jpg")
+
+    def test_studio_orchestrator_pipeline_dryrun(self):
+        """Valida que o orquestrador do BRK Studio executa o ciclo completo em dry_run e salva resultado."""
+        from services.studio import studio_orchestrator
+        prod = {
+            "master_sku": "C099DRY",
+            "title": "Camisa Feminina Brk Agro Teste UV50+",
+            "gallery": ["https://cdn.shopify.com/s/files/1/0628/1445/3826/files/pBekKbx.jpg?v=1758912299"]
+        }
+        res = studio_orchestrator.generate_humanized_photo(prod, store_key="brk_agro", provider="dry_run")
+        self.assertTrue(res.get("success"))
+        self.assertEqual(res.get("persona_id"), "agro_female_field")
+        self.assertTrue(os.path.exists(res.get("local_path")))
+
+
 def run_tests():
     suite = unittest.TestSuite()
-    for case in (TestBRKRegressionGuardrails, TestSemanticConformity, TestLiveAgentAndTracking, TestTampermonkeyIntegration, TestProductDBApiAndDirectConnection, TestDeepFlowAuditGuardrails):
+    for case in (TestBRKRegressionGuardrails, TestSemanticConformity, TestLiveAgentAndTracking, TestTampermonkeyIntegration, TestProductDBApiAndDirectConnection, TestDeepFlowAuditGuardrails, TestBRKStudioVerticalization):
         suite.addTests(unittest.TestLoader().loadTestsFromTestCase(case))
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)

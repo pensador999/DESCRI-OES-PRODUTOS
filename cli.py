@@ -198,6 +198,76 @@ def cmd_sync(args):
 
     print(f"\n[+] Relatório de sincronização salvo em: {report_file}")
 
+def cmd_studio(args):
+    """Executa o estúdio de fotos humanizadas (BRK Studio)"""
+    from services.studio import persona_manager, studio_orchestrator
+    from api.product_db import load_store_database
+
+    if getattr(args, "list_personas", False):
+        print("\n" + "=" * 65)
+        print("  🎨 BRK STUDIO - CATÁLOGO DE PERSONAS & CENÁRIOS HUMANIZADOS")
+        print("=" * 65)
+        personas = persona_manager.all_personas()
+        for p in personas:
+            print(f"\n[{p.persona_id}] {p.name}")
+            print(f"  Loja: {p.store_key} | Gênero: {p.gender}")
+            print(f"  Cenário: {p.setting}")
+            print(f"  Recomendado para: {', '.join(p.recommended_for)}")
+        print("\n" + "=" * 65)
+        return
+
+    store_key = args.store
+    sp = load_store_database(store_key)
+    if not sp:
+        print(f"[-] Erro: Loja '{store_key}' não encontrada.")
+        return
+
+    sku = (args.sku or "").strip()
+    if not sku:
+        print("[-] Erro: Informe o SKU do produto via --sku (ex: --sku C01005P) ou use --list-personas.")
+        return
+
+    product = sp["by_sku"].get(sku.upper()) or sp["by_sku"].get(sku)
+    if not product:
+        for s_key, p_obj in sp["by_sku"].items():
+            if sku.upper() in s_key.upper():
+                product = p_obj
+                break
+
+    if not product:
+        print(f"[-] Erro: Produto com SKU '{sku}' não encontrado na loja {store_key}.")
+        return
+
+    print(f"\n[🎨 BRK Studio] Iniciando geração humanizada para:")
+    print(f"  Produto : {product.get('title')}")
+    print(f"  SKU     : {product.get('master_sku')}")
+    print(f"  Loja    : {store_key}")
+    print(f"  Provedor: {args.provider}")
+
+    try:
+        res = studio_orchestrator.generate_humanized_photo(
+            product=product,
+            store_key=store_key,
+            persona_id=args.persona,
+            provider=args.provider
+        )
+        print("\n" + "=" * 65)
+        if res.get("success"):
+            print("  ✅ SUCESSO NA GERAÇÃO HUMANIZADA!")
+            print(f"  Provedor Utilizado : {res.get('provider')}")
+            print(f"  Persona Aplicada   : {res.get('persona_id')}")
+            if res.get("output_url"):
+                print(f"  URL da Imagem      : {res.get('output_url')}")
+            if res.get("local_path"):
+                print(f"  Arquivo Salvo      : {res.get('local_path')}")
+            if res.get("duration_seconds"):
+                print(f"  Tempo de Processamento: {res.get('duration_seconds')}s")
+        else:
+            print(f"  ⚠️ Aviso: {res.get('error')}")
+        print("=" * 65)
+    except Exception as e:
+        print(f"[-] Falha na execução do Studio: {e}")
+
 def main():
     parser = argparse.ArgumentParser(
         description="Central Mestre BRK - CLI Unificado de Operações Shopify",
@@ -237,6 +307,15 @@ def main():
     p_sync.add_argument("--delay", type=float, default=0.5, help="Intervalo em segundos entre requisições (padrão: 0.5s)")
     p_sync.add_argument("--token", type=str, default=None, help="Sobrescrever token de acesso da loja")
     p_sync.set_defaults(func=cmd_sync)
+
+    # Comando studio (Fotos Humanizadas & Virtual Try-On)
+    p_studio = subparsers.add_parser("studio", help="BRK Studio: Fotos Humanizadas e Virtual Try-On de alta conversão")
+    p_studio.add_argument("--store", type=str, default="brk_fishing", choices=["brk_fishing", "brk_agro", "brk_motors"], help="Loja alvo")
+    p_studio.add_argument("--sku", type=str, default=None, help="SKU do produto para gerar foto humanizada")
+    p_studio.add_argument("--persona", type=str, default=None, help="ID da persona (opcional, ex: fishing_male_boat)")
+    p_studio.add_argument("--provider", type=str, default="auto", choices=["auto", "replicate", "colab", "gemini", "dry_run"], help="Provedor de IA")
+    p_studio.add_argument("--list-personas", action="store_true", default=False, help="Lista todas as personas e cenários cadastrados")
+    p_studio.set_defaults(func=cmd_studio)
 
     args = parser.parse_args()
     if not args.command:

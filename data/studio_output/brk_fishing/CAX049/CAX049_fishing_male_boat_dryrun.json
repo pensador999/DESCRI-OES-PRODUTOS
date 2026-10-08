@@ -1,0 +1,23 @@
+{
+  "success": true,
+  "provider": "dry_run_simulation",
+  "message": "Simulação de pipeline realizada com sucesso. Para gerar a imagem real, configure REPLICATE_API_TOKEN ou COLAB_GRADIO_URL.",
+  "human_model": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=1000&q=80",
+  "garment_url": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F187283767_2F4787b96422a84a76b2b4437d41a75de5.jpg?v=1790703842",
+  "persona": {
+    "persona_id": "fishing_male_boat",
+    "store_key": "brk_fishing",
+    "gender": "masculino",
+    "name": "Pescador Esportivo no Barco (Golden Hour)",
+    "setting": "Barco de alumínio ou Bass Boat em rio brasileiro",
+    "prompt_scene": "Photorealistic professional lifestyle commercial shot of an athletic Brazilian male sport fisherman (35 years old), tanned skin, standing on an aluminum bass boat in the middle of a calm Amazonian or Pantanal river. Warm golden hour sunset lighting, clear reflections on the water, lush riverbank rainforest in soft background bokeh. He is wearing polar sunglasses resting on the collar or forehead, smiling naturally looking at the horizon. Ultra-realistic textile folds, crisp fabric weave, dynamic natural outdoor posture.",
+    "recommended_for": [
+      "uv_performance",
+      "caps_trucker_snapback",
+      "neck_gaiters_balaclavas"
+    ],
+    "base_model_url": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=1000&q=80"
+  },
+  "sku": "CAX049",
+  "title": "Camisa ArmorX Brk Barkeiro Azul com Listra e Luva e Proteção UV50+"
+}
