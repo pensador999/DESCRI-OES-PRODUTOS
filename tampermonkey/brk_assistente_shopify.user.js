@@ -679,7 +679,18 @@
                 injectModoBIntoEditor(activeLoadedProduct.mode_b_html);
               }, 1200);
             } else {
-              renderHudProductMode(activeLoadedProduct, "Produto Identificado no Banco", "Clique em 'Injetar Modo B' ou 'Copiar HTML'.");
+              // Verifica se o editor da página já possui o marcador oficial BRK-MODO-B
+              const editorArea = document.querySelector("textarea[name*='description']") || 
+                                 document.querySelector(".Polaris-Textarea__Input") ||
+                                 document.querySelector("iframe")?.contentDocument?.body;
+              const currentVal = editorArea?.value || editorArea?.innerHTML || "";
+              const alreadyModoB = currentVal.includes("BRK-MODO-B") || currentVal.includes("brk-modo-b");
+
+              if (alreadyModoB) {
+                renderHudProductMode(activeLoadedProduct, "✅ Já Colado (Modo B Ativo)", "Este produto já possui a descrição oficial Modo B aplicada no Shopify!");
+              } else {
+                renderHudProductMode(activeLoadedProduct, "Produto Identificado no Banco", "Clique em 'Injetar Modo B' ou 'Copiar HTML'.");
+              }
             }
           } else {
             renderHudProductMode(null, "Produto não encontrado", `O ID ${currentProductId} não foi localizado no banco da loja ${storeName}.`);
