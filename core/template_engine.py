@@ -935,22 +935,30 @@ class TemplateEngine:
             return "hats_country_cowboy"
 
         # 8. Camisas / Vestuário Superior: Distinção estrita entre Camisas Work/Botão vs Algodão vs Motors vs UV50+
-        is_c0_or_uv_sku = any(sku_clean.startswith(prefix) for prefix in ["C0", "CI", "CADV", "ADV", "HYB", "CMB", "RAGLAN"])
-        is_upper_body = any(w in t for w in ["camisa", "camiseta", "baby look", "babylook", "regata", "t-shirt", "polo", "jersey", "segunda pele"]) or is_c0_or_uv_sku
+        is_c0_or_uv_sku = any(sku_clean.startswith(prefix) for prefix in ["C0", "CI", "CADV", "ADV", "HYB", "RAGLAN"])
+        is_work_sku = any(sku_clean.startswith(prefix) for prefix in ["CMB", "CBT"])
+        is_upper_body = any(w in t for w in ["camisa", "camiseta", "baby look", "babylook", "regata", "t-shirt", "polo", "jersey", "segunda pele"]) or is_c0_or_uv_sku or is_work_sku
 
         if is_upper_body:
-            # 8.1 Camisas Work / Botão / Sarja / Lisas (Sem zíper, com botões e bolsos utilitários)
-            if any(w in t for w in ["work", "safari sarja", "manga longa sarja", "manga curta sarja", "sarja", "militar", "operacional", "botao", "botão", "de botao", "de botão", "lisa", "sem estampa"]) and not any(w in t for w in ["ziper", "zíper"]):
-                return "shirts_button_work"
-
-            # 8.2 Se for camisa com proteção UV, código C0 ou tecnologia XTech / Dry Fit -> SEMPRE uv_performance
+            # 8.1 Se for camisa com código C0, CI, CADV, ADV, HYB, RAGLAN ou com menção explícita a proteção UV / XTech
+            # -> Sempre uv_performance (mesmo que contenha cores como "verde militar" ou "camuflada militar")
             is_uv_shirt = (
                 is_c0_or_uv_sku or
-                any(w in t for w in ["uv", "uv50", "uv 50", "fpu", "fps", "xtech", "solar", "manga longa", "dry", "segunda pele"]) or
+                any(w in t for w in ["uv", "uv50", "uv 50", "fpu", "fps", "xtech", "solar", "segunda pele", "fusionx", "armorx", "hybrid"]) or
                 any(w in tags_str for w in ["uv50", "uv", "protecao solar", "proteção solar", "xtech"])
             )
-            if is_uv_shirt and not any(w in t for w in ["algodao puro", "100% algodao", "100% algodão"]):
+            if is_uv_shirt and not is_work_sku and not any(w in t for w in ["algodao puro", "100% algodao", "100% algodão", "camisa de botao", "camisa de botão", "camisa work"]):
                 return "uv_performance"
+
+            # 8.2 Camisas Work / Botão / Sarja / Lisas (Sem zíper, com botões e bolsos utilitários)
+            is_button_work = (
+                is_work_sku or
+                any(w in t for w in ["camisa work", "safari sarja", "camisa sarja", "camisa de botao", "camisa botao", "camisa de botão", "manga longa sarja", "manga curta sarja"]) or
+                (("operacional" in t or "sarja" in t or "de botao" in t or "de botão" in t) and not any(w in t for w in ["ziper", "zíper"])) or
+                (("lisa" in t or "sem estampa" in t) and any(w in t for w in ["classic", "manga curta", "manga longa"]) and not any(w in t for w in ["uv", "uv50", "dry", "xtech", "segunda pele"]))
+            )
+            if is_button_work and not any(w in t for w in ["ziper", "zíper"]):
+                return "shirts_button_work"
 
             # 8.3 Camisetas casuais de algodão (Agro / Campo)
             if any(w in t for w in ["algodao", "algodão", "campo", "agro", "fazenda", "trator"]):
