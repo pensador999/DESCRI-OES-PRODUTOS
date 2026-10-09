@@ -22,6 +22,7 @@ import json
 import os
 import sys
 import re
+import urllib.request
 
 # Cache em memória para processos warm da Vercel
 _CACHED_STORES = {}
@@ -299,8 +300,33 @@ class handler(BaseHTTPRequestHandler):
                 "store": store_key
             })
 
+        sync_live = (qs.get("sync_live") or ["0"])[0] == "1"
+        if sync_live and found_product:
+            handle = found_product.get("handle")
+            store_domains = {
+                "brk_fishing": "https://www.brkfishing.com.br",
+                "brk_agro": "https://www.brkagro.com.br",
+                "brk_motors": "https://www.brkmotors.com.br"
+            }
+            base_url = store_domains.get(store_key, "https://www.brkfishing.com.br")
+            if handle:
+                try:
+                    req_u = urllib.request.Request(f"{base_url}/products/{handle}.json", headers={"User-Agent": "Mozilla/5.0"})
+                    with urllib.request.urlopen(req_u, timeout=5) as resp_u:
+                        live_data = json.loads(resp_u.read().decode("utf-8")).get("product", {})
+                        if live_data and live_data.get("images"):
+                            new_imgs = [img.get("src") if isinstance(img, dict) else img for img in live_data["images"] if img]
+                            if new_imgs:
+                                found_product["images"] = live_data["images"]
+                                found_product["cdn_images"] = new_imgs
+                                found_product["gallery"] = new_imgs
+                                found_product["split_images"] = new_imgs
+                                found_product["mode_b_html"] = ""  # Forçar regeneração com as fotos novas
+                except Exception as ex:
+                    print(f"[!] Falha ao sincronizar live para {handle}: {ex}")
+
         return self._respond_json(200, {
             "success": True,
             "store": store_key,
             "product": sanitize_product(found_product, store_key)
-        }, cache_control="public, s-maxage=180")
+        }, cache_control="public, s-maxage=180" if not sync_live else "no-store")

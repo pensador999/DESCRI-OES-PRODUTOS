@@ -729,7 +729,12 @@ def build_dist():
           <span class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">Fotos no Catálogo do Site:</span>
           <div id="modal-gallery-thumbs" class="flex items-center gap-2"></div>
         </div>
-        <span id="modal-photos-count-badge" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700">3 Fotos no CDN Shopify</span>
+        <div class="flex items-center gap-2">
+          <button id="btn-sync-live-photos" onclick="syncLiveProductImages(this)" class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 font-bold text-[11px] flex items-center gap-1.5 transition-all shadow-sm cursor-pointer" title="Consultar a Shopify em tempo real e atualizar as fotos agora">
+            <span>🔄</span> Sincronizar Fotos da Loja
+          </button>
+          <span id="modal-photos-count-badge" class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700">3 Fotos no CDN Shopify</span>
+        </div>
       </div>
 
       <!-- Barra de Controle do Duplo Modo e Ações -->

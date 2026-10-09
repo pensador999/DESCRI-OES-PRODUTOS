@@ -77,6 +77,114 @@ function closeProductModal() {
   document.getElementById("product-modal").classList.add("hidden");
 }
 
+async function syncLiveProductImages(btn) {
+  if (!currentModalProduct) return;
+  const p = currentModalProduct;
+  const originalHtml = btn ? btn.innerHTML : "";
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add("opacity-70");
+    btn.innerHTML = `<span class="inline-block animate-spin">⏳</span> Buscando na Shopify...`;
+  }
+
+  try {
+    const storeDomains = {
+      "brk_fishing": "https://www.brkfishing.com.br",
+      "brk_agro": "https://www.brkagro.com.br",
+      "brk_motors": "https://www.brkmotors.com.br"
+    };
+    const storeBase = storeDomains[p.store_key || currentStore] || "https://www.brkfishing.com.br";
+    const handle = p.handle;
+    if (!handle) throw new Error("Produto sem handle cadastrado para consulta.");
+
+    let newImgs = [];
+    try {
+      const url = `${storeBase}/products/${handle}.json?t=${Date.now()}`;
+      const resp = await fetch(url, { cache: "no-store" });
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data && data.product && data.product.images) {
+          newImgs = data.product.images.map(i => (typeof i === "object" ? i.src : i)).filter(Boolean);
+        }
+      }
+    } catch (netErr) {
+      console.warn("[syncLiveProductImages] Falha direta na vitrine, tentando proxy Vercel:", netErr);
+    }
+
+    if (newImgs.length === 0) {
+      // Fallback via API serverless da Vercel
+      const apiUrl = `/api/product_db?store=${p.store_key || currentStore}&id=${p.id}&sync_live=1&t=${Date.now()}`;
+      const apiResp = await fetch(apiUrl, { cache: "no-store" });
+      if (apiResp.ok) {
+        const apiData = await apiResp.json();
+        if (apiData && apiData.product) {
+          const apiProd = apiData.product;
+          newImgs = apiProd.cdn_images || apiProd.gallery || (apiProd.images || []).map(i => (typeof i === "object" ? i.src : i)).filter(Boolean);
+          if (apiProd.mode_b_html) p.mode_b_html = apiProd.mode_b_html;
+        }
+      }
+    }
+
+    if (newImgs.length === 0) {
+      throw new Error("Nenhuma foto encontrada na vitrine online da Shopify.");
+    }
+
+    // Desduplicar fotos preservando a ordem oficial da Shopify
+    const uniqueImgs = [...new Set(newImgs)];
+    p.images = uniqueImgs.map((src, i) => ({ id: i, src: src }));
+    p.cdn_images = uniqueImgs;
+    p.gallery = uniqueImgs;
+    p.split_images = uniqueImgs;
+
+    // Atualiza miniaturas da galeria no modal
+    const thumbsContainer = document.getElementById("modal-gallery-thumbs");
+    if (thumbsContainer) {
+      thumbsContainer.innerHTML = "";
+      uniqueImgs.forEach((url, idx) => {
+        const thumb = document.createElement("img");
+        thumb.src = url;
+        thumb.alt = "Foto " + (idx + 1);
+        thumb.className = "w-8 h-8 object-cover rounded-lg border border-slate-300 shadow-sm cursor-pointer hover:border-blue-500 hover:scale-110 transition-all";
+        thumb.title = "Foto " + (idx + 1) + " oficial atualizada da Shopify";
+        thumb.onclick = () => window.open(url, '_blank');
+        thumbsContainer.appendChild(thumb);
+      });
+    }
+
+    const countBadge = document.getElementById("modal-photos-count-badge");
+    if (countBadge) {
+      countBadge.innerText = `${uniqueImgs.length} Fotos (Ao Vivo da Shopify)`;
+      countBadge.className = "text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300";
+    }
+
+    // Regera o Modo B oficial com as novas fotos
+    delete p.mode_b_html;
+    if (typeof getProductModeBHTML === "function") {
+      p.mode_b_html = getProductModeBHTML(p);
+    }
+    updateModalView();
+
+    if (typeof showToast === "function") {
+      showToast(`✅ ${uniqueImgs.length} fotos oficiais sincronizadas diretamente da vitrine da Shopify!`);
+    } else {
+      alert(`✅ ${uniqueImgs.length} fotos sincronizadas com sucesso da Shopify!`);
+    }
+  } catch (err) {
+    console.error("[syncLiveProductImages] Erro:", err);
+    if (typeof showToast === "function") {
+      showToast(`⚠️ Não foi possível sincronizar fotos da Shopify (${err.message}).`);
+    } else {
+      alert(`⚠️ Erro ao sincronizar fotos: ${err.message}`);
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove("opacity-70");
+      btn.innerHTML = originalHtml;
+    }
+  }
+}
+
 function switchModalMode(mode) {
   currentModalMode = mode;
   
