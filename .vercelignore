@@ -1,0 +1,9 @@
+# Vercel Ignore - Evitar upload de arquivos desnecessários para a Vercel
+data/studio_cache/
+data/studio_output/
+reports/
+notebooks/
+tests/
+scratch/
+tmp/
+*.log

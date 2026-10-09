@@ -919,7 +919,8 @@ def build_dist():
         sync_script = os.path.join(target_onedrive_dir, "sync_github.py")
         if os.path.exists(sync_script):
             print("[GITHUB SYNC] Executando sync_github.py...")
-            res = subprocess.run([sys.executable, sync_script, "fix: aplicar medidas oficiais das fotos C0, coluna ALTURA e travas de isolamento"], cwd=target_onedrive_dir, capture_output=True, text=True)
+            commit_msg = sys.argv[1] if len(sys.argv) > 1 else f"fix: alinhar narrativa com fotos e otimizar bundle vercel [{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}]"
+            res = subprocess.run([sys.executable, sync_script, commit_msg], cwd=target_onedrive_dir, capture_output=True, text=True)
             print("  -> Saída do Git Sync:", res.stdout.strip())
     except Exception as e:
         print(f"  -> Erro na sincronização com GitHub: {e}")
