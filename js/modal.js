@@ -2203,7 +2203,6 @@ function getProductModeBHTML(liveP) {
     <h2 class="brk-desc-main-title">${formattedTitle}</h2>
   </div>`;
 
-  const archetypeId = liveP.archetype_id || (typeof detectClientArchetype === "function" ? detectClientArchetype(liveP.title, liveP.category, liveP.tags).id : "uv_performance");
   const tLowTitle = (formattedTitle || liveP.title || "").toLowerCase();
   const isKids = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId) && (liveP.is_kids !== undefined ? liveP.is_kids : (/\b(infantil|kids|juvenil|mini)\b/i.test(tLowTitle) && !/\b(adulto|unissex adulto)\b/i.test(tLowTitle)));
   const isShortSleeve = liveP.is_short_sleeve !== undefined ? liveP.is_short_sleeve : (/\b(manga curta|manga-curta)\b/i.test(tLowTitle) && !/\b(manga longa|manga-longa)\b/i.test(tLowTitle));
