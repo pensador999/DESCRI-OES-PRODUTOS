@@ -1996,9 +1996,9 @@ function getProductModeBHTML(liveP) {
       let act1Desc = (tmpl.act1.desc_tmpl || "").replace(/\{title\}/g, formattedTitle);
       let act2Title = tmpl.act2.title || "CONFORTO E TECNOLOGIA";
       let act2Desc = (tmpl.act2.desc_tmpl || "").replace(/\{title\}/g, formattedTitle);
-      let act3Title = tmpl.act3.title || "DURABILIDADE E ACABAMENTO";
+      let act3Title = tmpl.act3.title || "COSTURAS PLANAS REFORÇADAS E ACABAMENTO PREMIUM";
       let act3Desc = (tmpl.act3.desc_tmpl || "").replace(/\{title\}/g, formattedTitle);
-      let act3Tag = tmpl.act3.tag || "Destaque";
+      let act3Tag = tmpl.act3.tag || "Durabilidade & Acabamento";
 
       if (isKids) {
         act1Title = "CONFORTO E PROTEÇÃO SOLAR TOTAL PARA OS PEQUENOS AVENTUREIROS";
@@ -2028,6 +2028,14 @@ function getProductModeBHTML(liveP) {
       } else if (isRoundNeck) {
         act3Title = "COSTURA REFORÇADA E GOLA REDONDA ANATÔMICA";
         act3Desc = "Acabamento de alto padrão com costuras planas anti-atrito, gola careca canelada que não deforma e ajuste confortável para uso contínuo.";
+      }
+
+      const img3Low = (img3 || "").toLowerCase();
+      const isBackView = /(costas|costa|back|traseira|02fem|02masc|03fem|03masc|verso)/i.test(img3Low);
+      if (isBackView && !isFusion && !isHybrid && !isHooded && !isKids && !isRoundNeck) {
+        act3Tag = "Design Traseiro & Acabamento";
+        act3Title = "PAINEL TRASEIRO EM ALTA DEFINIÇÃO E COSTURAS REFORÇADAS";
+        act3Desc = "Painel traseiro com estampa nítida e sublimação de alta resolução que não desbota, estruturado com costuras planas reforçadas nos ombros e dorso para total liberdade de movimentos e resistência ao uso contínuo.";
       }
 
       blocks = [
@@ -2135,6 +2143,14 @@ function getProductModeBHTML(liveP) {
     }
     if (!specs.some(s => /punho/i.test(s.label))) {
       specs.push({ label: "Punhos", value: "Punhos anatômicos com abertura para o polegar (dedeira)" });
+    }
+  }
+
+  const isRoundNeckModal = /\b(gola careca|gola redonda|sem zíper|sem ziper)\b/i.test(tLowModal) || (/\bcamiseta\b/i.test(tLowModal) && !/\b(ziper|zíper)\b/i.test(tLowModal));
+  const isHoodedModal = /\b(capuz|hood|hoodie)\b/i.test(tLowModal) || isFusionModal || isHybridModal;
+  if (!isFusionModal && !isHybridModal && !isRoundNeckModal && !isHoodedModal && (!liveP.archetype_id || liveP.archetype_id === "uv_performance")) {
+    if (!specs.some(s => /gola|fechamento/i.test(s.label))) {
+      specs.push({ label: "Gola / Fechamento", value: "Gola padre anatômica com zíper e trava de segurança" });
     }
   }
 

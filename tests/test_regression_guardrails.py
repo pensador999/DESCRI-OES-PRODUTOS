@@ -884,6 +884,43 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         self.assertIn("10 dias úteis", html_hybrid)
         self.assertNotIn("Pronta entrega", html_hybrid)
 
+    def test_act3_image_semantic_alignment_and_no_back_zipper(self):
+        """Valida que o Ato 3 de camisas UV padrão NÃO menciona zíper frontal ao ser pareado com foto de costas."""
+        prod = {
+            "id": 999901,
+            "title": "Camisa de Pesca BRK Patriota Masculina UV50+",
+            "category": "Camisas de Pesca UV",
+            "master_sku": "C0PATRIOTA01"
+        }
+        gallery_with_back = [
+            "https://cdn.shopify.com/files/frente.jpg",
+            "https://cdn.shopify.com/files/tecido.jpg",
+            "https://cdn.shopify.com/files/1786018701234-09_FEM_COSTAS.jpg"
+        ]
+        arch = self.engine.detect_archetype(prod["title"], prod["category"], [], "BRK", sku=prod["master_sku"])
+        narrative = self.engine.generate_narrative_from_template(prod, arch, gallery_with_back, store_key="brk_fishing")
+        
+        # Validar blocos narrativos
+        blocks = narrative["narrative_blocks"]
+        act3 = blocks[2]
+        
+        # Ato 3 JAMAIS deve conter zíper no título ou descrição
+        self.assertNotIn("zíper", act3["title"].lower(), "Ato 3 não pode ter zíper no título!")
+        self.assertNotIn("ziper", act3["title"].lower(), "Ato 3 não pode ter ziper no título!")
+        self.assertNotIn("zíper", act3["description"].lower(), "Ato 3 não pode citar zíper frontal ao mostrar foto das costas!")
+        self.assertNotIn("cursor do zíper", act3["description"].lower())
+        
+        # Com foto de costas detectada, o título deve focar em painel traseiro ou costuras planas
+        self.assertIn("TRASEIRO", act3["title"].upper())
+        self.assertIn("COSTURAS REFORÇADAS", act3["title"].upper())
+
+        # Validar HTML final
+        html = self.builder.build_shopify_html(narrative)
+        # O zíper deve constar nas specs técnicas (Gola / Fechamento)
+        self.assertIn("Gola padre anatômica com zíper", html)
+        self.assertIn("trava de segurança", html)
+
+
 
 class TestBRKStudioVerticalization(unittest.TestCase):
     def test_persona_manager_coverage(self):

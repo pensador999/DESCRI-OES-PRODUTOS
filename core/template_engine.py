@@ -60,10 +60,10 @@ class TemplateEngine:
                     "desc_tmpl": "Confeccionada em tecido tecnológico de absorção instantânea de suor, bloqueia até 98% dos raios UVA e UVB, mantendo a sensação de frescor e conforto térmico mesmo sob sol intenso o dia todo."
                 },
                 "act3": {
-                    "tag": "Durabilidade & Detalhes",
+                    "tag": "Durabilidade & Acabamento",
                     "fa_icon": "fa-solid fa-shield-halved",
-                    "title": "COSTURA REFORÇADA E ZÍPER COM TRAVA DE SEGURANÇA",
-                    "desc_tmpl": "Acabamento de alto padrão com costuras planas anti-atrito, gola padre com cobertura no cursor do zíper e punhos anatômicos que não laceiam com o uso frequente."
+                    "title": "COSTURAS PLANAS REFORÇADAS E ACABAMENTO PREMIUM",
+                    "desc_tmpl": "Acabamento de alto padrão com costuras planas anti-atrito, caimento anatômico no dorso e ombros para total liberdade de movimentos, além de punhos anatômicos que mantêm o ajuste firme e não laceiam."
                 },
                 "base_specs": [
                     {"label": "Prazo de Produção", "default": "10 dias úteis"},
@@ -847,10 +847,10 @@ class TemplateEngine:
                     "desc_tmpl": "Com fechamento integral por botões de alta tenacidade reforçados em costura em 'X', oferece ajuste prático, alinhamento alinhado e gola firme que mantém a postura durante toda a jornada."
                 },
                 "act3": {
-                    "tag": "Praticidade Utilitária",
-                    "fa_icon": "fa-solid fa-box-open",
-                    "title": "BOLSOS FRONTAIS COM LAPELA E COSTURA REFORÇADA",
-                    "desc_tmpl": "Equipada com bolsos funcionais no peito com fechamento por botão ou lapela protetora, perfeitos para portar ferramentas, canetas, celular e pequenos acessórios com total segurança."
+                    "tag": "Pala Traseira & Costuras",
+                    "fa_icon": "fa-solid fa-shield-halved",
+                    "title": "COSTURAS TRIPLAS REFORÇADAS E PALA TRASEIRA ANATÔMICA",
+                    "desc_tmpl": "Construída com pesponto reforçado nas áreas de maior tração, pala traseira anatômica com pregas de conforto e modelagem pensada para o trabalho pesado e ampla movimentação dos braços."
                 },
                 "base_specs": [
                     {"label": "Fechamento Frontal", "default": "Botões reforçados aplicados com costura em 'X'"},
@@ -994,10 +994,10 @@ class TemplateEngine:
                     "desc_tmpl": "Construída com materiais de alta tenacidade e flexibilidade balanceada, oferece encaixe anatômico confortável que não pressiona as têmporas nem o nariz durante longas horas de uso."
                 },
                 "act3": {
-                    "tag": "Fixação & Proteção",
+                    "tag": "Fixação & Durabilidade",
                     "fa_icon": "fa-solid fa-shield-halved",
-                    "title": "ACABAMENTO PREMIUM E ACOMPANHAMENTO DE ESTOJO E FLANELA",
-                    "desc_tmpl": "Design esportivo e elegante com dobradiças reforçadas e ponteiras anatômicas que garantem fixação firme no rosto, acompanhado de estojo rígido e flanela de microfibra para conservação."
+                    "title": "ACABAMENTO PREMIUM E HASTES ANATÔMICAS CONFORTÁVEIS",
+                    "desc_tmpl": "Design esportivo e refinado com dobradiças reforçadas e ponteiras anatômicas que garantem fixação firme no rosto sem pressionar as têmporas, oferecendo máximo conforto mesmo em movimento constante."
                 },
                 "base_specs": [
                     {"label": "Tecnologia das Lentes", "default": "Polarizadas TAC com filtro anti-reflexo HD"},
@@ -1674,6 +1674,14 @@ class TemplateEngine:
         elif is_has_glove:
             act3["desc_tmpl"] = "Acabamento de alto padrão com costuras planas anti-atrito, gola alta anatômica e punhos estendidos com luva integrada para proteção estendida do dorso das mãos."
 
+        # 7. Detecção Contextual da Foto 3 (Costas / Painel Traseiro vs. Acabamento Universal)
+        img3_url = (img3 or "").lower()
+        is_back_view = any(w in img3_url for w in ["costas", "costa", "back", "traseira", "02fem", "02masc", "03fem", "03masc", "verso"])
+        if is_back_view and archetype_id == "uv_performance" and not is_fusion and not is_hybrid and not is_hooded and not is_kids:
+            act3["tag"] = "Design Traseiro & Acabamento"
+            act3["title"] = "PAINEL TRASEIRO EM ALTA DEFINIÇÃO E COSTURAS REFORÇADAS"
+            act3["desc_tmpl"] = "Painel traseiro com estampa nítida e sublimação de alta resolução que não desbota, estruturado com costuras planas reforçadas nos ombros e dorso para total liberdade de movimentos e resistência ao uso contínuo."
+
         sibling_specs = sibling_info.get("extracted_specs") if sibling_info else None
         specs = self.extract_product_specs(product, archetype_id, sibling_specs=sibling_specs)
         specs = self.sanitize_specs_for_archetype(specs, archetype_id)
@@ -1735,6 +1743,9 @@ class TemplateEngine:
 
         if is_has_glove and not is_short_sleeve and not any("luva" in s["label"].lower() for s in new_specs):
             new_specs.append({"label": "Punhos / Luva", "value": "Punhos estendidos anatômicos com luva integrada para o dorso da mão"})
+
+        if archetype_id == "uv_performance" and not is_fusion and not is_hybrid and not is_hooded and not is_round_neck and not any(w in s["label"].lower() for s in new_specs for w in ["gola", "fechamento"]):
+            new_specs.append({"label": "Gola / Fechamento", "value": "Gola padre anatômica com zíper e trava de segurança"})
 
         if is_fusion:
             if not any("capuz" in s["label"].lower() or "máscara" in s["label"].lower() for s in new_specs):
