@@ -20,7 +20,8 @@
   "functions": {
     "api/*.py": {
       "maxDuration": 30,
-      "includeFiles": "{data/stores/*.json,core/**}"
+      "includeFiles": "{data/stores/*.json,core/**}",
+      "excludeFiles": "{data/stores/*.js,js/**,css/**}"
     }
   }
 }
