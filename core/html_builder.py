@@ -1324,28 +1324,32 @@ class HTMLBuilder:
         # Trava Estrita Anti-Zíper para Linhas Fusion, Hybrid, Gola Careca e Camisas de Botão
         t_low = (formatted_title or "").lower()
         sku_low = str(enriched_data.get("sku") or enriched_data.get("master_sku") or "").lower()
+        is_fusion_b = "fusion" in t_low or "fusion" in sku_low
+        is_hybrid_b = "hybrid" in t_low or sku_low.startswith("hyb") or "hybrid" in sku_low
         is_anti_zipper = (
-            any(w in t_low for w in ["fusion", "hybrid", "careca", "redonda", "sem zíper", "sem ziper"]) or
-            "fusion" in sku_low or sku_low.startswith("hyb") or "hybrid" in sku_low or
+            is_fusion_b or is_hybrid_b or
+            any(w in t_low for w in ["careca", "redonda", "sem zíper", "sem ziper"]) or
             archetype_id == "shirts_button_work"
         )
         if is_anti_zipper:
             for b in blocks:
                 if isinstance(b, dict):
                     if "title" in b:
-                        b["title"] = re.sub(r'\b(zíper|ziper)\b', '', b["title"], flags=re.IGNORECASE).strip()
+                        b["title"] = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', b["title"], flags=re.IGNORECASE).strip()
                     if "description" in b:
-                        b["description"] = re.sub(r'gola padre com cobertura no cursor do z[íi]per', 'capuz anatômico contínuo sem zíper', b["description"], flags=re.IGNORECASE)
+                        b["description"] = re.sub(r'gola padre com cobertura no cursor do z[íi]per', 'capuz anatômico contínuo', b["description"], flags=re.IGNORECASE)
                         b["description"] = re.sub(r'\bcursor do z[íi]per\b', 'acabamento anatômico', b["description"], flags=re.IGNORECASE)
-                        b["description"] = re.sub(r'\bz[íi]per com trava de seguran[çc]a\b', 'conforto anatômico sem zíper', b["description"], flags=re.IGNORECASE)
-                        b["description"] = re.sub(r'\b(com zíper|com ziper)\b', 'sem zíper', b["description"], flags=re.IGNORECASE)
-                        b["description"] = re.sub(r'\b(zíper|ziper)\b', '', b["description"], flags=re.IGNORECASE)
+                        b["description"] = re.sub(r'\bz[íi]per com trava de seguran[çc]a\b', 'conforto anatômico contínuo', b["description"], flags=re.IGNORECASE)
+                        b["description"] = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', b["description"], flags=re.IGNORECASE)
+                        b["description"] = re.sub(r'\(\s*\)', '', b["description"]).strip()
             new_clean_specs = []
             for sp in specs:
-                lbl_c = re.sub(r'\b(zíper|ziper)\b', '', sp["label"], flags=re.IGNORECASE).strip()
-                val_c = re.sub(r'gola padre[^,;.]*', 'capuz anatômico (sem zíper)', sp["value"], flags=re.IGNORECASE)
+                lbl_c = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', sp["label"], flags=re.IGNORECASE).strip()
+                replacement_hood = "capuz com máscara facial integrada" if is_fusion_b else "capuz anatômico integrado"
+                val_c = re.sub(r'gola padre[^,;.]*', replacement_hood, sp["value"], flags=re.IGNORECASE)
                 val_c = re.sub(r'\bcursor do z[íi]per\b', 'acabamento contínuo', val_c, flags=re.IGNORECASE)
-                val_c = re.sub(r'\b(com zíper|com ziper)\b', 'sem zíper', val_c, flags=re.IGNORECASE)
+                val_c = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', val_c, flags=re.IGNORECASE)
+                val_c = re.sub(r'\(\s*\)', '', val_c).strip()
                 new_clean_specs.append({"label": lbl_c or "Acabamento", "value": val_c})
             specs = new_clean_specs
 

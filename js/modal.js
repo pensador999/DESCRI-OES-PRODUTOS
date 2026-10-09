@@ -2014,11 +2014,11 @@ function getProductModeBHTML(liveP) {
       if (isFusion) {
         act3Tag = "Capuz com Máscara Integrada & Proteção 360°";
         act3Title = "CAPUZ COM MÁSCARA FACIAL INTEGRADA E PUNHO COM DEDEIRA";
-        act3Desc = "Desenvolvida sem zíper para máximo conforto e zero atrito, a camisa FusionX conta com capuz anatômico acoplado com máscara facial protetora (balaclava integrada) que protege cabeça, nuca e rosto contra o sol forte e o vento, além de punhos anatômicos com abertura para o polegar (dedeira) que mantêm o dorso da mão sempre protegido.";
+        act3Desc = "Desenvolvida com modelagem anatômica contínua para máximo conforto e zero atrito, a camisa FusionX conta com capuz anatômico acoplado com máscara facial protetora (balaclava integrada) que protege cabeça, nuca e rosto contra o sol forte e o vento, além de punhos anatômicos com abertura para o polegar (dedeira) que mantêm o dorso da mão sempre protegido.";
       } else if (isHybrid) {
         act3Tag = "Capuz Anatômico & Punho com Dedeira";
         act3Title = "CAPUZ ANATÔMICO INTEGRADO E PUNHO COM ABERTURA PARA POLEGAR";
-        act3Desc = "Projetada sem zíper para caimento leve e livre de atrito, a camisa Hybrid integra capuz anatômico de proteção solar 360° para nuca e cabeça, mangas com costuras planas reforçadas e punhos com abertura para o polegar (dedeira) que protegem o dorso das mãos durante toda a pescaria ou atividade ao ar livre.";
+        act3Desc = "Projetada com caimento leve, contínuo e livre de atrito, a camisa Hybrid integra capuz anatômico de proteção solar 360° para nuca e cabeça, mangas com costuras planas reforçadas e punhos com abertura para o polegar (dedeira) que protegem o dorso das mãos durante toda a pescaria ou atividade ao ar livre.";
       } else if (isHooded) {
         act3Tag = "Capuz Anatômico & Proteção 360°";
         act3Title = "CAPUZ ANATÔMICO INTEGRADO E COSTURA REFORÇADA";
@@ -2124,14 +2124,14 @@ function getProductModeBHTML(liveP) {
 
   if (isFusionModal) {
     if (!specs.some(s => /capuz|máscara/i.test(s.label))) {
-      specs.push({ label: "Capuz & Máscara", value: "Capuz anatômico integrado com máscara facial de proteção UV50+ (sem zíper)" });
+      specs.push({ label: "Capuz & Máscara", value: "Capuz anatômico integrado com máscara facial de proteção UV50+" });
     }
     if (!specs.some(s => /punho/i.test(s.label))) {
       specs.push({ label: "Punhos", value: "Punhos anatômicos com abertura para o polegar (dedeira)" });
     }
   } else if (isHybridModal) {
     if (!specs.some(s => /capuz/i.test(s.label))) {
-      specs.push({ label: "Capuz", value: "Capuz anatômico integrado de alta cobertura solar (sem zíper)" });
+      specs.push({ label: "Capuz", value: "Capuz anatômico integrado de alta cobertura solar" });
     }
     if (!specs.some(s => /punho/i.test(s.label))) {
       specs.push({ label: "Punhos", value: "Punhos anatômicos com abertura para o polegar (dedeira)" });
@@ -2141,23 +2141,27 @@ function getProductModeBHTML(liveP) {
   // Trava Estrita Anti-Zíper no Modal para Fusion, Hybrid e Botão
   if (isFusionModal || isHybridModal || liveP.archetype_id === "shirts_button_work") {
     blocks.forEach(b => {
-      if (b.title) b.title = b.title.replace(/\b(zíper|ziper)\b/gi, "").trim();
+      if (b.title) b.title = b.title.replace(/\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b/gi, "").trim();
       if (b.description) {
         b.description = b.description
-          .replace(/gola padre com cobertura no cursor do z[íi]per/gi, "capuz anatômico contínuo sem zíper")
+          .replace(/gola padre com cobertura no cursor do z[íi]per/gi, "capuz anatômico contínuo")
           .replace(/\bcursor do z[íi]per\b/gi, "acabamento anatômico")
-          .replace(/\bz[íi]per com trava de seguran[çc]a\b/gi, "conforto anatômico sem zíper")
-          .replace(/\b(com zíper|com ziper)\b/gi, "sem zíper")
-          .replace(/\b(zíper|ziper)\b/gi, "");
+          .replace(/\bz[íi]per com trava de seguran[çc]a\b/gi, "conforto anatômico contínuo")
+          .replace(/\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b/gi, "")
+          .replace(/\(\s*\)/g, "")
+          .trim();
       }
     });
-    specs = specs.map(s => ({
-      label: s.label.replace(/\b(zíper|ziper)\b/gi, "").trim() || "Acabamento",
-      value: s.value
-        .replace(/gola padre[^,;.]*/gi, "capuz anatômico (sem zíper)")
+    specs = specs.map(s => {
+      const lbl = s.label.replace(/\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b/gi, "").trim() || "Acabamento";
+      let val = s.value
+        .replace(/gola padre[^,;.]*/gi, isFusionModal ? "capuz com máscara facial integrada" : "capuz anatômico integrado")
         .replace(/\bcursor do z[íi]per\b/gi, "acabamento contínuo")
-        .replace(/\b(com zíper|com ziper)\b/gi, "sem zíper")
-    }));
+        .replace(/\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b/gi, "")
+        .replace(/\(\s*\)/g, "")
+        .trim();
+      return { label: lbl, value: val };
+    });
   }
 
   let careTips = liveP.care_tips;

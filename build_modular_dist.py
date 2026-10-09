@@ -149,7 +149,7 @@ def build_dist():
             arch_info = template_engine.templates.get(archetype_id, template_engine.templates["uv_performance"])
             
             # Busca de irmão homólogo com trava estrita de arquétipo para produtos sem descrição ou com placeholder
-            needs_sibling = (p.get("status") == "SEM_DESCRICAO") or is_empty_or_placeholder or len(orig_html.strip()) < 80
+            needs_sibling = (p.get("status") == "SEM_DESCRICAO") or (len(orig_html.strip()) < 80)
             sibling_info = sibling_matcher.find_best_sibling(p, min_score=0.70, target_archetype=archetype_id) if needs_sibling else None
             mode_a_html = html_replacer.replace_images_preserve_html(orig_html, images, title)
             narrative = template_engine.generate_narrative_from_template(p, archetype_id, images, store_key=store_key, sibling_info=sibling_info)
@@ -198,8 +198,9 @@ def build_dist():
                 p_copy["info_care"] = narrative.get("info_care")
                 p_copy["split_sections"] = narrative.get("split_sections")
             # Salvar mode_b_html completo em todos os itens SEM_DESCRICAO e IMAGENS_QUEBRADAS,
-            # alem de 100% dos bones e chapeus D2C e dos primeiros 25 de amostra.
-            save_mode_b = (p.get("status") in ("SEM_DESCRICAO", "IMAGENS_QUEBRADAS")) or (idx < 25) or is_headwear
+            # alem de 100% dos bones e chapeus D2C, Fusion, Hybrid e dos primeiros 25 de amostra.
+            is_fusion_or_hyb = ("fusion" in title.lower()) or ("hybrid" in title.lower()) or sku_code.lower().startswith("hyb") or ("fusion" in sku_code.lower())
+            save_mode_b = (p.get("status") in ("SEM_DESCRICAO", "IMAGENS_QUEBRADAS")) or (idx < 25) or is_headwear or is_fusion_or_hyb
             p_copy["mode_b_html"] = mode_b_html if save_mode_b else ""
             p_copy["mode_b_markdown"] = mode_b_markdown if save_mode_b else ""
             p_copy["prohibited_links"] = prohibited_links

@@ -853,7 +853,7 @@ class TemplateEngine:
                     "desc_tmpl": "Equipada com bolsos funcionais no peito com fechamento por botão ou lapela protetora, perfeitos para portar ferramentas, canetas, celular e pequenos acessórios com total segurança."
                 },
                 "base_specs": [
-                    {"label": "Fechamento Frontal", "default": "Botões reforçados aplicados com costura em 'X' (sem zíper)"},
+                    {"label": "Fechamento Frontal", "default": "Botões reforçados aplicados com costura em 'X'"},
                     {"label": "Colarinho / Gola", "default": "Colarinho tradicional estruturado com entretela de sustentação"},
                     {"label": "Bolsos Frontais", "default": "Dois bolsos utilitários no peito com lapela protetora"},
                     {"label": "Composição do Tecido", "default": "Algodão / Sarja de Alta Densidade resistente ao atrito"},
@@ -1755,12 +1755,15 @@ class TemplateEngine:
             act3["desc_tmpl"] = re.sub(r'\bcursor do z[íi]per\b', 'acabamento anatômico', act3["desc_tmpl"], flags=re.IGNORECASE)
             act3["desc_tmpl"] = re.sub(r'\bz[íi]per com trava de seguran[çc]a\b', 'conforto anatômico contínuo', act3["desc_tmpl"], flags=re.IGNORECASE)
             act3["desc_tmpl"] = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', act3["desc_tmpl"], flags=re.IGNORECASE)
+            act3["desc_tmpl"] = re.sub(r'\(\s*\)', '', act3["desc_tmpl"]).strip()
             new_clean_specs = []
             for sp in new_specs:
                 lbl_c = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', sp["label"], flags=re.IGNORECASE).strip()
-                val_c = re.sub(r'gola padre[^,;.]*', 'capuz anatômico', sp["value"], flags=re.IGNORECASE)
+                replacement_hood = "capuz com máscara facial integrada" if is_fusion else "capuz anatômico integrado"
+                val_c = re.sub(r'gola padre[^,;.]*', replacement_hood, sp["value"], flags=re.IGNORECASE)
                 val_c = re.sub(r'\bcursor do z[íi]per\b', 'acabamento contínuo', val_c, flags=re.IGNORECASE)
                 val_c = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', val_c, flags=re.IGNORECASE)
+                val_c = re.sub(r'\(\s*\)', '', val_c).strip()
                 new_clean_specs.append({"label": lbl_c or "Acabamento", "value": val_c})
             new_specs = new_clean_specs
 
