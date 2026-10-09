@@ -1,0 +1,28 @@
+name: Sincronizador Sentinela Shopify
+
+on:
+  schedule:
+    # Roda todos os dias às 08:00 e às 14:00 (horário de Brasília = 11:00 e 17:00 UTC)
+    - cron: '0 11,17 * * *'
+  workflow_dispatch: # Permite disparar manualmente com 1 clique no GitHub
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Executar Sincronização de Produtos Recentes
+        run: python core/auto_sync_recent_products.py
+
+      - name: Recompilar Catálogo Modular se Houver Mudanças
+        run: |
+          git config user.name "BRK Sentinel Bot"
+          git config user.email "ll654401@gmail.com"
+          python -u build_modular_dist.py "feat(sentinel): sincronizacao automatica de fotos e produtos recentes"
