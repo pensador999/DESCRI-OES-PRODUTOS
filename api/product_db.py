@@ -282,19 +282,77 @@ class handler(BaseHTTPRequestHandler):
             }, cache_control="public, s-maxage=120")
 
         # ---------------------------------------------------------------------
-        # 3. Consulta de Produto Único por ID ou SKU (Action = product)
+        # 3. Consulta de Produto Único por ID, SKU ou Handle (Action = product)
         # ---------------------------------------------------------------------
         p_id = (qs.get("id") or [""])[0].strip()
         p_sku = (qs.get("sku") or [""])[0].strip().upper()
         p_handle = (qs.get("handle") or [""])[0].strip().lower()
 
+        store_domains = {
+            "brk_fishing": "https://www.brkfishing.com.br",
+            "brk_agro": "https://www.brkagro.com.br",
+            "brk_motors": "https://www.brkmotors.com.br"
+        }
+
         found_product = None
         if p_id:
             found_product = db["by_id"].get(p_id)
-        elif p_sku:
+        if not found_product and p_sku:
             found_product = db["by_sku"].get(p_sku)
-        elif p_handle:
+        if not found_product and p_handle:
             found_product = db["by_handle"].get(p_handle)
+
+        # Fallback: se o produto foi recém-criado na Shopify ainda hoje e não consta no JSON estático,
+        # busca ao vivo na vitrine pública da loja (por handle ou nos 50 produtos mais recentes por ID)
+        if not found_product and (p_handle or p_id):
+            base_url = store_domains.get(store_key, "https://www.brkfishing.com.br")
+            live_p = None
+            try:
+                if p_handle:
+                    req_h = urllib.request.Request(f"{base_url}/products/{p_handle}.json", headers={"User-Agent": "Mozilla/5.0"})
+                    with urllib.request.urlopen(req_h, timeout=6) as resp_h:
+                        live_p = json.loads(resp_h.read().decode("utf-8")).get("product")
+                if not live_p and p_id:
+                    req_l = urllib.request.Request(f"{base_url}/products.json?limit=50", headers={"User-Agent": "Mozilla/5.0"})
+                    with urllib.request.urlopen(req_l, timeout=6) as resp_l:
+                        recent_list = json.loads(resp_l.read().decode("utf-8")).get("products", [])
+                        for rp in recent_list:
+                            if str(rp.get("id", "")) == p_id:
+                                live_p = rp
+                                break
+            except Exception as ex:
+                print(f"[!] Fallback live lookup falhou para ID={p_id} Handle={p_handle}: {ex}")
+
+            if live_p:
+                raw_imgs = [img.get("src") if isinstance(img, dict) else img for img in (live_p.get("images") or []) if img]
+                dedup_imgs, seen_r = [], set()
+                for u in raw_imgs:
+                    r = u.split("?")[0].lower()
+                    if r not in seen_r:
+                        seen_r.add(r)
+                        dedup_imgs.append(u)
+                variants = live_p.get("variants") or []
+                v_skus = [str(v.get("sku") or "").strip() for v in variants if v.get("sku")]
+                master_s = v_skus[0].split("-")[0] if v_skus else ""
+                raw_tags = live_p.get("tags") or []
+                if isinstance(raw_tags, str):
+                    raw_tags = [t.strip() for t in raw_tags.split(",") if t.strip()]
+                body_h = (live_p.get("body_html") or "").strip()
+                found_product = {
+                    "id": live_p.get("id"),
+                    "handle": live_p.get("handle", ""),
+                    "title": live_p.get("title", ""),
+                    "vendor": live_p.get("vendor", "BRK"),
+                    "tags": raw_tags,
+                    "master_sku": master_s,
+                    "variants_skus": v_skus,
+                    "body_html": body_h,
+                    "status": "SEM_DESCRICAO" if len(re.sub(r"<[^>]+>", "", body_h).strip()) < 20 else "SAUDAVEL",
+                    "cdn_images": dedup_imgs,
+                    "gallery": dedup_imgs,
+                    "image": dedup_imgs[0] if dedup_imgs else "",
+                    "updated_at": live_p.get("updated_at", "")
+                }
 
         if not found_product:
             return self._respond_json(404, {
@@ -305,32 +363,38 @@ class handler(BaseHTTPRequestHandler):
 
         sync_live = (qs.get("sync_live") or ["0"])[0] == "1"
         if sync_live and found_product:
-            handle = found_product.get("handle")
-            store_domains = {
-                "brk_fishing": "https://www.brkfishing.com.br",
-                "brk_agro": "https://www.brkagro.com.br",
-                "brk_motors": "https://www.brkmotors.com.br"
-            }
+            handle = found_product.get("handle") or p_handle
             base_url = store_domains.get(store_key, "https://www.brkfishing.com.br")
             if handle:
                 try:
                     req_u = urllib.request.Request(f"{base_url}/products/{handle}.json", headers={"User-Agent": "Mozilla/5.0"})
-                    with urllib.request.urlopen(req_u, timeout=5) as resp_u:
+                    with urllib.request.urlopen(req_u, timeout=6) as resp_u:
                         live_data = json.loads(resp_u.read().decode("utf-8")).get("product", {})
-                        if live_data and live_data.get("images"):
-                            new_imgs = [img.get("src") if isinstance(img, dict) else img for img in live_data["images"] if img]
-                            if new_imgs:
-                                found_product["images"] = live_data["images"]
-                                found_product["cdn_images"] = new_imgs
-                                found_product["gallery"] = new_imgs
-                                found_product.pop("split_images", None)
-                                found_product.pop("narrative_blocks", None)
-                                found_product["mode_b_html"] = ""  # Forçar regeneração com as fotos novas
+                        if live_data:
+                            if live_data.get("title"):
+                                found_product["title"] = live_data["title"]
+                            if live_data.get("images"):
+                                raw_imgs = [img.get("src") if isinstance(img, dict) else img for img in live_data["images"] if img]
+                                dedup_imgs, seen_r = [], set()
+                                for u in raw_imgs:
+                                    r = u.split("?")[0].lower()
+                                    if r not in seen_r:
+                                        seen_r.add(r)
+                                        dedup_imgs.append(u)
+                                if dedup_imgs:
+                                    found_product["images"] = live_data["images"]
+                                    found_product["cdn_images"] = dedup_imgs
+                                    found_product["gallery"] = dedup_imgs
+                                    found_product["image"] = dedup_imgs[0]
+                            found_product.pop("split_images", None)
+                            found_product.pop("narrative_blocks", None)
+                            found_product["mode_b_html"] = ""  # Forçar regeneração com as fotos e título novos
                 except Exception as ex:
                     print(f"[!] Falha ao sincronizar live para {handle}: {ex}")
 
         return self._respond_json(200, {
             "success": True,
             "store": store_key,
+            "sync_live": sync_live,
             "product": sanitize_product(found_product, store_key)
         }, cache_control="public, s-maxage=180" if not sync_live else "no-store")
