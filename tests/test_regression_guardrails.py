@@ -991,16 +991,16 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         engine = TemplateEngine()
         # 1. Casos críticos que antes vazavam de categoria
         cases = [
-            ("Camisa de Pesca Proteção Solar UV50+ Capivara Pescadora Brk", "brk_fishing", "Camisas de Pesca UV50+"),
-            ("Camisa De Pesca Infantil Brk Caramelo De Óculos Com Proteção Solar Uv50+", "brk_fishing", "Linha Infantil UV50+"),
-            ("Camisa de Pesca Brk Manga Longa FusionX", "brk_fishing", "Camisas de Pesca UV50+"),
+            ("Camisa de Pesca Proteção Solar UV50+ Capivara Pescadora Brk", "brk_fishing", "Camisas de Pesca UV"),
+            ("Camisa De Pesca Infantil Brk Caramelo De Óculos Com Proteção Solar Uv50+", "brk_fishing", "Camisas de Pesca UV"),
+            ("Camisa de Pesca Brk Manga Longa FusionX", "brk_fishing", "Camisas de Pesca UV"),
             ("Boné Trucker Brk Fishing Bass", "brk_fishing", "Bonés & Chapéus"),
             ("Vara de Pesca Marine Sports Gladius", "brk_fishing", "Equipamentos & Iscas"),
             ("Botina Country Masculina Couro Legítimo Brk Agro", "brk_agro", "Botinas & Calçados"),
-            ("Chapéu Country Pralana Feltro", "brk_agro", "Chapéus & Bonés"),
-            ("Faca Artesanal Inox 8 Polegadas", "brk_agro", "Cutelaria & Acessórios"),
-            ("Jersey Motocross Trilha Brk Motors", "brk_motors", "Jerseys & Off-Road"),
-            ("Camisa Masculina Brk Motors Dakar Com Proteção Solar UV50+", "brk_motors", "Camisas UV50+ Motors"),
+            ("Chapéu Country Pralana Feltro", "brk_agro", "Bonés & Chapéus Agro"),
+            ("Faca Artesanal Inox 8 Polegadas", "brk_agro", "Cutelaria & Facas Campo"),
+            ("Jersey Motocross Trilha Brk Motors", "brk_motors", "Jerseys & Camisas Motors"),
+            ("Camisa Masculina Brk Motors Dakar Com Proteção Solar UV50+", "brk_motors", "Jerseys & Camisas Motors"),
         ]
         for title, sk, expected_cat in cases:
             arch = engine.detect_archetype(title, "", "")

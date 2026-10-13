@@ -295,35 +295,41 @@ function classifyClientStoreCategory(title, archId, storeKey) {
   const s = (storeKey || "brk_fishing").toLowerCase();
 
   if (s === "brk_agro") {
-    if (["hats_country_cowboy", "hats_safari_outdoor", "caps_trucker_snapback"].includes(archId)) return "Chapéus & Bonés";
+    if (["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archId)) return "Camisas Agro & Campo";
+    if (["caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy"].includes(archId)) return "Bonés & Chapéus Agro";
     if (["closed_footwear_sneakers", "footwear_sandals_boaonda"].includes(archId)) return "Botinas & Calçados";
-    if (["pants_cargo_tactical", "overalls_workwear"].includes(archId)) return "Calças & Operacional";
-    if (["cutlery_unique", "accessories_general", "accessories_car_care", "drinkware_thermo", "eyewear_sunglasses", "gloves_tactical_fishing", "neck_gaiters_balaclavas", "sun_sleeves_manguitos", "books_publications"].includes(archId)) return "Cutelaria & Acessórios";
-    if (archId === "casual_cotton" || t.includes("camiseta") || t.includes("t-shirt") || t.includes("polo") || t.includes("moletom")) return "Camisetas & Polos";
-    return "Camisas UV50+ Agro";
+    if (archId === "cutlery_unique") return "Cutelaria & Facas Campo";
+    if (archId === "drinkware_thermo") return "Térmicos & Tereré";
+    if (archId === "eyewear_sunglasses") return "Óculos Polarizados Agro";
+    if (["neck_gaiters_balaclavas", "sun_sleeves_manguitos", "gloves_tactical_fishing"].includes(archId)) return "Bandanas, Luvas & Manguitos";
+    if (["pants_cargo_tactical", "overalls_workwear"].includes(archId)) return "Calças & Vestuário Campo";
+    return "Acessórios Agro & Fazenda";
   }
 
   if (s === "brk_motors") {
-    if (archId === "motors_speed" || /\b(jersey|motocross|enduro|trilha|off-road|velocross|fox)\b/i.test(t)) return "Jerseys & Off-Road";
-    if (["caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy"].includes(archId)) return "Bonés & Chapéus";
-    if (["neck_gaiters_balaclavas", "sun_sleeves_manguitos", "gloves_tactical_fishing", "eyewear_sunglasses", "accessories_car_care", "accessories_general", "drinkware_thermo", "cutlery_unique"].includes(archId)) return "Bandanas, Luvas & Acessórios";
-    if (["closed_footwear_sneakers", "footwear_sandals_boaonda", "pants_cargo_tactical", "overalls_workwear"].includes(archId)) return "Calças & Calçados";
-    if (archId === "casual_cotton" || t.includes("camiseta") || t.includes("t-shirt") || t.includes("polo") || t.includes("moletom")) return "Camisetas Casual & Paddock";
-    return "Camisas UV50+ Motors";
+    if (["uv_performance", "motors_speed", "agro_field", "shirts_button_work"].includes(archId)) {
+      if (/\b(jaqueta|corta vento|moletom|segunda pele)\b/i.test(t)) return "Jaquetas & Corta Vento";
+      return "Jerseys & Camisas Motors";
+    }
+    if (["neck_gaiters_balaclavas", "sun_sleeves_manguitos", "gloves_tactical_fishing"].includes(archId)) return "Proteção & Luvas Motors";
+    if (["caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy"].includes(archId)) return "Bonés & Street Motors";
+    if (archId === "eyewear_sunglasses") return "Óculos & Goggles";
+    return "Acessórios & Equipamentos";
   }
 
+  if (["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archId)) {
+    if (t.includes("armorx") || t.includes("armor")) return "Camisas ArmorX";
+    return "Camisas de Pesca UV";
+  }
   if (["caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy"].includes(archId)) return "Bonés & Chapéus";
   if (["neck_gaiters_balaclavas", "sun_sleeves_manguitos", "gloves_tactical_fishing"].includes(archId)) return "Bandanas, Luvas & Manguitos";
   if (archId === "eyewear_sunglasses") return "Óculos Polarizados";
-  if (["pants_cargo_tactical", "overalls_workwear"].includes(archId)) return "Calças & Bermudas";
-  if (["footwear_sandals_boaonda", "closed_footwear_sneakers"].includes(archId)) return "Calçados & Sandálias";
-  if (["fishing_lures", "fishing_tackle_gear", "tackle_boxes_storage"].includes(archId)) return "Equipamentos & Iscas";
+  if (["fishing_lures", "fishing_tackle_gear"].includes(archId)) return "Equipamentos & Iscas";
+  if (archId === "tackle_boxes_storage") return "Caixas & Organização";
+  if (["footwear_sandals_boaonda", "closed_footwear_sneakers", "overalls_workwear", "pants_cargo_tactical"].includes(archId)) return "Calçados & Sandálias";
   if (archId === "cutlery_unique") return "Cutelaria & Facas";
-  if (["drinkware_thermo", "accessories_car_care", "accessories_general", "books_publications"].includes(archId)) return "Térmicos & Acessórios";
-  if (archId === "casual_cotton" || t.includes("camiseta") || t.includes("t-shirt") || t.includes("polo") || t.includes("moletom")) return "Camisetas & Casual";
-  if (t.includes("infantil") || t.includes("kids") || t.includes("juvenil")) return "Linha Infantil UV50+";
-  if (t.includes("feminina") || t.includes("baby look") || t.includes("babylook")) return "Linha Feminina UV50+";
-  return "Camisas de Pesca UV50+";
+  if (archId === "drinkware_thermo") return "Térmicos & Camping";
+  return "Acessórios Diversos";
 }
 
 function createEnrichedFromLiveProduct(liveP, storeKey) {
