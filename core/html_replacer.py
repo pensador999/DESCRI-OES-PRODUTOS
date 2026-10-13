@@ -15,7 +15,12 @@ class HTMLReplacer:
             r"use-brk-images-s3\.s3\.us-east-1\.amazonaws\.com",
             r"s3\.amazonaws\.com/use-brk-images",
             r"photobucket\.com",
-            r"imageshack\.us"
+            r"imageshack\.us",
+            r"imgur\.com",
+            r"postimg\.cc",
+            r"placeholder",
+            r"sem-foto",
+            r"no-image"
         ]
         self.dead_regex = re.compile("|".join(self.dead_hosts), re.IGNORECASE)
 
@@ -50,8 +55,8 @@ class HTMLReplacer:
         
         # Encontrar todas as tags <img>
         img_pattern = re.compile(r'<img[^>]+src=["\']([^"\']+)["\'][^>]*>', re.IGNORECASE)
-        found_imgs = img_pattern.findall(html)
         
+        all_cdn = list(cdn_images) if cdn_images else []
         assigned_cdn = list(cdn_images[:3]) if cdn_images else []
         cdn_idx = 0
         seen_roots = set()
@@ -61,19 +66,18 @@ class HTMLReplacer:
             original_src = match.group(1).strip()
             orig_root = original_src.split("?")[0].lower()
             
-            # Se a imagem é morta ou se queremos garantir CDN Shopify
-            if self.is_dead_image(original_src) or ("cdn.shopify.com" not in original_src and cdn_idx < len(assigned_cdn)):
-                if cdn_idx < len(assigned_cdn):
-                    new_src = assigned_cdn[cdn_idx]
+            # Se a imagem é morta ou externa fora do CDN Shopify
+            if self.is_dead_image(original_src) or ("cdn.shopify.com" not in original_src):
+                while cdn_idx < len(all_cdn):
+                    new_src = all_cdn[cdn_idx]
                     cdn_idx += 1
                     new_root = new_src.split("?")[0].lower()
                     if new_root in seen_roots:
-                        return ""
+                        continue
                     seen_roots.add(new_root)
                     return self.create_responsive_image_tag(new_src, f"{product_title} - Detalhe Oficial")
-                else:
-                    # Sem foto CDN substituta, remove a tag quebrada para não dar 404
-                    return ""
+                # Sem foto CDN substituta disponível, remove a tag quebrada/externa para não dar 404
+                return ""
             
             # Se já for uma imagem válida no texto original, verificar duplicata
             if orig_root in seen_roots:
@@ -84,9 +88,9 @@ class HTMLReplacer:
         # 1. Substituir tags <img> encontradas
         updated_html = img_pattern.sub(img_sub_callback, html)
 
-        # 2. Se sobrou alguma imagem CDN não usada e havia poucas imagens no texto original
+        # 2. Se sobrou alguma imagem CDN não usada das 3 principais e havia poucas imagens no texto original
         # Adiciona no final de forma harmônica garantindo que não foi usada antes
-        remaining_cdn = assigned_cdn[cdn_idx:]
+        remaining_cdn = assigned_cdn[cdn_idx:] if cdn_idx < len(assigned_cdn) else []
         if remaining_cdn:
             extra_imgs = []
             for i, img in enumerate(remaining_cdn):

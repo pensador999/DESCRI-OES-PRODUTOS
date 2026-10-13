@@ -1486,6 +1486,77 @@ class TemplateEngine:
             "show_copyright": show_copyright
         }
 
+    def _is_back_view_url(self, url: str, include_03: bool = False) -> bool:
+        if not url or not isinstance(url, str):
+            return False
+        u_low = url.lower()
+        fname = u_low.split("/")[-1].split("?")[0]
+        fname_no_ts = re.sub(r'(?:^|[_.\-\s])\d{2}_\d{2}_\d{2}(?=[_.\-\s]|$)', '', fname)
+        if "frente" in fname_no_ts:
+            return False
+        keywords = [
+            "costas", "costa", "back", "traseira", "verso", "tras",
+            "02fem", "02masc", "02inf", "2fem", "2masc", "2inf",
+            "02_fem", "02_masc", "02_inf", "2_fem", "2_masc", "2_inf"
+        ]
+        if include_03:
+            keywords.extend(["03fem", "03masc", "03inf"])
+        if any(w in fname_no_ts for w in keywords):
+            return True
+        return bool(re.search(r'(?:^|[-_.\s])(2|02|b)(?:[-_.\s]|masc|fem|inf|kids|bl|$)', fname_no_ts))
+
+    def _select_apparel_act_images(self, cdn_images: List[str]):
+        if not cdn_images:
+            return "", "", ""
+        if len(cdn_images) == 1:
+            return cdn_images[0], "", ""
+
+        # Ato 1 (Hero Frontal): evita foto de costas se houver foto frontal/não-costas disponível
+        img1 = cdn_images[0]
+        if self._is_back_view_url(img1):
+            pure_front_candidates = [
+                u for u in cdn_images
+                if not self._is_back_view_url(u)
+                and any(k in u.lower().split("/")[-1] for k in ["frente", "01", "-1", "capa"])
+                and not any(p in u.lower().split("/")[-1] for p in ["persp", "zoom"])
+            ]
+            front_candidates = [
+                u for u in cdn_images
+                if not self._is_back_view_url(u) and any(k in u.lower().split("/")[-1] for k in ["frente", "01", "-1", "capa"])
+            ]
+            non_back_candidates = [u for u in cdn_images if not self._is_back_view_url(u)]
+            if pure_front_candidates:
+                img1 = pure_front_candidates[0]
+            elif front_candidates:
+                img1 = front_candidates[0]
+            elif non_back_candidates:
+                img1 = non_back_candidates[0]
+
+        rem = [u for u in cdn_images if u != img1]
+        if not rem:
+            return img1, "", ""
+        if len(rem) == 1:
+            return img1, rem[0], ""
+
+        # Ato 2 (Tecnologia / Detalhe) & Ato 3 (Acabamento / Painel Traseiro)
+        if self._is_back_view_url(rem[0]):
+            non_back_after = [u for u in rem[1:] if not self._is_back_view_url(u)]
+            if non_back_after:
+                img2 = non_back_after[0]
+                img3 = rem[0]
+            else:
+                img2 = rem[0]
+                img3 = rem[1]
+        else:
+            img2 = rem[0]
+            if self._is_back_view_url(rem[1]):
+                img3 = rem[1]
+            else:
+                back_after = [u for u in rem[2:] if self._is_back_view_url(u)]
+                img3 = back_after[0] if back_after else rem[1]
+
+        return img1, img2, img3
+
     def generate_narrative_from_template(self, product: Dict[str, Any], archetype_id: str, cdn_images: List[str], store_key: str = None, sibling_info: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Gera os 3 blocos narrativos e especificações prontos para o HTMLBuilder.
@@ -1553,15 +1624,17 @@ class TemplateEngine:
         }
         care_icon = care_icons.get(archetype_id, template.get("fa_icon", "fa-solid fa-hand-sparkles"))
 
-        # Tratamento Especial para Iscas e Produtos com Várias Variações (Split Media)
-        is_lure = (archetype_id == "fishing_lures") or any(w in title.lower() for w in ["isca", "plug", "popper", "stick", "crankbait", "minnow", "frog", "soft"])
+        is_apparel = archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work", "pants_cargo_tactical")
+
+        # Tratamento Especial para Iscas e Produtos com Várias Variações (Split Media estrito para fishing_lures)
+        is_lure = (archetype_id == "fishing_lures")
         variants = product.get("variants") or []
         has_multiple_variations = is_lure and (len(variants) > 1 or len(cdn_images) >= 2)
         split_images = None
         variations_summary = ""
 
         # Alocação estrita de imagens exclusivas por ato - ZERO DUPLICAÇÃO
-        if has_multiple_variations and len(cdn_images) >= 2:
+        if has_multiple_variations and (len(cdn_images) >= 4 or len(cdn_images) == 2):
             split_images = [cdn_images[0], cdn_images[1]]
             img1 = cdn_images[0]
             # Se for split no Ato 1, Atos 2 e 3 usam as fotos seguintes para não repetir
@@ -1572,10 +1645,18 @@ class TemplateEngine:
                 variations_summary = f"Disponível em {len(variant_titles)} opções de cores e modelos no anúncio ({', '.join(variant_titles[:4])}{'...' if len(variant_titles) > 4 else ''})."
             else:
                 variations_summary = "Múltiplas variações e opções de cores disponíveis para escolha no anúncio."
+        elif is_apparel:
+            img1, img2, img3 = self._select_apparel_act_images(cdn_images)
         else:
             img1 = cdn_images[0] if len(cdn_images) > 0 else ""
             img2 = cdn_images[1] if len(cdn_images) > 1 else ""
             img3 = cdn_images[2] if len(cdn_images) > 2 else ""
+            if has_multiple_variations:
+                variant_titles = [v.get("title") for v in variants if v.get("title") and v.get("title") != "Default Title"]
+                if variant_titles:
+                    variations_summary = f"Disponível em {len(variant_titles)} opções de cores e modelos no anúncio ({', '.join(variant_titles[:4])}{'...' if len(variant_titles) > 4 else ''})."
+                else:
+                    variations_summary = "Múltiplas variações e opções de cores disponíveis para escolha no anúncio."
 
         act1 = dict(template["act1"])
         act2 = dict(template["act2"])
@@ -1587,8 +1668,6 @@ class TemplateEngine:
         tags_low = " ".join([str(t).lower() for t in tags_list])
         body_low = (product.get("body_html") or "").lower()
         all_info = f"{t_low} {tags_low} {body_low}"
-
-        is_apparel = archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work", "pants_cargo_tactical")
         
         sku_clean_for_flags = str(product.get("master_sku") or product.get("sku") or "").lower()
         is_fusion = is_apparel and (
@@ -1610,7 +1689,11 @@ class TemplateEngine:
             is_kids = False
         is_short_sleeve = is_apparel and (any(w in t_low for w in ["manga curta", "manga-curta"]) or ("curta" in t_low and "manga" in t_low)) and not any(w in t_low for w in ["manga longa", "manga-longa"])
         is_has_glove = is_apparel and any(w in t_low for w in ["com luva", "e luva", "luva integrada"])
-        is_female = (any(w in t_low for w in ["feminina", "feminino", "baby look", "babylook", "mulher"]) or "femin" in tags_low) and not is_kids
+        is_female = (
+            any(w in t_low for w in ["feminina", "feminino", "baby look", "babylook", "mulher"]) or
+            "femin" in tags_low or
+            (is_apparel and bool(re.search(r'bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_clean_for_flags)))
+        ) and not is_kids
         is_round_neck = is_apparel and (any(w in t_low for w in ["gola careca", "gola redonda", "sem zíper", "sem ziper", "t-shirt"]) or ("camiseta" in t_low and not any(w in t_low for w in ["ziper", "zíper"])))
 
         # 1. Adaptação Kids / Infantil (Eliminação de "homem e mulher", foco em aventura e proteção suave)
@@ -1675,9 +1758,8 @@ class TemplateEngine:
             act3["desc_tmpl"] = "Acabamento de alto padrão com costuras planas anti-atrito, gola alta anatômica e punhos estendidos com luva integrada para proteção estendida do dorso das mãos."
 
         # 7. Detecção Contextual da Foto 3 (Costas / Painel Traseiro vs. Acabamento Universal)
-        img3_url = (img3 or "").lower()
-        is_back_view = any(w in img3_url for w in ["costas", "costa", "back", "traseira", "02fem", "02masc", "03fem", "03masc", "verso"])
-        if is_back_view and archetype_id == "uv_performance" and not is_fusion and not is_hybrid and not is_hooded and not is_kids:
+        is_back_view = self._is_back_view_url(img3, include_03=True)
+        if is_back_view and archetype_id == "uv_performance" and not is_fusion and not is_hybrid and not is_hooded and not is_round_neck:
             act3["tag"] = "Design Traseiro & Acabamento"
             act3["title"] = "PAINEL TRASEIRO EM ALTA DEFINIÇÃO E COSTURAS REFORÇADAS"
             act3["desc_tmpl"] = "Painel traseiro com estampa nítida e sublimação de alta resolução que não desbota, estruturado com costuras planas reforçadas nos ombros e dorso para total liberdade de movimentos e resistência ao uso contínuo."

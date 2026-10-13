@@ -920,6 +920,72 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         self.assertIn("Gola padre anatômica com zíper", html)
         self.assertIn("trava de segurança", html)
 
+    def test_smart_3_act_apparel_image_ordering_and_python_js_parity(self):
+        """Valida que fotos de Costas (02 / -2 / COSTAS) vão para o Ato 3 (Painel Traseiro), Frente para o Ato 1 e Detalhe para o Ato 2, com paridade Python/JS."""
+        from core.html_replacer import HTMLReplacer
+
+        # 1. Galeria padrão BRK onde a 2ª foto é Costas (-2 / 02FEM) e a 3ª é Perspectiva (-3 / 03FEM)
+        prod = {
+            "id": 999902,
+            "title": "Camisa de Pesca Feminina BRK Capivara Floral UV50+",
+            "category": "Camisas de Pesca UV",
+            "master_sku": "C02846BL"
+        }
+        gallery_123 = [
+            "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/1784823571109-1.jpg",
+            "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/1784823571109-2.jpg",
+            "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/1784823571109-3.jpg"
+        ]
+        arch = self.engine.detect_archetype(prod["title"], prod["category"], [], "BRK", sku=prod["master_sku"])
+        narrative = self.engine.generate_narrative_from_template(prod, arch, gallery_123, store_key="brk_fishing")
+        blocks = narrative["narrative_blocks"]
+
+        # Ato 1 = Foto 1 (Frente), Ato 2 = Foto 3 (Detalhe), Ato 3 = Foto 2 (Costas + Painel Traseiro)
+        self.assertEqual(blocks[0]["image"], gallery_123[0])
+        self.assertEqual(blocks[1]["image"], gallery_123[2])
+        self.assertEqual(blocks[2]["image"], gallery_123[1])
+        self.assertIn("PAINEL TRASEIRO EM ALTA DEFINIÇÃO E COSTURAS REFORÇADAS", blocks[2]["title"])
+        self.assertIn("MODELAGEM FEMININA ANATÔMICA", blocks[0]["title"])
+
+        # 2. Galeria invertida onde Costas foi subida como 1ª foto (ex: C02822BL)
+        gallery_inverted = [
+            "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/COSTAS_FEM.jpg",
+            "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/FRENTEPERSPECTIVA_FEM.jpg",
+            "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/FRENTE_FEM.jpg"
+        ]
+        narrative_inv = self.engine.generate_narrative_from_template(prod, arch, gallery_inverted, store_key="brk_agro")
+        blocks_inv = narrative_inv["narrative_blocks"]
+        self.assertEqual(blocks_inv[0]["image"], gallery_inverted[2], "Ato 1 deve promover a foto frontal FRENTE_FEM.jpg")
+        self.assertEqual(blocks_inv[1]["image"], gallery_inverted[1], "Ato 2 deve usar a foto de perspectiva")
+        self.assertEqual(blocks_inv[2]["image"], gallery_inverted[0], "Ato 3 deve receber a foto de costas COSTAS_FEM.jpg")
+        self.assertIn("PAINEL TRASEIRO", blocks_inv[2]["title"])
+
+        # 3. Timestamp HH_MM_SS com _02_ não pode ser confundido com foto de costas
+        self.assertFalse(self.engine._is_back_view_url("https://cdn.shopify.com/files/ChatGPT_Image_24_de_set._de_2026_10_02_34.png"))
+
+        # 4. HTMLReplacer não pode deixar imgur.com ou postimg.cc sobrando no Modo A
+        replacer = HTMLReplacer()
+        dirty_html = (
+            '<p>Texto</p>'
+            '<img src="https://i.imgur.com/1.jpg">'
+            '<img src="https://i.imgur.com/2.jpg">'
+            '<img src="https://i.imgur.com/3.jpg">'
+            '<img src="https://i.imgur.com/4.jpg">'
+            '<img src="https://i.postimg.cc/5.png">'
+        )
+        clean_mode_a = replacer.replace_images_preserve_html(dirty_html, gallery_123, prod["title"])
+        self.assertNotIn("imgur.com", clean_mode_a)
+        self.assertNotIn("postimg.cc", clean_mode_a)
+
+        # 5. Paridade JS (js/modal.js)
+        js_path = os.path.join(BASE_DIR, "js", "modal.js")
+        with open(js_path, "r", encoding="utf-8") as f:
+            js_code = f.read()
+        self.assertIn("function isClientBackViewUrl", js_code)
+        self.assertIn("function selectClientApparelActImages", js_code)
+        self.assertIn("delete p.narrative_blocks;", js_code)
+        self.assertIn("delete p.split_images;", js_code)
+
 
 
 class TestBRKStudioVerticalization(unittest.TestCase):

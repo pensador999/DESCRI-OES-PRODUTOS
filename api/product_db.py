@@ -180,6 +180,7 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
 def sanitize_product(p: dict, store_key: str = "brk_fishing") -> dict:
     """Retorna apenas os campos necessários para a injeção do Modo B garantido"""
     mode_b = ensure_mode_b_html(p, store_key)
+    imgs = p.get("cdn_images") or p.get("gallery") or []
     return {
         "id": str(p.get("id", "")),
         "handle": p.get("handle", ""),
@@ -188,6 +189,8 @@ def sanitize_product(p: dict, store_key: str = "brk_fishing") -> dict:
         "status": p.get("status", "SAUDAVEL"),
         "archetype_id": p.get("archetype_id", "uv_performance"),
         "archetype_name": p.get("archetype_name", "Modo B"),
+        "cdn_images": imgs,
+        "gallery": imgs,
         "mode_b_html": mode_b,
         "mode_b_chars": len(mode_b),
         "has_official_mode_b": "<!-- BRK-MODO-B" in mode_b,
@@ -320,7 +323,8 @@ class handler(BaseHTTPRequestHandler):
                                 found_product["images"] = live_data["images"]
                                 found_product["cdn_images"] = new_imgs
                                 found_product["gallery"] = new_imgs
-                                found_product["split_images"] = new_imgs
+                                found_product.pop("split_images", None)
+                                found_product.pop("narrative_blocks", None)
                                 found_product["mode_b_html"] = ""  # Forçar regeneração com as fotos novas
                 except Exception as ex:
                     print(f"[!] Falha ao sincronizar live para {handle}: {ex}")

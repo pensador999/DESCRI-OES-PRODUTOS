@@ -134,7 +134,9 @@ async function syncLiveProductImages(btn) {
     p.images = uniqueImgs.map((src, i) => ({ id: i, src: src }));
     p.cdn_images = uniqueImgs;
     p.gallery = uniqueImgs;
-    p.split_images = uniqueImgs;
+    delete p.split_images;
+    delete p.narrative_blocks;
+    delete p.mode_b_markdown;
 
     // Atualiza miniaturas da galeria no modal
     const thumbsContainer = document.getElementById("modal-gallery-thumbs");
@@ -161,6 +163,9 @@ async function syncLiveProductImages(btn) {
     delete p.mode_b_html;
     if (typeof getProductModeBHTML === "function") {
       p.mode_b_html = getProductModeBHTML(p);
+    }
+    if (typeof buildClientModeBMarkdown === "function") {
+      p.mode_b_markdown = buildClientModeBMarkdown(p);
     }
     updateModalView();
 
@@ -417,8 +422,15 @@ function applyBunkerLinksToModal() {
   });
 
   currentModalProduct.cdn_images = finalImgs;
+  currentModalProduct.gallery = finalImgs;
+  delete currentModalProduct.split_images;
+  delete currentModalProduct.narrative_blocks;
+  delete currentModalProduct.mode_b_markdown;
   // Recalcular HTML com as novas imagens
   currentModalProduct.mode_b_html = getProductModeBHTML(currentModalProduct);
+  if (typeof buildClientModeBMarkdown === "function") {
+    currentModalProduct.mode_b_markdown = buildClientModeBMarkdown(currentModalProduct);
+  }
   updateModalView();
 
   const thumbsContainer = document.getElementById("modal-gallery-thumbs");
@@ -2019,6 +2031,75 @@ ${cuidadosLi}
 </div>`;
 }
 
+function isClientBackViewUrl(url, include03 = false) {
+  if (!url || typeof url !== "string") return false;
+  const uLow = url.toLowerCase();
+  const fname = uLow.split("/").pop().split("?")[0];
+  const fnameNoTs = fname.replace(/(?:^|[_.\-\s])\d{2}_\d{2}_\d{2}(?=[_.\-\s]|$)/g, "");
+  if (fnameNoTs.includes("frente")) return false;
+  const keywords = [
+    "costas", "costa", "back", "traseira", "verso", "tras",
+    "02fem", "02masc", "02inf", "2fem", "2masc", "2inf",
+    "02_fem", "02_masc", "02_inf", "2_fem", "2_masc", "2_inf"
+  ];
+  if (include03) {
+    keywords.push("03fem", "03masc", "03inf");
+  }
+  if (keywords.some(w => fnameNoTs.includes(w))) return true;
+  return /(?:^|[-_.\s])(2|02|b)(?:[-_.\s]|masc|fem|inf|kids|bl|$)/i.test(fnameNoTs);
+}
+
+function selectClientApparelActImages(cdnImages) {
+  if (!cdnImages || cdnImages.length === 0) return ["", "", ""];
+  if (cdnImages.length === 1) return [cdnImages[0], "", ""];
+
+  let img1 = cdnImages[0];
+  if (isClientBackViewUrl(img1)) {
+    const pureFrontCandidates = cdnImages.filter(
+      u => !isClientBackViewUrl(u)
+        && ["frente", "01", "-1", "capa"].some(k => u.toLowerCase().split("/").pop().includes(k))
+        && !["persp", "zoom"].some(p => u.toLowerCase().split("/").pop().includes(p))
+    );
+    const frontCandidates = cdnImages.filter(
+      u => !isClientBackViewUrl(u) && ["frente", "01", "-1", "capa"].some(k => u.toLowerCase().split("/").pop().includes(k))
+    );
+    const nonBackCandidates = cdnImages.filter(u => !isClientBackViewUrl(u));
+    if (pureFrontCandidates.length > 0) {
+      img1 = pureFrontCandidates[0];
+    } else if (frontCandidates.length > 0) {
+      img1 = frontCandidates[0];
+    } else if (nonBackCandidates.length > 0) {
+      img1 = nonBackCandidates[0];
+    }
+  }
+
+  const rem = cdnImages.filter(u => u !== img1);
+  if (rem.length === 0) return [img1, "", ""];
+  if (rem.length === 1) return [img1, rem[0], ""];
+
+  let img2 = "";
+  let img3 = "";
+  if (isClientBackViewUrl(rem[0])) {
+    const nonBackAfter = rem.slice(1).filter(u => !isClientBackViewUrl(u));
+    if (nonBackAfter.length > 0) {
+      img2 = nonBackAfter[0];
+      img3 = rem[0];
+    } else {
+      img2 = rem[0];
+      img3 = rem[1];
+    }
+  } else {
+    img2 = rem[0];
+    if (isClientBackViewUrl(rem[1])) {
+      img3 = rem[1];
+    } else {
+      const backAfter = rem.slice(2).filter(u => isClientBackViewUrl(u));
+      img3 = backAfter.length > 0 ? backAfter[0] : rem[1];
+    }
+  }
+  return [img1, img2, img3];
+}
+
 function getProductModeBHTML(liveP) {
   if (!liveP) return "";
   const originInfo = resolveClientOriginAndTitle(liveP);
@@ -2056,50 +2137,49 @@ function getProductModeBHTML(liveP) {
     }
   });
 
-  const isLure = (liveP.archetype_id === "fishing_lures") || /isca|plug|popper|stick|crankbait|minnow|frog|soft/i.test(liveP.title || "");
-  const hasMultipleVariations = liveP.has_multiple_variations || (isLure && (images.length >= 2 || (liveP.variants && liveP.variants.length > 1)));
-  let splitImages = liveP.split_images || null;
-  if (!splitImages && hasMultipleVariations && images.length >= 2) {
+  const isApparel = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work", "pants_cargo_tactical"].includes(archetypeId);
+  const isLure = (archetypeId === "fishing_lures");
+  const hasMultipleVariations = isLure && (Boolean(liveP.has_multiple_variations) || images.length >= 2 || (liveP.variants && liveP.variants.length > 1));
+  let splitImages = isLure ? (liveP.split_images || null) : null;
+  if (!splitImages && hasMultipleVariations && (images.length >= 4 || images.length === 2)) {
     splitImages = [images[0], images[1]];
   }
-  let variationsSummary = liveP.variations_summary || "";
+  let variationsSummary = isLure ? (liveP.variations_summary || "") : "";
   if (!variationsSummary && hasMultipleVariations) {
     variationsSummary = "Múltiplas variações e opções de cores disponíveis para escolha no anúncio.";
   }
 
-  // Atribuição de imagens exclusivas por ato - ZERO DUPLICAÇÃO
+  // Atribuição de imagens exclusivas por ato - ZERO DUPLICAÇÃO e Alinhamento Semântico
   let img1 = images[0] || "";
   let img2 = images[1] || "";
   let img3 = images[2] || "";
 
-  if (hasMultipleVariations && images.length >= 2) {
+  if (hasMultipleVariations && (images.length >= 4 || images.length === 2)) {
     img2 = images[2] || "";
     img3 = images[3] || "";
+  } else if (isApparel) {
+    [img1, img2, img3] = selectClientApparelActImages(images);
   }
 
-  let blocks = liveP.narrative_blocks;
+  const tLowModal = (liveP.title || "").toLowerCase();
+  const skuLowModal = (liveP.sku || liveP.master_sku || "").toLowerCase();
+  const tagsLowModal = (Array.isArray(liveP.tags) ? liveP.tags.join(" ") : (liveP.tags || "")).toLowerCase();
+  const isFusionModal = isApparel && (/\b(fusion|fusionx)\b/i.test(tLowModal) || /fusion/i.test(skuLowModal) || /fusion/i.test(tagsLowModal));
+  const isHybridModal = isApparel && (/\bhybrid\b/i.test(tLowModal) || /^hyb/i.test(skuLowModal) || /hybrid/i.test(skuLowModal) || /hybrid/i.test(tagsLowModal));
+  const isHoodedModal = (isApparel && /\b(capuz|hood|hoodie)\b/i.test(tLowModal)) || isFusionModal || isHybridModal;
+  const isKidsModal = isApparel && /\b(infantil|kids|juvenil|mini)\b/i.test(tLowModal) && !/\b(adulto|unissex adulto)\b/i.test(tLowModal);
+  const isShortSleeveModal = isApparel && (/\b(manga curta|manga-curta)\b/i.test(tLowModal) || (tLowModal.includes("curta") && tLowModal.includes("manga"))) && !/\b(manga longa|manga-longa)\b/i.test(tLowModal);
+  const isHasGloveModal = isApparel && /\b(com luva|e luva|luva integrada)\b/i.test(tLowModal);
+  const isFemaleModal = (/\b(feminina|feminino|baby look|babylook|mulher)\b/i.test(tLowModal) || /femin/i.test(tagsLowModal) || (isApparel && /bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$/i.test(skuLowModal))) && !isKidsModal;
+  const isRoundNeckModal = isApparel && (/\b(gola careca|gola redonda|sem zíper|sem ziper|t-shirt)\b/i.test(tLowModal) || (/\bcamiseta\b/i.test(tLowModal) && !/\b(ziper|zíper)\b/i.test(tLowModal)));
+
+  let blocks = liveP.narrative_blocks ? liveP.narrative_blocks.map(b => ({ ...b })) : null;
   if (!blocks || blocks.length === 0) {
     const moldes = window.__STORE_MOLDES || {};
-    let archKey = liveP.archetype_id;
-    if (!archKey || archKey === "uv_performance") {
-      if (typeof detectClientArchetype === "function") {
-        archKey = detectClientArchetype(liveP.title, liveP.category, liveP.tags).id;
-      }
-    }
+    let archKey = archetypeId;
     const tmpl = moldes[archKey] || moldes["uv_performance"];
 
     if (tmpl && tmpl.act1 && tmpl.act2 && tmpl.act3) {
-      const tLow = (liveP.title || "").toLowerCase();
-      const skuLow = (liveP.sku || liveP.master_sku || "").toLowerCase();
-      const tagsLow = (Array.isArray(liveP.tags) ? liveP.tags.join(" ") : (liveP.tags || "")).toLowerCase();
-
-      const isFusion = /\b(fusion|fusionx)\b/i.test(tLow) || /fusion/i.test(skuLow) || /fusion/i.test(tagsLow);
-      const isHybrid = /\bhybrid\b/i.test(tLow) || /^hyb/i.test(skuLow) || /hybrid/i.test(skuLow) || /hybrid/i.test(tagsLow);
-      const isHooded = /\b(capuz|hood|hoodie)\b/i.test(tLow) || isFusion || isHybrid;
-      const isKids = /\b(infantil|kids|juvenil|mini)\b/i.test(tLow) && !/\b(adulto|unissex adulto)\b/i.test(tLow);
-      const isShortSleeve = /\b(manga curta|manga-curta)\b/i.test(tLow) && !/\b(manga longa|manga-longa)\b/i.test(tLow);
-      const isRoundNeck = /\b(gola careca|gola redonda|sem zíper|sem ziper)\b/i.test(tLow) || (/\bcamiseta\b/i.test(tLow) && !/\b(ziper|zíper)\b/i.test(tLow));
-
       let act1Title = tmpl.act1.title || "QUALIDADE E DESEMPENHO";
       let act1Desc = (tmpl.act1.desc_tmpl || "").replace(/\{title\}/g, formattedTitle);
       let act2Title = tmpl.act2.title || "CONFORTO E TECNOLOGIA";
@@ -2108,47 +2188,60 @@ function getProductModeBHTML(liveP) {
       let act3Desc = (tmpl.act3.desc_tmpl || "").replace(/\{title\}/g, formattedTitle);
       let act3Tag = tmpl.act3.tag || "Durabilidade & Acabamento";
 
-      if (isKids) {
+      if (isKidsModal) {
         act1Title = "CONFORTO E PROTEÇÃO SOLAR TOTAL PARA OS PEQUENOS AVENTUREIROS";
-        act1Desc = `Desenvolvida especialmente para crianças e jovens exploradores, o(a) ${formattedTitle} oferece proteção solar máxima FPU 50+ com toque extra suave na pele, garantindo segurança e liberdade total para brincar ao ar livre.`;
+        act1Desc = `Desenvolvida especialmente para crianças e jovens exploradores, o(a) ${formattedTitle} oferece proteção solar máxima FPU 50+ com toque extra suave na pele, garantindo segurança, leveza e liberdade total para brincar e se divertir ao ar livre.`;
         act2Title = "TECNOLOGIA DRY FIT QUE MANTÉM AS CRIANÇAS FRESCAS E SECAS";
-        act2Desc = "Tecido respirável de secagem ultra rápida que evapora o suor rapidamente, mantendo o corpo seco durante todas as brincadeiras e pescarias em família.";
-        if (!isHooded) {
+        act2Desc = "Tecido tecnológico respirável que absorve e dissipa o suor rapidamente, evitando o superaquecimento e mantendo o corpo seco e confortável durante todas as brincadeiras e pescarias em família.";
+        if (!isHoodedModal) {
+          act3Tag = "Durabilidade & Liberdade";
           act3Title = "COSTURAS PLANAS ANTI-ATRITO E MÁXIMA DURABILIDADE";
           act3Desc = "Construída com acabamento elástico de alta resistência que não pinica nem irrita a pele sensível das crianças, oferecendo caimento confortável que aguenta todas as aventuras infantis.";
         }
+      } else if (isFemaleModal && archetypeId === "uv_performance" && !isHoodedModal) {
+        act1Title = "MODELAGEM FEMININA ANATÔMICA COM CAIMENTO IMPECÁVEL";
+        act1Desc = `Projetada sob medida para a anatomia feminina, a ${formattedTitle} combina corte acinturado esportivo, máxima liberdade de movimentos e proteção solar FPU 50+ com toque suave e elegante.`;
       }
 
-      if (isFusion) {
+      if (isFusionModal) {
         act3Tag = "Capuz com Máscara Integrada & Proteção 360°";
         act3Title = "CAPUZ COM MÁSCARA FACIAL INTEGRADA E PUNHO COM DEDEIRA";
         act3Desc = "Desenvolvida com modelagem anatômica contínua para máximo conforto e zero atrito, a camisa FusionX conta com capuz anatômico acoplado com máscara facial protetora (balaclava integrada) que protege cabeça, nuca e rosto contra o sol forte e o vento, além de punhos anatômicos com abertura para o polegar (dedeira) que mantêm o dorso da mão sempre protegido.";
-      } else if (isHybrid) {
+      } else if (isHybridModal) {
         act3Tag = "Capuz Anatômico & Punho com Dedeira";
         act3Title = "CAPUZ ANATÔMICO INTEGRADO E PUNHO COM ABERTURA PARA POLEGAR";
         act3Desc = "Projetada com caimento leve, contínuo e livre de atrito, a camisa Hybrid integra capuz anatômico de proteção solar 360° para nuca e cabeça, mangas com costuras planas reforçadas e punhos com abertura para o polegar (dedeira) que protegem o dorso das mãos durante toda a pescaria ou atividade ao ar livre.";
-      } else if (isHooded) {
+      } else if (isHoodedModal) {
         act3Tag = "Capuz Anatômico & Proteção 360°";
         act3Title = "CAPUZ ANATÔMICO INTEGRADO E COSTURA REFORÇADA";
-        act3Desc = "Equipada com capuz anatômico integrado que oferece proteção solar 360° para nuca, orelhas e laterais do rosto contra o sol forte e vento, dispensando o uso de acessórios extras.";
-      } else if (isShortSleeve) {
-        act3Desc = act3Desc.replace(/punhos anatômicos[^,;.]*/gi, "mangas curtas com barra reforçada em costura dupla");
-      } else if (isRoundNeck) {
+        act3Desc = "Equipada com capuz anatômico integrado que oferece proteção solar 360° para nuca, orelhas e laterais do rosto contra a radiação forte e o vento, dispensando acessórios extras, com costuras planas reforçadas anti-atrito.";
+      } else if (isShortSleeveModal) {
+        act3Desc = act3Desc
+          .replace(/punhos anatômicos que não laceiam com o uso frequente/gi, "mangas curtas com barra em costura dupla reforçada que proporcionam ventilação ideal e liberdade nos braços")
+          .replace(/manga longa/gi, "manga curta");
+      } else if (isRoundNeckModal) {
         act3Title = "COSTURA REFORÇADA E GOLA REDONDA ANATÔMICA";
-        act3Desc = "Acabamento de alto padrão com costuras planas anti-atrito, gola careca canelada que não deforma e ajuste confortável para uso contínuo.";
+        act3Desc = "Acabamento de alto padrão com costuras planas anti-atrito, gola careca canelada reforçada ombro a ombro e caimento confortável para uso prolongado.";
+      } else if (isHasGloveModal) {
+        act3Desc = "Acabamento de alto padrão com costuras planas anti-atrito, gola alta anatômica e punhos estendidos com luva integrada para proteção estendida do dorso das mãos.";
       }
 
-      const img3Low = (img3 || "").toLowerCase();
-      const isBackView = /(costas|costa|back|traseira|02fem|02masc|03fem|03masc|verso)/i.test(img3Low);
-      if (isBackView && !isFusion && !isHybrid && !isHooded && !isKids && !isRoundNeck) {
-        act3Tag = "Design Traseiro & Acabamento";
-        act3Title = "PAINEL TRASEIRO EM ALTA DEFINIÇÃO E COSTURAS REFORÇADAS";
-        act3Desc = "Painel traseiro com estampa nítida e sublimação de alta resolução que não desbota, estruturado com costuras planas reforçadas nos ombros e dorso para total liberdade de movimentos e resistência ao uso contínuo.";
+      if (archetypeId === "uv_performance" && !isKidsModal) {
+        const storeKeyEff = liveP.store_key || (typeof currentStore !== "undefined" ? currentStore : "brk_fishing");
+        if (storeKeyEff === "brk_agro" || /\b(agro|campo|rural|trator|fazenda|pecuaria|pecuária)\b/i.test(tLowModal)) {
+          act1Desc = act1Desc
+            .replace(/pescadores e entusiastas do ar livre/g, "o homem e a mulher do campo e entusiastas do ar livre")
+            .replace(/arremessos e manobras/g, "a rotina intensa no campo e manobras");
+        } else if (storeKeyEff === "brk_motors" || /\b(moto|trail|cross|velocidade|motors|pista)\b/i.test(tLowModal)) {
+          act1Desc = act1Desc
+            .replace(/pescadores e entusiastas do ar livre/g, "pilotos, motociclistas e aventureiros")
+            .replace(/arremessos e manobras/g, "a pilotagem e manobras");
+        }
       }
 
       blocks = [
         {
-          tag: isKids ? "Proteção Infantil & Conforto" : (tmpl.act1.tag || "Destaque"),
+          tag: isKidsModal ? "Proteção Infantil & Conforto" : (tmpl.act1.tag || "Destaque"),
           title: act1Title,
           description: act1Desc,
           image: img1,
@@ -2156,7 +2249,7 @@ function getProductModeBHTML(liveP) {
           variations_summary: variationsSummary
         },
         {
-          tag: isKids ? "Respirabilidade & Frescor" : (tmpl.act2.tag || "Destaque"),
+          tag: isKidsModal ? "Respirabilidade & Frescor" : (tmpl.act2.tag || "Destaque"),
           title: act2Title,
           description: act2Desc,
           image: img2
@@ -2194,6 +2287,14 @@ function getProductModeBHTML(liveP) {
     }
   }
 
+  // Garantir alinhamento semântico do Ato 3 com foto de costas (mesmo com narrative_blocks pré-carregados)
+  const isBackView = isClientBackViewUrl(img3, true);
+  if (blocks && blocks.length >= 3 && isBackView && archetypeId === "uv_performance" && !isFusionModal && !isHybridModal && !isHoodedModal && !isRoundNeckModal) {
+    blocks[2].tag = "Design Traseiro & Acabamento";
+    blocks[2].title = "PAINEL TRASEIRO EM ALTA DEFINIÇÃO E COSTURAS REFORÇADAS";
+    blocks[2].description = "Painel traseiro com estampa nítida e sublimação de alta resolução que não desbota, estruturado com costuras planas reforçadas nos ombros e dorso para total liberdade de movimentos e resistência ao uso contínuo.";
+  }
+
   const isReadyDelivery = (p) => {
     if (!p) return false;
     const fullOutPattern = /(_FULL|_OUT|\bFULL\b|\bOUT\b|-FULL|-OUT)/i;
@@ -2209,9 +2310,9 @@ function getProductModeBHTML(liveP) {
     return false;
   };
 
-  let specs = liveP.specs || [];
+  let specs = (liveP.specs || []).map(s => ({ ...s }));
   if (specs.length === 0 && window.__STORE_MOLDES) {
-    const archKey = liveP.archetype_id || "uv_performance";
+    const archKey = archetypeId;
     const tmpl = window.__STORE_MOLDES[archKey] || window.__STORE_MOLDES["uv_performance"];
     if (tmpl && tmpl.base_specs) {
       specs = tmpl.base_specs.map(s => ({ label: s.label, value: s.default }));
@@ -2219,7 +2320,7 @@ function getProductModeBHTML(liveP) {
   }
 
   // Ajuste inteligente do Prazo de Produção para Camisas C0 (Pronta entrega para _FULL e _OUT, 10 dias úteis para padrão)
-  const isC0Shirt = (liveP.archetype_id === "uv_performance") ||
+  const isC0Shirt = (archetypeId === "uv_performance") ||
                     (liveP.sku && /^(c0|ci|cadv|adv)/i.test(liveP.sku)) ||
                     (liveP.master_sku && /^(c0|ci|cadv|adv)/i.test(liveP.master_sku));
   if (isC0Shirt && specs.length > 0) {
@@ -2232,11 +2333,17 @@ function getProductModeBHTML(liveP) {
     });
   }
 
-  const tLowModal = (liveP.title || "").toLowerCase();
-  const skuLowModal = (liveP.sku || liveP.master_sku || "").toLowerCase();
-  const tagsLowModal = (Array.isArray(liveP.tags) ? liveP.tags.join(" ") : (liveP.tags || "")).toLowerCase();
-  const isFusionModal = /\b(fusion|fusionx)\b/i.test(tLowModal) || /fusion/i.test(skuLowModal) || /fusion/i.test(tagsLowModal);
-  const isHybridModal = /\bhybrid\b/i.test(tLowModal) || /^hyb/i.test(skuLowModal) || /hybrid/i.test(skuLowModal) || /hybrid/i.test(tagsLowModal);
+  if (isHasGloveModal && !isShortSleeveModal) {
+    specs = specs.map(s => {
+      if (/punho/i.test(s.label)) {
+        return { label: "Punhos / Luva", value: "Punhos estendidos anatômicos com luva integrada para o dorso da mão" };
+      }
+      return s;
+    });
+    if (!specs.some(s => /luva/i.test(s.label))) {
+      specs.push({ label: "Punhos / Luva", value: "Punhos estendidos anatômicos com luva integrada para o dorso da mão" });
+    }
+  }
 
   if (isFusionModal) {
     if (!specs.some(s => /capuz|máscara/i.test(s.label))) {
@@ -2252,18 +2359,18 @@ function getProductModeBHTML(liveP) {
     if (!specs.some(s => /punho/i.test(s.label))) {
       specs.push({ label: "Punhos", value: "Punhos anatômicos com abertura para o polegar (dedeira)" });
     }
+  } else if (isHoodedModal && !specs.some(s => /capuz/i.test(s.label))) {
+    specs.push({ label: "Capuz", value: "Capuz anatômico integrado para proteção solar estendida" });
   }
 
-  const isRoundNeckModal = /\b(gola careca|gola redonda|sem zíper|sem ziper)\b/i.test(tLowModal) || (/\bcamiseta\b/i.test(tLowModal) && !/\b(ziper|zíper)\b/i.test(tLowModal));
-  const isHoodedModal = /\b(capuz|hood|hoodie)\b/i.test(tLowModal) || isFusionModal || isHybridModal;
-  if (!isFusionModal && !isHybridModal && !isRoundNeckModal && !isHoodedModal && (!liveP.archetype_id || liveP.archetype_id === "uv_performance")) {
+  if (!isFusionModal && !isHybridModal && !isRoundNeckModal && !isHoodedModal && archetypeId === "uv_performance") {
     if (!specs.some(s => /gola|fechamento/i.test(s.label))) {
       specs.push({ label: "Gola / Fechamento", value: "Gola padre anatômica com zíper e trava de segurança" });
     }
   }
 
-  // Trava Estrita Anti-Zíper no Modal para Fusion, Hybrid e Botão
-  if (isFusionModal || isHybridModal || liveP.archetype_id === "shirts_button_work") {
+  // Trava Estrita Anti-Zíper no Modal para Fusion, Hybrid, Gola Careca e Botão
+  if (isFusionModal || isHybridModal || isRoundNeckModal || archetypeId === "shirts_button_work") {
     blocks.forEach(b => {
       if (b.title) b.title = b.title.replace(/\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b/gi, "").trim();
       if (b.description) {
