@@ -986,6 +986,41 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         self.assertIn("delete p.narrative_blocks;", js_code)
         self.assertIn("delete p.split_images;", js_code)
 
+    def test_store_category_classification_and_full_3_store_sync(self):
+        """Valida que as categorias das 3 lojas não misturam produtos díspares e que 100% do catálogo das 3 lojas está sincronizado."""
+        engine = TemplateEngine()
+        # 1. Casos críticos que antes vazavam de categoria
+        cases = [
+            ("Camisa de Pesca Proteção Solar UV50+ Capivara Pescadora Brk", "brk_fishing", "Camisas de Pesca UV50+"),
+            ("Camisa De Pesca Infantil Brk Caramelo De Óculos Com Proteção Solar Uv50+", "brk_fishing", "Linha Infantil UV50+"),
+            ("Camisa de Pesca Brk Manga Longa FusionX", "brk_fishing", "Camisas de Pesca UV50+"),
+            ("Boné Trucker Brk Fishing Bass", "brk_fishing", "Bonés & Chapéus"),
+            ("Vara de Pesca Marine Sports Gladius", "brk_fishing", "Equipamentos & Iscas"),
+            ("Botina Country Masculina Couro Legítimo Brk Agro", "brk_agro", "Botinas & Calçados"),
+            ("Chapéu Country Pralana Feltro", "brk_agro", "Chapéus & Bonés"),
+            ("Faca Artesanal Inox 8 Polegadas", "brk_agro", "Cutelaria & Acessórios"),
+            ("Jersey Motocross Trilha Brk Motors", "brk_motors", "Jerseys & Off-Road"),
+            ("Camisa Masculina Brk Motors Dakar Com Proteção Solar UV50+", "brk_motors", "Camisas UV50+ Motors"),
+        ]
+        for title, sk, expected_cat in cases:
+            arch = engine.detect_archetype(title, "", "")
+            cat = engine.classify_store_category(title, arch, sk)
+            self.assertEqual(cat, expected_cat, f"Falha na categoria de '{title}' ({sk}): {cat} != {expected_cat}")
+
+        # 2. Verificar catálogos compilados das 3 lojas
+        min_counts = {"brk_fishing": 2200, "brk_agro": 2500, "brk_motors": 1400}
+        for sk, min_total in min_counts.items():
+            store_path = os.path.join(BASE_DIR, "data", "stores", f"{sk}.json")
+            self.assertTrue(os.path.exists(store_path), f"Store compilada ausente: {store_path}")
+            with open(store_path, "r", encoding="utf-8") as f:
+                sdata = json.load(f)
+            prods = sdata.get("products", [])
+            self.assertGreaterEqual(len(prods), min_total, f"Catálogo {sk} incompleto: {len(prods)} < {min_total}")
+            cats = sdata.get("categories", {})
+            cats_list = list(cats.values()) if isinstance(cats, dict) else cats
+            self.assertGreaterEqual(len(cats_list), 4, f"Loja {sk} deve ter categorias estruturadas")
+            for c in cats_list:
+                self.assertTrue(c.get("thumb", "").startswith("https://cdn.shopify.com/"), f"Thumb inválida em {sk}/{c.get('name')}")
 
 
 class TestBRKStudioVerticalization(unittest.TestCase):

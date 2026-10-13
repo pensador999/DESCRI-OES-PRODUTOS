@@ -24,44 +24,33 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from core.shopify_public_api import ShopifyPublicAPI
 from core.auditor import CatalogAuditor
 from core.config import STORES
+from core.template_engine import TemplateEngine
+
+_ENGINE = TemplateEngine()
 
 def categorize_agro_product(prod: dict) -> str:
-    title = prod.get("title", "").lower()
-    ptype = (prod.get("product_type") or "").lower()
-    tags = [t.lower() for t in (prod.get("tags") or [])]
-    full = f"{title} {ptype} {' '.join(tags)}"
-
-    if any(k in full for k in ["camisa", "camiseta", "manga", "uv50", "agro", "trator", "lavoura"]):
-        return "Camisas Agro & Campo"
-    elif any(k in full for k in ["boné", "bone", "chapéu", "chapeu"]):
-        return "Bonés & Chapéus Agro"
-    elif any(k in full for k in ["bota", "botina", "calçado", "calcado", "sapato"]):
-        return "Botinas & Calçados"
-    elif any(k in full for k in ["faca", "cutelaria", "canivete", "churrasco"]):
-        return "Cutelaria & Facas Campo"
-    elif any(k in full for k in ["copo", "garrafa", "térmico", "termico"]):
-        return "Térmicos & Tereré"
-    else:
-        return "Acessórios Agro & Fazenda"
+    title = prod.get("title", "")
+    ptype = prod.get("product_type") or ""
+    vendor = prod.get("vendor") or ""
+    tags = prod.get("tags") or []
+    if isinstance(tags, str):
+        tags = [t.strip() for t in tags.split(",") if t.strip()]
+    variants = prod.get("variants") or []
+    sku = prod.get("master_sku") or (variants[0].get("sku") if variants and isinstance(variants[0], dict) else "") or ""
+    arch_id = _ENGINE.detect_archetype(title, ptype, tags, vendor=vendor, sku=sku)
+    return _ENGINE.classify_store_category(title, arch_id, store_key="brk_agro", tags=tags, sku=sku)
 
 def categorize_motors_product(prod: dict) -> str:
-    title = prod.get("title", "").lower()
-    ptype = (prod.get("product_type") or "").lower()
-    tags = [t.lower() for t in (prod.get("tags") or [])]
-    full = f"{title} {ptype} {' '.join(tags)}"
-
-    if any(k in full for k in ["camisa", "jersey", "trilha", "motocross", "off-road", "off road"]):
-        return "Jerseys & Camisas Motors"
-    elif any(k in full for k in ["jaqueta", "corta vento", "segunda pele", "moletom"]):
-        return "Jaquetas & Corta Vento"
-    elif any(k in full for k in ["luva", "manguito", "balaclava", "pescoceira"]):
-        return "Proteção & Luvas Motors"
-    elif any(k in full for k in ["boné", "bone", "chapéu", "chapeu"]):
-        return "Bonés & Street Motors"
-    elif any(k in full for k in ["óculos", "oculos", "goggle"]):
-        return "Óculos & Goggles"
-    else:
-        return "Acessórios & Equipamentos"
+    title = prod.get("title", "")
+    ptype = prod.get("product_type") or ""
+    vendor = prod.get("vendor") or ""
+    tags = prod.get("tags") or []
+    if isinstance(tags, str):
+        tags = [t.strip() for t in tags.split(",") if t.strip()]
+    variants = prod.get("variants") or []
+    sku = prod.get("master_sku") or (variants[0].get("sku") if variants and isinstance(variants[0], dict) else "") or ""
+    arch_id = _ENGINE.detect_archetype(title, ptype, tags, vendor=vendor, sku=sku)
+    return _ENGINE.classify_store_category(title, arch_id, store_key="brk_motors", tags=tags, sku=sku)
 
 def analyze_store(store_key: str):
     store_info = STORES[store_key]
@@ -78,8 +67,8 @@ def analyze_store(store_key: str):
     api = ShopifyPublicAPI(store_key)
     auditor = CatalogAuditor()
 
-    # 1. Varredura Completa de Produtos
-    raw_products = api.fetch_all_products(max_products=1000)
+    # 1. Varredura Completa de Produtos (sem trava de 1000)
+    raw_products = api.fetch_all_products(max_products=None)
     print(f"[OK] Total de produtos coletados em {store_name}: {len(raw_products)}")
 
     catalog_data = {

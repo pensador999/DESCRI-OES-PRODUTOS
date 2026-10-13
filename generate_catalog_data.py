@@ -20,34 +20,22 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core.shopify_public_api import ShopifyPublicAPI
 from core.auditor import CatalogAuditor
+from core.template_engine import TemplateEngine
+
+_ENGINE = TemplateEngine()
 
 def categorize_product(prod: dict) -> str:
-    title = prod.get("title", "").lower()
-    ptype = (prod.get("product_type") or "").lower()
-    vendor = (prod.get("vendor") or "").lower()
-    tags = [t.lower() for t in (prod.get("tags") or [])]
-    full = f"{title} {ptype} {vendor} {' '.join(tags)}"
+    title = prod.get("title", "")
+    ptype = prod.get("product_type") or ""
+    vendor = prod.get("vendor") or ""
+    tags = prod.get("tags") or []
+    if isinstance(tags, str):
+        tags = [t.strip() for t in tags.split(",") if t.strip()]
+    variants = prod.get("variants") or []
+    sku = prod.get("master_sku") or (variants[0].get("sku") if variants and isinstance(variants[0], dict) else "") or ""
+    arch_id = _ENGINE.detect_archetype(title, ptype, tags, vendor=vendor, sku=sku)
+    return _ENGINE.classify_store_category(title, arch_id, store_key="brk_fishing", tags=tags, sku=sku)
 
-    if any(k in full for k in ["sandalia", "sandália", "chinelo", "bota", "tenis", "tênis", "boaonda"]):
-        return "Calçados & Sandálias"
-    elif any(k in full for k in ["caixa de pesca", "estojo", "maleta", "organizador", "case pesca", "bolsa de pesca"]) or (any(k in full for k in ["caixa", "estojo", "maleta"]) and not any(k in full for k in ["camisa", "camiseta"])):
-        return "Caixas & Organização"
-    elif any(k in full for k in ["copo", "garrafa", "cooler", "geladeira", "termico", "térmico", "elber"]):
-        return "Térmicos & Camping"
-    elif any(k in full for k in ["vara", "carretilha", "molinete", "isca", "anzol", "alicate", "linha", "passagua", "passaguá"]) or any(v in full for v in ["marine sports", "shimano", "daiwa", "albatroz", "rapala", "nakamura", "yara", "maruri"]):
-        return "Equipamentos & Iscas"
-    elif "armorx" in full or "armor" in full:
-        return "Camisas ArmorX"
-    elif any(k in full for k in ["faca", "cutelaria", "lamina", "bainha", "canivete"]):
-        return "Cutelaria & Facas"
-    elif any(k in full for k in ["óculos", "oculos"]):
-        return "Óculos Polarizados"
-    elif any(k in full for k in ["boné", "bone", "chapéu", "chapeu", "bandana", "balaclava"]):
-        return "Bonés & Chapéus"
-    elif any(k in full for k in ["camisa", "camiseta", "manga", "uv50", "dry"]):
-        return "Camisas de Pesca UV"
-    else:
-        return "Acessórios Diversos"
 
 def main():
     api = ShopifyPublicAPI("brk")

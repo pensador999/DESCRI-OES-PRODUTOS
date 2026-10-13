@@ -1188,7 +1188,7 @@ class TemplateEngine:
             return "sun_sleeves_manguitos"
 
         # 16. Ferragens e Equipamentos de Pesca (Varas, Carretilhas, Molinetes, Giradores, Snaps, Argolas)
-        if any(w in t for w in ["vara", "carretilha", "molinete", "linha", "anzol", "anzois", "alicate", "passagua", "girador", "giradores", "snap", "snaps", "argola", "empate", "chumbada", "chumbo", "trava varas", "suporte porta iscas"]):
+        if bool(re.search(r'\bvaras?\b', t)) or any(w in t for w in ["carretilha", "molinete", "linha", "anzol", "anzois", "alicate", "passagua", "girador", "giradores", "snap", "snaps", "argola", "empate", "chumbada", "chumbo", "trava varas", "suporte porta iscas"]):
             return "fishing_tackle_gear"
 
         # 17. Iscas Artificiais
@@ -1236,7 +1236,7 @@ class TemplateEngine:
             return "hats_safari_outdoor"
         if bool(re.search(r'\b(bone|bones)\b', text)) and "till the bones" not in text:
             return "caps_trucker_snapback"
-        if any(w in text for w in ["vara", "carretilha", "molinete", "girador", "snap", "empate"]):
+        if bool(re.search(r'\bvaras?\b', text)) or any(w in text for w in ["carretilha", "molinete", "girador", "snap", "empate"]):
             return "fishing_tackle_gear"
         if any(w in text for w in ["jersey", "moto", "motors"]):
             return "motors_speed"
@@ -1244,6 +1244,71 @@ class TemplateEngine:
             return "agro_field"
 
         return "uv_performance"
+
+    def classify_store_category(self, title: str, archetype_id: str, store_key: str = "brk_fishing", tags: List[str] = None, sku: str = "") -> str:
+        """
+        Classifica o produto em uma Coleção/Categoria oficial da loja com base no arquétipo soberano,
+        garantindo zero contaminação entre Camisas, Bonés, Bandanas, Óculos, Botinas e Equipamentos.
+        """
+        t_low = (title or "").lower()
+        sku_low = (sku or "").lower()
+        tags_str = " ".join(tags or []).lower() if isinstance(tags, list) else str(tags or "").lower()
+        full_info = f"{t_low} {sku_low} {tags_str}"
+
+        if store_key == "brk_agro":
+            if archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work"):
+                return "Camisas Agro & Campo"
+            if archetype_id in ("caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy"):
+                return "Bonés & Chapéus Agro"
+            if archetype_id in ("closed_footwear_sneakers", "footwear_sandals_boaonda"):
+                return "Botinas & Calçados"
+            if archetype_id == "cutlery_unique":
+                return "Cutelaria & Facas Campo"
+            if archetype_id == "drinkware_thermo":
+                return "Térmicos & Tereré"
+            if archetype_id == "eyewear_sunglasses":
+                return "Óculos Polarizados Agro"
+            if archetype_id in ("neck_gaiters_balaclavas", "sun_sleeves_manguitos", "gloves_tactical_fishing"):
+                return "Bandanas, Luvas & Manguitos"
+            if archetype_id in ("pants_cargo_tactical", "overalls_workwear"):
+                return "Calças & Vestuário Campo"
+            return "Acessórios Agro & Fazenda"
+
+        if store_key == "brk_motors":
+            if archetype_id in ("uv_performance", "motors_speed", "agro_field", "shirts_button_work"):
+                if any(w in t_low for w in ["jaqueta", "corta vento", "moletom", "segunda pele"]):
+                    return "Jaquetas & Corta Vento"
+                return "Jerseys & Camisas Motors"
+            if archetype_id in ("neck_gaiters_balaclavas", "sun_sleeves_manguitos", "gloves_tactical_fishing"):
+                return "Proteção & Luvas Motors"
+            if archetype_id in ("caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy"):
+                return "Bonés & Street Motors"
+            if archetype_id == "eyewear_sunglasses":
+                return "Óculos & Goggles"
+            return "Acessórios & Equipamentos"
+
+        # Default: brk_fishing
+        if archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work"):
+            if "armorx" in full_info or "armor" in t_low:
+                return "Camisas ArmorX"
+            return "Camisas de Pesca UV"
+        if archetype_id in ("caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy"):
+            return "Bonés & Chapéus"
+        if archetype_id in ("neck_gaiters_balaclavas", "sun_sleeves_manguitos", "gloves_tactical_fishing"):
+            return "Bandanas, Luvas & Manguitos"
+        if archetype_id == "eyewear_sunglasses":
+            return "Óculos Polarizados"
+        if archetype_id in ("fishing_lures", "fishing_tackle_gear"):
+            return "Equipamentos & Iscas"
+        if archetype_id == "tackle_boxes_storage":
+            return "Caixas & Organização"
+        if archetype_id in ("footwear_sandals_boaonda", "closed_footwear_sneakers", "overalls_workwear", "pants_cargo_tactical"):
+            return "Calçados & Sandálias"
+        if archetype_id == "cutlery_unique":
+            return "Cutelaria & Facas"
+        if archetype_id == "drinkware_thermo":
+            return "Térmicos & Camping"
+        return "Acessórios Diversos"
 
     def sanitize_specs_for_archetype(self, specs: List[Dict[str, str]], archetype_id: str) -> List[Dict[str, str]]:
         """

@@ -290,6 +290,42 @@ function detectClientArchetype(title, category, tags) {
   return { id: "uv_performance", name: "Camisas UV50+ Performance & Pesca" };
 }
 
+function classifyClientStoreCategory(title, archId, storeKey) {
+  const t = (title || "").toLowerCase();
+  const s = (storeKey || "brk_fishing").toLowerCase();
+
+  if (s === "brk_agro") {
+    if (["hats_country_cowboy", "hats_safari_outdoor", "caps_trucker_snapback"].includes(archId)) return "Chapéus & Bonés";
+    if (["closed_footwear_sneakers", "footwear_sandals_boaonda"].includes(archId)) return "Botinas & Calçados";
+    if (["pants_cargo_tactical", "overalls_workwear"].includes(archId)) return "Calças & Operacional";
+    if (["cutlery_unique", "accessories_general", "accessories_car_care", "drinkware_thermo", "eyewear_sunglasses", "gloves_tactical_fishing", "neck_gaiters_balaclavas", "sun_sleeves_manguitos", "books_publications"].includes(archId)) return "Cutelaria & Acessórios";
+    if (archId === "casual_cotton" || t.includes("camiseta") || t.includes("t-shirt") || t.includes("polo") || t.includes("moletom")) return "Camisetas & Polos";
+    return "Camisas UV50+ Agro";
+  }
+
+  if (s === "brk_motors") {
+    if (archId === "motors_speed" || /\b(jersey|motocross|enduro|trilha|off-road|velocross|fox)\b/i.test(t)) return "Jerseys & Off-Road";
+    if (["caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy"].includes(archId)) return "Bonés & Chapéus";
+    if (["neck_gaiters_balaclavas", "sun_sleeves_manguitos", "gloves_tactical_fishing", "eyewear_sunglasses", "accessories_car_care", "accessories_general", "drinkware_thermo", "cutlery_unique"].includes(archId)) return "Bandanas, Luvas & Acessórios";
+    if (["closed_footwear_sneakers", "footwear_sandals_boaonda", "pants_cargo_tactical", "overalls_workwear"].includes(archId)) return "Calças & Calçados";
+    if (archId === "casual_cotton" || t.includes("camiseta") || t.includes("t-shirt") || t.includes("polo") || t.includes("moletom")) return "Camisetas Casual & Paddock";
+    return "Camisas UV50+ Motors";
+  }
+
+  if (["caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy"].includes(archId)) return "Bonés & Chapéus";
+  if (["neck_gaiters_balaclavas", "sun_sleeves_manguitos", "gloves_tactical_fishing"].includes(archId)) return "Bandanas, Luvas & Manguitos";
+  if (archId === "eyewear_sunglasses") return "Óculos Polarizados";
+  if (["pants_cargo_tactical", "overalls_workwear"].includes(archId)) return "Calças & Bermudas";
+  if (["footwear_sandals_boaonda", "closed_footwear_sneakers"].includes(archId)) return "Calçados & Sandálias";
+  if (["fishing_lures", "fishing_tackle_gear", "tackle_boxes_storage"].includes(archId)) return "Equipamentos & Iscas";
+  if (archId === "cutlery_unique") return "Cutelaria & Facas";
+  if (["drinkware_thermo", "accessories_car_care", "accessories_general", "books_publications"].includes(archId)) return "Térmicos & Acessórios";
+  if (archId === "casual_cotton" || t.includes("camiseta") || t.includes("t-shirt") || t.includes("polo") || t.includes("moletom")) return "Camisetas & Casual";
+  if (t.includes("infantil") || t.includes("kids") || t.includes("juvenil")) return "Linha Infantil UV50+";
+  if (t.includes("feminina") || t.includes("baby look") || t.includes("babylook")) return "Linha Feminina UV50+";
+  return "Camisas de Pesca UV50+";
+}
+
 function createEnrichedFromLiveProduct(liveP, storeKey) {
   const rawImgs = liveP.images || [];
   const rawSources = [];
@@ -324,13 +360,14 @@ function createEnrichedFromLiveProduct(liveP, storeKey) {
   const title = liveP.title || "";
   const isC0 = title.toUpperCase().includes("C0") || (liveP.handle || "").toUpperCase().includes("C0");
   const arch = detectClientArchetype(title, liveP.product_type || "", tags);
+  const category = classifyClientStoreCategory(title, arch.id, storeKey);
 
   return {
     id: liveP.id,
     title: title,
     handle: liveP.handle || "",
     vendor: liveP.vendor || (storeKey === "brk_agro" ? "BRK Agro" : storeKey === "brk_motors" ? "BRK Motors" : "BRK Fishing"),
-    category: liveP.product_type || "",
+    category: category,
     tags: tags,
     images: dedupImages,
     gallery: dedupImages,
@@ -565,7 +602,7 @@ function renderCategories() {
     div.onclick = () => { selectedCategory = cat.name; renderProducts(); highlightCategory(div); };
     
     const ringClass = cat.broken_count > 0 ? "category-ring has-broken" : "category-ring";
-    const imgUrl = cat.sample_image || "https://placehold.co/100x100?text=BRK";
+    const imgUrl = cat.sample_image || cat.thumb || "https://placehold.co/100x100?text=BRK";
 
     div.innerHTML = `
       <div class="relative w-16 h-16 rounded-full p-[2px] ${ringClass} transition-all transform group-hover:scale-105 shadow-md">
@@ -1151,7 +1188,7 @@ function downloadLatestDailyCSV() {
     if (!sData || !sData.products) continue;
     sData.products.forEach(p => {
       if (p.status === "IMAGENS_QUEBRADAS" || p.status === "SEM_DESCRICAO") {
-        const html = p.mode_b_html || p.mode_a_html || "";
+        const html = p.mode_b_html || (typeof getProductModeBHTML === "function" ? getProductModeBHTML(p) : "") || p.mode_a_html || "";
         rows.push(`"${p.handle}","${p.title.replace(/"/g, '""')}","${html.replace(/"/g, '""')}"`);
         count++;
       }

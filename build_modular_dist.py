@@ -65,15 +65,13 @@ def build_dist():
     # Função de enriquecimento de produtos
     def enrich_products(store_dict, store_key="brk_fishing"):
         all_prods = store_dict.get("products", [])
-        categories = store_dict.get("categories", {})
-        
-        selected_prods = []
-        selected_handles = set()
+        dead_body_re = re.compile(r"use-brk-images-s3|photobucket|imageshack|tinytake|yampi", re.IGNORECASE)
 
-        # Normalizar status de todos os produtos: classificação estrita e sem limbo
+        # Normalizar status de todos os produtos: classificação estrita e sem limbo baseada no body_html real
         for p in all_prods:
             body = (p.get("original_body_html") or p.get("body_html") or "").strip()
-            clean_b = re.sub(r'<[^>]+>', ' ', body).strip()
+            clean_b = re.sub(r'<style.*?</style>', ' ', body, flags=re.S | re.I)
+            clean_b = re.sub(r'<[^>]+>', ' ', clean_b).strip()
             clean_b = re.sub(r'\s+', ' ', clean_b)
             w_count = len(clean_b.split()) if clean_b else 0
             is_empty_or_placeholder = (
@@ -83,10 +81,7 @@ def build_dist():
                 or (w_count < 20 and not any(tag in body.lower() for tag in ["<table", "<div", "<ul"]))
                 or w_count < 5
             )
-            has_broken_s3 = (p.get("status") == "IMAGENS_QUEBRADAS") or (p.get("broken_images_count", 0) > 0)
-            orig_html = p.get("original_body_html") or p.get("body_html") or ""
-            if "use-brk-images-s3" in orig_html or "photobucket" in orig_html:
-                has_broken_s3 = True
+            has_broken_s3 = bool(dead_body_re.search(body))
 
             if has_broken_s3:
                 p["status"] = "IMAGENS_QUEBRADAS"
@@ -94,9 +89,13 @@ def build_dist():
             elif is_empty_or_placeholder:
                 p["status"] = "SEM_DESCRICAO"
                 p["is_out_of_standard"] = True
+                p["broken_images_count"] = 0
+                p["broken_urls"] = []
             else:
                 p["status"] = "SAUDAVEL"
                 p["is_out_of_standard"] = False
+                p["broken_images_count"] = 0
+                p["broken_urls"] = []
 
         # Incluir 100% de todos os produtos do catálogo (sem descarte de produtos saudáveis)
         selected_prods = []
@@ -146,6 +145,7 @@ def build_dist():
             vendor = p.get("vendor", "")
             sku_code = p.get("master_sku") or p.get("sku") or (p.get("variants_skus") and p.get("variants_skus")[0]) or ""
             archetype_id = template_engine.detect_archetype(title, category, tags, vendor=vendor, sku=sku_code)
+            canonical_cat = template_engine.classify_store_category(title, archetype_id, store_key=store_key, tags=tags, sku=sku_code)
             arch_info = template_engine.templates.get(archetype_id, template_engine.templates["uv_performance"])
             
             # Busca de irmão homólogo com trava estrita de arquétipo para produtos sem descrição ou com placeholder
@@ -154,9 +154,13 @@ def build_dist():
             mode_a_html = html_replacer.replace_images_preserve_html(orig_html, images, title)
             narrative = template_engine.generate_narrative_from_template(p, archetype_id, images, store_key=store_key, sibling_info=sibling_info)
             
-            # Geração com ícones vetoriais SVG estilo Font Awesome
-            mode_b_html = html_builder.build_shopify_html(narrative)
-            mode_b_markdown = html_builder.build_shopify_markdown(narrative)
+            is_headwear = archetype_id in ("caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy")
+            # Salvar mode_b_html pré-compilado nos itens SEM_DESCRICAO (lote inicial), bonés/chapéus D2C e amostra inicial;
+            # os demais produtos possuem narrative_blocks/specs completos e compilam mode_b_html em <2ms no cliente e na API,
+            # mantendo cada loja bem abaixo do limite de 100 MB do GitHub e 250 MB da Vercel.
+            save_mode_b = (p.get("status") == "SEM_DESCRICAO" and idx < 250) or (idx < 15) or is_headwear
+            mode_b_html = html_builder.build_shopify_html(narrative) if save_mode_b else ""
+            mode_b_markdown = html_builder.build_shopify_markdown(narrative) if save_mode_b else ""
 
             prohibited_links = p.get("prohibited_links", [])
             if not prohibited_links and orig_html:
@@ -165,6 +169,10 @@ def build_dist():
                 prohibited_links = [l for l in re.findall(r'(?:href|src)=["\']([^"\']+)["\']', orig_html) if prohib_regex.search(l)]
 
             p_copy = dict(p)
+            p_copy.pop("images", None)
+            p_copy.pop("original_body_html", None)
+            p_copy["body_html"] = orig_html
+            p_copy["category"] = canonical_cat
             p_copy["cdn_images"] = images
             p_copy["gallery"] = images
             p_copy["image"] = images[0] if images else (p.get("image") or "")
@@ -190,26 +198,100 @@ def build_dist():
             p_copy["care_tips"] = narrative.get("care_tips", "")
             p_copy["specs"] = narrative.get("specs", [])
             p_copy["mode_a_html"] = mode_a_html
-            is_headwear = archetype_id in ("caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy")
             p_copy["layout_format"] = narrative.get("layout_format", "standard_3act")
             if is_headwear:
                 p_copy["details_grid"] = narrative.get("details_grid")
                 p_copy["info_characteristics"] = narrative.get("info_characteristics")
                 p_copy["info_care"] = narrative.get("info_care")
                 p_copy["split_sections"] = narrative.get("split_sections")
-            # Salvar mode_b_html completo em todos os itens SEM_DESCRICAO e IMAGENS_QUEBRADAS,
-            # alem de 100% dos bones e chapeus D2C, Fusion, Hybrid e dos primeiros 25 de amostra.
-            is_fusion_or_hyb = ("fusion" in title.lower()) or ("hybrid" in title.lower()) or sku_code.lower().startswith("hyb") or ("fusion" in sku_code.lower())
-            save_mode_b = (p.get("status") in ("SEM_DESCRICAO", "IMAGENS_QUEBRADAS")) or (idx < 25) or is_headwear or is_fusion_or_hyb
-            p_copy["mode_b_html"] = mode_b_html if save_mode_b else ""
-            p_copy["mode_b_markdown"] = mode_b_markdown if save_mode_b else ""
+            p_copy["mode_b_html"] = mode_b_html
+            p_copy["mode_b_markdown"] = mode_b_markdown
             p_copy["prohibited_links"] = prohibited_links
             p_copy["orphaned_variants"] = p.get("orphaned_variants", [])
             enriched.append(p_copy)
 
+        # Reconstruir categorias e métricas globais da loja com base nos produtos enriquecidos
+        category_order = {
+            "brk_fishing": [
+                "Camisas de Pesca UV50+",
+                "Linha Infantil UV50+",
+                "Linha Feminina UV50+",
+                "Camisetas & Casual",
+                "Bonés & Chapéus",
+                "Bandanas, Luvas & Manguitos",
+                "Óculos Polarizados",
+                "Calças & Bermudas",
+                "Calçados & Sandálias",
+                "Equipamentos & Iscas",
+                "Cutelaria & Facas",
+                "Térmicos & Acessórios",
+            ],
+            "brk_agro": [
+                "Camisas UV50+ Agro",
+                "Camisetas & Polos",
+                "Chapéus & Bonés",
+                "Botinas & Calçados",
+                "Calças & Operacional",
+                "Cutelaria & Acessórios",
+            ],
+            "brk_motors": [
+                "Camisas UV50+ Motors",
+                "Jerseys & Off-Road",
+                "Camisetas Casual & Paddock",
+                "Bonés & Chapéus",
+                "Bandanas, Luvas & Acessórios",
+                "Calças & Calçados",
+            ],
+        }
+        ordered_cats = list(category_order.get(store_key, []))
+        for ep in enriched:
+            c = ep.get("category", "Acessórios Diversos")
+            if c not in ordered_cats:
+                ordered_cats.append(c)
+
+        rebuilt_categories = {}
+        for cat in ordered_cats:
+            cat_prods = [ep for ep in enriched if ep.get("category") == cat]
+            if not cat_prods:
+                continue
+            thumb_url = ""
+            for cp in cat_prods:
+                img_c = cp.get("image") or ""
+                if "cdn.shopify.com" in img_c:
+                    thumb_url = img_c
+                    break
+            if not thumb_url:
+                thumb_url = cat_prods[0].get("image", "")
+            rebuilt_categories[cat] = {
+                "name": cat,
+                "title": cat,
+                "badge": "Coleção",
+                "thumb": thumb_url,
+                "sample_image": thumb_url,
+                "count": len(cat_prods),
+                "total_skus": sum(ep.get("total_skus_count") or len(ep.get("variants_skus", [])) or 1 for ep in cat_prods),
+                "broken_skus": sum((ep.get("total_skus_count") or len(ep.get("variants_skus", [])) or 1) for ep in cat_prods if ep.get("status") == "IMAGENS_QUEBRADAS"),
+                "out_of_standard_skus": sum((ep.get("total_skus_count") or len(ep.get("variants_skus", [])) or 1) for ep in cat_prods if ep.get("is_out_of_standard")),
+                "broken_count": sum(1 for ep in cat_prods if ep.get("status") == "IMAGENS_QUEBRADAS"),
+                "alert_count": 0,
+                "empty_count": sum(1 for ep in cat_prods if ep.get("status") == "SEM_DESCRICAO"),
+            }
+
+        rebuilt_store = dict(store_dict.get("store", {}))
+        total_skus = sum(ep.get("total_skus_count") or len(ep.get("variants_skus", [])) or 1 for ep in enriched)
+        broken_skus = sum((ep.get("total_skus_count") or len(ep.get("variants_skus", [])) or 1) for ep in enriched if ep.get("status") == "IMAGENS_QUEBRADAS")
+        out_of_std_skus = sum((ep.get("total_skus_count") or len(ep.get("variants_skus", [])) or 1) for ep in enriched if ep.get("is_out_of_standard"))
+        out_of_std_prods = sum(1 for ep in enriched if ep.get("is_out_of_standard"))
+        rebuilt_store["total_products"] = len(enriched)
+        rebuilt_store["total_scanned"] = len(enriched)
+        rebuilt_store["total_skus"] = total_skus
+        rebuilt_store["broken_skus"] = broken_skus
+        rebuilt_store["out_of_standard_skus"] = out_of_std_skus
+        rebuilt_store["out_of_standard_prods"] = out_of_std_prods
+
         return {
-            "store": store_dict.get("store", {}),
-            "categories": store_dict.get("categories", {}),
+            "store": rebuilt_store,
+            "categories": rebuilt_categories,
             "products": enriched
         }
 
@@ -262,11 +344,11 @@ def build_dist():
 
     print("  -> data/stores/ gravados com sucesso em ambos os diretorios.")
 
-    fishing_skus = fishing_data.get("store", {}).get("total_skus", 12582)
+    fishing_skus = enriched_fishing.get("store", {}).get("total_skus", 12582)
     fishing_skus_fmt = f"{fishing_skus:,}".replace(",", ".")
-    agro_skus = agro_data.get("store", {}).get("total_skus", 5955)
+    agro_skus = enriched_agro.get("store", {}).get("total_skus", 5955)
     agro_skus_fmt = f"{agro_skus:,}".replace(",", ".")
-    motors_skus = motors_data.get("store", {}).get("total_skus", 6758)
+    motors_skus = enriched_motors.get("store", {}).get("total_skus", 6758)
     motors_skus_fmt = f"{motors_skus:,}".replace(",", ".")
 
     # 5. Gerar index.html enxuto (< 50 KB) com links para css/main.css e js/*.js com cache-busting
