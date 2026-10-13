@@ -307,7 +307,10 @@ def build_dist():
 
     # 4. Salvar arquivos particionados em data/stores/ (.json e .js para duplo clique file:// sem CORS)
     print("[3/5] Gravando arquivos JSON e JS particionados em data/stores/...")
-    target_dirs = [r"C:\Users\lucas\Desktop\PYTHON DATA", r"C:\Users\lucas\OneDrive\Documentos\DESCRIÇOES"]
+    base_repo_dir = os.path.dirname(os.path.abspath(__file__))
+    target_dirs = [base_repo_dir]
+    if os.name == "nt" and os.path.exists(r"C:\Users\lucas\Desktop\PYTHON DATA"):
+        target_dirs.append(r"C:\Users\lucas\Desktop\PYTHON DATA")
     analytics_data = {
         "history": history_data,
         "available_csvs": available_csvs
@@ -975,11 +978,12 @@ def build_dist():
 </html>"""
 
     # Destinos de sincronização de index.html
-    dest_desktop = r"C:\Users\lucas\Desktop\PYTHON DATA\index.html"
-    dest_artifact = r"C:\Users\lucas\.gemini\antigravity\brain\6d694e19-7d4a-472b-b269-63d576efc810\index.html"
-    dest_onedrive = r"C:\Users\lucas\OneDrive\Documentos\DESCRIÇOES\index.html"
+    dest_onedrive = os.path.join(base_repo_dir, "index.html")
+    dest_list = [dest_onedrive]
+    if os.name == "nt" and os.path.exists(r"C:\Users\lucas\Desktop\PYTHON DATA"):
+        dest_list.append(r"C:\Users\lucas\Desktop\PYTHON DATA\index.html")
 
-    for dest in [dest_desktop, dest_artifact, dest_onedrive]:
+    for dest in dest_list:
         try:
             with open(dest, "w", encoding="utf-8") as f:
                 f.write(html_template)

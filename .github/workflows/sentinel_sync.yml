@@ -6,6 +6,9 @@ on:
     - cron: '0 11,17 * * *'
   workflow_dispatch: # Permite disparar manualmente com 1 clique no GitHub
 
+permissions:
+  contents: write
+
 jobs:
   sync:
     runs-on: ubuntu-latest

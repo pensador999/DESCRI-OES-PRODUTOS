@@ -14,7 +14,7 @@ if hasattr(sys.stdout, "reconfigure"):
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
-REPO_PATH = r"C:\Users\lucas\OneDrive\Documentos\DESCRIÇOES"
+REPO_PATH = os.path.dirname(os.path.abspath(__file__))
 REMOTE_URL = "https://github.com/pensador999/DESCRI-OES-PRODUTOS.git"
 
 def run_cmd(cmd, cwd=REPO_PATH):
@@ -47,14 +47,14 @@ def sync_to_github(custom_message=None):
     else:
         print("[1/5] Repositorio Git ja inicializado.")
 
-    # 2. Configurar remote origin
+    # 2. Configurar remote origin (preserva token do GitHub Actions quando em CI)
     code, remotes, _ = run_cmd("git remote -v")
     if "origin" not in remotes:
         print("[2/5] Adicionando remote origin...")
         run_cmd(f'git remote add origin "{REMOTE_URL}"')
     else:
-        # Garante que o origin está com a URL correta
-        run_cmd(f'git remote set-url origin "{REMOTE_URL}"')
+        if not os.environ.get("GITHUB_ACTIONS"):
+            run_cmd(f'git remote set-url origin "{REMOTE_URL}"')
         print("[2/5] Remote origin verificado.")
 
     # 3. Adicionar arquivos (respeitando o .gitignore)
