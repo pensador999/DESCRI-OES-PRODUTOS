@@ -179,6 +179,7 @@ def build_dist():
             p_copy["archetype_id"] = archetype_id
             p_copy["archetype_name"] = arch_info["name"]
             p_copy["is_kids"] = narrative.get("is_kids", False)
+            p_copy["is_casal"] = narrative.get("is_casal", False)
             p_copy["is_short_sleeve"] = narrative.get("is_short_sleeve", False)
             p_copy["source_type"] = narrative["source_type"]
             p_copy["source_label"] = narrative["source_label"]

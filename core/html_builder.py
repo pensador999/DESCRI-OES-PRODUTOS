@@ -281,13 +281,19 @@ class HTMLBuilder:
     def _build_size_guide(self, theme_color: str, archetype_id: str, is_kids: bool, is_short_sleeve: bool, enriched_data: Dict[str, Any]) -> str:
         title_low = (enriched_data.get("formatted_title") or enriched_data.get("title") or "").lower()
         sku_low = (enriched_data.get("sku") or enriched_data.get("master_sku") or "").lower()
+        title_low_for_kids = re.sub(r'sonho de crian[çc]a', '', title_low)
+        is_casal = bool(enriched_data.get("is_casal")) or "casal" in title_low
+        has_shirt_word = any(w in title_low for w in ["camisa", "camiseta", "jersey", "baby look", "babylook", "polo", "regata"])
 
         # 1. Identificar se o produto é comprovadamente de vestuário superior / camisa
+        # Nota: "Camisa ArmorX ... com Luva" contém "luva", mas é camisa (has_shirt_word=True)
         is_shirt = (
             archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work")
-            or any(w in title_low for w in ["camisa", "camiseta", "jersey", "baby look", "babylook"])
-            or any(sku_low.startswith(pfx) for pfx in ["c0", "ci", "cadv", "adv", "hyb", "cmb", "raglan"])
-        ) and not bool(re.search(r'\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|chapéu|chapeu|boné|bone|luva|luvas|manguito|manguitos|bandana|tubeneck|buff|balaclava)\b', title_low))
+            or has_shirt_word
+            or any(sku_low.startswith(pfx) for pfx in ["c0", "ci", "cadv", "adv", "hyb", "cmb", "cax", "raglan"])
+        ) and not bool(re.search(r'\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|manguito|manguitos|bandana|tubeneck|buff|balaclava)\b', title_low)) and not (
+            bool(re.search(r'\b(chapéu|chapeu|boné|bone|luva|luvas)\b', title_low)) and not has_shirt_word
+        )
 
         # 0. Exclusão estrita de itens não-têxteis com UV ou termos ambíguos (apenas se NÃO for camisa)
         if not is_shirt:
@@ -296,28 +302,64 @@ class HTMLBuilder:
                 return ""
 
         tip_text = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | Manga do ombro ao punho). Dica: compare com uma peça sua estendida para escolher o caimento ideal."
+        uv_subtitle = "Camisa Manga Curta UV50 | *As medidas podem variar de 2cm a 3cm" if is_short_sleeve else "Camisa Manga Longa UV50 | *As medidas podem variar de 2cm a 3cm"
 
         if is_shirt:
-            # 1.1 Camisas de Botão / Utilitárias Work (CMB - Sarja/Algodão corte reto de trabalho)
+            is_fem_shirt = (
+                any(w in title_low for w in ["feminina", "feminino", "baby look", "fem", "babylook"])
+                or bool(re.search(r'bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_low))
+            ) and not is_casal
+
+            # 1.1 Camisas de Botão / Utilitárias Work (CMB / CBT - Sarja/Algodão corte de trabalho)
             is_work_guide = (
                 (archetype_id == "shirts_button_work" or "cmb" in sku_low or "cbt" in sku_low or ("work" in title_low and "camisa" in title_low and not any(w in title_low for w in ["xtech", "dry", "uv", "uv50", "pesca"])))
                 and not sku_low.startswith("c0") and not sku_low.startswith("ci")
             )
             if is_work_guide:
-                guide_title = "Tabela de Medidas - Camisas Work & Utilitárias de Botão (P ao G2)"
-                tip_text = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Comprimento da gola à barra | Manga). Modelagem confortável de trabalho."
                 manga_header = "Manga Curta" if is_short_sleeve else "Manga Longa"
-                rows = [
-                    ("P", "102 cm", "68 cm", "22 cm" if is_short_sleeve else "75 cm"),
-                    ("M", "108 cm", "71 cm", "23 cm" if is_short_sleeve else "77 cm"),
-                    ("G", "114 cm", "74 cm", "24 cm" if is_short_sleeve else "79 cm"),
-                    ("GG", "120 cm", "77 cm", "25 cm" if is_short_sleeve else "81 cm"),
-                    ("XG", "126 cm", "80 cm", "26 cm" if is_short_sleeve else "83 cm"),
-                    ("EXG (G1)", "132 cm", "83 cm", "27 cm" if is_short_sleeve else "85 cm"),
-                    ("G2", "138 cm", "85 cm", "28 cm" if is_short_sleeve else "87 cm"),
-                ]
-                rows_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td></tr>\n" for r in rows])
-                table_html = f"""<table class="brk-sg-table">
+                if is_fem_shirt:
+                    guide_title = "Tabela de Medidas Feminina - Camisas Xadrez & Work de Botão (PP ao G2)"
+                    tip_text = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Busto/Tórax | Comprimento da gola à barra | Manga). Modelagem Feminina Acinturada."
+                    rows = [
+                        ("PP", "90 cm", "61 cm", "19 cm" if is_short_sleeve else "58 cm"),
+                        ("P", "94 cm", "63 cm", "20 cm" if is_short_sleeve else "59 cm"),
+                        ("M", "98 cm", "65 cm", "21 cm" if is_short_sleeve else "60 cm"),
+                        ("G", "104 cm", "67 cm", "22 cm" if is_short_sleeve else "61 cm"),
+                        ("GG", "110 cm", "69 cm", "23 cm" if is_short_sleeve else "62 cm"),
+                        ("G1", "116 cm", "71 cm", "24 cm" if is_short_sleeve else "63 cm"),
+                        ("G2", "122 cm", "73 cm", "25 cm" if is_short_sleeve else "64 cm"),
+                    ]
+                    rows_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td></tr>\n" for r in rows])
+                    table_html = f"""<div class="brk-sg-card-header">
+        <div class="brk-sg-card-title">FEMININO</div>
+        <div class="brk-sg-subtitle">Camisa Feminina de Botão | *As medidas podem variar de 2cm a 3cm</div>
+      </div>
+      <table class="brk-sg-table">
+        <thead>
+          <tr>
+            <th>Tamanho</th>
+            <th>Busto / Circunferência</th>
+            <th>Comprimento Total</th>
+            <th>{manga_header}</th>
+          </tr>
+        </thead>
+        <tbody>
+{rows_html}        </tbody>
+      </table>"""
+                else:
+                    guide_title = "Tabela de Medidas - Camisas Work & Utilitárias de Botão (P ao G2)"
+                    tip_text = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Comprimento da gola à barra | Manga). Modelagem confortável de trabalho."
+                    rows = [
+                        ("P", "102 cm", "68 cm", "22 cm" if is_short_sleeve else "75 cm"),
+                        ("M", "108 cm", "71 cm", "23 cm" if is_short_sleeve else "77 cm"),
+                        ("G", "114 cm", "74 cm", "24 cm" if is_short_sleeve else "79 cm"),
+                        ("GG", "120 cm", "77 cm", "25 cm" if is_short_sleeve else "81 cm"),
+                        ("XG", "126 cm", "80 cm", "26 cm" if is_short_sleeve else "83 cm"),
+                        ("EXG (G1)", "132 cm", "83 cm", "27 cm" if is_short_sleeve else "85 cm"),
+                        ("G2", "138 cm", "85 cm", "28 cm" if is_short_sleeve else "87 cm"),
+                    ]
+                    rows_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td></tr>\n" for r in rows])
+                    table_html = f"""<table class="brk-sg-table">
         <thead>
           <tr>
             <th>Tamanho</th>
@@ -331,10 +373,10 @@ class HTMLBuilder:
       </table>"""
 
             # 1.2 Camisas UV C0 Infantil (1 a 13 Anos)
-            elif is_kids or any(w in title_low for w in ["infantil", "kids", "juvenil", "criança", "crianca"]) or "kids" in sku_low or "inf" in sku_low:
+            elif is_kids or any(w in title_low_for_kids for w in ["infantil", "kids", "juvenil", "criança", "crianca"]) or "kids" in sku_low or "inf" in sku_low:
                 guide_title = "Guia de Tamanhos Infantil (1 a 13 Anos)"
                 badge_title = "INFANTIL"
-                subtitle = "Camisa Manga Longa UV50 | *As medidas podem variar de 2cm a 3cm"
+                subtitle = uv_subtitle
                 rows = [
                     ("1 a 2 Anos (PP)", "31 cm", "41 cm", "31 cm"),
                     ("2 a 3 Anos (P)", "33 cm", "45 cm", "35 cm"),
@@ -362,11 +404,63 @@ class HTMLBuilder:
 {rows_html}        </tbody>
       </table>"""
 
+            # 1.2b Kit Casal (Exibe Tabela Masculina + Tabela Feminina Baby Look)
+            elif is_casal:
+                guide_title = "Tabela de Medidas Kit Casal - Masculino & Feminino Baby Look (PP ao G2)"
+                masc_rows = [
+                    ("PP", "49,5 cm", "67 cm", "56 cm"),
+                    ("P", "51,5 cm", "69 cm", "59,5 cm"),
+                    ("M", "54 cm", "71 cm", "62 cm"),
+                    ("G", "56 cm", "72 cm", "64 cm"),
+                    ("GG", "59 cm", "74 cm", "64 cm"),
+                    ("G1", "62 cm", "75 cm", "66 cm"),
+                    ("G2", "65 cm", "76,5 cm", "66 cm"),
+                ]
+                fem_rows = [
+                    ("Baby Look PP", "33 cm", "51 cm", "53 cm"),
+                    ("Baby Look P", "37 cm", "54 cm", "55 cm"),
+                    ("Baby Look M", "43 cm", "57 cm", "59 cm"),
+                    ("Baby Look G", "47 cm", "60 cm", "60 cm"),
+                    ("Baby Look GG", "47 cm", "60 cm", "61 cm"),
+                    ("Baby Look G1", "50 cm", "62 cm", "61 cm"),
+                    ("Baby Look G2", "55 cm", "64 cm", "63 cm"),
+                ]
+                masc_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td></tr>\n" for r in masc_rows])
+                fem_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td></tr>\n" for r in fem_rows])
+                table_html = f"""<div class="brk-sg-card-header">
+        <div class="brk-sg-card-title">MASCULINO &amp; FEMININO (KIT CASAL)</div>
+        <div class="brk-sg-subtitle">{uv_subtitle}</div>
+      </div>
+      <table class="brk-sg-table" style="margin-bottom: 16px;">
+        <thead>
+          <tr class="brk-sg-th-row">
+            <th>TAMANHO MASCULINO</th>
+            <th>TÓRAX</th>
+            <th>ALTURA</th>
+            <th>MANGA</th>
+          </tr>
+        </thead>
+        <tbody>
+{masc_html}        </tbody>
+      </table>
+      <table class="brk-sg-table">
+        <thead>
+          <tr class="brk-sg-th-row">
+            <th>TAMANHO FEMININO</th>
+            <th>TÓRAX</th>
+            <th>ALTURA</th>
+            <th>MANGA</th>
+          </tr>
+        </thead>
+        <tbody>
+{fem_html}        </tbody>
+      </table>"""
+
             # 1.3 Camisas UV C0 Feminina / Baby Look (PP ao G2)
-            elif any(w in title_low for w in ["feminina", "feminino", "baby look", "fem", "babylook"]) or "bl" in sku_low:
+            elif is_fem_shirt:
                 guide_title = "Tabela de Medidas Feminina - Baby Look (PP ao G2)"
                 badge_title = "FEMININO"
-                subtitle = "Camisa Manga Longa UV50 | *As medidas podem variar de 2cm a 3cm"
+                subtitle = uv_subtitle
                 rows = [
                     ("Baby Look PP", "33 cm", "51 cm", "53 cm"),
                     ("Baby Look P", "37 cm", "54 cm", "55 cm"),
@@ -398,7 +492,7 @@ class HTMLBuilder:
             else:
                 guide_title = "Tabela de Medidas Masculino / Unissex (PP ao G2)"
                 badge_title = "MASCULINO"
-                subtitle = "Camisa Manga Longa UV50 | *As medidas podem variar de 2cm a 3cm"
+                subtitle = uv_subtitle
                 rows = [
                     ("PP", "49,5 cm", "67 cm", "56 cm"),
                     ("P", "51,5 cm", "69 cm", "59,5 cm"),
@@ -818,7 +912,12 @@ class HTMLBuilder:
             ]
             split1_p1 = "<strong>Cada chapéu BRK é desenvolvido pensando na proteção de quem enfrenta longas jornadas ao ar livre.</strong>"
             split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem padrão de proteção solar certificado."
-            split1_p3 = "Construído com materiais leves e resistentes, oferece o máximo de conforto térmico para pescarias e trabalho sob sol forte."
+            if store_key == "brk_agro" and "pesca" not in formatted_title.lower():
+                split1_p3 = "Construído com materiais leves e resistentes, oferece o máximo de conforto térmico para o trabalho no campo, pecuária e atividades sob sol forte."
+            elif store_key == "brk_motors" and "pesca" not in formatted_title.lower():
+                split1_p3 = "Construído com materiais leves e resistentes, oferece o máximo de conforto térmico para aventuras, trilhas e atividades sob sol forte."
+            else:
+                split1_p3 = "Construído com materiais leves e resistentes, oferece o máximo de conforto térmico para pescarias e trabalho sob sol forte."
             split2_p1 = "<strong>A sua experiência começa antes mesmo de abrir a caixa.</strong>"
             split2_p2 = "O chapéu é enviado em embalagem protegida BRK, projetada para evitar deformações na aba durante o transporte."
             split2_p3 = "Seu novo chapéu chega pronto para encarar o sol com proteção e estilo incomparáveis."
