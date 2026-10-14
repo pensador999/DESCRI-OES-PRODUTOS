@@ -1072,16 +1072,16 @@ class TemplateEngine:
         if any(w in t for w in ["aromatizante", "cheirinho", "difusor", "aromatizador", "odorizador", "little trees", "odor"]):
             return "accessories_car_care"
 
-        # 1.1 Cabos, Fontes Conversoras, Acessórios Elétricos e Peças de Reposição (Para não cair em térmicos ou iscas)
-        if any(w in t for w in ["cabo plug", "cabo de alimentacao", "cabo de forca", "adaptador 12v", "fonte conversora", "fonte 110", "conversor 110"]):
+        # 1.1 Cabos, Acessórios Elétricos e Peças de Reposição (Para não cair em térmicos ou iscas)
+        if any(w in t for w in ["cabo plug", "cabo de alimentacao", "cabo de forca", "adaptador 12v"]):
             return "accessories_general"
 
         # 2. Copos Térmicos, Garrafas e Canecas (Prioridade Alta para evitar colisões com boné/isca/camisa)
         is_drinkware = (
-            any(w in t for w in ["copo termico", "garrafa termica", "caneca termica", "cuia termica", "cooler", "bolsa termica"]) or
+            any(w in t for w in ["copo termico", "garrafa termica", "caneca termica", "cuia termica", "cooler"]) or
             ((any(w in t for w in ["copo", "garrafa", "caneca", "cantil", "cuia"]) or "elber" in t) and
              any(w in t for w in ["termic", "termo", "inox", "aco inox", "vacuum", "vazio", "geladeira", "litros"]) and
-             not any(w in t for w in ["cabo", "plug", "abridor", "fonte conversora", "conversor"])) or
+             not any(w in t for w in ["cabo", "plug", "abridor"])) or
             (t.startswith("copo ") or t.startswith("garrafa ") or t.startswith("caneca ") or t.startswith("cuia "))
         )
         if is_drinkware and not any(w in t for w in ["camisa", "camiseta", "abridor de garrafa"]):
@@ -1115,10 +1115,6 @@ class TemplateEngine:
         if any(w in t for w in ["calca", "calcas", "bermuda", "bermudas", "shorts", "short", "calcao"]) and not any(w in t for w in ["camisa", "camiseta"]):
             return "pants_cargo_tactical"
 
-        # 8.5 Cutelaria, Facas & Kits Churrasco (Prioridade antes de chapéus para que 'Kit Faca Karandá' não caia em chapéu)
-        if any(w in t for w in ["faca", "facas", "cutelo", "cutelaria", "lamina", "bainha", "canivete", "chaira", "afiador", "kit churrasco"]) and not any(w in t for w in ["camisa", "camiseta", "bone", "chapeu"]):
-            return "cutlery_unique"
-
         # 9. Chapéus: Distinção estrita entre Country/Feltro/Cowboy vs Safári/Outdoor/Pescador
         if any(w in t for w in ["chapeu", "chapeus"]):
             if any(w in t for w in ["feltro", "pralana", "american hat", "karanda", "country", "cowboy", "pantaneiro", "la", "veludo", "liso", "marcatto", "eldorado", "cury"]):
@@ -1139,7 +1135,7 @@ class TemplateEngine:
                 any(w in t for w in ["uv", "uv50", "fpu", "fps", "xtech", "solar", "segunda pele", "fusionx", "armorx", "hybrid"]) or
                 any(w in tags_str for w in ["uv50", "uv", "protecao solar", "xtech"])
             )
-            if is_uv_shirt and not is_work_sku and not any(w in t for w in ["algodao puro", "100% algodao", "algodao premium", "de algodao", "camisa de botao", "camisa work"]):
+            if is_uv_shirt and not is_work_sku and not any(w in t for w in ["algodao puro", "100% algodao", "camisa de botao", "camisa work"]):
                 return "uv_performance"
 
             # 10.2 Camisas Work / Botão / Sarja / Lisas / Xadrez (Sem zíper, com botões e bolsos utilitários)
@@ -1147,12 +1143,12 @@ class TemplateEngine:
                 is_work_sku or
                 any(w in t for w in ["camisa work", "safari sarja", "camisa sarja", "camisa de botao", "camisa botao", "manga longa sarja", "manga curta sarja", "xadrez"]) or
                 (("operacional" in t or "sarja" in t or "de botao" in t) and not any(w in t for w in ["ziper"])) or
-                (("lisa" in t or "sem estampa" in t) and any(w in t for w in ["classic", "manga curta", "manga longa"]) and not any(w in t for w in ["uv", "uv50", "dry", "xtech", "segunda pele", "algodao"]))
+                (("lisa" in t or "sem estampa" in t) and any(w in t for w in ["classic", "manga curta", "manga longa"]) and not any(w in t for w in ["uv", "uv50", "dry", "xtech", "segunda pele"]))
             )
             if is_button_work and not any(w in t for w in ["ziper"]):
                 return "shirts_button_work"
 
-            # 10.3 Camisetas casuais de algodão (Agro / Campo / Casual)
+            # 10.3 Camisetas casuais de algodão (Agro / Campo)
             if any(w in t for w in ["algodao", "campo", "agro", "fazenda", "trator"]):
                 return "agro_field"
 
@@ -1166,7 +1162,7 @@ class TemplateEngine:
             return "motors_speed"
 
         # 11. Cutelaria & Facas
-        if any(w in t for w in ["faca", "facas", "cutelo", "cutelaria", "lamina", "bainha", "canivete", "chaira", "afiador", "kit churrasco"]):
+        if any(w in t for w in ["faca", "facas", "cutelo", "cutelaria", "lamina", "bainha", "canivete", "chaira", "afiador"]):
             return "cutlery_unique"
 
         # 12. Calçados (Sandálias Boaonda vs Tênis/Botinas)
@@ -1430,6 +1426,13 @@ class TemplateEngine:
             
             is_fusion = any(w in t_low for w in ["fusion", "fusionx"]) or "fusion" in sku_low or "fusion" in tags_low
             is_hybrid = any(w in t_low for w in ["hybrid"]) or sku_low.startswith("hyb") or "hybrid" in sku_low or "hybrid" in tags_low
+            is_armorx_shirt = sku_low.startswith("cax") or ("armorx" in t_low and "camisa" in t_low)
+            is_has_glove = any(w in t_low for w in ["com luva", "e luva", "luva integrada"]) or is_armorx_shirt
+            is_short_sleeve = (
+                any(w in t_low for w in ["manga curta", "manga-curta", "camiseta", "camisetas", "t-shirt", "tshirt"])
+                or ("curta" in t_low and "manga" in t_low)
+                or bool(re.match(r'^(?:cm|casual|bp|apc)\d', sku_low))
+            ) and not any(w in t_low for w in ["manga longa", "manga-longa"])
             
             specs = [
                 {"label": "Prazo de Produção", "value": prazo_val},
@@ -1445,21 +1448,21 @@ class TemplateEngine:
             elif is_hybrid:
                 specs.append({"label": "Capuz", "value": "Capuz anatômico integrado de alta cobertura solar"})
                 specs.append({"label": "Punhos", "value": "Punhos anatômicos com abertura para o polegar (dedeira)"})
+            elif is_short_sleeve:
+                specs.append({"label": "Gola", "value": "Gola redonda canelada anatômica com pesponto reforçado"})
+                specs.append({"label": "Mangas", "value": "Mangas curtas com acabamento reforçado em pesponto duplo"})
+            elif is_has_glove:
+                specs.append({"label": "Punhos / Luva", "value": "Punhos estendidos anatômicos com luva integrada para o dorso da mão"})
             return specs
 
         if sibling_specs and len(sibling_specs) >= 2:
             raw_specs = [{"label": s["label"], "value": s["default"]} for s in sibling_specs]
-            sanitized_sib = self.sanitize_specs_for_archetype(raw_specs, archetype_id)
-            t_low_sib = (product.get("title") or "").lower()
-            if archetype_id == "fishing_tackle_gear" and "vara" in t_low_sib and not any(w in t_low_sib for w in ["molinete", "carretilha"]):
-                sanitized_sib = [s for s in sanitized_sib if "rolamento" not in f"{s['label']} {s['value']}".lower()]
-            return sanitized_sib
+            return self.sanitize_specs_for_archetype(raw_specs, archetype_id)
 
         template = self.templates.get(archetype_id, self.templates["uv_performance"])
         base_specs = template["base_specs"]
         
         title = product.get("title", "")
-        t_low = title.lower()
         vendor = product.get("vendor", "")
         body = product.get("body_html", "") or ""
         tags = product.get("tags", [])
@@ -1481,63 +1484,6 @@ class TemplateEngine:
             elif "boaonda" in full_text and label == "Material do Cabedal":
                 val = "Termoplástico nobre Boaonda flexível e lavável"
 
-            # Sub-tipos específicos de Equipamentos de Pesca (Varas vs Carretilhas/Molinetes vs Linhas)
-            if archetype_id == "fishing_tackle_gear":
-                if "vara" in t_low and not any(w in t_low for w in ["molinete", "carretilha"]):
-                    if label == "Construção / Material":
-                        val = "Blank tubular/maciço de alta resistência com passadores reforçados"
-                    elif label == "Componentes":
-                        val = "Cabo anatômico antiderrapante e fixador (reel seat) de precisão"
-                elif any(w in t_low for w in ["carretilha", "molinete"]):
-                    if label == "Componentes":
-                        val = "Sistema de rolamentos de precisão, carretel aliviado e freio (drag) macio"
-                elif any(w in t_low for w in ["linha", "multifilamento", "fluorocarbono", "monofilamento"]):
-                    if label == "Construção / Material":
-                        val = "Polímero/Fibras trançadas de alta resistência à tração e abrasão"
-                    elif label == "Componentes":
-                        val = "Baixa memória mecânica, alta sensibilidade e diâmetro calibrado"
-
-            # Sub-tipos de Calçados Fechados (Botinas de Couro vs Tênis)
-            elif archetype_id == "closed_footwear_sneakers" and any(w in t_low for w in ["botina", "bota"]):
-                if label == "Material do Cabedal":
-                    val = "Couro legítimo selecionado de alta resistência e durabilidade"
-                elif label == "Solado":
-                    val = "Borracha antiderrapante de alta tração costurada/blaqueada"
-                elif label == "Fechamento":
-                    val = "Elástico lateral recoberto de calce fácil (sem cadarço)"
-
-            # Sub-tipos de Calças (Calça Jeans Country vs Calça Tática Ripstop)
-            elif archetype_id == "pants_cargo_tactical" and any(w in t_low for w in ["jeans", "denim"]):
-                if label == "Tecido":
-                    val = "Jeans Denim Premium de alta gramatura (Algodão com Elastano)"
-                elif label == "Modelagem":
-                    val = "Country / Tradicional Masculina com corte anatômico confortável"
-                elif label == "Bolsos":
-                    val = "5 bolsos funcionais reforçados com rebites metálicos"
-                elif label == "Costuras":
-                    val = "Costuras duplas/triplas de alta resistência para lida e uso diário"
-
-            # Sub-tipos de Térmicos (Geladeiras Portáteis 12V/24V e Bolsas Térmicas vs Copos/Garrafas)
-            elif archetype_id == "drinkware_thermo":
-                if "geladeira" in t_low:
-                    if label == "Material Principal":
-                        val = "Gabinete térmico reforçado de alta resistência com isolamento em PU"
-                    elif label == "Isolamento Térmico":
-                        val = "Compressor hermético 12V/24V de refrigeração e congelamento rápido"
-                    elif label == "Tampas / Vedação":
-                        val = "Tampa com trava de segurança e vedação magnética de alta eficiência"
-                    elif label == "Revestimento Externo":
-                        val = "Estrutura robusta anti-impacto com alças laterais ergonômicas"
-                elif any(w in t_low for w in ["bolsa térmica", "bolsa termica", "cooler"]):
-                    if label == "Material Principal":
-                        val = "Tecido Oxford impermeável de alta densidade com forro térmico PEVA"
-                    elif label == "Isolamento Térmico":
-                        val = "Espuma térmica multicamadas de alta retenção de temperatura"
-                    elif label == "Tampas / Vedação":
-                        val = "Fechamento superior em zíper duplo reforçado de vedação hermética"
-                    elif label == "Revestimento Externo":
-                        val = "Acabamento impermeável fácil de limpar com alça de transporte ajustável"
-
             # 1. Proteção Solar (uv_performance usa padrão oficial XTech Pro)
             if archetype_id != "uv_performance" and ("proteção" in label.lower() or "solar" in label.lower()):
                 if any(x in full_text for x in ["50+", "uv 50", "fps 50", "fpu 50"]):
@@ -1545,9 +1491,9 @@ class TemplateEngine:
                 elif "uv" in full_text:
                     val = "Proteção UV integrada ao tecido"
             
-            # 2. Composição / Tecido (Prioriza Algodão em agro_field ou quando Algodão consta no título)
-            elif archetype_id not in ("uv_performance", "pants_cargo_tactical", "drinkware_thermo", "closed_footwear_sneakers", "fishing_tackle_gear") and ("composição" in label.lower() or "tecido" in label.lower()):
-                if archetype_id == "agro_field" or "algodão" in t_low or "algodao" in t_low:
+            # 2. Composição / Tecido (uv_performance usa padrão oficial 90% Poliéster 10% Elastano / XTech Pro)
+            elif archetype_id != "uv_performance" and ("composição" in label.lower() or "tecido" in label.lower()):
+                if archetype_id == "agro_field" or "algodão" in title.lower() or "algodao" in title.lower():
                     val = "100% Algodão Premium Penteado com toque macio"
                 elif any(x in full_text for x in ["dry fit", "dryfit", "dry"]):
                     val = "100% Poliéster Tecnológico Dry Fit respirável"
@@ -1815,33 +1761,36 @@ class TemplateEngine:
             "hybrid" in tags_low
         )
         is_hooded = (is_apparel and any(w in t_low for w in ["capuz", "hood", "hoodie"])) or is_fusion or is_hybrid
-        # is_kids só vale para vestuário; exclui a estampa "Sonho de Criança" em camisas adultas
-        t_low_for_kids = re.sub(r'sonho de crian[çc]a', '', t_low)
-        is_kids = is_apparel and (any(w in t_low_for_kids for w in ["infantil", "kids", "juvenil", "criança", "crianca"]) or bool(re.search(r'\bmini\b', t_low_for_kids)))
-        if any(w in t_low for w in ["adulto", "unissex adulto"]):
+        # is_kids só vale para vestuário: o texto/tabela infantil é de roupa (FPU 50+, Dry Fit, tórax/manga).
+        # Óculos, calçados etc. com "Infantil" no título NÃO podem receber essa narrativa.
+        has_inf_img = any("inf" in str(u).lower().split("/")[-1] for u in (cdn_images or []))
+        is_kids_sku = bool(re.match(r'^(?:c0|c|cm|casual|ci|bp)\d+i(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_clean_for_flags)) and not ("feminina" in t_low and not has_inf_img)
+        is_kids = is_apparel and (any(w in t_low for w in ["infantil", "kids", "juvenil"]) or bool(re.search(r'\bmini\b', t_low)) or is_kids_sku)
+        if any(w in t_low for w in ["adulto", "unissex adulto"]) and not is_kids_sku and not any(w in t_low for w in ["infantil", "kids", "juvenil"]):
             is_kids = False
-        is_casal = is_apparel and ("casal" in t_low or "kit casal" in all_info)
         is_short_sleeve = is_apparel and (
-            any(w in t_low for w in ["manga curta", "manga-curta", "camiseta", "t-shirt", "polo", "regata"]) or
+            any(w in t_low for w in ["manga curta", "manga-curta", "camiseta", "camisetas", "t-shirt", "tshirt"]) or
             ("curta" in t_low and "manga" in t_low) or
-            bool(re.match(r'^(cm\d|casual|bp\d|cbtmc)', sku_clean_for_flags))
+            bool(re.match(r'^(?:cm|casual|bp|apc)\d', sku_clean_for_flags))
         ) and not any(w in t_low for w in ["manga longa", "manga-longa"])
-        is_has_glove = is_apparel and any(w in t_low for w in ["com luva", "e luva", "luva integrada"])
+        is_armorx_shirt = is_apparel and (sku_clean_for_flags.startswith("cax") or ("armorx" in t_low and "camisa" in t_low))
+        is_has_glove = (is_apparel and any(w in t_low for w in ["com luva", "e luva", "luva integrada"])) or is_armorx_shirt
         is_female = (
             any(w in t_low for w in ["feminina", "feminino", "baby look", "babylook", "mulher"]) or
             "femin" in tags_low or
             (is_apparel and bool(re.search(r'bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_clean_for_flags)))
-        ) and not is_kids and not is_casal
+        ) and not is_kids
         is_round_neck = is_apparel and (
+            (is_short_sleeve and not any(w in t_low for w in ["ziper", "zíper"])) or
             any(w in t_low for w in ["gola careca", "gola redonda", "sem zíper", "sem ziper", "t-shirt"]) or
-            (is_short_sleeve and not any(w in t_low for w in ["ziper", "zíper", "polo"]) and archetype_id != "shirts_button_work")
+            ("camiseta" in t_low and not any(w in t_low for w in ["ziper", "zíper"]))
         )
-
-        # 0. Sub-tipos de Arquétipos Específicos (Algodão Motors, Calça Jeans, Botina de Couro, Geladeira/Bolsa Térmica)
-        is_motors_cotton = archetype_id == "agro_field" and (
+        is_motors_cotton = (archetype_id == "agro_field") and (
             store_key == "brk_motors" or
-            any(w in t_low for w in ["rossi", "vr46", "shelby", "gt500", "opala", "gol gti", "maverick", "mustang", "camaro", "fusca", "kombi", "chevette", "caravan", "charger", "harley", "gs adventure", "grau", "motocross", "velocidade", "turbo", "v8", "racing", "pista", "moto", "carro"])
-        )
+            any(w in t_low for w in ["gs adventure", "big trail", "r1250", "street wear", "atacama", "rastro da serpente", "moto", "motors", "route 66", "machu picchu", "ushuaia", "travel far away", "all black"])
+        ) and not any(w in t_low for w in ["agro", "fazenda", "pecuária", "pecuaria", "nelore", "trator", "campo", "roça", "roca"])
+
+        # 0. Adaptação Algodão Premium Motors & Lifestyle Urbano/Duas Rodas
         if is_motors_cotton:
             act1["tag"] = "Algodão Premium & Lifestyle"
             act1["fa_icon"] = "fa-solid fa-flag-checkered"
@@ -1856,70 +1805,8 @@ class TemplateEngine:
             act3["title"] = "GOLA CANELADA REFORÇADA E COSTURAS DE ALTA DURABILIDADE"
             act3["desc_tmpl"] = "Desenvolvida com reforço ombro a ombro, gola redonda canelada que não laceia e costuras duplas de alto padrão, garantindo que a peça mantenha sua forma e cores vivas lavagem após lavagem."
 
-        elif archetype_id == "pants_cargo_tactical" and any(w in t_low for w in ["jeans", "denim"]):
-            act1["tag"] = "Denim Premium de Alta Gramatura"
-            act1["fa_icon"] = "fa-solid fa-shield-halved"
-            act1["title"] = "RESISTÊNCIA E ESTILO AUTÊNTICO PARA O CAMPO E O DIA A DIA"
-            act1["desc_tmpl"] = "Confeccionada em tecido Jeans Denim de alta gramatura, a {title} foi projetada para suportar a rotina intensa do campo, rodeios e uso diário com durabilidade superior e visual country autêntico."
-            act2["tag"] = "Conforto & Mobilidade"
-            act2["fa_icon"] = "fa-solid fa-arrows-up-down-left-right"
-            act2["title"] = "MODELAGEM ANATÔMICA COM LIBERDADE DE MOVIMENTOS"
-            act2["desc_tmpl"] = "O corte tradicional masculino aliado à flexibilidade do tecido proporciona encaixe confortável na cintura e nas pernas, garantindo mobilidade total para montar, dirigir ou trabalhar."
-            act3["tag"] = "Acabamento Reforçado"
-            act3["fa_icon"] = "fa-solid fa-Hammer"
-            act3["title"] = "COSTURAS REFORÇADAS, REBITES METÁLICOS E 5 BOLSOS FUNCIONAIS"
-            act3["desc_tmpl"] = "Equipada com 5 bolsos funcionais profundos, passantes largos para cinto, rebites metálicos nos pontos de maior tensão e costuras duplas de alta resistência."
-
-        elif archetype_id == "closed_footwear_sneakers" and any(w in t_low for w in ["botina", "bota"]):
-            act1["tag"] = "Couro Legítimo & Resistência"
-            act1["fa_icon"] = "fa-solid fa-shoe-prints"
-            act1["title"] = "DURABILIDADE EXTREMA E CONFORTO DO CAMPO À CIDADE"
-            act1["desc_tmpl"] = "Produzida em couro legítimo selecionado, a {title} entrega proteção robusta, visual autêntico e maciez anatômica para acompanhar o ritmo intenso da lida rural, eventos e uso diário."
-            act2["tag"] = "Estabilidade & Aderência"
-            act2["fa_icon"] = "fa-solid fa-mountain"
-            act2["title"] = "SOLADO ANTIDERRAPANTE DE ALTA TRAÇÃO E AMORTECIMENTO"
-            act2["desc_tmpl"] = "Solado emborrachado de alta densidade projetado para oferecer aderência firme em diferentes terrenos, absorvendo impactos e reduzindo a fadiga plantar ao longo do dia."
-            act3["tag"] = "Praticidade & Calce Fácil"
-            act3["fa_icon"] = "fa-solid fa-check-double"
-            act3["title"] = "ELÁSTICO LATERAL DE CALCE FÁCIL E COSTURA REFORÇADA"
-            act3["desc_tmpl"] = "Sistema de fechamento com elástico lateral recoberto de alta resistência e puxador traseiro que facilitam o calce rápido, aliados a costuras reforçadas e palmilha macia."
-
-        elif archetype_id == "drinkware_thermo":
-            if "geladeira" in t_low:
-                act1["tag"] = "Refrigeração Portátil 12V/24V"
-                act1["fa_icon"] = "fa-solid fa-snowflake"
-                act1["title"] = "ALTA CAPACIDADE DE REFRIGERAÇÃO E CONGELAMENTO EM QUALQUER ROTA"
-                act1["desc_tmpl"] = "Projetada para viagens, expedições, caminhões, barcos e acampamentos, a {title} mantém alimentos e bebidas refrigerados ou congelados com eficiência profissional onde quer que você esteja."
-                act2["tag"] = "Tecnologia & Eficiência"
-                act2["fa_icon"] = "fa-solid fa-car-battery"
-                act2["title"] = "COMPRESSOR DE ALTA PERFORMANCE COM PROTEÇÃO DE BATERIA"
-                act2["desc_tmpl"] = "Equipada com compressor hermético silencioso de baixo consumo energético, painel digital de controle de temperatura e sistema inteligente de proteção contra descarga da bateria veicular."
-                act3["tag"] = "Construção Robusta"
-                act3["fa_icon"] = "fa-solid fa-shield-halved"
-                act3["title"] = "GABINETE REFORÇADO, VEDAÇÃO DE PRECISÃO E ALÇAS ERGONÔMICAS"
-                act3["desc_tmpl"] = "Estrutura externa resistente a impactos e trepidações, isolamento térmico de alta densidade, trava de tampa segura e iluminação interna para máxima praticidade."
-            elif any(w in t_low for w in ["bolsa térmica", "bolsa termica", "cooler"]):
-                act1["tag"] = "Conservação Térmica & Praticidade"
-                act1["fa_icon"] = "fa-solid fa-snowflake"
-                act1["title"] = "TEMPERATURA PRESERVADA PARA SUAS BEBIDAS E ALIMENTOS AO AR LIVRE"
-                act1["desc_tmpl"] = "Compacta, leve e altamente funcional, a {title} foi desenvolvida para conservar a temperatura de bebidas, lanches e iscas durante pescarias, viagens, praia e lazer."
-                act2["tag"] = "Isolamento Multicamadas"
-                act2["fa_icon"] = "fa-solid fa-layer-group"
-                act2["title"] = "FORRO TÉRMICO IMPERMEÁVEL DE ALTA RETENÇÃO"
-                act2["desc_tmpl"] = "Construída com espuma térmica isolante e revestimento interno impermeável fácil de higienizar, evitando vazamentos e mantendo o frescor por horas."
-                act3["tag"] = "Transporte Confortável"
-                act3["fa_icon"] = "fa-solid fa-bag-shopping"
-                act3["title"] = "TECIDO RESISTENTE, ZÍPER REFORÇADO E ALÇA AJUSTÁVEL"
-                act3["desc_tmpl"] = "Acabamento externo em tecido de alta resistência à abrasão, fechamento com zíper reforçado de abertura ampla e alça ergonômica para transporte prático."
-
         # 1. Adaptação Kids / Infantil (Eliminação de "homem e mulher", foco em aventura e proteção suave)
         if is_kids:
-            kids_activity = "todas as brincadeiras e pescarias em família"
-            if store_key == "brk_agro":
-                kids_activity = "todas as brincadeiras, passeios no campo e momentos em família"
-            elif store_key == "brk_motors":
-                kids_activity = "todas as brincadeiras, passeios, trilhas e aventuras em família"
-
             act1["tag"] = "Proteção Infantil & Conforto"
             act1["fa_icon"] = "fa-solid fa-child"
             act1["title"] = "CONFORTO E PROTEÇÃO SOLAR TOTAL PARA OS PEQUENOS AVENTUREIROS"
@@ -1928,7 +1815,7 @@ class TemplateEngine:
             act2["tag"] = "Respirabilidade & Frescor"
             act2["fa_icon"] = "fa-solid fa-sun"
             act2["title"] = "TECNOLOGIA DRY FIT QUE MANTÉM AS CRIANÇAS FRESCAS E SECAS"
-            act2["desc_tmpl"] = f"Tecido tecnológico respirável que absorve e dissipa o suor rapidamente, evitando o superaquecimento e mantendo o corpo seco e confortável durante {kids_activity}."
+            act2["desc_tmpl"] = "Tecido tecnológico respirável que absorve e dissipa o suor rapidamente, evitando o superaquecimento e mantendo o corpo seco e confortável durante todas as brincadeiras e pescarias em família."
 
             if not is_hooded:
                 act3["tag"] = "Durabilidade & Liberdade"
@@ -1950,15 +1837,10 @@ class TemplateEngine:
 
         # 3.1 Adaptação Hybrid (Capuz Anatômico e Punhos com Dedeira - SEM ZÍPER)
         elif is_hybrid:
-            hybrid_context = "a pescaria ou atividade ao ar livre"
-            if store_key == "brk_agro":
-                hybrid_context = "a lida no campo ou atividade ao ar livre"
-            elif store_key == "brk_motors":
-                hybrid_context = "a pilotagem, trilha ou atividade ao ar livre"
             act3["tag"] = "Capuz Anatômico & Punho com Dedeira"
             act3["fa_icon"] = "fa-solid fa-head-side-mask"
             act3["title"] = "CAPUZ ANATÔMICO INTEGRADO E PUNHO COM ABERTURA PARA POLEGAR"
-            act3["desc_tmpl"] = f"Projetada com caimento leve, contínuo e livre de atrito, a camisa Hybrid integra capuz anatômico de proteção solar 360° para nuca e cabeça, mangas com costuras planas reforçadas e punhos com abertura para o polegar (dedeira) que protegem o dorso das mãos durante toda {hybrid_context}."
+            act3["desc_tmpl"] = "Projetada com caimento leve, contínuo e livre de atrito, a camisa Hybrid integra capuz anatômico de proteção solar 360° para nuca e cabeça, mangas com costuras planas reforçadas e punhos com abertura para o polegar (dedeira) que protegem o dorso das mãos durante toda a pescaria ou atividade ao ar livre."
 
         # 3.2 Adaptação Capuz Geral (Elimina 'gola padre', injeta cobertura 360° no rosto/nuca)
         elif is_hooded:
@@ -1967,33 +1849,37 @@ class TemplateEngine:
             act3["title"] = "CAPUZ ANATÔMICO INTEGRADO E COSTURA REFORÇADA"
             act3["desc_tmpl"] = "Equipada com capuz anatômico integrado que oferece proteção solar 360° para nuca, orelhas e laterais do rosto contra a radiação forte e o vento, dispensando acessórios extras, com costuras planas reforçadas anti-atrito."
 
-        else:
-            # 4. Adaptação Manga Curta (Elimina 'punhos anatômicos', injeta ventilação e barra pespontada)
-            if is_short_sleeve:
+        # 4. Adaptação Manga Curta (Elimina 'punhos anatômicos', injeta ventilação e barra pespontada)
+        elif is_short_sleeve and not is_motors_cotton:
+            if "punhos anatômicos" in act3.get("desc_tmpl", "").lower():
                 act3["desc_tmpl"] = re.sub(
-                    r'punhos anatômicos que [^\.,;]+',
-                    'mangas curtas com barra em costura dupla reforçada que proporcionam ventilação ideal e liberdade nos braços',
-                    act3.get("desc_tmpl", ""),
-                    flags=re.IGNORECASE
+                    r"punhos anatômicos[^.]*",
+                    "mangas curtas com barra em costura dupla reforçada que proporcionam ventilação ideal e liberdade nos braços",
+                    act3["desc_tmpl"],
+                    flags=re.IGNORECASE,
                 )
-                act3["desc_tmpl"] = re.sub(r'manga longa', 'manga curta', act3["desc_tmpl"], flags=re.IGNORECASE)
+            if "manga longa" in act3.get("desc_tmpl", "").lower():
+                act3["desc_tmpl"] = act3["desc_tmpl"].replace("manga longa", "manga curta")
 
-            # 5. Adaptação Gola Redonda / Sem Zíper (Elimina 'zíper com trava', injeta gola careca canelada)
-            if is_round_neck:
-                if "zíper" in act3.get("title", "").lower() or "ziper" in act3.get("title", "").lower():
-                    act3["title"] = "COSTURA REFORÇADA E GOLA REDONDA ANATÔMICA"
-                    act3["desc_tmpl"] = "Acabamento de alto padrão com costuras planas anti-atrito, gola careca canelada reforçada ombro a ombro e caimento confortável para uso prolongado."
+        # 5. Adaptação Gola Redonda / Sem Zíper (Elimina 'zíper com trava', injeta gola careca canelada)
+        elif is_round_neck and not is_motors_cotton:
+            if "zíper" in act3.get("title", "").lower() or "ziper" in act3.get("title", "").lower():
+                act3["title"] = "COSTURA REFORÇADA E GOLA REDONDA ANATÔMICA"
+                act3["desc_tmpl"] = "Acabamento de alto padrão com costuras planas anti-atrito, gola careca canelada reforçada ombro a ombro e caimento confortável para uso prolongado."
 
-            # 6. Adaptação Camisa com Luva Integrada
-            elif is_has_glove:
-                act3["desc_tmpl"] = "Acabamento de alto padrão com costuras planas anti-atrito, gola alta anatômica e punhos estendidos com luva integrada para proteção estendida do dorso das mãos."
+        # 6. Adaptação Camisa com Luva Integrada
+        elif is_has_glove:
+            act3["desc_tmpl"] = "Acabamento de alto padrão com costuras planas anti-atrito, gola alta anatômica e punhos estendidos com luva integrada para proteção estendida do dorso das mãos."
 
         # 7. Detecção Contextual da Foto 3 (Costas / Painel Traseiro vs. Acabamento Universal)
         is_back_view = self._is_back_view_url(img3, include_03=True)
         if is_back_view and archetype_id == "uv_performance" and not is_fusion and not is_hybrid and not is_hooded and not is_round_neck:
             act3["tag"] = "Design Traseiro & Acabamento"
             act3["title"] = "PAINEL TRASEIRO EM ALTA DEFINIÇÃO E COSTURAS REFORÇADAS"
-            act3["desc_tmpl"] = "Painel traseiro com estampa nítida e sublimação de alta resolução que não desbota, estruturado com costuras planas reforçadas nos ombros e dorso para total liberdade de movimentos e resistência ao uso contínuo."
+            if is_has_glove:
+                act3["desc_tmpl"] = "Painel traseiro com estampa nítida e sublimação de alta resolução que não desbota, estruturado com costuras planas reforçadas nos ombros e dorso e punhos estendidos com luva integrada para proteção do dorso das mãos."
+            else:
+                act3["desc_tmpl"] = "Painel traseiro com estampa nítida e sublimação de alta resolução que não desbota, estruturado com costuras planas reforçadas nos ombros e dorso para total liberdade de movimentos e resistência ao uso contínuo."
 
         sibling_specs = sibling_info.get("extracted_specs") if sibling_info else None
         specs = self.extract_product_specs(product, archetype_id, sibling_specs=sibling_specs)
@@ -2005,7 +1891,6 @@ class TemplateEngine:
             lbl = s.get("label", "")
             val = s.get("value", s.get("default", ""))
 
-            # Algodão Motors: ajusta Uso Recomendado
             if is_motors_cotton and "uso recomendado" in lbl.lower():
                 val = "Dia a dia, encontros automotivos, viagens e lazer"
 
@@ -2045,7 +1930,7 @@ class TemplateEngine:
 
             # Gola Redonda: elimina zíper
             if is_round_neck and not is_hooded:
-                if any(w in lbl.lower() for w in ["zíper", "ziper"]):
+                if any(w in lbl.lower() for w in ["zíper", "ziper", "gola", "fechamento"]):
                     lbl = "Gola"
                     val = "Gola redonda canelada anatômica com pesponto reforçado"
                 val = re.sub(r'com zíper[^,;.]*', '', val, flags=re.IGNORECASE)
@@ -2061,7 +1946,7 @@ class TemplateEngine:
         if is_has_glove and not is_short_sleeve and not any("luva" in s["label"].lower() for s in new_specs):
             new_specs.append({"label": "Punhos / Luva", "value": "Punhos estendidos anatômicos com luva integrada para o dorso da mão"})
 
-        if archetype_id == "uv_performance" and not is_fusion and not is_hybrid and not is_hooded and not is_round_neck and not any(w in s["label"].lower() for s in new_specs for w in ["gola", "fechamento"]):
+        if archetype_id == "uv_performance" and not is_fusion and not is_hybrid and not is_hooded and not is_round_neck and not is_short_sleeve and not any(w in s["label"].lower() for s in new_specs for w in ["gola", "fechamento"]):
             new_specs.append({"label": "Gola / Fechamento", "value": "Gola padre anatômica com zíper e trava de segurança"})
 
         if is_fusion:
@@ -2095,47 +1980,14 @@ class TemplateEngine:
                 new_clean_specs.append({"label": lbl_c or "Acabamento", "value": val_c})
             new_specs = new_clean_specs
 
-        # Adaptação Temática de Público por Loja (Agro, Motors e Fishing) para evitar contaminação de nicho
-        has_fishing_in_title = any(w in t_low for w in ["pesca", "pescador", "pescaria", "fishing", "tucunar", "dourado", "traíra", "traira", "robalo", "tambaqui", "pirarucu"])
+        # Adaptação Temática de Público por Loja (Agro, Motors e Fishing) para Camisas UV
         if archetype_id == "uv_performance" and not is_kids:
             if store_key == "brk_agro" or any(w in t_low for w in ["agro", "campo", "rural", "trator", "fazenda", "pecuaria", "pecuária"]):
                 if "pescadores" in act1.get("desc_tmpl", ""):
-                    act1["desc_tmpl"] = act1["desc_tmpl"].replace("pescadores e entusiastas do ar livre", "o homem e a mulher do campo e entusiastas do ar livre").replace("arremessos e manobras", "a rotina intensa no campo e manobras")
+                    act1["desc_tmpl"] = act1["desc_tmpl"].replace("pescadores e entusiastas do ar livre", "o homem e a mulher do campo e entusiastas do ar livre").replace("os arremessos e manobras", "a rotina intensa no campo e manobras").replace("arremessos e manobras", "a rotina intensa no campo e manobras")
             elif store_key == "brk_motors" or any(w in t_low for w in ["moto", "trail", "cross", "velocidade", "motors", "pista"]):
                 if "pescadores" in act1.get("desc_tmpl", ""):
-                    act1["desc_tmpl"] = act1["desc_tmpl"].replace("pescadores e entusiastas do ar livre", "pilotos, motociclistas e aventureiros").replace("arremessos e manobras", "a pilotagem e manobras")
-
-        elif archetype_id == "neck_gaiters_balaclavas" and not has_fishing_in_title:
-            if store_key == "brk_agro":
-                act1["desc_tmpl"] = act1["desc_tmpl"].replace("pescarias e esportes sob sol forte", "a lida no campo, cavalgadas e atividades sob sol forte")
-            elif store_key == "brk_motors":
-                act1["desc_tmpl"] = act1["desc_tmpl"].replace("pescarias e esportes sob sol forte", "pilotagem, trilhas e esportes sob sol forte")
-
-        elif archetype_id == "sun_sleeves_manguitos" and not has_fishing_in_title:
-            if store_key == "brk_agro":
-                act1["desc_tmpl"] = act1["desc_tmpl"].replace("pescarias, ciclismo, corrida e direção", "o trabalho no campo, cavalgadas, ciclismo e direção")
-                act2["desc_tmpl"] = act2["desc_tmpl"].replace("arremessos e movimentação intensa", "o trabalho rural e movimentação intensa")
-            elif store_key == "brk_motors":
-                act1["desc_tmpl"] = act1["desc_tmpl"].replace("pescarias, ciclismo, corrida e direção", "pilotagem, motociclismo, ciclismo e direção")
-                act2["desc_tmpl"] = act2["desc_tmpl"].replace("arremessos e movimentação intensa", "a pilotagem e movimentação intensa")
-
-        elif archetype_id == "footwear_sandals_boaonda" and not has_fishing_in_title and store_key in ("brk_agro", "brk_motors"):
-            act1["desc_tmpl"] = act1["desc_tmpl"].replace(", barcos e pós-pescaria", ", viagens e lazer ao ar livre")
-
-        elif archetype_id == "books_publications" and not has_fishing_in_title and store_key in ("brk_agro", "brk_motors"):
-            act1["desc_tmpl"] = act1["desc_tmpl"].replace("da pesca esportiva e vida ao ar livre", "da vida no campo, cultura rural e aventura ao ar livre")
-            act3["desc_tmpl"] = act3["desc_tmpl"].replace("todo apaixonado pela natureza e pela pesca", "todo apaixonado pela cultura do campo e pela natureza")
-            for sp in new_specs:
-                if "gênero" in sp["label"].lower():
-                    sp["value"] = "Cultura Rural / Aventura / Conhecimento"
-
-        elif archetype_id == "hats_safari_outdoor" and not has_fishing_in_title:
-            if store_key == "brk_agro":
-                act1["desc_tmpl"] = act1["desc_tmpl"].replace("nas pescarias e expedições", "no trabalho no campo e expedições")
-            elif store_key == "brk_motors":
-                act1["desc_tmpl"] = act1["desc_tmpl"].replace("nas pescarias e expedições", "nas aventuras, trilhas e expedições")
-
-        split_sections_out = template.get("split_sections")
+                    act1["desc_tmpl"] = act1["desc_tmpl"].replace("pescadores e entusiastas do ar livre", "pilotos, motociclistas e aventureiros").replace("os arremessos e manobras", "a pilotagem e manobras").replace("arremessos e manobras", "a pilotagem e manobras")
 
         specs = new_specs
 
@@ -2187,14 +2039,12 @@ class TemplateEngine:
             "source_label": source_label,
             "sibling_info": sibling_info,
             "archetype_id": archetype_id,
-            "store_key": store_key,
             "layout_format": template.get("layout_format", "standard_3act"),
             "details_grid": template.get("details_grid"),
             "info_characteristics": template.get("info_characteristics"),
             "info_care": template.get("info_care"),
-            "split_sections": split_sections_out,
+            "split_sections": template.get("split_sections"),
             "is_kids": is_kids,
-            "is_casal": is_casal,
             "is_short_sleeve": is_short_sleeve,
             "is_hooded": is_hooded,
             "sku": sku,

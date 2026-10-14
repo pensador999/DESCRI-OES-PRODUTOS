@@ -1203,68 +1203,72 @@ ${itemsHtml}
 function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortSleeve, liveP) {
   const tLow = (liveP.formatted_title || liveP.title || "").toLowerCase();
   const skuLow = (liveP.sku || liveP.master_sku || "").toLowerCase();
-  const tLowForKids = tLow.replace(/sonho de crian[çc]a/gi, "");
-  const isCasal = Boolean(liveP.is_casal) || tLow.includes("casal");
-  const hasShirtWord = /camisa|camiseta|jersey|baby look|babylook|polo|regata/i.test(tLow);
 
   // 1. Identificar se o produto é comprovadamente de vestuário superior / camisa
-  const isShirt = (
-    ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId) ||
-    hasShirtWord ||
-    /^(c0|ci|cadv|adv|hyb|cmb|cax|raglan)/i.test(skuLow)
-  ) && !/\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|manguito|manguitos|bandana|tubeneck|buff|balaclava)\b/i.test(tLow)
-    && !(/\b(chapéu|chapeu|boné|bone|luva|luvas)\b/i.test(tLow) && !hasShirtWord);
+  // Nota: Camisas ArmorX e Hybrid possuem "com Luva" no título — NÃO excluir luva quando for camisa!
+  const hasShirtWord = /camisa|camiseta|jersey|baby look|babylook/i.test(tLow);
+  const isShirtArchetype = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId);
+  const isShirtSku = /^(c0|ci|cadv|adv|hyb|cax|cmb|raglan|cm|casual|bp|apc)/i.test(skuLow);
+  const nonShirtExclusions = (hasShirtWord || isShirtArchetype || isShirtSku)
+    ? /\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|chapéu|chapeu|boné|bone|manguito|manguitos|bandana|tubeneck|buff|balaclava)\b/i
+    : /\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|chapéu|chapeu|boné|bone|luva|luvas|manguito|manguitos|bandana|tubeneck|buff|balaclava)\b/i;
+  const isShirt = (isShirtArchetype || hasShirtWord || isShirtSku) && !nonShirtExclusions.test(tLow);
 
-  // 0. Exclusão estrita de itens não-têxteis com UV ou termos ambíguos (apenas se NÃO for camisa)
-  if (!isShirt) {
+  // 0. Exclusão estrita de itens não-têxteis com UV ou termos ambíguos (apenas se NÃO for arquétipo vestível confirmado)
+  const wearableArchetypes = [
+    "uv_performance", "agro_field", "motors_speed", "shirts_button_work",
+    "pants_cargo_tactical", "overalls_workwear", "hats_safari_outdoor",
+    "caps_trucker_snapback", "footwear_sandals_boaonda", "closed_footwear_sneakers",
+    "calcados_botinas", "gloves_tactical_fishing", "uv_arm_sleeves", "neck_gaiters_balaclavas"
+  ];
+  if (!isShirt && !wearableArchetypes.includes(archetypeId)) {
     if (/\b(óculos|oculos|faca|facas|canivete|alicate|vara|varas|molinete|carretilha|isca|iscas|linha|linhas|anzol|anzois|anzóis|estojo|garrafa|copo|chaveiro|adesivo|carteira|protetor solar)\b/i.test(tLow)) {
       return "";
     }
   }
 
   let tipText = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | Manga do ombro ao punho). Dica: compare com uma peça sua estendida para escolher o caimento ideal.";
-  const uvSubtitle = isShortSleeve
-    ? "Camisa Manga Curta UV50 | *As medidas podem variar de 2cm a 3cm"
-    : "Camisa Manga Longa UV50 | *As medidas podem variar de 2cm a 3cm";
+  let guideTitle = "";
+  let tableHtml = "";
 
   if (isShirt) {
-    const isFemShirt = (/feminina|feminino|baby look|fem|babylook/i.test(tLow) || /bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$/i.test(skuLow)) && !isCasal;
+    const isShortModel = (
+      isShortSleeve ||
+      archetypeId === "agro_field" ||
+      /manga curta|camiseta|t-shirt|algodão|algodao/i.test(tLow) ||
+      /^(cm|casual|bp|apc)\d/i.test(skuLow)
+    ) && !/manga longa/i.test(tLow);
+    let shirtSubtitle = "Camisa Manga Longa UV50 | *As medidas podem variar de 2cm a 3cm";
+    if (archetypeId === "agro_field" || /algodão|algodao/i.test(tLow) || /^(cm|casual|bp|apc)\d/i.test(skuLow)) {
+      shirtSubtitle = "Camiseta Manga Curta Algodão Premium | *As medidas podem variar de 2cm a 3cm";
+    } else if (isShortModel) {
+      shirtSubtitle = "Camiseta Manga Curta UV50+ | *As medidas podem variar de 2cm a 3cm";
+    }
+
+    const isKidsSku = /^(?:c0|c|cm|casual|ci|bp)\d+i(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$/i.test(skuLow) && !skuLow.startsWith("c0694i");
+
     // 1.1 Camisas de Botão / Utilitárias Work (CMB - Sarja/Algodão corte reto de trabalho)
     const isWorkGuide = (archetypeId === "shirts_button_work" || skuLow.includes("cmb") || skuLow.includes("cbt") || (tLow.includes("work") && tLow.includes("camisa") && !tLow.includes("xtech") && !tLow.includes("dry") && !tLow.includes("uv") && !tLow.includes("pesca"))) && !skuLow.startsWith("c0") && !skuLow.startsWith("ci");
     if (isWorkGuide) {
-      const mHeader = isShortSleeve ? "Manga Curta" : "Manga Longa";
-      if (isFemShirt) {
-        guideTitle = "Tabela de Medidas Feminina - Camisas Xadrez & Work de Botão (PP ao G2)";
-        tipText = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Busto/Tórax | Comprimento da gola à barra | Manga). Modelagem Feminina Acinturada.";
-        const rows = [
-          ["PP", "90 cm", "61 cm", isShortSleeve ? "19 cm" : "58 cm"],
-          ["P", "94 cm", "63 cm", isShortSleeve ? "20 cm" : "59 cm"],
-          ["M", "98 cm", "65 cm", isShortSleeve ? "21 cm" : "60 cm"],
-          ["G", "104 cm", "67 cm", isShortSleeve ? "22 cm" : "61 cm"],
-          ["GG", "110 cm", "69 cm", isShortSleeve ? "23 cm" : "62 cm"],
-          ["G1", "116 cm", "71 cm", isShortSleeve ? "24 cm" : "63 cm"],
-          ["G2", "122 cm", "73 cm", isShortSleeve ? "25 cm" : "64 cm"],
-        ];
-        tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">FEMININO</div><div class="brk-sg-subtitle">Camisa Feminina de Botão | *As medidas podem variar de 2cm a 3cm</div></div><table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Busto / Circunferência</th><th>Comprimento Total</th><th>${mHeader}</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
-      } else {
-        guideTitle = "Tabela de Medidas - Camisas Work & Utilitárias de Botão (P ao G2)";
-        tipText = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Comprimento da gola à barra | Manga). Modelagem confortável de trabalho.";
-        const rows = [
-          ["P", "102 cm", "68 cm", isShortSleeve ? "22 cm" : "75 cm"],
-          ["M", "108 cm", "71 cm", isShortSleeve ? "23 cm" : "77 cm"],
-          ["G", "114 cm", "74 cm", isShortSleeve ? "24 cm" : "79 cm"],
-          ["GG", "120 cm", "77 cm", isShortSleeve ? "25 cm" : "81 cm"],
-          ["XG", "126 cm", "80 cm", isShortSleeve ? "26 cm" : "83 cm"],
-          ["EXG (G1)", "132 cm", "83 cm", isShortSleeve ? "27 cm" : "85 cm"],
-          ["G2", "138 cm", "85 cm", isShortSleeve ? "28 cm" : "87 cm"],
-        ];
-        tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Tórax / Circunferência</th><th>Comprimento Total</th><th>${mHeader}</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
-      }
+      guideTitle = "Tabela de Medidas - Camisas Work & Utilitárias de Botão (P ao G2)";
+      tipText = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Comprimento da gola à barra | Manga). Modelagem confortável de trabalho.";
+      const mHeader = isShortModel ? "Manga Curta" : "Manga Longa";
+      const rows = [
+        ["P", "102 cm", "68 cm", isShortModel ? "22 cm" : "75 cm"],
+        ["M", "108 cm", "71 cm", isShortModel ? "23 cm" : "77 cm"],
+        ["G", "114 cm", "74 cm", isShortModel ? "24 cm" : "79 cm"],
+        ["GG", "120 cm", "77 cm", isShortModel ? "25 cm" : "81 cm"],
+        ["XG", "126 cm", "80 cm", isShortModel ? "26 cm" : "83 cm"],
+        ["EXG (G1)", "132 cm", "83 cm", isShortModel ? "27 cm" : "85 cm"],
+        ["G2", "138 cm", "85 cm", isShortModel ? "28 cm" : "87 cm"],
+      ];
+      tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Tórax / Circunferência</th><th>Comprimento Total</th><th>${mHeader}</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
     }
-    // 1.2 Camisas UV C0 Infantil (1 a 13 Anos)
-    else if (isKids || /infantil|kids|juvenil|criança|crianca/i.test(tLowForKids) || /kids|inf/i.test(skuLow)) {
+    // 1.2 Camisas UV C0 Infantil (1 a 13 Anos) — sem "criança" para não capturar estampa adulta "Sonho de Criança"
+    else if (isKids || isKidsSku || /infantil|kids|juvenil/i.test(tLow) || /kids|inf/i.test(skuLow)) {
       guideTitle = "Guia de Tamanhos Infantil (1 a 13 Anos)";
       const badgeTitle = "INFANTIL";
+      const subtitle = shirtSubtitle;
       const rows = [
         ["1 a 2 Anos (PP)", "31 cm", "41 cm", "31 cm"],
         ["2 a 3 Anos (P)", "33 cm", "45 cm", "35 cm"],
@@ -1274,12 +1278,13 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
         ["10 a 11 Anos (G1)", "41 cm", "58 cm", "44 cm"],
         ["12 a 13 Anos (G2)", "43 cm", "61 cm", "45 cm"],
       ];
-      tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">${badgeTitle}</div><div class="brk-sg-subtitle">${uvSubtitle}</div></div><table class="brk-sg-table"><thead><tr class="brk-sg-th-row"><th>TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
+      tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">${badgeTitle}</div><div class="brk-sg-subtitle">${subtitle}</div></div><table class="brk-sg-table"><thead><tr class="brk-sg-th-row"><th>TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
     }
-    // 1.2b Kit Casal
-    else if (isCasal) {
+    // 1.2b Kits Casal (exibe Tabela Masculina + Tabela Feminina Baby Look)
+    else if (tLow.includes("casal")) {
       guideTitle = "Tabela de Medidas Kit Casal - Masculino & Feminino Baby Look (PP ao G2)";
-      const mascRows = [
+      const subtitle = shirtSubtitle;
+      const rowsM = [
         ["PP", "49,5 cm", "67 cm", "56 cm"],
         ["P", "51,5 cm", "69 cm", "59,5 cm"],
         ["M", "54 cm", "71 cm", "62 cm"],
@@ -1288,7 +1293,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
         ["G1", "62 cm", "75 cm", "66 cm"],
         ["G2", "65 cm", "76,5 cm", "66 cm"],
       ];
-      const femRows = [
+      const rowsF = [
         ["Baby Look PP", "33 cm", "51 cm", "53 cm"],
         ["Baby Look P", "37 cm", "54 cm", "55 cm"],
         ["Baby Look M", "43 cm", "57 cm", "59 cm"],
@@ -1297,12 +1302,13 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
         ["Baby Look G1", "50 cm", "62 cm", "61 cm"],
         ["Baby Look G2", "55 cm", "64 cm", "63 cm"],
       ];
-      tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">MASCULINO &amp; FEMININO (KIT CASAL)</div><div class="brk-sg-subtitle">${uvSubtitle}</div></div><table class="brk-sg-table" style="margin-bottom: 16px;"><thead><tr class="brk-sg-th-row"><th>TAMANHO MASCULINO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${mascRows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table><table class="brk-sg-table"><thead><tr class="brk-sg-th-row"><th>TAMANHO FEMININO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${femRows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
+      tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">MASCULINO</div><div class="brk-sg-subtitle">${subtitle}</div></div><table class="brk-sg-table" style="margin-bottom:18px;"><thead><tr class="brk-sg-th-row"><th>TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${rowsM.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table><div class="brk-sg-card-header"><div class="brk-sg-card-title">FEMININO (BABY LOOK)</div><div class="brk-sg-subtitle">${subtitle}</div></div><table class="brk-sg-table"><thead><tr class="brk-sg-th-row"><th>TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${rowsF.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
     }
     // 1.3 Camisas UV C0 Feminina / Baby Look (PP ao G2)
-    else if (isFemShirt) {
+    else if (/feminina|feminino|baby look|fem|babylook/i.test(tLow) || skuLow.includes("bl")) {
       guideTitle = "Tabela de Medidas Feminina - Baby Look (PP ao G2)";
       const badgeTitle = "FEMININO";
+      const subtitle = shirtSubtitle;
       const rows = [
         ["Baby Look PP", "33 cm", "51 cm", "53 cm"],
         ["Baby Look P", "37 cm", "54 cm", "55 cm"],
@@ -1312,12 +1318,13 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
         ["Baby Look G1", "50 cm", "62 cm", "61 cm"],
         ["Baby Look G2", "55 cm", "64 cm", "63 cm"],
       ];
-      tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">${badgeTitle}</div><div class="brk-sg-subtitle">${uvSubtitle}</div></div><table class="brk-sg-table"><thead><tr class="brk-sg-th-row"><th>TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
+      tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">${badgeTitle}</div><div class="brk-sg-subtitle">${subtitle}</div></div><table class="brk-sg-table"><thead><tr class="brk-sg-th-row"><th>TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
     }
     // 1.4 Camisas UV C0 Masculino / Unissex Padrão (PP ao G2)
     else {
       guideTitle = "Tabela de Medidas Masculino / Unissex (PP ao G2)";
       const badgeTitle = "MASCULINO";
+      const subtitle = shirtSubtitle;
       const rows = [
         ["PP", "49,5 cm", "67 cm", "56 cm"],
         ["P", "51,5 cm", "69 cm", "59,5 cm"],
@@ -1327,7 +1334,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
         ["G1", "62 cm", "75 cm", "66 cm"],
         ["G2", "65 cm", "76,5 cm", "66 cm"],
       ];
-      tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">${badgeTitle}</div><div class="brk-sg-subtitle">${uvSubtitle}</div></div><table class="brk-sg-table"><thead><tr class="brk-sg-th-row"><th>TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
+      tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">${badgeTitle}</div><div class="brk-sg-subtitle">${subtitle}</div></div><table class="brk-sg-table"><thead><tr class="brk-sg-th-row"><th>TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
     }
   }
   else if (["pants_cargo_tactical", "overalls_workwear"].includes(archetypeId) || (!isShirt && /\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao)\b/i.test(tLow))) {
@@ -1368,7 +1375,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
       ["GG", "9,5 a 10,5 cm", "22 cm"]
     ];
     tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Largura da Palma</th><th>Comprimento da Mão</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("")}</tbody></table>`;
-  } else if (archetypeId === "sun_sleeves_manguitos" || tLow.includes("manguito")) {
+  } else if (archetypeId === "sun_sleeves_manguitos" || archetypeId === "uv_arm_sleeves" || tLow.includes("manguito")) {
     guideTitle = "Tabela de Medidas - Manguitos de Proteção Solar";
     tipText = "<strong>Como medir com precisão:</strong> Meça a circunferência do bíceps e punho com o braço em repouso.";
     const rows = [
@@ -1458,7 +1465,6 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
   const formattedTitle = liveP.formatted_title || originInfo.formattedTitle || liveP.title || "Boné BRK";
   const sku = liveP.sku || liveP.master_sku || "";
   const stKey = liveP.store_key || (typeof currentStore !== "undefined" ? currentStore : "brk_fishing");
-  const storeKey = stKey;
   const schemaJsonLd = buildClientSchemaJsonLd(liveP);
 
   let gradHoriz, gradVert, colorAccent, brandLabel;
@@ -1525,16 +1531,11 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
       }
     ];
     caractTitle = "Características do Boné BRK";
-    const idealUsage = storeKey === "brk_agro"
-      ? "Ideal para o campo, atividades ao ar livre e uso no dia a dia."
-      : storeKey === "brk_motors"
-        ? "Ideal para trilha, velocidade, eventos automotivos e uso no dia a dia."
-        : "Ideal para pesca esportiva, atividades ao ar livre e uso no dia a dia.";
     caractItems = [
       "Copa estruturada estilo trucker, com frente firme e tela traseira que favorece a ventilação.",
       "Aba moldável com costuras reforçadas, oferecendo conforto e proteção para o rosto e os olhos.",
       "Tamanho único com regulagem traseira, se ajustando com precisão à maioria dos formatos de cabeça.",
-      idealUsage,
+      "Ideal para pesca esportiva, atividades ao ar livre e uso no dia a dia.",
       storeKey === "brk_fishing"
         ? "Acabamento interno pensado para máximo conforto mesmo em longas jornadas de pesca."
         : "Acabamento interno pensado para máximo conforto mesmo em longas jornadas de uso contínuo."
@@ -1629,11 +1630,7 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
     ];
     split1_p1 = "Cada chapéu BRK é desenvolvido pensando na proteção de quem enfrenta longas jornadas ao ar livre.";
     split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem padrão de proteção solar certificado.";
-    split1_p3 = storeKey === "brk_agro"
-      ? "Construído com materiais leves e resistentes, oferece o máximo de conforto térmico para o trabalho no campo, pecuária e atividades sob sol forte."
-      : storeKey === "brk_motors"
-        ? "Construído com materiais leves e resistentes, oferece o máximo de conforto térmico para aventuras, trilhas e atividades sob sol forte."
-        : "Construído com materiais leves e resistentes, oferece o máximo de conforto térmico para pescarias e trabalho sob sol forte.";
+    split1_p3 = "Construído com materiais leves e resistentes, oferece o máximo de conforto térmico para pescarias e trabalho sob sol forte.";
     split2_p1 = "A sua experiência começa antes mesmo de abrir a caixa.";
     split2_p2 = "O chapéu é enviado em embalagem protegida BRK, projetada para evitar deformações na aba durante o transporte.";
     split2_p3 = "Seu novo chapéu chega pronto para encarar o sol com proteção e estilo incomparáveis.";
@@ -2215,25 +2212,23 @@ function getProductModeBHTML(liveP) {
   }
 
   const tLowModal = (liveP.title || "").toLowerCase();
-  const tLowForKidsModal = tLowModal.replace(/sonho de crian[çc]a/gi, "");
   const skuLowModal = (liveP.sku || liveP.master_sku || "").toLowerCase();
   const tagsLowModal = (Array.isArray(liveP.tags) ? liveP.tags.join(" ") : (liveP.tags || "")).toLowerCase();
   const isFusionModal = isApparel && (/\b(fusion|fusionx)\b/i.test(tLowModal) || /fusion/i.test(skuLowModal) || /fusion/i.test(tagsLowModal));
   const isHybridModal = isApparel && (/\bhybrid\b/i.test(tLowModal) || /^hyb/i.test(skuLowModal) || /hybrid/i.test(skuLowModal) || /hybrid/i.test(tagsLowModal));
+  const isArmorxModal = isApparel && (/\barmorx\b/i.test(tLowModal) || /^cax/i.test(skuLowModal) || /armorx/i.test(tagsLowModal));
   const isHoodedModal = (isApparel && /\b(capuz|hood|hoodie)\b/i.test(tLowModal)) || isFusionModal || isHybridModal;
-  const isKidsModal = isApparel && /\b(infantil|kids|juvenil|criança|crianca|mini)\b/i.test(tLowForKidsModal) && !/\b(adulto|unissex adulto)\b/i.test(tLowModal);
-  const isCasalModal = isApparel && (Boolean(liveP.is_casal) || tLowModal.includes("casal"));
+  const isKidsSkuModal = isApparel && /^(?:c0|c|cm|casual|ci|bp)\d+i(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$/i.test(skuLowModal) && !skuLowModal.startsWith("c0694i");
+  const isKidsModal = isApparel && (/\b(infantil|kids|juvenil|mini)\b/i.test(tLowModal) || isKidsSkuModal) && !/\b(adulto|unissex adulto)\b/i.test(tLowModal);
   const isShortSleeveModal = isApparel && (
-    /\b(manga curta|manga-curta|camiseta|t-shirt|polo|regata)\b/i.test(tLowModal) ||
+    /\b(manga curta|manga-curta|camiseta|t-shirt)\b/i.test(tLowModal) ||
     (tLowModal.includes("curta") && tLowModal.includes("manga")) ||
-    /^(cm\d|casual|bp\d|cbtmc)/i.test(skuLowModal)
+    archetypeId === "agro_field" ||
+    /^(cm|casual|bp|apc)\d/i.test(skuLowModal)
   ) && !/\b(manga longa|manga-longa)\b/i.test(tLowModal);
-  const isHasGloveModal = isApparel && /\b(com luva|e luva|luva integrada)\b/i.test(tLowModal);
-  const isFemaleModal = (/\b(feminina|feminino|baby look|babylook|mulher)\b/i.test(tLowModal) || /femin/i.test(tagsLowModal) || (isApparel && /bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$/i.test(skuLowModal))) && !isKidsModal && !isCasalModal;
-  const isRoundNeckModal = isApparel && (
-    /\b(gola careca|gola redonda|sem zíper|sem ziper|t-shirt)\b/i.test(tLowModal) ||
-    (isShortSleeveModal && !/\b(ziper|zíper|polo)\b/i.test(tLowModal) && archetypeId !== "shirts_button_work")
-  );
+  const isHasGloveModal = isApparel && (/\b(com luva|e luva|luva integrada)\b/i.test(tLowModal) || isArmorxModal);
+  const isFemaleModal = (/\b(feminina|feminino|baby look|babylook|mulher)\b/i.test(tLowModal) || /femin/i.test(tagsLowModal) || (isApparel && /bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$/i.test(skuLowModal))) && !isKidsModal;
+  const isRoundNeckModal = isApparel && (/\b(gola careca|gola redonda|sem zíper|sem ziper|t-shirt)\b/i.test(tLowModal) || ((/\bcamiseta\b/i.test(tLowModal) || isShortSleeveModal) && !/\b(ziper|zíper)\b/i.test(tLowModal)));
 
   let blocks = liveP.narrative_blocks ? liveP.narrative_blocks.map(b => ({ ...b })) : null;
   if (!blocks || blocks.length === 0) {
@@ -2249,18 +2244,12 @@ function getProductModeBHTML(liveP) {
       let act3Title = tmpl.act3.title || "COSTURAS PLANAS REFORÇADAS E ACABAMENTO PREMIUM";
       let act3Desc = (tmpl.act3.desc_tmpl || "").replace(/\{title\}/g, formattedTitle);
       let act3Tag = tmpl.act3.tag || "Durabilidade & Acabamento";
-      const storeKeyEff = liveP.store_key || (typeof currentStore !== "undefined" ? currentStore : "brk_fishing");
 
       if (isKidsModal) {
-        const kidsActivity = storeKeyEff === "brk_agro"
-          ? "todas as brincadeiras, passeios no campo e momentos em família"
-          : storeKeyEff === "brk_motors"
-            ? "todas as brincadeiras, passeios, trilhas e aventuras em família"
-            : "todas as brincadeiras e pescarias em família";
         act1Title = "CONFORTO E PROTEÇÃO SOLAR TOTAL PARA OS PEQUENOS AVENTUREIROS";
         act1Desc = `Desenvolvida especialmente para crianças e jovens exploradores, o(a) ${formattedTitle} oferece proteção solar máxima FPU 50+ com toque extra suave na pele, garantindo segurança, leveza e liberdade total para brincar e se divertir ao ar livre.`;
         act2Title = "TECNOLOGIA DRY FIT QUE MANTÉM AS CRIANÇAS FRESCAS E SECAS";
-        act2Desc = `Tecido tecnológico respirável que absorve e dissipa o suor rapidamente, evitando o superaquecimento e mantendo o corpo seco e confortável durante ${kidsActivity}.`;
+        act2Desc = "Tecido tecnológico respirável que absorve e dissipa o suor rapidamente, evitando o superaquecimento e mantendo o corpo seco e confortável durante todas as brincadeiras e pescarias em família.";
         if (!isHoodedModal) {
           act3Tag = "Durabilidade & Liberdade";
           act3Title = "COSTURAS PLANAS ANTI-ATRITO E MÁXIMA DURABILIDADE";
@@ -2276,41 +2265,43 @@ function getProductModeBHTML(liveP) {
         act3Title = "CAPUZ COM MÁSCARA FACIAL INTEGRADA E PUNHO COM DEDEIRA";
         act3Desc = "Desenvolvida com modelagem anatômica contínua para máximo conforto e zero atrito, a camisa FusionX conta com capuz anatômico acoplado com máscara facial protetora (balaclava integrada) que protege cabeça, nuca e rosto contra o sol forte e o vento, além de punhos anatômicos com abertura para o polegar (dedeira) que mantêm o dorso da mão sempre protegido.";
       } else if (isHybridModal) {
-        const hybridContext = storeKeyEff === "brk_agro"
-          ? "a lida no campo ou atividade ao ar livre"
-          : storeKeyEff === "brk_motors"
-            ? "a pilotagem, trilha ou atividade ao ar livre"
-            : "a pescaria ou atividade ao ar livre";
         act3Tag = "Capuz Anatômico & Punho com Dedeira";
         act3Title = "CAPUZ ANATÔMICO INTEGRADO E PUNHO COM ABERTURA PARA POLEGAR";
-        act3Desc = `Projetada com caimento leve, contínuo e livre de atrito, a camisa Hybrid integra capuz anatômico de proteção solar 360° para nuca e cabeça, mangas com costuras planas reforçadas e punhos com abertura para o polegar (dedeira) que protegem o dorso das mãos durante toda ${hybridContext}.`;
+        act3Desc = "Projetada com caimento leve, contínuo e livre de atrito, a camisa Hybrid integra capuz anatômico de proteção solar 360° para nuca e cabeça, mangas com costuras planas reforçadas e punhos com abertura para o polegar (dedeira) que protegem o dorso das mãos durante toda a pescaria ou atividade ao ar livre.";
       } else if (isHoodedModal) {
         act3Tag = "Capuz Anatômico & Proteção 360°";
         act3Title = "CAPUZ ANATÔMICO INTEGRADO E COSTURA REFORÇADA";
         act3Desc = "Equipada com capuz anatômico integrado que oferece proteção solar 360° para nuca, orelhas e laterais do rosto contra a radiação forte e o vento, dispensando acessórios extras, com costuras planas reforçadas anti-atrito.";
-      } else {
-        if (isShortSleeveModal) {
-          act3Desc = act3Desc
-            .replace(/punhos anatômicos que [^\.,;]+/gi, "mangas curtas com barra em costura dupla reforçada que proporcionam ventilação ideal e liberdade nos braços")
-            .replace(/manga longa/gi, "manga curta");
-        }
-        if (isRoundNeckModal) {
-          act3Title = "COSTURA REFORÇADA E GOLA REDONDA ANATÔMICA";
-          act3Desc = "Acabamento de alto padrão com costuras planas anti-atrito, gola careca canelada reforçada ombro a ombro e caimento confortável para uso prolongado.";
-        } else if (isHasGloveModal) {
-          act3Desc = "Acabamento de alto padrão com costuras planas anti-atrito, gola alta anatômica e punhos estendidos com luva integrada para proteção estendida do dorso das mãos.";
-        }
+      } else if (isShortSleeveModal) {
+        act3Desc = act3Desc
+          .replace(/punhos anatômicos que não laceiam com o uso frequente/gi, "mangas curtas com barra em costura dupla reforçada que proporcionam ventilação ideal e liberdade nos braços")
+          .replace(/manga longa/gi, "manga curta");
+      } else if (isRoundNeckModal) {
+        act3Title = "COSTURA REFORÇADA E GOLA REDONDA ANATÔMICA";
+        act3Desc = "Acabamento de alto padrão com costuras planas anti-atrito, gola careca canelada reforçada ombro a ombro e caimento confortável para uso prolongado.";
+      } else if (isHasGloveModal) {
+        act3Desc = "Acabamento de alto padrão com costuras planas anti-atrito, gola alta anatômica e punhos estendidos com luva integrada para proteção estendida do dorso das mãos.";
       }
 
       if (archetypeId === "uv_performance" && !isKidsModal) {
+        const storeKeyEff = liveP.store_key || (typeof currentStore !== "undefined" ? currentStore : "brk_fishing");
         if (storeKeyEff === "brk_agro" || /\b(agro|campo|rural|trator|fazenda|pecuaria|pecuária)\b/i.test(tLowModal)) {
           act1Desc = act1Desc
             .replace(/pescadores e entusiastas do ar livre/g, "o homem e a mulher do campo e entusiastas do ar livre")
+            .replace(/os arremessos e manobras/g, "a rotina intensa no campo e o lazer")
             .replace(/arremessos e manobras/g, "a rotina intensa no campo e manobras");
         } else if (storeKeyEff === "brk_motors" || /\b(moto|trail|cross|velocidade|motors|pista)\b/i.test(tLowModal)) {
           act1Desc = act1Desc
             .replace(/pescadores e entusiastas do ar livre/g, "pilotos, motociclistas e aventureiros")
+            .replace(/os arremessos e manobras/g, "a pilotagem e as aventuras sobre rodas")
             .replace(/arremessos e manobras/g, "a pilotagem e manobras");
+        }
+      } else if (archetypeId === "agro_field") {
+        const storeKeyEff = liveP.store_key || (typeof currentStore !== "undefined" ? currentStore : "brk_agro");
+        if (storeKeyEff === "brk_motors" || /^apc/i.test(skuLowModal) || /\b(carro|moto|fusca|kombi|opala|chevette|gol|maverick|garage|pistão|turbina|v8)\b/i.test(tLowModal)) {
+          act1Desc = act1Desc.replace(/para o dia a dia no campo e na cidade/g, "para apaixonados por motores, encontros automotivos e uso casual");
+          act2Title = "IDENTIDADE AUTOMOTIVA E ESTAMPA DE ALTA DEFINIÇÃO";
+          act2Desc = "Estampa exclusiva de cultura automotiva e duas rodas com toque zero, alta nitidez e resistência às lavagens, unindo estilo marcante e conforto absoluto.";
         }
       }
 
@@ -2367,7 +2358,11 @@ function getProductModeBHTML(liveP) {
   if (blocks && blocks.length >= 3 && isBackView && archetypeId === "uv_performance" && !isFusionModal && !isHybridModal && !isHoodedModal && !isRoundNeckModal) {
     blocks[2].tag = "Design Traseiro & Acabamento";
     blocks[2].title = "PAINEL TRASEIRO EM ALTA DEFINIÇÃO E COSTURAS REFORÇADAS";
-    blocks[2].description = "Painel traseiro com estampa nítida e sublimação de alta resolução que não desbota, estruturado com costuras planas reforçadas nos ombros e dorso para total liberdade de movimentos e resistência ao uso contínuo.";
+    if (isHasGloveModal) {
+      blocks[2].description = "Painel traseiro com estampa nítida e sublimação de alta resolução que não desbota, aliado a costuras planas reforçadas e punhos estendidos com luva integrada para proteção completa do dorso das mãos.";
+    } else {
+      blocks[2].description = "Painel traseiro com estampa nítida e sublimação de alta resolução que não desbota, estruturado com costuras planas reforçadas nos ombros e dorso para total liberdade de movimentos e resistência ao uso contínuo.";
+    }
   }
 
   const isReadyDelivery = (p) => {
@@ -2420,6 +2415,18 @@ function getProductModeBHTML(liveP) {
     }
   }
 
+  if (isShortSleeveModal) {
+    specs = specs.map(s => {
+      if (/punho|manga/i.test(s.label)) {
+        return { label: "Mangas", value: "Mangas curtas com acabamento reforçado em pesponto duplo" };
+      }
+      return s;
+    });
+    if (!specs.some(s => /manga/i.test(s.label))) {
+      specs.push({ label: "Mangas", value: "Mangas curtas com acabamento reforçado em pesponto duplo" });
+    }
+  }
+
   if (isFusionModal) {
     if (!specs.some(s => /capuz|máscara/i.test(s.label))) {
       specs.push({ label: "Capuz & Máscara", value: "Capuz anatômico integrado com máscara facial de proteção UV50+" });
@@ -2438,7 +2445,17 @@ function getProductModeBHTML(liveP) {
     specs.push({ label: "Capuz", value: "Capuz anatômico integrado para proteção solar estendida" });
   }
 
-  if (!isFusionModal && !isHybridModal && !isRoundNeckModal && !isHoodedModal && archetypeId === "uv_performance") {
+  if (isRoundNeckModal) {
+    specs = specs.map(s => {
+      if (/gola|fechamento/i.test(s.label)) {
+        return { label: "Gola", value: "Gola redonda canelada anatômica com reforço interno" };
+      }
+      return s;
+    });
+    if (!specs.some(s => /gola/i.test(s.label))) {
+      specs.push({ label: "Gola", value: "Gola redonda canelada anatômica com reforço interno" });
+    }
+  } else if (!isFusionModal && !isHybridModal && !isRoundNeckModal && !isHoodedModal && archetypeId === "uv_performance") {
     if (!specs.some(s => /gola|fechamento/i.test(s.label))) {
       specs.push({ label: "Gola / Fechamento", value: "Gola padre anatômica com zíper e trava de segurança" });
     }
@@ -2450,7 +2467,7 @@ function getProductModeBHTML(liveP) {
       if (b.title) b.title = b.title.replace(/\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b/gi, "").trim();
       if (b.description) {
         b.description = b.description
-          .replace(/gola padre com cobertura no cursor do z[íi]per/gi, "capuz anatômico contínuo")
+          .replace(/gola padre com cobertura no cursor do z[íi]per/gi, isRoundNeckModal ? "gola careca anatômica" : "capuz anatômico contínuo")
           .replace(/\bcursor do z[íi]per\b/gi, "acabamento anatômico")
           .replace(/\bz[íi]per com trava de seguran[çc]a\b/gi, "conforto anatômico contínuo")
           .replace(/\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b/gi, "")
@@ -2461,7 +2478,7 @@ function getProductModeBHTML(liveP) {
     specs = specs.map(s => {
       const lbl = s.label.replace(/\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b/gi, "").trim() || "Acabamento";
       let val = s.value
-        .replace(/gola padre[^,;.]*/gi, isFusionModal ? "capuz com máscara facial integrada" : "capuz anatômico integrado")
+        .replace(/gola padre[^,;.]*/gi, isFusionModal ? "capuz com máscara facial integrada" : (isRoundNeckModal ? "Gola redonda canelada anatômica com reforço interno" : "capuz anatômico integrado"))
         .replace(/\bcursor do z[íi]per\b/gi, "acabamento contínuo")
         .replace(/\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b/gi, "")
         .replace(/\(\s*\)/g, "")

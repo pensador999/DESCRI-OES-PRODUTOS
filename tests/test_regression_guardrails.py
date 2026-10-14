@@ -1022,6 +1022,87 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
             for c in cats_list:
                 self.assertTrue(c.get("thumb", "").startswith("https://cdn.shopify.com/"), f"Thumb inválida em {sk}/{c.get('name')}")
 
+    def test_360_degree_audit_coherence_guardrails(self):
+        """Valida as 8 travas da Auditoria 360 Graus (ArmorX/Hybrid com Luva, Camisetas Manga Curta, Sonho de Criança, Infantil SKU 'I', Kit Casal, Tubeneck com estampa de Óculos/Isca, Varas sem rolamentos e Algodão sem Dry Fit)."""
+        engine = TemplateEngine()
+        builder = HTMLBuilder()
+
+        def render(prod, store_key="brk_fishing"):
+            arch = engine.detect_archetype(
+                prod.get("title", ""), prod.get("product_type", ""), prod.get("tags", ""),
+                vendor=prod.get("vendor", ""), sku=prod.get("master_sku") or prod.get("sku") or ""
+            )
+            enriched = engine.generate_narrative_from_template(prod, arch, prod.get("gallery", []), store_key=store_key)
+            return enriched, builder.build_shopify_html(enriched)
+
+        # 1. Camisa ArmorX / Hybrid com Luva JAMAIS deve receber Tabela de Medidas de Luvas (Largura da Palma)
+        for p_glove in [
+            {"title": "Camisa ArmorX Masculina Brk Traíra Master com Luva e Proteção Solar UV50", "master_sku": "CAX001P"},
+            {"title": "Camisa ArmorX Feminina Brk Agro Rosa com Proteção Solar UV50+", "master_sku": "CAX039BLPP"},
+            {"title": "Camisa de Pesca Masculina Brk Tucunaré Azul com Luva e Capuz Hybrid", "master_sku": "HYB001P"},
+        ]:
+            enriched, html = render(p_glove, "brk_fishing")
+            self.assertNotIn("Tabela de Medidas de Luvas", html)
+            self.assertIn("Punhos estendidos anatômicos com luva integrada", html)
+            if "BL" in p_glove["master_sku"]:
+                self.assertIn("Tabela de Medidas Feminina - Baby Look", html)
+            else:
+                self.assertIn("Tabela de Medidas Masculino / Unissex", html)
+
+        # 2. Camiseta Manga Curta (CASUAL / CM / APC) JAMAIS deve ter Gola Padre com Zíper ou subtítulo Manga Longa
+        _, html_short_uv = render({"title": "Camiseta Infantil Brk Tiozão Da Sukita Com Proteção Solar UV50+", "master_sku": "CM387IPP"}, "brk_fishing")
+        self.assertNotIn("z\u00edper", html_short_uv.lower())
+        self.assertIn("Gola redonda canelada anatômica", html_short_uv)
+        self.assertIn("Mangas curtas com acabamento reforçado", html_short_uv)
+        self.assertIn("Camiseta Manga Curta UV50+", html_short_uv)
+
+        _, html_motors_cotton = render({"title": "Camiseta Algodão Premium Brk Fusca Clássico", "master_sku": "APC010P"}, "brk_motors")
+        self.assertIn("Camiseta Manga Curta Algodão Premium", html_motors_cotton)
+        self.assertIn("encontros automotivos", html_motors_cotton)
+        self.assertNotIn("no campo e na cidade", html_motors_cotton)
+
+        # 3. Estampa adulta "Sonho de Criança" JAMAIS deve receber tabela Infantil
+        _, html_sonho = render({"title": "Camisa Masculina Brk Sonho de Criança Vermelho Com Proteção Solar UV50+", "master_sku": "C01684PP"}, "brk_agro")
+        self.assertIn("Tabela de Medidas Masculino / Unissex", html_sonho)
+        self.assertNotIn("Guia de Tamanhos Infantil", html_sonho)
+
+        # 4. Camisa com sufixo SKU Infantil (ex: C02577I) sem palavra "Infantil" no título deve ser reconhecida como Infantil (exceto C0694I)
+        enr_inf, html_inf = render({"title": "Camisa de Pesca Brk Traíra Attack Com Proteção Solar UV50+", "master_sku": "C02577I"}, "brk_fishing")
+        self.assertTrue(enr_inf["is_kids"])
+        self.assertIn("Guia de Tamanhos Infantil (1 a 13 Anos)", html_inf)
+
+        enr_c0694i, html_c0694i = render({"title": "Camisa de Pesca Feminina Brk Robalo Rosa Com Proteção Solar UV50+", "master_sku": "C0694I"}, "brk_fishing")
+        self.assertFalse(enr_c0694i["is_kids"])
+        self.assertIn("Tabela de Medidas Feminina - Baby Look", html_c0694i)
+
+        # 5. Kit Camisas UV50 Casal deve exibir AMBAS as tabelas (MASCULINO e FEMININO BABY LOOK)
+        _, html_casal = render({"title": "Kit Camisas UV50 Casal Agro Brk Rodeio Country", "master_sku": "ADV116PP_ADV116BLPP"}, "brk_agro")
+        self.assertIn("Tabela de Medidas Kit Casal - Masculino & Feminino Baby Look", html_casal)
+        self.assertIn("MASCULINO", html_casal)
+        self.assertIn("FEMININO (BABY LOOK)", html_casal)
+
+        # 6. Bandana Tubeneck com estampa "Caramelo de Óculos" ou "Iscas" ou "Anzol Garateia" deve ter Guia de Dimensões
+        for t_neck in [
+            "Bandana Tubeneck Brk Caramelo de Óculos Com Proteção Solar UV50+",
+            "Bandana Tubeneck Brk Iscas Artificiais Com Proteção Solar UV50+",
+            "Lenço Bandana Brk Coleção Anzol Garateia Com Proteção Solar UV50+",
+        ]:
+            _, html_neck = render({"title": t_neck, "master_sku": "T432"}, "brk_fishing")
+            self.assertIn("Dimensões - Bandana Tubular Seamless Multifuncional", html_neck)
+
+        # 7. Varas de pesca JAMAIS devem mencionar rolamentos
+        _, html_rod = render({"title": "Vara Para Carretilha Albatroz Kaluma 5'6\" 1,68m 8-17lbs", "master_sku": "VARA01"}, "brk_fishing")
+        self.assertNotIn("rolamento", html_rod.lower())
+
+        # 8. Camisa Algodão Premium com body_html legado citando "dry" JAMAIS deve gerar ficha com Dry Fit
+        _, html_cotton = render({
+            "title": "Camiseta Masculina Algodão Premium Brk Agro Nelore",
+            "master_sku": "CASUAL100",
+            "body_html": "<p>Conforto térmico dry e maciez no campo</p>"
+        }, "brk_agro")
+        self.assertNotIn("dry fit", html_cotton.lower())
+        self.assertIn("100% Algodão Premium Penteado", html_cotton)
+
 
 class TestBRKStudioVerticalization(unittest.TestCase):
     def test_persona_manager_coverage(self):

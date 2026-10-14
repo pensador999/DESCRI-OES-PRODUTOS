@@ -120,6 +120,17 @@ def _rule_bearings_in_rod(arch: str, title: str, body: str) -> Optional[str]:
     return None
 
 
+def _rule_wrong_size_guide_in_shirt(arch: str, title: str, body: str) -> Optional[str]:
+    if arch in KIDS_SHIRT_TABLE_OK:
+        if "Tabela de Medidas de Luvas" in body:
+            return "Tabela de Medidas de Luvas em camisa/camiseta (ex.: ArmorX/Hybrid com Luva)"
+        if "Tabela de Medidas - Calças & Bermudas" in body:
+            return "Tabela de Medidas de Calças/Bermudas em camisa/camiseta"
+        if "sonho de criança" in title.lower() and not re.search(r"\b(infantil|kids|juvenil)\b", title.lower()) and "Guia de Tamanhos Infantil" in body:
+            return "Guia de Tamanhos Infantil em camisa adulta 'Sonho de Criança'"
+    return None
+
+
 # (id, severidade, descricao, funcao(arq, titulo, corpo_html) -> trecho_encontrado | None)
 RULES: List[Dict[str, Any]] = [
     {"id": "textil_em_nao_textil", "severity": "ERROR",
@@ -143,6 +154,9 @@ RULES: List[Dict[str, Any]] = [
     {"id": "tabela_infantil_de_camisa_em_nao_camisa", "severity": "ERROR",
      "desc": "Tabela infantil de camisa (torax/manga) em produto que nao e camisa",
      "check": _rule_kids_shirt_table_in_non_shirt},
+    {"id": "tabela_incorreta_em_camisa", "severity": "ERROR",
+     "desc": "Camisa/camiseta recebendo tabela de luvas, calcas ou infantil indevida",
+     "check": _rule_wrong_size_guide_in_shirt},
     {"id": "dryfit_em_camisa_de_algodao", "severity": "WARNING",
      "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
      "check": _rule_dryfit_in_cotton_shirt},
