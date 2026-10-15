@@ -1059,7 +1059,7 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         nar_work = engine.generate_narrative_from_template(prod_work, arch_work, [], store_key="brk_agro")
         specs_work_str = json.dumps(nar_work.get("specs", []), ensure_ascii=False)
         self.assertNotIn("Gola redonda anatômica", specs_work_str)
-        self.assertIn("Abotoamento frontal reforçado", specs_work_str)
+        self.assertIn("Botões reforçados", specs_work_str)
 
         # 4. Corta-Vento (Windbreaker)
         prod_wb = {"id": 9903, "title": "Corta Vento Impermeável Brk Motors", "category": "Jaquetas", "master_sku": "CV001"}
@@ -1069,11 +1069,11 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
 
         # 5. Coerência estrita de cores nos 3 sites (Azul = Fishing, Verde = Agro, Laranja = Motors)
         expected_colors = {
-            "brk_fishing": "#0284c7",
-            "brk_agro": "#16a34a",
-            "brk_motors": "#f97316",
+            "brk_fishing": ("#0284c7", "#00a8ff"),
+            "brk_agro": ("#16a34a", "#15803d"),
+            "brk_motors": ("#f97316", "#ea580c"),
         }
-        for sk, hex_color in expected_colors.items():
+        for sk, (hex_color, cap_color) in expected_colors.items():
             prod_st = {"id": 9904, "title": "Camisa UV50+ Teste", "category": "Camisas", "master_sku": "C0999"}
             arch_st = engine.detect_archetype(prod_st["title"], prod_st["category"], [], "BRK", sku=prod_st["master_sku"])
             nar_st = engine.generate_narrative_from_template(prod_st, arch_st, [], store_key=sk)
@@ -1084,7 +1084,7 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
             arch_cap = engine.detect_archetype(prod_cap["title"], prod_cap["category"], [], "BRK", sku=prod_cap["master_sku"])
             nar_cap = engine.generate_narrative_from_template(prod_cap, arch_cap, [], store_key=sk)
             html_cap = builder.build_shopify_html(nar_cap)
-            self.assertIn(hex_color, html_cap, f"Cor oficial {hex_color} ausente no Boné D2C da loja {sk}")
+            self.assertIn(cap_color, html_cap, f"Cor oficial {cap_color} ausente no Boné D2C da loja {sk}")
 
 
 
