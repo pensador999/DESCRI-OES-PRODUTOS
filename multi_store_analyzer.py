@@ -233,8 +233,9 @@ def generate_store_ui(catalog_data: dict, output_dir: str, store_key: str):
     with open(html_file, "w", encoding="utf-8") as f:
         f.write(custom_html)
 
-    with open(artifact_file, "w", encoding="utf-8") as f:
-        f.write(custom_html)
+    if os.path.exists(artifact_dir):
+        with open(artifact_file, "w", encoding="utf-8") as f:
+            f.write(custom_html)
 
     print(f"[OK] Interface V2 isolada gerada em:")
     print(f"     -> {html_file}")
@@ -421,8 +422,9 @@ def generate_multi_store_hub(agro_data, motors_data):
     
     with open(hub_file, "w", encoding="utf-8") as f:
         f.write(hub_html)
-    with open(artifact_hub, "w", encoding="utf-8") as f:
-        f.write(hub_html)
+    if os.path.exists(os.path.dirname(artifact_hub)):
+        with open(artifact_hub, "w", encoding="utf-8") as f:
+            f.write(hub_html)
 
     print("\n[OK] Central Multi-Lojas Unificada gerada em:")
     print("     ->", hub_file)

@@ -1870,7 +1870,9 @@ class TemplateEngine:
             if len(non_png_rest) >= 2:
                 # Em galerias de 8 fotos BRK Rodeio/Curva, non_png_rest[0] é close-up do cabo/conjunto e non_png_rest[1] é faca na bainha
                 return img1, non_png_rest[0], non_png_rest[1]
-            return img1, cdn_images[3], cdn_images[4]
+            img2 = cdn_images[3] if len(cdn_images) > 3 else cdn_images[1]
+            img3 = cdn_images[4] if len(cdn_images) > 4 else (cdn_images[2] if len(cdn_images) > 2 else img2)
+            return img1, img2, img3
 
         # 5. Facas 10" Cabo em Madeira e Resina (Pescaria com Isca / Resina com Abridor - 6 a 8 fotos)
         # [0]=conjunto faca+bainha, [1]=ambientada, [2]=close-up do cabo em resina/isca, [3]=close-up lâmina, [4]=faca na bainha de couro
@@ -1883,7 +1885,9 @@ class TemplateEngine:
         # 6. Facas 10" em Inox Personalizadas / Abridor de Garrafa (6 a 7 fotos)
         # [0]=conjunto faca+bainha, [1]=ambientada, [2]=close-up cabo madeira e gravação, [3]=bainha de couro costurada
         if "inox" in t_low and ('10"' in t_low or "10 " in t_low or "abridor" in t_low):
-            return cdn_images[0], cdn_images[2], cdn_images[3]
+            img2 = cdn_images[2] if len(cdn_images) > 2 else cdn_images[1]
+            img3 = cdn_images[3] if len(cdn_images) > 3 else (cdn_images[2] if len(cdn_images) > 2 else img2)
+            return cdn_images[0], img2, img3
 
         # 7. Facas Artesanais Gaúchas Forjadas (4 a 7 fotos: [0]=faca+bainha, [3]=detalhe lâmina/cabo, [1]=certificado/especificações)
         if "artesanal" in t_low and len(cdn_images) >= 4:
