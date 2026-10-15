@@ -727,8 +727,8 @@ class TemplateEngine:
                 },
                 "base_specs": [
                     {"label": "Categoria", "default": "Equipamento de Precisão para Pesca Esportiva"},
-                    {"label": "Estrutura", "default": "Construção reforçada de baixo peso e alta rigidez estrutural"},
-                    {"label": "Desempenho", "default": "Componentes de precisão com alta resistência à tração e atrito"},
+                    {"label": "Estrutura", "default": "Liga reforçada de baixo peso e alta rigidez estrutural"},
+                    {"label": "Mecânica", "default": "Componentes de precisão com rolamentos selados"},
                     {"label": "Aplicação", "default": "Pesca esportiva em rios, lagos, pesqueiros e mar aberto"},
                     {"label": "Origem / Distribuição", "default": "Produto original com procedência e garantia"}
                 ],
@@ -1072,8 +1072,8 @@ class TemplateEngine:
         if any(w in t for w in ["aromatizante", "cheirinho", "difusor", "aromatizador", "odorizador", "little trees", "odor"]):
             return "accessories_car_care"
 
-        # 1.1 Cabos, Acessórios Elétricos e Peças de Reposição (Para não cair em térmicos ou iscas)
-        if any(w in t for w in ["cabo plug", "cabo de alimentacao", "cabo de forca", "adaptador 12v"]):
+        # 1.1 Cabos, Fontes Conversoras, Acessórios Elétricos e Peças de Reposição (Para não cair em térmicos ou iscas)
+        if any(w in t for w in ["cabo plug", "cabo de alimentacao", "cabo de forca", "adaptador 12v", "fonte conversora", "fonte 110", "conversor 110"]):
             return "accessories_general"
 
         # 2. Copos Térmicos, Garrafas e Canecas (Prioridade Alta para evitar colisões com boné/isca/camisa)
@@ -1081,7 +1081,7 @@ class TemplateEngine:
             any(w in t for w in ["copo termico", "garrafa termica", "caneca termica", "cuia termica", "cooler"]) or
             ((any(w in t for w in ["copo", "garrafa", "caneca", "cantil", "cuia"]) or "elber" in t) and
              any(w in t for w in ["termic", "termo", "inox", "aco inox", "vacuum", "vazio", "geladeira", "litros"]) and
-             not any(w in t for w in ["cabo", "plug", "abridor"])) or
+             not any(w in t for w in ["cabo", "plug", "abridor", "fonte conversora", "fonte 110"])) or
             (t.startswith("copo ") or t.startswith("garrafa ") or t.startswith("caneca ") or t.startswith("cuia "))
         )
         if is_drinkware and not any(w in t for w in ["camisa", "camiseta", "abridor de garrafa"]):
@@ -1114,6 +1114,10 @@ class TemplateEngine:
         # 8. Calças, Bermudas & Shorts (Prioridade antes de camisa para não cair em uv_performance)
         if any(w in t for w in ["calca", "calcas", "bermuda", "bermudas", "shorts", "short", "calcao"]) and not any(w in t for w in ["camisa", "camiseta"]):
             return "pants_cargo_tactical"
+
+        # 8.5 Cutelaria, Facas, Canivetes & Kits Churrasco (Prioridade antes de chapéus/camisas para que Kit Faca Karandá e Kit Churrasco não caiam em chapéu/agro_field)
+        if any(w in t for w in ["faca", "facas", "cutelo", "cutelaria", "lamina", "bainha", "canivete", "chaira", "afiador", "kit churrasco"]) and not any(w in t for w in ["camisa", "camiseta", "bone", "chapeu", "copo", "garrafa"]):
+            return "cutlery_unique"
 
         # 9. Chapéus: Distinção estrita entre Country/Feltro/Cowboy vs Safári/Outdoor/Pescador
         if any(w in t for w in ["chapeu", "chapeus"]):
@@ -1148,7 +1152,7 @@ class TemplateEngine:
             if is_button_work and not any(w in t for w in ["ziper"]):
                 return "shirts_button_work"
 
-            # 10.3 Camisetas casuais de algodão (Agro / Campo)
+            # 10.3 Camisetas casuais de algodão (Agro / Campo / Lifestyle)
             if any(w in t for w in ["algodao", "campo", "agro", "fazenda", "trator"]):
                 return "agro_field"
 
@@ -1162,7 +1166,7 @@ class TemplateEngine:
             return "motors_speed"
 
         # 11. Cutelaria & Facas
-        if any(w in t for w in ["faca", "facas", "cutelo", "cutelaria", "lamina", "bainha", "canivete", "chaira", "afiador"]):
+        if any(w in t for w in ["faca", "facas", "cutelo", "cutelaria", "lamina", "bainha", "canivete", "chaira", "afiador", "kit churrasco"]):
             return "cutlery_unique"
 
         # 12. Calçados (Sandálias Boaonda vs Tênis/Botinas)
@@ -1196,7 +1200,7 @@ class TemplateEngine:
             return "fishing_lures"
 
         # 18. Acessórios Gerais, Chaveiros, Adesivos, Camping & Caiaque
-        if any(w in t for w in ["chaveiro", "adesivo", "adesivos", "sticker", "stickers", "patch", "emblema", "pin ", "capa de caiaque", "caiaque", "barraca", "fogareiro", "mesa dobravel", "cadeira", "coleira", "suporte magnetico", "personalizacao nome", "cabo plug", "fita para protecao"]):
+        if any(w in t for w in ["chaveiro", "adesivo", "adesivos", "sticker", "stickers", "patch", "emblema", "pin ", "capa de caiaque", "caiaque", "barraca", "fogareiro", "mesa dobravel", "cadeira", "coleira", "suporte magnetico", "personalizacao nome", "cabo plug", "fita para protecao", "fonte conversora"]):
             return "accessories_general"
 
         # 19. Copos e Térmicos (secundário)
@@ -1220,6 +1224,8 @@ class TemplateEngine:
             return "accessories_general"
         if any(w in text for w in ["calca", "bermuda", "shorts"]):
             return "pants_cargo_tactical"
+        if any(w in text for w in ["faca", "chaira", "cutelaria", "canivete", "churrasco"]):
+            return "cutlery_unique"
         if any(w in text for w in ["pralana", "american hat", "karanda", "feltro", "country"]):
             return "hats_country_cowboy"
         if any(w in text for w in ["manguito", "manguitos"]):
@@ -1276,8 +1282,10 @@ class TemplateEngine:
 
         if store_key == "brk_motors":
             if archetype_id in ("uv_performance", "motors_speed", "agro_field", "shirts_button_work"):
-                if any(w in t_low for w in ["jaqueta", "corta vento", "moletom", "segunda pele"]):
+                if any(w in t_low for w in ["jaqueta", "corta vento", "moletom"]):
                     return "Jaquetas & Corta Vento"
+                if "segunda pele" in t_low or sku_low.startswith("raglan"):
+                    return "Camisas Segunda Pele"
                 return "Jerseys & Camisas Motors"
             if archetype_id in ("neck_gaiters_balaclavas", "sun_sleeves_manguitos", "gloves_tactical_fishing"):
                 return "Proteção & Luvas Motors"
@@ -1330,6 +1338,11 @@ class TemplateEngine:
             elif archetype_id == "shirts_button_work":
                 if any(w in full for w in ["zíper", "ziper", "cursor", "trava", "sublimad", "gola padre"]):
                     continue
+
+            # 2.1 Camisetas de Algodão (agro_field): ZERO Dry Fit ou Poliéster (evita contradição Algodão vs Dry Fit)
+            elif archetype_id == "agro_field":
+                if any(w in full for w in ["dry fit", "dryfit", "poliéster", "poliester", "xtech"]):
+                    s = {"label": s.get("label", "Composição"), "value": "100% Algodão Premium Penteado com toque macio"}
 
             # 3. Calças / Bermudas: ZERO mangas, ZERO gola alta, ZERO zíper frontal no peito
             elif archetype_id == "pants_cargo_tactical":
@@ -1426,13 +1439,6 @@ class TemplateEngine:
             
             is_fusion = any(w in t_low for w in ["fusion", "fusionx"]) or "fusion" in sku_low or "fusion" in tags_low
             is_hybrid = any(w in t_low for w in ["hybrid"]) or sku_low.startswith("hyb") or "hybrid" in sku_low or "hybrid" in tags_low
-            is_armorx_shirt = sku_low.startswith("cax") or ("armorx" in t_low and "camisa" in t_low)
-            is_has_glove = any(w in t_low for w in ["com luva", "e luva", "luva integrada"]) or is_armorx_shirt
-            is_short_sleeve = (
-                any(w in t_low for w in ["manga curta", "manga-curta", "camiseta", "camisetas", "t-shirt", "tshirt"])
-                or ("curta" in t_low and "manga" in t_low)
-                or bool(re.match(r'^(?:cm|casual|bp|apc)\d', sku_low))
-            ) and not any(w in t_low for w in ["manga longa", "manga-longa"])
             
             specs = [
                 {"label": "Prazo de Produção", "value": prazo_val},
@@ -1448,12 +1454,72 @@ class TemplateEngine:
             elif is_hybrid:
                 specs.append({"label": "Capuz", "value": "Capuz anatômico integrado de alta cobertura solar"})
                 specs.append({"label": "Punhos", "value": "Punhos anatômicos com abertura para o polegar (dedeira)"})
-            elif is_short_sleeve:
-                specs.append({"label": "Gola", "value": "Gola redonda canelada anatômica com pesponto reforçado"})
-                specs.append({"label": "Mangas", "value": "Mangas curtas com acabamento reforçado em pesponto duplo"})
-            elif is_has_glove:
-                specs.append({"label": "Punhos / Luva", "value": "Punhos estendidos anatômicos com luva integrada para o dorso da mão"})
             return specs
+
+        title = product.get("title", "")
+        t_low = title.lower()
+        vendor = product.get("vendor", "")
+
+        # Especialização Cirúrgica para Equipamentos de Pesca (Evita 'rolamentos' em Varas, Linhas, Anzóis, Alicates e Suportes)
+        if archetype_id == "fishing_tackle_gear":
+            origem_val = f"Produto Original {vendor} com garantia oficial" if vendor else "Produto original com procedência e garantia"
+            is_rod_kit = "kit vara" in t_low and ("molinete" in t_low or "carretilha" in t_low)
+            is_rod = bool(re.search(r'\bvaras?\b', t_low)) and not is_rod_kit and not any(w in t_low for w in ["trava vara", "alça", "alca", "suporte", "porta vara"])
+            is_line = bool(re.search(r'\blinhas?\b', t_low))
+            is_hook_terminal = any(w in t_low for w in ["anzol", "anzóis", "anzois", "snap", "girador", "argola", "empate", "chumbada", "chumbo", "garateia", "garatéia"])
+            is_pliers = "alicate" in t_low or "passaguá" in t_low or "passagua" in t_low
+            is_belt_holder = any(w in t_low for w in ["cinto", "apoiador", "trava vara", "alça", "alca", "suporte"])
+
+            if is_rod_kit:
+                return [
+                    {"label": "Categoria", "value": f"Kit Conjunto Vara e Molinete {vendor}".strip()},
+                    {"label": "Vara (Blank & Passadores)", "value": "Blank em compósito resistente de 2 partes com passadores anti-atrito"},
+                    {"label": "Molinete (Recolhimento)", "value": "Carretel balanceado com sistema de fricção progressiva e recolhimento macio"},
+                    {"label": "Empunhadura", "value": "Cabo anatômico em EVA de alta densidade com Reel Seat firme"},
+                    {"label": "Origem / Distribuição", "value": origem_val},
+                ]
+            if is_rod:
+                return [
+                    {"label": "Categoria", "value": f"Vara de Pesca Esportiva {vendor}".strip()},
+                    {"label": "Blank (Corpo)", "value": "Compósito de alta sensibilidade e resistência à tração"},
+                    {"label": "Passadores", "value": "Passadores reforçados anti-atrito de alto desempenho"},
+                    {"label": "Cabo & Fixador", "value": "Cabo anatômico de alta aderência com Reel Seat de travamento firme"},
+                    {"label": "Origem / Distribuição", "value": origem_val},
+                ]
+            if is_line:
+                is_multi = any(w in t_low for w in ["multi", "x4", "x8", "j-braid", "vexter", "siglon", "rapinova"])
+                tipo_linha = "Multifilamento trançado de alta tenacidade" if is_multi else "Monofilamento / Fluorcarbono calibrado de alta resistência"
+                return [
+                    {"label": "Categoria", "value": f"Linha de Pesca {vendor}".strip()},
+                    {"label": "Construção", "value": tipo_linha},
+                    {"label": "Resistência", "value": "Alta resistência linear à tração, ao nó e à abrasão"},
+                    {"label": "Desempenho", "value": "Baixíssima memória mecânica para arremessos precisos"},
+                    {"label": "Origem / Distribuição", "value": origem_val},
+                ]
+            if is_hook_terminal:
+                return [
+                    {"label": "Categoria", "value": f"Terminal de Pesca de Alta Resistência {vendor}".strip()},
+                    {"label": "Material", "value": "Aço carbono / inox forjado de alta resistência à tração"},
+                    {"label": "Acabamento", "value": "Tratamento anticorrosivo para água doce e salgada"},
+                    {"label": "Precisão", "value": "Afiamento químico de penetração rápida" if "anz" in t_low else "Trava segura de alta pressão para troca rápida"},
+                    {"label": "Origem / Distribuição", "value": origem_val},
+                ]
+            if is_pliers:
+                return [
+                    {"label": "Categoria", "value": f"Ferramenta de Precisão e Contenção {vendor}".strip()},
+                    {"label": "Estrutura", "value": "Corpo metálico reforçado com proteção anticorrosiva"},
+                    {"label": "Empunhadura", "value": "Anatômica antiderrapante para firmeza com mãos molhadas"},
+                    {"label": "Aplicação", "value": "Contenção segura, manutenção de garatéias e corte de linhas"},
+                    {"label": "Origem / Distribuição", "value": origem_val},
+                ]
+            if is_belt_holder:
+                return [
+                    {"label": "Categoria", "value": f"Acessório de Suporte e Transporte para Pesca {vendor}".strip()},
+                    {"label": "Estrutura", "value": "Material reforçado de alta resistência mecânica e durabilidade"},
+                    {"label": "Ergonomia", "value": "Encaixe firme e seguro para proteção do equipamento"},
+                    {"label": "Aplicação", "value": "Apoio em brigas pesadas ou transporte seguro de varas"},
+                    {"label": "Origem / Distribuição", "value": origem_val},
+                ]
 
         if sibling_specs and len(sibling_specs) >= 2:
             raw_specs = [{"label": s["label"], "value": s["default"]} for s in sibling_specs]
@@ -1462,8 +1528,6 @@ class TemplateEngine:
         template = self.templates.get(archetype_id, self.templates["uv_performance"])
         base_specs = template["base_specs"]
         
-        title = product.get("title", "")
-        vendor = product.get("vendor", "")
         body = product.get("body_html", "") or ""
         tags = product.get("tags", [])
         if isinstance(tags, str):
@@ -1491,9 +1555,9 @@ class TemplateEngine:
                 elif "uv" in full_text:
                     val = "Proteção UV integrada ao tecido"
             
-            # 2. Composição / Tecido (uv_performance usa padrão oficial 90% Poliéster 10% Elastano / XTech Pro)
+            # 2. Composição / Tecido (agro_field / camisetas de algodão usam estritamente 100% Algodão Premium)
             elif archetype_id != "uv_performance" and ("composição" in label.lower() or "tecido" in label.lower()):
-                if archetype_id == "agro_field" or "algodão" in title.lower() or "algodao" in title.lower():
+                if archetype_id == "agro_field" or "algodão" in t_low or "algodao" in t_low:
                     val = "100% Algodão Premium Penteado com toque macio"
                 elif any(x in full_text for x in ["dry fit", "dryfit", "dry"]):
                     val = "100% Poliéster Tecnológico Dry Fit respirável"
@@ -1763,47 +1827,26 @@ class TemplateEngine:
         is_hooded = (is_apparel and any(w in t_low for w in ["capuz", "hood", "hoodie"])) or is_fusion or is_hybrid
         # is_kids só vale para vestuário: o texto/tabela infantil é de roupa (FPU 50+, Dry Fit, tórax/manga).
         # Óculos, calçados etc. com "Infantil" no título NÃO podem receber essa narrativa.
-        has_inf_img = any("inf" in str(u).lower().split("/")[-1] for u in (cdn_images or []))
-        is_kids_sku = bool(re.match(r'^(?:c0|c|cm|casual|ci|bp)\d+i(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_clean_for_flags)) and not ("feminina" in t_low and not has_inf_img)
-        is_kids = is_apparel and (any(w in t_low for w in ["infantil", "kids", "juvenil"]) or bool(re.search(r'\bmini\b', t_low)) or is_kids_sku)
-        if any(w in t_low for w in ["adulto", "unissex adulto"]) and not is_kids_sku and not any(w in t_low for w in ["infantil", "kids", "juvenil"]):
+        is_kids = is_apparel and (any(w in t_low for w in ["infantil", "kids", "juvenil"]) or bool(re.search(r'\bmini\b', t_low)))
+        if any(w in t_low for w in ["adulto", "unissex adulto"]):
             is_kids = False
+        is_segunda_pele = is_apparel and ("segunda pele" in t_low or sku_clean_for_flags.startswith("raglan"))
         is_short_sleeve = is_apparel and (
-            any(w in t_low for w in ["manga curta", "manga-curta", "camiseta", "camisetas", "t-shirt", "tshirt"]) or
-            ("curta" in t_low and "manga" in t_low) or
-            bool(re.match(r'^(?:cm|casual|bp|apc)\d', sku_clean_for_flags))
-        ) and not any(w in t_low for w in ["manga longa", "manga-longa"])
-        is_armorx_shirt = is_apparel and (sku_clean_for_flags.startswith("cax") or ("armorx" in t_low and "camisa" in t_low))
-        is_has_glove = (is_apparel and any(w in t_low for w in ["com luva", "e luva", "luva integrada"])) or is_armorx_shirt
+            any(w in t_low for w in ["manga curta", "manga-curta", "camiseta"])
+            or ("curta" in t_low and "manga" in t_low)
+            or sku_clean_for_flags.startswith(("casual", "bp", "cm"))
+        ) and not any(w in t_low for w in ["manga longa", "manga-longa"]) and not is_segunda_pele
+        is_has_glove = is_apparel and any(w in t_low for w in ["com luva", "e luva", "luva integrada"])
         is_female = (
             any(w in t_low for w in ["feminina", "feminino", "baby look", "babylook", "mulher"]) or
             "femin" in tags_low or
             (is_apparel and bool(re.search(r'bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_clean_for_flags)))
         ) and not is_kids
         is_round_neck = is_apparel and (
-            (is_short_sleeve and not any(w in t_low for w in ["ziper", "zíper"])) or
-            any(w in t_low for w in ["gola careca", "gola redonda", "sem zíper", "sem ziper", "t-shirt"]) or
-            ("camiseta" in t_low and not any(w in t_low for w in ["ziper", "zíper"]))
-        )
-        is_motors_cotton = (archetype_id == "agro_field") and (
-            store_key == "brk_motors" or
-            any(w in t_low for w in ["gs adventure", "big trail", "r1250", "street wear", "atacama", "rastro da serpente", "moto", "motors", "route 66", "machu picchu", "ushuaia", "travel far away", "all black"])
-        ) and not any(w in t_low for w in ["agro", "fazenda", "pecuária", "pecuaria", "nelore", "trator", "campo", "roça", "roca"])
-
-        # 0. Adaptação Algodão Premium Motors & Lifestyle Urbano/Duas Rodas
-        if is_motors_cotton:
-            act1["tag"] = "Algodão Premium & Lifestyle"
-            act1["fa_icon"] = "fa-solid fa-flag-checkered"
-            act1["title"] = "CONFORTO E PERSONALIDADE PARA APAIXONADOS POR MOTORES E VELOCIDADE"
-            act1["desc_tmpl"] = "Confeccionada em fibra 100% Algodão Premium selecionado, a {title} une toque extremamente macio, respirabilidade natural e estampa de alta definição que celebra a cultura automotiva e duas rodas com estilo autêntico."
-            act2["tag"] = "Conforto Natural & Caimento"
-            act2["fa_icon"] = "fa-solid fa-shirt"
-            act2["title"] = "TOQUE MACIO, ALTA RESPIRABILIDADE E CAIMENTO IMPECÁVEL"
-            act2["desc_tmpl"] = "O tecido de algodão penteado proporciona conforto térmico natural durante todo o dia, mantendo a pele fresca em encontros automotivos, viagens, passeios e no uso casual urbano."
-            act3["tag"] = "Acabamento & Durabilidade"
-            act3["fa_icon"] = "fa-solid fa-medal"
-            act3["title"] = "GOLA CANELADA REFORÇADA E COSTURAS DE ALTA DURABILIDADE"
-            act3["desc_tmpl"] = "Desenvolvida com reforço ombro a ombro, gola redonda canelada que não laceia e costuras duplas de alto padrão, garantindo que a peça mantenha sua forma e cores vivas lavagem após lavagem."
+            is_segunda_pele
+            or is_short_sleeve
+            or any(w in t_low for w in ["gola careca", "gola redonda", "sem zíper", "sem ziper", "t-shirt", "camisa casual", "casual"])
+        ) and not any(w in t_low for w in ["com zíper", "com ziper"])
 
         # 1. Adaptação Kids / Infantil (Eliminação de "homem e mulher", foco em aventura e proteção suave)
         if is_kids:
@@ -1822,6 +1865,12 @@ class TemplateEngine:
                 act3["fa_icon"] = "fa-solid fa-shield-heart"
                 act3["title"] = "COSTURAS PLANAS ANTI-ATRITO E MÁXIMA DURABILIDADE"
                 act3["desc_tmpl"] = "Construída com acabamento elástico de alta resistência que não pinica nem irrita a pele sensível das crianças, oferecendo caimento confortável que aguenta todas as aventuras infantis."
+
+        # 1.1 Adaptação Segunda Pele Térmica / UV (RAGLAN)
+        elif is_segunda_pele:
+            act1["tag"] = "Segunda Pele Térmica & UV50+"
+            act1["title"] = "CONFORTO TÉRMICO, AJUSTE ANATÔMICO E PROTEÇÃO SOLAR UV50+"
+            act1["desc_tmpl"] = "Projetada para atuar como uma verdadeira segunda pele sob jaquetas, macacões ou no uso direto ao ar livre, a {title} mantém o equilíbrio térmico corporal, reduz o atrito com equipamentos e garante proteção solar FPU 50+ com liberdade total de movimentos."
 
         # 2. Adaptação Feminina (Corte anatômico e caimento sob medida)
         elif is_female and archetype_id == "uv_performance" and not is_hooded:
@@ -1849,23 +1898,23 @@ class TemplateEngine:
             act3["title"] = "CAPUZ ANATÔMICO INTEGRADO E COSTURA REFORÇADA"
             act3["desc_tmpl"] = "Equipada com capuz anatômico integrado que oferece proteção solar 360° para nuca, orelhas e laterais do rosto contra a radiação forte e o vento, dispensando acessórios extras, com costuras planas reforçadas anti-atrito."
 
+        # 3.3 Adaptação Segunda Pele no Ato 3 (Gola redonda e mangas raglan sem zíper)
+        elif is_segunda_pele:
+            act3["tag"] = "Costuras Planas & Gola Anatômica"
+            act3["title"] = "MANGAS RAGLAN E COSTURAS PLANAS ANTI-ATRITO"
+            act3["desc_tmpl"] = "Construída com mangas de corte raglan esportivo, gola redonda anatômica e costuras planas reforçadas que eliminam pontos de pressão sob jaquetas, coletes ou mochilas."
+
         # 4. Adaptação Manga Curta (Elimina 'punhos anatômicos', injeta ventilação e barra pespontada)
-        elif is_short_sleeve and not is_motors_cotton:
+        elif is_short_sleeve:
             if "punhos anatômicos" in act3.get("desc_tmpl", "").lower():
-                act3["desc_tmpl"] = re.sub(
-                    r"punhos anatômicos[^.]*",
-                    "mangas curtas com barra em costura dupla reforçada que proporcionam ventilação ideal e liberdade nos braços",
-                    act3["desc_tmpl"],
-                    flags=re.IGNORECASE,
-                )
+                act3["desc_tmpl"] = act3["desc_tmpl"].replace("punhos anatômicos que não laceiam com o uso frequente", "mangas curtas com barra em costura dupla reforçada que proporcionam ventilação ideal e liberdade nos braços")
             if "manga longa" in act3.get("desc_tmpl", "").lower():
                 act3["desc_tmpl"] = act3["desc_tmpl"].replace("manga longa", "manga curta")
 
         # 5. Adaptação Gola Redonda / Sem Zíper (Elimina 'zíper com trava', injeta gola careca canelada)
-        elif is_round_neck and not is_motors_cotton:
-            if "zíper" in act3.get("title", "").lower() or "ziper" in act3.get("title", "").lower():
-                act3["title"] = "COSTURA REFORÇADA E GOLA REDONDA ANATÔMICA"
-                act3["desc_tmpl"] = "Acabamento de alto padrão com costuras planas anti-atrito, gola careca canelada reforçada ombro a ombro e caimento confortável para uso prolongado."
+        elif is_round_neck:
+            act3["title"] = "COSTURA REFORÇADA E GOLA REDONDA ANATÔMICA"
+            act3["desc_tmpl"] = "Acabamento de alto padrão com costuras planas anti-atrito, gola careca anatômica reforçada ombro a ombro e caimento confortável para uso prolongado."
 
         # 6. Adaptação Camisa com Luva Integrada
         elif is_has_glove:
@@ -1876,10 +1925,7 @@ class TemplateEngine:
         if is_back_view and archetype_id == "uv_performance" and not is_fusion and not is_hybrid and not is_hooded and not is_round_neck:
             act3["tag"] = "Design Traseiro & Acabamento"
             act3["title"] = "PAINEL TRASEIRO EM ALTA DEFINIÇÃO E COSTURAS REFORÇADAS"
-            if is_has_glove:
-                act3["desc_tmpl"] = "Painel traseiro com estampa nítida e sublimação de alta resolução que não desbota, estruturado com costuras planas reforçadas nos ombros e dorso e punhos estendidos com luva integrada para proteção do dorso das mãos."
-            else:
-                act3["desc_tmpl"] = "Painel traseiro com estampa nítida e sublimação de alta resolução que não desbota, estruturado com costuras planas reforçadas nos ombros e dorso para total liberdade de movimentos e resistência ao uso contínuo."
+            act3["desc_tmpl"] = "Painel traseiro com estampa nítida e sublimação de alta resolução que não desbota, estruturado com costuras planas reforçadas nos ombros e dorso para total liberdade de movimentos e resistência ao uso contínuo."
 
         sibling_specs = sibling_info.get("extracted_specs") if sibling_info else None
         specs = self.extract_product_specs(product, archetype_id, sibling_specs=sibling_specs)
@@ -1890,9 +1936,6 @@ class TemplateEngine:
         for s in specs:
             lbl = s.get("label", "")
             val = s.get("value", s.get("default", ""))
-
-            if is_motors_cotton and "uso recomendado" in lbl.lower():
-                val = "Dia a dia, encontros automotivos, viagens e lazer"
 
             # Fusion e Hybrid: Capuz e Dedeira sem zíper
             if is_fusion:
@@ -1932,8 +1975,9 @@ class TemplateEngine:
             if is_round_neck and not is_hooded:
                 if any(w in lbl.lower() for w in ["zíper", "ziper", "gola", "fechamento"]):
                     lbl = "Gola"
-                    val = "Gola redonda canelada anatômica com pesponto reforçado"
+                    val = "Gola redonda anatômica com acabamento reforçado anti-atrito"
                 val = re.sub(r'com zíper[^,;.]*', '', val, flags=re.IGNORECASE)
+                val = re.sub(r'gola padre[^,;.]*', 'gola redonda anatômica', val, flags=re.IGNORECASE)
 
             # Luva integrada em camisa
             if is_has_glove and not is_short_sleeve:
@@ -1946,8 +1990,13 @@ class TemplateEngine:
         if is_has_glove and not is_short_sleeve and not any("luva" in s["label"].lower() for s in new_specs):
             new_specs.append({"label": "Punhos / Luva", "value": "Punhos estendidos anatômicos com luva integrada para o dorso da mão"})
 
-        if archetype_id == "uv_performance" and not is_fusion and not is_hybrid and not is_hooded and not is_round_neck and not is_short_sleeve and not any(w in s["label"].lower() for s in new_specs for w in ["gola", "fechamento"]):
-            new_specs.append({"label": "Gola / Fechamento", "value": "Gola padre anatômica com zíper e trava de segurança"})
+        if archetype_id == "uv_performance" and not is_fusion and not is_hybrid and not is_hooded:
+            if is_round_neck:
+                if not any(w in s["label"].lower() for s in new_specs for w in ["gola", "fechamento"]):
+                    new_specs.append({"label": "Gola", "value": "Gola redonda anatômica com acabamento reforçado anti-atrito"})
+            else:
+                if not any(w in s["label"].lower() for s in new_specs for w in ["gola", "fechamento"]):
+                    new_specs.append({"label": "Gola / Fechamento", "value": "Gola padre anatômica com zíper e trava de segurança"})
 
         if is_fusion:
             if not any("capuz" in s["label"].lower() or "máscara" in s["label"].lower() for s in new_specs):
@@ -1962,9 +2011,10 @@ class TemplateEngine:
         elif is_hooded and not any("capuz" in s["label"].lower() for s in new_specs):
             new_specs.append({"label": "Capuz", "value": "Capuz anatômico integrado para proteção solar estendida"})
 
-        if is_fusion or is_hybrid:
+        if is_fusion or is_hybrid or is_round_neck:
             act3["title"] = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', act3["title"], flags=re.IGNORECASE).strip()
-            act3["desc_tmpl"] = re.sub(r'gola padre com cobertura no cursor do z[íi]per', 'capuz anatômico contínuo', act3["desc_tmpl"], flags=re.IGNORECASE)
+            replacement_collar = "capuz anatômico contínuo" if (is_fusion or is_hybrid) else "gola redonda anatômica"
+            act3["desc_tmpl"] = re.sub(r'gola padre com cobertura no cursor do z[íi]per', replacement_collar, act3["desc_tmpl"], flags=re.IGNORECASE)
             act3["desc_tmpl"] = re.sub(r'\bcursor do z[íi]per\b', 'acabamento anatômico', act3["desc_tmpl"], flags=re.IGNORECASE)
             act3["desc_tmpl"] = re.sub(r'\bz[íi]per com trava de seguran[çc]a\b', 'conforto anatômico contínuo', act3["desc_tmpl"], flags=re.IGNORECASE)
             act3["desc_tmpl"] = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', act3["desc_tmpl"], flags=re.IGNORECASE)
@@ -1972,7 +2022,7 @@ class TemplateEngine:
             new_clean_specs = []
             for sp in new_specs:
                 lbl_c = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', sp["label"], flags=re.IGNORECASE).strip()
-                replacement_hood = "capuz com máscara facial integrada" if is_fusion else "capuz anatômico integrado"
+                replacement_hood = "capuz com máscara facial integrada" if is_fusion else ("capuz anatômico integrado" if is_hybrid else "gola redonda anatômica")
                 val_c = re.sub(r'gola padre[^,;.]*', replacement_hood, sp["value"], flags=re.IGNORECASE)
                 val_c = re.sub(r'\bcursor do z[íi]per\b', 'acabamento contínuo', val_c, flags=re.IGNORECASE)
                 val_c = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', val_c, flags=re.IGNORECASE)
@@ -1984,10 +2034,228 @@ class TemplateEngine:
         if archetype_id == "uv_performance" and not is_kids:
             if store_key == "brk_agro" or any(w in t_low for w in ["agro", "campo", "rural", "trator", "fazenda", "pecuaria", "pecuária"]):
                 if "pescadores" in act1.get("desc_tmpl", ""):
-                    act1["desc_tmpl"] = act1["desc_tmpl"].replace("pescadores e entusiastas do ar livre", "o homem e a mulher do campo e entusiastas do ar livre").replace("os arremessos e manobras", "a rotina intensa no campo e manobras").replace("arremessos e manobras", "a rotina intensa no campo e manobras")
+                    act1["desc_tmpl"] = act1["desc_tmpl"].replace("pescadores e entusiastas do ar livre", "o homem e a mulher do campo e entusiastas do ar livre").replace("arremessos e manobras", "a rotina intensa no campo e manobras")
             elif store_key == "brk_motors" or any(w in t_low for w in ["moto", "trail", "cross", "velocidade", "motors", "pista"]):
                 if "pescadores" in act1.get("desc_tmpl", ""):
-                    act1["desc_tmpl"] = act1["desc_tmpl"].replace("pescadores e entusiastas do ar livre", "pilotos, motociclistas e aventureiros").replace("os arremessos e manobras", "a pilotagem e manobras").replace("arremessos e manobras", "a pilotagem e manobras")
+                    act1["desc_tmpl"] = act1["desc_tmpl"].replace("pescadores e entusiastas do ar livre", "pilotos, motociclistas e aventureiros").replace("arremessos e manobras", "a pilotagem e manobras")
+
+        # 8. Adaptação 360° para Camisetas de Algodão em BRK Motors (Lifestyle Duas Rodas vs Agro)
+        if archetype_id == "agro_field":
+            is_motors_cotton = (
+                store_key == "brk_motors"
+                or any(w in t_low for w in ["moto", "motocicl", "trail", "big trail", "adventure", "gs ", "r1250", "r1200", "grau", "244", "rossi", "ninja", "hornet", "xj6", "tiger", "africa twin", "harley", "custom", "pista", "velocidade", "piloto"])
+            )
+            if is_motors_cotton:
+                act1["tag"] = "Lifestyle Duas Rodas & Algodão Nobre"
+                act1["title"] = "ESTILO AUTÊNTICO DUAS RODAS COM CONFORTO PREMIUM"
+                act1["desc_tmpl"] = "Desenvolvida para apaixonados por motociclismo, estrada e liberdade, a {title} une estampa exclusiva de alta definição ao toque macio do algodão premium, garantindo presença marcante em encontros, viagens e no dia a dia urbano."
+                for sp in new_specs:
+                    if "uso recomendado" in sp["label"].lower():
+                        sp["value"] = "Encontros de motociclismo, viagens, passeios e uso casual no dia a dia"
+
+        # 9. Adaptação 360° por Subtipo de Equipamentos de Pesca (fishing_tackle_gear)
+        elif archetype_id == "fishing_tackle_gear":
+            if any(w in t_low for w in ["vara ", "vara de", "varas"]):
+                act1["tag"] = "Ação & Sensibilidade de Arremesso"
+                act1["title"] = "BLANK DE ALTA SENSIBILIDADE E ARREMESSOS DE PRECISÃO"
+                act1["desc_tmpl"] = "Projetada para pescadores que exigem leitura imediata da isca e fisgadas rápidas, a {title} combina leveza, equilíbrio de blank e reserva de potência para dominar predadores esportivos com total controle."
+                act2["tag"] = "Passadores & Cabo Ergonômico"
+                act2["title"] = "PASSADORES RESISTENTES À ABRASÃO E EMPUNHADURA FIRME"
+                act2["desc_tmpl"] = "Equipada com passadores dimensionados para reduzir o atrito de linhas multifilamento e monofilamento, além de reel seat anatômico e cabo ergonômico de alta aderência para horas de arremessos sem fadiga."
+                act3["tag"] = "Resistência & Envergadura"
+                act3["title"] = "RESERVA DE POTÊNCIA PARA BRIGAS INTENSAS"
+                act3["desc_tmpl"] = "Construção robusta que distribui a tensão de forma progressiva ao longo do blank, garantindo segurança nas fisgadas e durabilidade superior em água doce ou salgada."
+            elif any(w in t_low for w in ["linha ", "multifilamento", "monofilamento", "fluorocarbon", "leader"]):
+                act1["tag"] = "Resistência Linear & Sensibilidade"
+                act1["title"] = "ALTA RESISTÊNCIA À TRAÇÃO E SENSIBILIDADE IMEDIATA"
+                act1["desc_tmpl"] = "Desenvolvida para oferecer máxima confiabilidade entre o pescador e o troféu, a {title} entrega diâmetro uniforme, baixíssima memória mecânica e resposta instantânea na fisgada."
+                act2["tag"] = "Arremesso Suave & Abrasão"
+                act2["title"] = "DESLIZAMENTO MACIO NOS PASSADORES E PROTEÇÃO ANTI-ABRASÃO"
+                act2["desc_tmpl"] = "Superfície tratada para reduzir o atrito nos passadores, permitindo arremessos mais longos e silenciosos, além de elevada resistência contra estruturas submersas, galhadas e pedras."
+                act3["tag"] = "Força de Nó & Durabilidade"
+                act3["title"] = "SEGURANÇA SUPERIOR EM NÓS E TENSÃO CONTÍNUA"
+                act3["desc_tmpl"] = "Fibras selecionadas com tratamento impermeabilizante que evita absorção de água e preserva a resistência original mesmo após longas jornadas de pesca."
+            elif any(w in t_low for w in ["anzol", "anzois", "anzóis", "garateia", "garatéia", "snap", "girador", "encastoado", "chumbada", "boia", "bóia", "jig head"]):
+                act1["tag"] = "Fisgada Rápida & Segurança"
+                act1["title"] = "AÇO DE ALTA RESISTÊNCIA E CONFIABILIDADE EXTREMA"
+                act1["desc_tmpl"] = "Componente essencial para não perder o troféu na hora decisiva, o(a) {title} é fabricado(a) em liga metálica de alta tenacidade para suportar forte tração sem abrir ou deformar."
+                act2["tag"] = "Precisão & Acabamento"
+                act2["title"] = "GEOMETRIA PRECISA E PROTEÇÃO ANTI-CORROSÃO"
+                act2["desc_tmpl"] = "Acabamento técnico com tratamento superficial anticorrosivo que preserva a integridade e a eficiência mecânica em pescarias de água doce ou salgada."
+                act3["tag"] = "Performance Profissional"
+                act3["title"] = "PADRONIZAÇÃO RIGOROSA PARA MONTAGENS SEGURAS"
+                act3["desc_tmpl"] = "Dimensionamento exato que garante equilíbrio na apresentação da isca e máxima segurança durante o trabalho e a briga com grandes peixes."
+            elif any(w in t_low for w in ["alicate", "balança", "balanca", "pegador", "boga", "passagua", "passaguá", "puçá", "puca", "cinto apoiador"]):
+                act1["tag"] = "Manuseio Seguro & Precisão"
+                act1["title"] = "ESTRUTURA DE ALTA RESISTÊNCIA PARA CONTROLE TOTAL"
+                act1["desc_tmpl"] = "Acessório indispensável para o pescador esportivo, o(a) {title} garante manuseio firme, seguro e rápido durante a contenção do peixe e operação da tralha."
+                act2["tag"] = "Ergonomia & Firmeza"
+                act2["title"] = "EMPUNHADURA ANATÔMICA E OPERAÇÃO PRÁTICA"
+                act2["desc_tmpl"] = "Projetado para oferecer pegada firme mesmo em ambiente úmido, proporcionando praticidade e segurança contra acidentes."
+                act3["tag"] = "Durabilidade Naval"
+                act3["title"] = "MATERIAIS RESISTENTES À CORROSÃO E AO USO INTENSO"
+                act3["desc_tmpl"] = "Construído com componentes resistentes à oxidação e à umidade constante, acompanhando o pescador por muitas temporadas em rios, represas ou mar."
+
+        # 10. Adaptação 360° para Geladeiras Portáteis e Bolsas Térmicas (drinkware_thermo)
+        elif archetype_id == "drinkware_thermo":
+            if "geladeira" in t_low:
+                act1["tag"] = "Refrigeração Portátil 12V/24V"
+                act1["title"] = "COMPRESSOR DE ALTA EFICIÊNCIA PARA EXPEDIÇÕES E ESTRADA"
+                act1["desc_tmpl"] = "Desenvolvida para garantir conservação térmica profissional em viagens, pescarias, caminhões, motorhomes e acampamentos, a {title} entrega refrigeração rápida e estável mesmo sob altas temperaturas externas."
+                act2["tag"] = "Economia de Bateria & Controle"
+                act2["title"] = "PAINEL DIGITAL INTELIGENTE COM PROTEÇÃO DE BATERIA"
+                act2["desc_tmpl"] = "Conta com controle preciso de temperatura e módulo inteligente de proteção contra descarga da bateria veicular, operando com baixo consumo energético e mínima emissão de ruído."
+                act3["tag"] = "Gabinete Robusto & Isolamento"
+                act3["title"] = "ESTRUTURA REFORÇADA PARA TERRENOS SEVEROS"
+                act3["desc_tmpl"] = "Isolamento térmico de alta densidade, trava de tampa segura e construção resistente a vibrações e inclinações em trilhas, barcos e estradas."
+                new_specs = [
+                    {"label": "Alimentação", "value": "12V / 24V DC (bateria veicular/náutica)"},
+                    {"label": "Tecnologia de Refrigeração", "value": "Compressor hermético de alta performance"},
+                    {"label": "Controle de Temperatura", "value": "Painel digital com ajuste preciso e módulo protetor de bateria"},
+                    {"label": "Isolamento", "value": "Poliuretano expandido de alta densidade livre de CFC"},
+                    {"label": "Aplicação", "value": "Pesca, camping, overland, caminhões, barcos e viagens"}
+                ]
+            elif any(w in t_low for w in ["bolsa termica", "bolsa térmica", "caixa termica", "caixa térmica", "cooler"]):
+                act1["tag"] = "Conservação Térmica Portátil"
+                act1["title"] = "ISOLAMENTO TÉRMICO DE ALTA DENSIDADE PARA SUAS AVENTURAS"
+                act1["desc_tmpl"] = "Perfeita para manter bebidas e alimentos na temperatura ideal durante pescarias, viagens e lazer ao ar livre, a {title} alia excelente capacidade interna e praticidade de transporte."
+                act2["tag"] = "Impermeabilidade & Higiene"
+                act2["title"] = "REVESTIMENTO INTERNO SELADO E FÁCIL DE LIMPAR"
+                act2["desc_tmpl"] = "Camada interna impermeável que evita vazamentos, não retém odores e facilita a higienização rápida após o uso."
+                act3["tag"] = "Transporte Confortável"
+                act3["title"] = "ESTRUTURA EXTERNA RESISTENTE E ALÇAS REFORÇADAS"
+                act3["desc_tmpl"] = "Construída com materiais externos resistentes à abrasão, fechamento superior reforçado de alta vedação e alças ergonômicas para transporte seguro em qualquer ambiente."
+                new_specs = [
+                    {"label": "Construção Externa", "value": "Material sintético de alta resistência à abrasão e respingos"},
+                    {"label": "Isolamento Térmico", "value": "Espuma térmica de célula fechada com manta aluminizada interna"},
+                    {"label": "Revestimento Interno", "value": "Impermeável, atóxico e de fácil higienização"},
+                    {"label": "Transporte", "value": "Alças reforçadas com ajuste ergonômico"},
+                    {"label": "Uso Recomendado", "value": "Pescarias, praia, camping, viagens e dia a dia"}
+                ]
+
+        # 11. Adaptação 360° para Calça Jeans / Denim (pants_cargo_tactical)
+        elif archetype_id == "pants_cargo_tactical" and any(w in t_low for w in ["jeans", "denim"]):
+            act1["tag"] = "Denim Encorpado & Tradição"
+            act1["title"] = "JEANS DE ALTA GRAMATURA PARA A LIDA E O DIA A DIA"
+            act1["desc_tmpl"] = "Desenvolvida para suportar a rotina intensa no campo, viagens e uso casual com elegância rústica, a {title} une tecido Denim resistente a um corte anatômico que garante conforto na sela, na caminhonete ou na cidade."
+            act2["tag"] = "Conforto & Mobilidade"
+            act2["title"] = "CAIMENTO ESTRUTURADO COM LIBERDADE DE MOVIMENTOS"
+            act2["desc_tmpl"] = "Modelagem tradicional pensada para não prender os movimentos ao agachar ou montar, com toque macio interno e excelente estabilidade dimensional após a lavagem."
+            act3["tag"] = "Costuras Reforçadas & Rebites"
+            act3["title"] = "ACABAMENTO REFORÇADO COM 5 BOLSOS FUNCIONAIS"
+            act3["desc_tmpl"] = "Equipada com 5 bolsos funcionais profundos, passantes largos para cinto country, zíper metálico de alta trava e costuras reforçadas nos pontos de maior tensão."
+            new_specs = [
+                {"label": "Tecido Principal", "value": "Denim / Jeans de alta gramatura e resistência"},
+                {"label": "Modelagem", "value": "Tradicional / Country anatômica com ótimo caimento"},
+                {"label": "Bolsos", "value": "5 bolsos funcionais profundos com rebites de reforço"},
+                {"label": "Costuras & Cós", "value": "Pesponto reforçado e passantes largos para cinto"},
+                {"label": "Fechamento", "value": "Braguilha com zíper metálico reforçado e botão personalizado"},
+                {"label": "Indicação de Uso", "value": "Lida no campo, rodeios, viagens e uso diário"}
+            ]
+
+        # 12. Adaptação 360° para Botinas Country / Agro (closed_footwear_sneakers)
+        elif archetype_id == "closed_footwear_sneakers" and any(w in t_low for w in ["botina", "bota "]):
+            act1["tag"] = "Tradição & Robustez no Campo"
+            act1["title"] = "CONSTRUÇÃO REFORÇADA PARA A LIDA E O ESTILO COUNTRY"
+            act1["desc_tmpl"] = "Projetada para enfrentar o trabalho pesado na fazenda, terrenos irregulares e uso prolongado com máximo conforto, a {title} entrega proteção superior aos pés e durabilidade comprovada."
+            act2["tag"] = "Solado de Alta Tração"
+            act2["title"] = "ADERÊNCIA SEGURA E ABSORÇÃO DE IMPACTO"
+            act2["desc_tmpl"] = "Solado tratorado antiderrapante de alta resistência, garantindo estabilidade na terra, lama ou piso molhado, aliado a palmilha macia que reduz a fadiga plantar."
+            act3["tag"] = "Calce Fácil & Durabilidade"
+            act3["title"] = "ACABAMENTO RESISTENTE COM AJUSTE ANATÔMICO NO TORNOZELO"
+            act3["desc_tmpl"] = "Cabedal estruturado de alta resistência com elásticos laterais reforçados e puxador, facilitando o calce rápido e firme no dia a dia."
+            new_specs = [
+                {"label": "Cabedal", "value": "Couro / Material de alta resistência com costuras reforçadas"},
+                {"label": "Solado", "value": "Borracha antiderrapante de alta tração e durabilidade"},
+                {"label": "Palmilha", "value": "Anatômica em espuma de alta densidade antibacteriana"},
+                {"label": "Sistema de Calce", "value": "Calce fácil com elástico lateral reforçado e puxador"},
+                {"label": "Uso Recomendado", "value": "Lida no campo, agronegócio, cavalgadas e uso diário"}
+            ]
+
+        # 13. Adaptação 360° para Camisas de Botão Xadrez / UV50+ (shirts_button_work)
+        elif archetype_id == "shirts_button_work":
+            if "xadrez" in t_low:
+                act1["title"] = "PADRONAGEM XADREZ CLÁSSICA E ESTRUTURA DE ALTA DURABILIDADE"
+            if any(w in t_low for w in ["uv", "uv50", "solar", "fpu"]) and not any("proteção" in s["label"].lower() for s in new_specs):
+                new_specs.append({"label": "Proteção Solar", "value": "Fator UV50+ integrado ao tecido"})
+
+        # 14. Adaptação 360° para Equipamentos de Camping, Náutica e Acessórios Específicos (accessories_general)
+        elif archetype_id == "accessories_general":
+            if "barraca" in t_low:
+                act1["tag"] = "Abrigo & Impermeabilidade"
+                act1["title"] = "PROTEÇÃO CONFIÁVEL CONTRA CHUVA, VENTO E INSETOS"
+                act1["desc_tmpl"] = "Projetada para proporcionar noites seguras e confortáveis em acampamentos e expedições de pesca, a {title} combina montagem prática, ventilação eficiente e cobertura impermeável."
+                act2["tag"] = "Estrutura & Ventilação"
+                act2["title"] = "VARETAS FLEXÍVEIS DE FIBRA E TELA MOSQUITEIRO DE ALTA DENSIDADE"
+                act2["desc_tmpl"] = "Varetas interligadas que garantem estabilidade estrutural contra rajadas de vento e janelas com tela mosquiteiro ultrafina que mantêm a circulação de ar bloqueando insetos."
+                act3["tag"] = "Piso Reforçado & Portabilidade"
+                act3["title"] = "PISO ANTI-UMIDADE E BOLSA COMPACTA DE TRANSPORTE"
+                act3["desc_tmpl"] = "Fundo confeccionado em polietileno de alta resistência que isola a umidade do solo, acompanhando estacas metálicas, cordas de tensão e bolsa para transporte fácil."
+                new_specs = [
+                    {"label": "Sobreteto / Cobertura", "value": "Poliéster impermeabilizado com proteção contra chuva e sol"},
+                    {"label": "Estrutura", "value": "Varetas em fibra de vidro flexível de alta resistência"},
+                    {"label": "Piso", "value": "Polietileno de alta densidade anti-umidade (antifungo)"},
+                    {"label": "Ventilação", "value": "Tela mosquiteiro de poliéster superfino"},
+                    {"label": "Acessórios Inclusos", "value": "Estacas metálicas, cordas de fixação e bolsa de transporte"}
+                ]
+            elif any(w in t_low for w in ["cadeira", "banqueta", "mesa dobravel", "mesa dobrável", "mesa de camping"]):
+                act1["tag"] = "Conforto & Praticidade Outdoor"
+                act1["title"] = "ESTRUTURA DOBRÁVEL REFORÇADA PARA PESCA, CAMPING E LAZER"
+                act1["desc_tmpl"] = "Desenvolvida para garantir máximo conforto e estabilidade na beira do rio, no acampamento ou na praia, a {title} abre e fecha em segundos ocupando mínimo espaço no porta-malas."
+                act2["tag"] = "Estabilidade & Resistência"
+                act2["title"] = "ESTRUTURA TUBULAR ANTICORROSIVA E MATERIAL DE ALTA TENACIDADE"
+                act2["desc_tmpl"] = "Construída com estrutura metálica reforçada e material de alta tenacidade resistente ao peso, à umidade e à exposição solar."
+                act3["tag"] = "Transporte Descomplicado"
+                act3["title"] = "DESIGN COMPACTO E PONTEIRAS ESTABILIZADORAS"
+                act3["desc_tmpl"] = "Equipada com apoios estabilizadores para terrenos de terra, grama ou areia, sendo leve e prática para transportar em qualquer pescaria ou viagem."
+                new_specs = [
+                    {"label": "Estrutura", "value": "Tubos de aço/alumínio com pintura anticorrosiva"},
+                    {"label": "Material Principal", "value": "Tecido Oxford de alta tenacidade / Polímero reforçado"},
+                    {"label": "Sistema", "value": "Dobrável de montagem rápida e compacta"},
+                    {"label": "Uso Recomendado", "value": "Pesca esportiva, camping, praia e lazer ao ar livre"}
+                ]
+            elif "fogareiro" in t_low:
+                act1["tag"] = "Chama Potente & Portabilidade"
+                act1["title"] = "COZIMENTO RÁPIDO E SEGURO EM QUALQUER ACAMPAMENTO OU PESCARIA"
+                act1["desc_tmpl"] = "Projetado para preparar refeições e café fresco na beira do rio ou no camping com total praticidade, o {title} oferece chama estável, controle preciso de fogo e transporte compacto."
+                act2["tag"] = "Ignição & Segurança"
+                act2["title"] = "ACENDIMENTO PRÁTICO E CONTROLE GRADUAL DE CHAMA"
+                act2["desc_tmpl"] = "Sistema de ignição ágil que dispensa fósforos, válvula com trava de segurança para o cartucho de gás e queimador eficiente que otimiza o consumo."
+                act3["tag"] = "Estrutura & Limpeza"
+                act3["title"] = "APOIO FIRME PARA PANELAS E ALTA DURABILIDADE"
+                act3["desc_tmpl"] = "Suporte estável para panelas e chaleiras com proteção lateral contra vento, construído em liga metálica resistente ao calor intenso."
+                new_specs = [
+                    {"label": "Tipo", "value": "Fogareiro portátil para camping e pesca"},
+                    {"label": "Ignição", "value": "Acendimento automático piezoelétrico com ajuste de chama"},
+                    {"label": "Segurança", "value": "Trava de engate seguro com dispositivo de corte de pressão"},
+                    {"label": "Uso Recomendado", "value": "Camping, pescarias, expedições e viagens"}
+                ]
+            elif any(w in t_low for w in ["capa de caiaque", "saco estanque", "bolsa estanque"]):
+                act1["tag"] = "Proteção Impermeável & UV"
+                act1["title"] = "BLINDAGEM COMPLETA CONTRA SOL, CHUVA, POEIRA E UMIDADE"
+                act1["desc_tmpl"] = "Desenvolvida para proteger seu equipamento durante o armazenamento ou transporte, o(a) {title} preserva a integridade contra raios solares, respingos e sujeira."
+                act2["tag"] = "Ajuste Firme & Vedação"
+                act2["title"] = "MATERIAL REFORÇADO DE ALTA TENACIDADE"
+                act2["desc_tmpl"] = "Confeccionado com material impermeável de alta gramatura e acabamento reforçado que não rasga com facilidade."
+                act3["tag"] = "Vida Útil Prolongada"
+                act3["title"] = "PRATICIDADE NO USO E CONSERVAÇÃO DO SEU EQUIPAMENTO"
+                act3["desc_tmpl"] = "Fácil de instalar, dobrar e higienizar, evitando o desbotamento precoce e o ressecamento do seu caiaque ou tralha."
+            elif any(w in t_low for w in ["fonte conversora", "cabo plug", "cabo de força"]):
+                act1["tag"] = "Alimentação Elétrica Segura"
+                act1["title"] = "CONEXÃO ESTÁVEL E PROTEÇÃO ELÉTRICA PARA SUA GELADEIRA ELBER"
+                act1["desc_tmpl"] = "Acessório original desenvolvido para garantir alimentação contínua e segura da sua geladeira portátil Elber, o(a) {title} oferece encaixe perfeito e proteção contra oscilações."
+                act2["tag"] = "Versatilidade 110V/220V & 12V/24V"
+                act2["title"] = "EFICIÊNCIA ENERGÉTICA EM CASA, NO BARCO OU NA ESTRADA"
+                act2["desc_tmpl"] = "Permite ligar sua geladeira portátil na rede elétrica residencial (110V/220V) ou na tomada veicular (12V/24V) com conversão estável e cabos de bitola dimensionada."
+                act3["tag"] = "Qualidade Original Elber"
+                act3["title"] = "ISOLAMENTO REFORÇADO E ALTA DURABILIDADE"
+                act3["desc_tmpl"] = "Construído com componentes homologados, plugues firmes que não aquecem e revestimento resistente a dobras e impactos."
+                new_specs = [
+                    {"label": "Compatibilidade", "value": "Geladeiras portáteis Elber 12V/24V"},
+                    {"label": "Tensão", "value": "Conversão automática Bivolt 110V/220V para 12V/24V DC"},
+                    {"label": "Segurança", "value": "Proteção contra sobrecarga, curto-circuito e superaquecimento"},
+                    {"label": "Procedência", "value": "Acessório 100% Original Elber"}
+                ]
 
         specs = new_specs
 

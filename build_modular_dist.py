@@ -103,11 +103,17 @@ def build_dist():
         for p in all_prods:
             h = p.get("handle")
             if h and h not in selected_handles:
+                p_title = p.get("title", "")
+                p_cat = p.get("category", "")
+                p_tags = p.get("tags", [])
+                p_vendor = p.get("vendor", "")
+                p_sku = p.get("master_sku") or p.get("sku") or (p.get("variants_skus") and p.get("variants_skus")[0]) or ""
+                p["archetype_id"] = template_engine.detect_archetype(p_title, p_cat, p_tags, vendor=p_vendor, sku=p_sku)
                 selected_prods.append(p)
                 selected_handles.add(h)
 
-        # Indexar catálogo desta loja no sibling_matcher para produtos com descrição rica
-        sibling_matcher.set_catalog(all_prods)
+        # Indexar catálogo desta loja no sibling_matcher já com archetype_id populado
+        sibling_matcher.set_catalog(selected_prods)
 
         enriched = []
         for idx, p in enumerate(selected_prods):
@@ -144,7 +150,7 @@ def build_dist():
             orig_html = p.get("original_body_html") or p.get("body_html") or ""
             vendor = p.get("vendor", "")
             sku_code = p.get("master_sku") or p.get("sku") or (p.get("variants_skus") and p.get("variants_skus")[0]) or ""
-            archetype_id = template_engine.detect_archetype(title, category, tags, vendor=vendor, sku=sku_code)
+            archetype_id = p.get("archetype_id") or template_engine.detect_archetype(title, category, tags, vendor=vendor, sku=sku_code)
             canonical_cat = template_engine.classify_store_category(title, archetype_id, store_key=store_key, tags=tags, sku=sku_code)
             arch_info = template_engine.templates.get(archetype_id, template_engine.templates["uv_performance"])
             
@@ -980,8 +986,6 @@ def build_dist():
     # Destinos de sincronização de index.html
     dest_onedrive = os.path.join(base_repo_dir, "index.html")
     dest_list = [dest_onedrive]
-    if os.name == "nt" and os.path.exists(r"C:\Users\lucas\Desktop\PYTHON DATA"):
-        dest_list.append(r"C:\Users\lucas\Desktop\PYTHON DATA\index.html")
 
     for dest in dest_list:
         try:
@@ -992,31 +996,39 @@ def build_dist():
         except Exception as e:
             print(f"  -> Alerta ao gravar {dest}: {e}")
 
-    # 6. Sincronização com repositório GitHub e espelhamento para Desktop (se existir)
-    print("[5/5] Sincronizando estrutura modular com repositório no OneDrive e GitHub...")
-    target_onedrive_dir = os.path.dirname(os.path.abspath(__file__))
-    desktop_backup_dir = r"C:\Users\lucas\Desktop\PYTHON DATA"
-    try:
-        if os.path.exists(desktop_backup_dir) and os.path.abspath(desktop_backup_dir) != os.path.abspath(target_onedrive_dir):
-            for folder in ["data", "css", "js", "api", "core", "reports"]:
-                src_f = os.path.join(target_onedrive_dir, folder)
-                dst_f = os.path.join(desktop_backup_dir, folder)
-                if os.path.exists(src_f):
-                    shutil.copytree(src_f, dst_f, dirs_exist_ok=True)
-            for f_name in ["vercel.json", "build_modular_dist.py", "build_master_index.py"]:
-                src_file = os.path.join(target_onedrive_dir, f_name)
-                if os.path.exists(src_file):
-                    shutil.copy2(src_file, os.path.join(desktop_backup_dir, f_name))
-            print("  -> Backup espelhado com sucesso para Desktop\\PYTHON DATA.")
-
-        sync_script = os.path.join(target_onedrive_dir, "sync_github.py")
-        if os.path.exists(sync_script):
-            print("[GITHUB SYNC] Executando sync_github.py...")
-            commit_msg = sys.argv[1] if len(sys.argv) > 1 else f"fix: alinhar narrativa com fotos e otimizar bundle vercel [{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}]"
-            res = subprocess.run([sys.executable, sync_script, commit_msg], cwd=target_onedrive_dir, capture_output=True, text=True)
-            print("  -> Saída do Git Sync:", res.stdout.strip())
-    except Exception as e:
-        print(f"  -> Erro na sincronização com GitHub: {e}")
+    # 6. Sincronização com repositório GitHub (com proteção anti-travamento)
+    skip_sync = any(arg in ("--no-push", "--skip-sync") for arg in sys.argv[1:])
+    if skip_sync:
+        print("[5/5] Sincronização GitHub ignorada via flag (--no-push / --skip-sync).")
+    else:
+        print("[5/5] Sincronizando estrutura modular com repositório GitHub...")
+        target_onedrive_dir = os.path.dirname(os.path.abspath(__file__))
+        try:
+            sync_script = os.path.join(target_onedrive_dir, "sync_github.py")
+            if os.path.exists(sync_script):
+                print("[GITHUB SYNC] Executando sync_github.py...")
+                cli_args = [a for a in sys.argv[1:] if not a.startswith("--")]
+                commit_msg = cli_args[0] if cli_args else f"fix: auditoria 360 e otimizacao de compilacao [{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}]"
+                env = os.environ.copy()
+                env["GIT_TERMINAL_PROMPT"] = "0"
+                env["GCM_INTERACTIVE"] = "never"
+                res = subprocess.run(
+                    [sys.executable, sync_script, commit_msg],
+                    cwd=target_onedrive_dir,
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    timeout=60,
+                    env=env
+                )
+                print("  -> Saída do Git Sync:\n" + (res.stdout or "").strip())
+                if res.stderr:
+                    print("  -> Avisos Git Sync:\n" + res.stderr.strip())
+        except subprocess.TimeoutExpired:
+            print("  -> [AVISO] Git push excedeu o tempo limite de 60s (compilação local concluída normalmente).")
+        except Exception as e:
+            print(f"  -> Erro na sincronização com GitHub: {e}")
 
     print("[CONCLUÍDO] Compilação modular v5.0 finalizada com sucesso absoluto!")
 

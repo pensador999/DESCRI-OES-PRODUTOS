@@ -17,10 +17,15 @@ if hasattr(sys.stderr, "reconfigure"):
 REPO_PATH = os.path.dirname(os.path.abspath(__file__))
 REMOTE_URL = "https://github.com/pensador999/DESCRI-OES-PRODUTOS.git"
 
-def run_cmd(cmd, cwd=REPO_PATH):
+def run_cmd(cmd, cwd=REPO_PATH, timeout=45):
     try:
-        res = subprocess.run(cmd, cwd=cwd, shell=True, capture_output=True, text=True, encoding="utf-8", errors="replace")
+        env = os.environ.copy()
+        env["GIT_TERMINAL_PROMPT"] = "0"
+        env["GCM_INTERACTIVE"] = "never"
+        res = subprocess.run(cmd, cwd=cwd, shell=True, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout, env=env)
         return res.returncode, res.stdout.strip(), res.stderr.strip()
+    except subprocess.TimeoutExpired:
+        return 1, "", f"Comando excedeu o tempo limite ({timeout}s): {cmd}"
     except Exception as e:
         return 1, "", str(e)
 

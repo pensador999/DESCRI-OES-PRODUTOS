@@ -18,23 +18,38 @@ class SiblingMatcher:
         self.catalog = catalog_products
         self._index_candidates()
 
+    STOPWORDS = {
+        "brk", "com", "para", "por", "sem", "protecao", "proteção", "solar",
+        "uv50+", "uv50", "uv", "fpu50+", "fpu50", "fpu", "fps50", "fps",
+        "envio", "imediato", "pronta", "entrega", "fishing", "agro", "motors",
+        "masculina", "masculino", "feminina", "feminino", "infantil", "kids",
+        "de", "do", "da", "dos", "das", "em", "no", "na", "nos", "nas"
+    }
+
     def _index_candidates(self):
         """Indexa produtos que possuem descrição existente rica (> 150 caracteres de texto limpo)."""
         self.rich_candidates = []
+        self.candidates_by_archetype: Dict[str, List[Dict[str, Any]]] = {}
         for p in self.catalog:
             html = p.get("original_body_html") or p.get("body_html") or ""
             clean_text = self._strip_html(html)
             if len(clean_text) >= 150:
                 norm_title = self.normalize_title(p.get("title", ""))
                 tokens = set(norm_title.split())
-                self.rich_candidates.append({
+                meaningful_tokens = tokens - self.STOPWORDS
+                arch_id = p.get("archetype_id")
+                entry = {
                     "product": p,
                     "clean_text": clean_text,
                     "norm_title": norm_title,
                     "tokens": tokens,
-                    "archetype_id": p.get("archetype_id"),
+                    "meaningful_tokens": meaningful_tokens,
+                    "archetype_id": arch_id,
                     "specs": self.extract_specs_from_html(html)
-                })
+                }
+                self.rich_candidates.append(entry)
+                if arch_id:
+                    self.candidates_by_archetype.setdefault(arch_id, []).append(entry)
 
     @staticmethod
     def _strip_html(html: str) -> str:
@@ -59,11 +74,11 @@ class SiblingMatcher:
         t = re.sub(r'\b(pp|p|m|g|gg|xg|xgg|exg|g1|g2|g3)\b', ' ', t)
         t = re.sub(r'\b(3[4-9]|4[0-8])\b', ' ', t)  # Numeração calçados
         # Remover sufixos de cores comuns
-        cores = [
+        cores = {
             "preto", "preta", "azul", "marinho", "vermelho", "vermelha", "verde",
             "amarelo", "amarela", "branco", "branca", "cinza", "grafite", "marrom",
             "laranja", "rosa", "bege", "bordo", "camuflado", "camuflada"
-        ]
+        }
         tokens = t.split()
         filtered = [tok for tok in tokens if tok not in cores and len(tok) > 1]
         return " ".join(filtered)
@@ -128,22 +143,32 @@ class SiblingMatcher:
         target_tokens = set(target_norm.split())
         if not target_tokens:
             return None
+        target_meaningful = target_tokens - self.STOPWORDS
 
-        for cand in self.rich_candidates:
+        # Selecionar pool estrito por arquétipo quando disponível
+        if target_archetype and self.candidates_by_archetype:
+            pool = self.candidates_by_archetype.get(target_archetype, [])
+        else:
+            pool = self.rich_candidates
+
+        for cand in pool:
             cand_p = cand["product"]
             # Não comparar consigo mesmo
             if cand_p.get("handle") == target_handle:
                 continue
 
-            # Se target_archetype foi exigido, verificar compatibilidade do candidato
+            # Trava estrita de arquétipo: impede contaminação entre categorias distintas (ex: bandana vs camisa)
             if target_archetype:
                 cand_arch = cand.get("archetype_id") or cand_p.get("archetype_id")
-                if cand_arch and cand_arch != target_archetype:
+                if cand_arch != target_archetype:
+                    continue
+
+            # Requer ao menos 1 token significativo (não-stopword) em comum
+            if target_meaningful and cand.get("meaningful_tokens"):
+                if not (target_meaningful & cand["meaningful_tokens"]):
                     continue
 
             cand_tokens = cand["tokens"]
-
-            # Filtro de Alta Performance: requer ao menos 1 token em comum
             inter = len(target_tokens & cand_tokens)
             if inter == 0:
                 continue
@@ -151,12 +176,6 @@ class SiblingMatcher:
             union = len(target_tokens | cand_tokens)
             jaccard_score = inter / union if union > 0 else 0.0
 
-            cand_norm = cand["norm_title"]
-
-            # 1. Similaridade por SequenceMatcher
-            seq_score = SequenceMatcher(None, target_norm, cand_norm).ratio()
-
-            # 2. Bônus por Categoria ou Vendor compartilhado
             cand_vendor = (cand_p.get("vendor") or "").lower()
             bonus = 0.0
             if target_vendor and target_vendor == cand_vendor:
@@ -165,6 +184,19 @@ class SiblingMatcher:
             if target_cat and target_cat == cand_cat:
                 bonus += 0.05
 
+            # Filtro rápido de limite superior antes de calcular SequenceMatcher.ratio()
+            max_possible_Threshold = max(best_score, min_score)
+            required_seq = (max_possible_Threshold - bonus - (jaccard_score * 0.4)) / 0.6
+            if required_seq > 1.0:
+                continue
+
+            sm = SequenceMatcher(None, target_norm, cand["norm_title"])
+            if required_seq > 0 and sm.real_quick_ratio() < required_seq:
+                continue
+            if required_seq > 0 and sm.quick_ratio() < required_seq:
+                continue
+
+            seq_score = sm.ratio()
             final_score = min(1.0, (seq_score * 0.6 + jaccard_score * 0.4) + bonus)
 
             if final_score > best_score:
