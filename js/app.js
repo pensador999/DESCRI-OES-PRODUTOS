@@ -507,23 +507,18 @@ async function switchStore(storeKey) {
 function updateCockpit() {
   const storeData = MASTER_PAYLOAD.stores[currentStore];
   if (!storeData) return;
-  const storeInfo = storeData.store || {};
   const products = storeData.products || [];
-  
-  const totalSkus = storeInfo.total_skus || products.length;
-  const brokenSkus = storeInfo.broken_skus !== undefined ? storeInfo.broken_skus : products.filter(p => p.status === "IMAGENS_QUEBRADAS").length;
-  const outOfStd = storeInfo.out_of_standard_skus || 0;
-  const healthySkus = totalSkus > outOfStd ? totalSkus - outOfStd : 0;
-  const healthPct = totalSkus > 0 ? Math.round((healthySkus / totalSkus) * 100) : 100;
 
-  const brokenElem = document.getElementById("cockpit-broken-count");
-  if (brokenElem) brokenElem.innerText = brokenSkus.toLocaleString('pt-BR');
-  const healthElem = document.getElementById("cockpit-health-badge");
-  if (healthElem) healthElem.innerText = healthPct + "% Saudável";
-  
   const loadedBroken = products.filter(p => p.status === "IMAGENS_QUEBRADAS").length;
   const loadedEmpty = products.filter(p => p.status === "SEM_DESCRICAO").length;
   const loadedHealthy = products.filter(p => p.status === "SAUDAVEL" || (!p.is_out_of_standard && p.status !== "IMAGENS_QUEBRADAS" && p.status !== "SEM_DESCRICAO")).length;
+  const totalProds = products.length;
+  const healthPct = totalProds > 0 ? Math.round((loadedHealthy / totalProds) * 100) : 100;
+
+  const brokenElem = document.getElementById("cockpit-broken-count");
+  if (brokenElem) brokenElem.innerText = loadedBroken.toLocaleString('pt-BR');
+  const healthElem = document.getElementById("cockpit-health-badge");
+  if (healthElem) healthElem.innerText = healthPct + "% Saudável";
 
   const emptyCockpitElem = document.getElementById("cockpit-empty-count");
   if (emptyCockpitElem) {
@@ -988,58 +983,48 @@ async function renderMoldesCards() {
   }
 }
 
-// Aba Análises & Vigilante Diário
+// Aba Análises & Auditoria 360
 async function renderAnalyticsView() {
-  let analytics = MASTER_PAYLOAD.analytics;
-  if (!analytics || !analytics.history) {
-    analytics = await StoreLoader.loadAnalytics();
-    MASTER_PAYLOAD.analytics = analytics;
-  }
-  const history = analytics.history || [];
-  const latestSnapshot = history.length > 0 ? history[history.length - 1] : null;
-
-  if (latestSnapshot) {
-    const sentinelRun = document.getElementById("sentinel-last-run");
-    if (sentinelRun) sentinelRun.innerText = "Última checagem: " + latestSnapshot.timestamp;
-    const badgeDaily = document.getElementById("badge-daily-corrections-count");
-    if (badgeDaily) badgeDaily.innerText = (latestSnapshot.total_corrections_ready || 86) + " correções prontas";
-    
-    // Atualizar métricas Fishing
-    const f = latestSnapshot.stores ? latestSnapshot.stores.brk_fishing : null;
-    if (f) {
-      document.getElementById("stat-fishing-health").innerText = f.health_percentage + "%";
-      document.getElementById("stat-fishing-skus").innerText = f.total_skus;
-      document.getElementById("stat-fishing-broken").innerText = f.broken_skus + " SKUs";
-      document.getElementById("stat-fishing-empty").innerText = f.empty_products + " produtos";
-      document.getElementById("stat-fishing-fixes").innerText = f.corrections_generated + " prontas";
-      document.getElementById("bar-fishing-health").style.width = f.health_percentage + "%";
-    }
-
-    // Atualizar métricas Agro
-    const a = latestSnapshot.stores ? latestSnapshot.stores.brk_agro : null;
-    if (a) {
-      document.getElementById("stat-agro-health").innerText = a.health_percentage + "%";
-      document.getElementById("stat-agro-skus").innerText = a.total_skus;
-      document.getElementById("stat-agro-broken").innerText = a.broken_skus + " SKUs";
-      document.getElementById("stat-agro-empty").innerText = a.empty_products + " produtos";
-      document.getElementById("stat-agro-fixes").innerText = a.corrections_generated + " prontas";
-      document.getElementById("bar-agro-health").style.width = a.health_percentage + "%";
-    }
-
-    // Atualizar métricas Motors
-    const m = latestSnapshot.stores ? latestSnapshot.stores.brk_motors : null;
-    if (m) {
-      document.getElementById("stat-motors-health").innerText = m.health_percentage + "%";
-      document.getElementById("stat-motors-skus").innerText = m.total_skus;
-      document.getElementById("stat-motors-broken").innerText = m.broken_skus + " SKUs";
-      document.getElementById("stat-motors-empty").innerText = m.empty_products + " produtos";
-      document.getElementById("stat-motors-fixes").innerText = m.corrections_generated + " prontas";
-      document.getElementById("bar-motors-health").style.width = m.health_percentage + "%";
+  for (const sk of ["brk_fishing", "brk_agro", "brk_motors"]) {
+    if (!MASTER_PAYLOAD.stores[sk]) {
+      try {
+        MASTER_PAYLOAD.stores[sk] = await StoreLoader.loadStore(sk);
+      } catch (e) {}
     }
   }
+
+  const mapIds = [
+    { key: "brk_fishing", prefix: "fishing" },
+    { key: "brk_agro", prefix: "agro" },
+    { key: "brk_motors", prefix: "motors" }
+  ];
+
+  mapIds.forEach(({ key, prefix }) => {
+    const sData = MASTER_PAYLOAD.stores[key];
+    if (!sData || !sData.products) return;
+    const prods = sData.products;
+    const totalP = prods.length;
+    const totalSkus = (sData.store && sData.store.total_skus) || totalP;
+    const brokenP = prods.filter(p => p.status === "IMAGENS_QUEBRADAS").length;
+    const emptyP = prods.filter(p => p.status === "SEM_DESCRICAO").length;
+    const healthyP = totalP - brokenP - emptyP;
+    const pct = totalP > 0 ? ((healthyP / totalP) * 100).toFixed(1) : "100.0";
+
+    const elHealth = document.getElementById(`stat-${prefix}-health`);
+    if (elHealth) elHealth.innerText = `${pct}%`;
+    const elSkus = document.getElementById(`stat-${prefix}-skus`);
+    if (elSkus) elSkus.innerText = `${totalP.toLocaleString('pt-BR')} produtos (${totalSkus.toLocaleString('pt-BR')} SKUs)`;
+    const elBroken = document.getElementById(`stat-${prefix}-broken`);
+    if (elBroken) elBroken.innerText = `${brokenP.toLocaleString('pt-BR')} ${brokenP === 1 ? 'produto' : 'produtos'}`;
+    const elEmpty = document.getElementById(`stat-${prefix}-empty`);
+    if (elEmpty) elEmpty.innerText = `${emptyP.toLocaleString('pt-BR')} ${emptyP === 1 ? 'produto' : 'produtos'}`;
+    const elFixes = document.getElementById(`stat-${prefix}-fixes`);
+    if (elFixes) elFixes.innerText = `${healthyP.toLocaleString('pt-BR')} saudáveis (100% Modo B)`;
+    const elBar = document.getElementById(`bar-${prefix}-health`);
+    if (elBar) elBar.style.width = `${pct}%`;
+  });
 
   renderAuditTable();
-  renderAvailableCSVs();
 }
 
 function filterAuditTable(filterType) {

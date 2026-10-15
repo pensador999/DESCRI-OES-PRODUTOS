@@ -48,26 +48,15 @@ def build_dist():
         except Exception:
             history_data = []
 
-    # 3. Listar CSVs diários disponíveis
-    daily_fixes_dir = "reports/daily_fixes"
+    # 3. CSVs diários desativados (substituídos por automação direta Tampermonkey / API)
     available_csvs = []
-    if os.path.exists(daily_fixes_dir):
-        for fname in sorted(os.listdir(daily_fixes_dir), reverse=True):
-            if fname.endswith(".csv"):
-                fpath = os.path.join(daily_fixes_dir, fname)
-                fsize = os.path.getsize(fpath)
-                available_csvs.append({
-                    "filename": fname,
-                    "size_kb": round(fsize / 1024, 1),
-                    "created_at": datetime.fromtimestamp(os.path.getmtime(fpath)).strftime("%d/%m/%Y %H:%M")
-                })
 
     # Função de enriquecimento de produtos
     def enrich_products(store_dict, store_key="brk_fishing"):
         all_prods = store_dict.get("products", [])
         dead_body_re = re.compile(r"use-brk-images-s3|photobucket|imageshack|tinytake|yampi", re.IGNORECASE)
 
-        # Normalizar status de todos os produtos: classificação estrita e sem limbo baseada no body_html real
+        # Normalizar status de todos os produtos: classificação estrita e sem falso-positivo de ícone SVG
         for p in all_prods:
             body = (p.get("original_body_html") or p.get("body_html") or "").strip()
             clean_b = re.sub(r'<style.*?</style>', ' ', body, flags=re.S | re.I)
@@ -81,11 +70,19 @@ def build_dist():
                 or (w_count < 20 and not any(tag in body.lower() for tag in ["<table", "<div", "<ul"]))
                 or w_count < 5
             )
-            has_broken_s3 = bool(dead_body_re.search(body))
+            # Extrair apenas imagens reais (ignorando ícones .svg decorativos antigos como uv_protection.svg)
+            img_urls = re.findall(r'<img[^>]+src=["\']([^"\']+)["\']', body, flags=re.I)
+            broken_photo_urls = [
+                u for u in img_urls
+                if dead_body_re.search(u) and not u.split("?")[0].strip().lower().endswith(".svg")
+            ]
+            has_broken_s3_photos = len(broken_photo_urls) > 0
 
-            if has_broken_s3:
+            if has_broken_s3_photos:
                 p["status"] = "IMAGENS_QUEBRADAS"
                 p["is_out_of_standard"] = True
+                p["broken_images_count"] = len(broken_photo_urls)
+                p["broken_urls"] = broken_photo_urls
             elif is_empty_or_placeholder:
                 p["status"] = "SEM_DESCRICAO"
                 p["is_out_of_standard"] = True
@@ -526,7 +523,7 @@ def build_dist():
           <!-- O BOTÃO UNIFICADO ANIMADO NO TOPO (COCKPIT) -->
           <div id="unified-button-cockpit" class="flex items-center gap-3 bg-slate-900 border border-slate-700/80 rounded-2xl p-1.5 px-3 unified-button-glow transition-all">
             <!-- Falha 1: Fotos Quebradas -->
-            <div class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-all" onclick="filterBrokenFromCockpit()" title="Filtrar SKUs com fotos quebradas">
+            <div class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-all" onclick="filterBrokenFromCockpit()" title="Filtrar produtos com fotos quebradas no corpo da descrição">
               <span class="relative flex h-2.5 w-2.5">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
@@ -534,7 +531,7 @@ def build_dist():
               <div class="text-left">
                 <span class="text-[9px] uppercase tracking-wider font-extrabold text-slate-400 block">Fotos Quebradas</span>
                 <span class="text-xs font-bold text-white flex items-center gap-1">
-                  <span id="cockpit-broken-count" class="text-red-400 font-extrabold text-sm">--</span> SKUs
+                  <span id="cockpit-broken-count" class="text-red-400 font-extrabold text-sm">--</span> Itens
                 </span>
               </div>
             </div>
@@ -642,7 +639,7 @@ def build_dist():
         <h2 class="text-2xl font-extrabold font-heading">Fila de Geração em Massa por SKU</h2>
         <p class="text-xs text-slate-300 leading-relaxed">
           Gere descrições em lote para todos os produtos sem texto ou com fotos quebradas da AWS S3. 
-          O motor aplica automaticamente o <strong>Molde Mestre da Categoria</strong>, vincula as fotos oficiais do CDN Shopify e gera o arquivo CSV oficial pronto para importação direta no Admin da Shopify.
+          O motor aplica automaticamente o <strong>Molde Mestre da Categoria</strong>, vincula as fotos oficiais do CDN Shopify e envia diretamente para o Assistente Tampermonkey v4.0 no Shopify Admin.
         </p>
       </div>
 
@@ -654,9 +651,6 @@ def build_dist():
         <button onclick="executeMassBatch('mode_b_html')" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-lg transition-all flex items-center gap-2">
           <span>🚀 Gerar Lote: Modo B</span>
           <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">3 Atos Conversão</span>
-        </button>
-        <button onclick="downloadShopifyCSVBatch()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-extrabold shadow-lg transition-all flex items-center gap-2">
-          <span>📥 Baixar Planilha CSV Shopify</span>
         </button>
         <button onclick="sendSelectedMassToTampermonkey()" class="px-4 py-2.5 bg-purple-700 hover:bg-purple-800 text-white rounded-xl text-xs font-extrabold shadow-lg transition-all flex items-center gap-2" title="Enviar os produtos selecionados diretamente para o Assistente Tampermonkey no Chrome">
           <span>⚡ Fila Tampermonkey</span>
@@ -721,20 +715,19 @@ def build_dist():
         <div class="flex items-center gap-2">
           <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-extrabold uppercase tracking-wider border border-emerald-500/30 flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            Vigilante Diário • Agendamento às 08:00
+            Auditoria 360° em Tempo Real • 3 Lojas
           </span>
-          <span id="sentinel-last-run" class="text-xs text-slate-400 font-mono">Última checagem: Hoje às 08:00</span>
+          <span id="sentinel-last-run" class="text-xs text-slate-400 font-mono">Catálogo Oficial Auditado (6.242 Produtos)</span>
         </div>
         <h2 class="text-2xl font-extrabold font-heading">Painel de Auditoria & Conformidade</h2>
         <p class="text-xs text-slate-300 leading-relaxed">
-          Monitoramento contínuo das 3 lojas Shopify. Rastreia fotos quebradas da AWS S3, links externos proibidos (Drive, Mercado Livre, Shopee) e SKUs órfãos.
+          Diagnóstico preciso das 3 lojas Shopify (Fishing, Agro e Motors). Separa fotos reais de produto quebradas no S3 antigo (excluindo falsos-positivos de ícones SVG), produtos sem descrição, links externos proibidos e variantes órfãs.
         </p>
       </div>
 
       <div class="flex flex-wrap items-center gap-3">
-        <button onclick="downloadLatestDailyCSV()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-lg transition-all flex items-center gap-2">
-          <span>📥 Baixar CSV de Correção do Dia</span>
-          <span id="badge-daily-corrections-count" class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">86 itens</span>
+        <button onclick="sendBatchToTampermonkey(25)" class="px-4 py-2.5 bg-purple-700 hover:bg-purple-600 text-white rounded-xl text-xs font-extrabold shadow-lg transition-all flex items-center gap-2">
+          <span>⚡ Enviar Lote para Tampermonkey (25)</span>
         </button>
       </div>
     </div>
@@ -744,48 +737,48 @@ def build_dist():
       <div class="bg-white rounded-3xl border border-slate-200 p-6 product-shadow space-y-4">
         <div class="flex items-center justify-between">
           <span class="text-xs font-extrabold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-xl">🎣 BRK Fishing</span>
-          <span id="stat-fishing-health" class="text-base font-extrabold text-emerald-600">90.2%</span>
+          <span id="stat-fishing-health" class="text-base font-extrabold text-emerald-600">75.4%</span>
         </div>
         <div class="space-y-1.5 text-xs text-slate-600">
-          <div class="flex justify-between"><span>Total de SKUs:</span><strong id="stat-fishing-skus" class="text-slate-900">438</strong></div>
-          <div class="flex justify-between"><span>Fotos Quebradas:</span><strong id="stat-fishing-broken" class="text-red-600">43 SKUs</strong></div>
-          <div class="flex justify-between"><span>Sem Descrição:</span><strong id="stat-fishing-empty" class="text-amber-600">1 produto</strong></div>
-          <div class="flex justify-between"><span>Correções Geradas:</span><strong id="stat-fishing-fixes" class="text-emerald-600">8 prontas</strong></div>
+          <div class="flex justify-between"><span>Total de Produtos:</span><strong id="stat-fishing-skus" class="text-slate-900">2.148 produtos (11.799 SKUs)</strong></div>
+          <div class="flex justify-between"><span>Fotos de Produto Quebradas:</span><strong id="stat-fishing-broken" class="text-red-600">339 produtos</strong></div>
+          <div class="flex justify-between"><span>Sem Descrição:</span><strong id="stat-fishing-empty" class="text-amber-600">190 produtos</strong></div>
+          <div class="flex justify-between"><span>Saudáveis / Modo B Pronto:</span><strong id="stat-fishing-fixes" class="text-emerald-600">1.619 saudáveis (100% Modo B)</strong></div>
         </div>
         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-          <div id="bar-fishing-health" class="bg-blue-600 h-full rounded-full" style="width: 90.2%;"></div>
+          <div id="bar-fishing-health" class="bg-blue-600 h-full rounded-full" style="width: 75.4%;"></div>
         </div>
       </div>
 
       <div class="bg-white rounded-3xl border border-slate-200 p-6 product-shadow space-y-4">
         <div class="flex items-center justify-between">
           <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-xl">🚜 BRK Agro</span>
-          <span id="stat-agro-health" class="text-base font-extrabold text-emerald-600">99.7%</span>
+          <span id="stat-agro-health" class="text-base font-extrabold text-emerald-600">94.5%</span>
         </div>
         <div class="space-y-1.5 text-xs text-slate-600">
-          <div class="flex justify-between"><span>Total de SKUs:</span><strong id="stat-agro-skus" class="text-slate-900">5.955</strong></div>
-          <div class="flex justify-between"><span>Fotos Quebradas:</span><strong id="stat-agro-broken" class="text-red-600">19 SKUs</strong></div>
-          <div class="flex justify-between"><span>Sem Descrição:</span><strong id="stat-agro-empty" class="text-amber-600">35 produtos</strong></div>
-          <div class="flex justify-between"><span>Correções Geradas:</span><strong id="stat-agro-fixes" class="text-emerald-600">38 prontas</strong></div>
+          <div class="flex justify-between"><span>Total de Produtos:</span><strong id="stat-agro-skus" class="text-slate-900">2.647 produtos (17.058 SKUs)</strong></div>
+          <div class="flex justify-between"><span>Fotos de Produto Quebradas:</span><strong id="stat-agro-broken" class="text-red-600">1 produto</strong></div>
+          <div class="flex justify-between"><span>Sem Descrição:</span><strong id="stat-agro-empty" class="text-amber-600">145 produtos</strong></div>
+          <div class="flex justify-between"><span>Saudáveis / Modo B Pronto:</span><strong id="stat-agro-fixes" class="text-emerald-600">2.501 saudáveis (100% Modo B)</strong></div>
         </div>
         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-          <div id="bar-agro-health" class="bg-emerald-600 h-full rounded-full" style="width: 99.7%;"></div>
+          <div id="bar-agro-health" class="bg-emerald-600 h-full rounded-full" style="width: 94.5%;"></div>
         </div>
       </div>
 
       <div class="bg-white rounded-3xl border border-slate-200 p-6 product-shadow space-y-4">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-extrabold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-xl">🏁 BRK Motors</span>
-          <span id="stat-motors-health" class="text-base font-extrabold text-emerald-600">98.5%</span>
+          <span class="text-xs font-extrabold text-orange-600 bg-orange-50 px-2.5 py-1 rounded-xl">🏁 BRK Motors</span>
+          <span id="stat-motors-health" class="text-base font-extrabold text-emerald-600">79.5%</span>
         </div>
         <div class="space-y-1.5 text-xs text-slate-600">
-          <div class="flex justify-between"><span>Total de SKUs:</span><strong id="stat-motors-skus" class="text-slate-900">6.758</strong></div>
-          <div class="flex justify-between"><span>Fotos Quebradas:</span><strong id="stat-motors-broken" class="text-red-600">98 SKUs</strong></div>
-          <div class="flex justify-between"><span>Sem Descrição:</span><strong id="stat-motors-empty" class="text-amber-600">32 produtos</strong></div>
-          <div class="flex justify-between"><span>Correções Geradas:</span><strong id="stat-motors-fixes" class="text-emerald-600">40 prontas</strong></div>
+          <div class="flex justify-between"><span>Total de Produtos:</span><strong id="stat-motors-skus" class="text-slate-900">1.447 produtos (9.218 SKUs)</strong></div>
+          <div class="flex justify-between"><span>Fotos de Produto Quebradas:</span><strong id="stat-motors-broken" class="text-red-600">100 produtos</strong></div>
+          <div class="flex justify-between"><span>Sem Descrição:</span><strong id="stat-motors-empty" class="text-amber-600">196 produtos</strong></div>
+          <div class="flex justify-between"><span>Saudáveis / Modo B Pronto:</span><strong id="stat-motors-fixes" class="text-emerald-600">1.151 saudáveis (100% Modo B)</strong></div>
         </div>
         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-          <div id="bar-motors-health" class="bg-indigo-600 h-full rounded-full" style="width: 98.5%;"></div>
+          <div id="bar-motors-health" class="bg-orange-600 h-full rounded-full" style="width: 79.5%;"></div>
         </div>
       </div>
     </div>
@@ -795,7 +788,7 @@ def build_dist():
       <div class="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4 bg-slate-50/50">
         <div>
           <h3 class="text-sm font-extrabold text-slate-900 font-heading">Auditoria de Conformidade por SKU</h3>
-          <p class="text-xs text-slate-500">Detecta links proibidos e variantes sem código cadastrado.</p>
+          <p class="text-xs text-slate-500">Detecta fotos de produto quebradas no S3 antigo, produtos sem descrição, links proibidos e variantes sem código.</p>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
@@ -821,21 +814,6 @@ def build_dist():
             <!-- Injetado Via JavaScript -->
           </tbody>
         </table>
-      </div>
-    </div>
-
-    <!-- REPOSITÓRIO DE CSVS GERADOS -->
-    <div class="bg-white rounded-3xl border border-slate-200 p-6 product-shadow space-y-4">
-      <div class="flex items-center justify-between">
-        <div>
-          <h3 class="text-sm font-extrabold text-slate-900 font-heading">Planilhas CSV de Correção do Dia (Prontas para Importar)</h3>
-          <p class="text-xs text-slate-500">Arquivos gerados automaticamente pelo ciclo diário e salvos na pasta reports/daily_fixes.</p>
-        </div>
-        <span class="text-xs font-bold text-slate-400">Padrão UTF-8 BOM Shopify</span>
-      </div>
-
-      <div id="analytics-csv-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        <!-- Injetado Via JavaScript -->
       </div>
     </div>
 
