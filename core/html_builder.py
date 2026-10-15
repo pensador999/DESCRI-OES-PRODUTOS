@@ -73,15 +73,15 @@ QUICK_BADGES_BY_ARCHETYPE: Dict[str, List[Dict[str, str]]] = {
     ],
     # --- Vestuário inferior / macacões ---
     "pants_cargo_tactical": [
-        {"icon": "shield", "title": "Ripstop Alta Tenacidade", "sub": "Resistente ao Atrito"},
-        {"icon": "gear", "title": "Reforço Cavalo e Joelhos", "sub": "Modelagem Operacional"},
-        {"icon": "box", "title": "Múltiplos Bolsos Cargo", "sub": "Compartimentação Prática"},
+        {"icon": "shield", "title": "Tecido Alta Gramatura", "sub": "Resistente ao Atrito"},
+        {"icon": "gear", "title": "Costuras Reforçadas", "sub": "Travetes de Alta Tensão"},
+        {"icon": "box", "title": "Bolsos Funcionais", "sub": "Profundos e Estruturados"},
         _TROCA,
     ],
     "overalls_workwear": [
-        {"icon": "shield", "title": "Costuras Duplas e Triplas", "sub": "Alta Tenacidade"},
+        {"icon": "shield", "title": "100% Impermeável", "sub": "Termossoldagem Estanque"},
+        {"icon": "shoe", "title": "Bota Integrada", "sub": "Solado Tratorado Firme"},
         {"icon": "gear", "title": "Alças Reguláveis", "sub": "Engate Rápido"},
-        {"icon": "box", "title": "Bolsos Reforçados", "sub": "Frontais, Laterais e Traseiros"},
         _TROCA,
     ],
     # --- Acessórios de proteção solar ---
@@ -175,8 +175,8 @@ QUICK_BADGES_BY_ARCHETYPE: Dict[str, List[Dict[str, str]]] = {
     ],
     "accessories_car_care": [
         {"icon": "sparkle", "title": "Fragrância Contínua", "sub": "Liberação Gradual"},
-        {"icon": "care", "title": "Longa Duração", "sub": "Até 30 a 45 Dias"},
-        {"icon": "gear", "title": "Fixação Prática", "sub": "Retrovisor ou Grade de Ar"},
+        {"icon": "care", "title": "Longa Duração", "sub": "Perfume Prolongado"},
+        {"icon": "gear", "title": "Suspensão Prática", "sub": "Retrovisor Interno"},
         {"icon": "return", "title": "Troca Descomplicada", "sub": "Satisfação Garantida"},
     ],
     "accessories_general": [
@@ -429,8 +429,8 @@ class HTMLBuilder:
 {rows_html}        </tbody>
       </table>"""
 
-        # 2. Calças e Bermudas / Macacões (pants_cargo_tactical, overalls_workwear)
-        elif archetype_id in ("pants_cargo_tactical", "overalls_workwear") or (not is_shirt and bool(re.search(r'\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao)\b', title_low))):
+        # 2. Calças e Bermudas / Macacões sem bota acoplada (pants_cargo_tactical, overalls_workwear)
+        elif (archetype_id in ("pants_cargo_tactical", "overalls_workwear") or (not is_shirt and bool(re.search(r'\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao)\b', title_low)))) and "bota" not in title_low:
             guide_title = "Tabela de Medidas - Calças & Bermudas (38 ao 52)"
             tip_text = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Cintura na altura do cós | Quadril na parte mais larga | Comprimento da cintura até a barra). Dica: compare com uma peça sua estendida."
             rows = [
@@ -747,12 +747,29 @@ class HTMLBuilder:
             brand_label = "BRK Fishing"
 
         # 1. Configuração Específica por Categoria
+        title_low = formatted_title.lower()
         if archetype_id == "caps_trucker_snapback":
             item_type_label = "Boné"
-            if store_key == "brk_agro":
+            is_6_gomos = ("6 gomos" in title_low or "seis gomos" in title_low)
+            copa_bullet = (
+                "Copa estruturada de 6 gomos fechada em tecido camuflado, com frente firme e ilhoses bordados que favorecem a ventilação."
+                if is_6_gomos else
+                "Copa estruturada estilo trucker, com frente firme e tela traseira que favorece a ventilação."
+            )
+            # Detecta tema visual real do boné pelo título antes de cair no store_key
+            if any(w in title_low for w in ["fishing", "pesca", "robalo", "tucunar", "tambaqui", "traira", "traíra", "dourado", "pirarara", "red tail", "black bass"]):
+                cap_theme = "brk_fishing"
+            elif any(w in title_low for w in ["agro", "peacemaker", "country", "texas", "bull", "nelore", "fazenda", "sertanejo"]):
+                cap_theme = "brk_agro"
+            elif any(w in title_low for w in ["motors", "racing", "off-road", "off road", "motocross", "trilha"]):
+                cap_theme = "brk_motors"
+            else:
+                cap_theme = store_key
+
+            if cap_theme == "brk_agro":
                 exclusive_desc = "Arte exclusiva BRK Agro inspirada no campo e no agronegócio, para você se destacar em qualquer ambiente."
                 caract_items = [
-                    "Copa estruturada estilo trucker, com frente firme e tela traseira que favorece a ventilação.",
+                    copa_bullet,
                     "Aba moldável com costuras reforçadas, oferecendo conforto e proteção para o rosto e os olhos.",
                     "Tamanho único com regulagem traseira, se ajustando à maioria dos formatos de cabeça.",
                     "Ideal para o campo, atividades ao ar livre e uso no dia a dia.",
@@ -766,10 +783,10 @@ class HTMLBuilder:
                 split2_p3 = "Assim, seu novo boné chega pronto para encarar a lida na fazenda, feiras agropecuárias ou eventos sertanejos."
                 split1_alt = "Etiquetas BRK aplicadas em produtos agropecuários"
                 split2_alt = "Caixa personalizada BRK para envio seguro"
-            elif store_key == "brk_motors":
+            elif cap_theme == "brk_motors":
                 exclusive_desc = "Arte exclusiva BRK Motors inspirada na velocidade e no off-road, para você se destacar dentro e fora das pistas."
                 caract_items = [
-                    "Copa estruturada estilo trucker, com frente firme e tela traseira que favorece a ventilação.",
+                    copa_bullet,
                     "Aba moldável com costuras reforçadas, oferecendo conforto e proteção para o rosto e os olhos.",
                     "Tamanho único com regulagem traseira, se ajustando à maioria dos formatos de cabeça.",
                     "Ideal para trilha, velocidade, eventos automotivos e uso no dia a dia.",
@@ -786,7 +803,7 @@ class HTMLBuilder:
             else:
                 exclusive_desc = "Arte exclusiva BRK Fishing inspirada na pesca esportiva, para você se destacar dentro e fora da água."
                 caract_items = [
-                    "Copa estruturada estilo trucker, com frente firme e tela traseira que favorece a ventilação.",
+                    copa_bullet,
                     "Aba moldável com costuras reforçadas, oferecendo conforto e proteção para o rosto e os olhos.",
                     "Tamanho único com regulagem traseira, se ajustando à maioria dos formatos de cabeça.",
                     "Ideal para pesca esportiva, atividades ao ar livre e uso no dia a dia.",
@@ -812,7 +829,7 @@ class HTMLBuilder:
                     "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/k2bupYT.jpg",
                     "alt": "Parte interna do boné BRK com costuras em tear",
                     "title": "Interno em Tear",
-                    "desc": "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de pesca." if store_key == "brk_fishing" else "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de uso contínuo."
+                    "desc": "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de pesca." if cap_theme == "brk_fishing" else "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de uso contínuo."
                 },
                 {
                     "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/BYAO1Oj.jpg",
@@ -847,56 +864,108 @@ class HTMLBuilder:
             img3 = gallery[2] if len(gallery) > 2 else img1
             img4 = gallery[3] if len(gallery) > 3 else img2
 
-            details = [
-                {
-                    "img": img1,
-                    "alt": f"Aba 360° com proteção solar do chapéu {formatted_title}",
-                    "title": "Aba 360° UV50+",
-                    "desc": "Aba circular ampla com costuras reforçadas, bloqueando os raios solares diretos no rosto, orelhas e pescoço com máxima cobertura."
-                },
-                {
-                    "img": img2,
-                    "alt": f"Cordão jugular com trava anti-vento do chapéu {formatted_title}",
-                    "title": "Cordão Jugular Anti-Vento",
-                    "desc": "Ajuste seguro sob o queixo com trava regulável, mantendo o chapéu firme mesmo sob rajadas de vento e navegação rápida."
-                },
-                {
-                    "img": img3,
-                    "alt": f"Protetor de nuca e acabamento do chapéu {formatted_title}",
-                    "title": "Protetor de Nuca Integrado",
-                    "desc": "Cobertura estendida para a nuca que previne queimaduras solares durante longas jornadas sob sol intenso."
-                },
-                {
-                    "img": img4,
-                    "alt": f"Tecido leve e respirável do chapéu {formatted_title}",
-                    "title": "Tecido Respirável & Leve",
-                    "desc": "Construção de secagem rápida com ilhoses de ventilação lateral para dissipação imediata de calor e sensação de frescor contínuo."
-                }
-            ]
-            caract_title = "Características do Chapéu Safári BRK"
-            caract_items = [
-                "Copa anatômica com ilhoses laterais que garantem circulação de ar constante.",
-                "Aba larga circular de 360° com fator de proteção UV50+ permanente.",
-                "Cordão jugular com trava ajustável de segurança contra quedas e vento forte.",
-                "Protetor de nuca para proteção solar total na região posterior do pescoço.",
-                "Tecido tecnológico leve de secagem ultra rápida e alta resistência ao desgaste."
-            ]
-            cuidados_title = "Cuidados com o Seu Chapéu"
-            cuidados_items = [
-                "Lavar à mão com água fria e sabão neutro.",
-                "Não lavar em máquina e não torcer para preservar a estrutura da aba.",
-                "Secar estendido à sombra em superfície plana.",
-                "Não usar alvejantes, amaciantes ou produtos à base de cloro.",
-                "Guardar sem dobrar a aba estruturada para manter o caimento original."
-            ]
-            split1_p1 = "<strong>Cada chapéu BRK é desenvolvido pensando na proteção de quem enfrenta longas jornadas ao ar livre.</strong>"
-            split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem padrão de proteção solar certificado."
-            split1_p3 = "Construído com materiais leves e resistentes, oferece o máximo de conforto térmico para pescarias e trabalho sob sol forte."
-            split2_p1 = "<strong>A sua experiência começa antes mesmo de abrir a caixa.</strong>"
-            split2_p2 = "O chapéu é enviado em embalagem protegida BRK, projetada para evitar deformações na aba durante o transporte."
-            split2_p3 = "Seu novo chapéu chega pronto para encarar o sol com proteção e estilo incomparáveis."
-            split1_alt = f"Etiquetas BRK aplicadas no chapéu {formatted_title}"
-            split2_alt = f"Embalagem protegida BRK para envio do chapéu {formatted_title}"
+            if any(w in title_low for w in ["juta", "bambu", "palha"]):
+                details = [
+                    {
+                        "img": img1,
+                        "alt": f"Trama natural em juta e palha de bambu do chapéu {formatted_title}",
+                        "title": "Trama em Juta & Bambu",
+                        "desc": "Trançado nobre em fibras selecionadas de juta e palha de bambu que proporciona ventilação natural constante e leveza superior."
+                    },
+                    {
+                        "img": img2,
+                        "alt": f"Bandinha personalizada BRK Agro com fivela metálica do chapéu {formatted_title}",
+                        "title": "Bandinha BRK Agro Exclusiva",
+                        "desc": "Acabamento externo em fita caramelo personalizada BRK Agro com fivela metálica lateral, conferindo identidade autêntica do campo."
+                    },
+                    {
+                        "img": img3,
+                        "alt": f"Copa e aba estruturadas com viés protetor do chapéu {formatted_title}",
+                        "title": "Copa & Aba Estruturadas",
+                        "desc": "Modelagem clássica com copa bem definida e aba ampla finalizada com viés de proteção nas bordas para excelente cobertura solar."
+                    },
+                    {
+                        "img": img4,
+                        "alt": f"Carneira interna confortável do chapéu {formatted_title}",
+                        "title": "Carneira Interna Confortável",
+                        "desc": "Faixa interna macia e anatômica que garante encaixe firme e estável na cabeça ao longo de todo o dia."
+                    }
+                ]
+                caract_title = "Características do Chapéu BRK Agro Juta & Bambu"
+                caract_items = [
+                    "Confeccionado em trama selecionada de juta e palha de bambu altamente respirável.",
+                    "Aba estruturada com acabamento em viés nas bordas para proteção solar no campo e lazer.",
+                    "Bandinha externa personalizada BRK Agro em tom caramelo com fivela metálica.",
+                    "Carneira interna macia que proporciona ajuste confortável e seguro na cabeça.",
+                    "Ideal para dias de sol na fazenda, feiras agropecuárias, encontros sertanejos e lazer ao ar livre."
+                ]
+                cuidados_title = "Cuidados com o Seu Chapéu de Fibra Natural"
+                cuidados_items = [
+                    "Limpar delicadamente com pano seco ou escova de cerdas macias.",
+                    "Não lavar em água, não submergir e não utilizar máquina de lavar.",
+                    "Evitar exposição à chuva intensa ou ambientes úmidos fechados.",
+                    "Caso receba respingos leves, deixe secar naturalmente à sombra em local arejado.",
+                    "Guardar sempre apoiado pela copa ou em suporte próprio para preservar a aba estruturada."
+                ]
+                split1_p1 = "<strong>Estilo autêntico do campo aliado ao frescor das fibras naturais.</strong>"
+                split1_p2 = "O Chapéu BRK Agro Juta Palha de Bambu Premium foi desenvolvido para quem valoriza elegância rústica, conforto térmico e acabamento impecável."
+                split1_p3 = "Cada detalhe — da trama ventilada à bandinha exclusiva BRK Agro — entrega presença marcante e bem-estar sob o sol."
+                split2_p1 = "<strong>Embalagem protetora pensada para preservar o formato original.</strong>"
+                split2_p2 = "O chapéu é enviado em caixa reforçada BRK, projetada para proteger a copa e a aba durante todo o transporte."
+                split2_p3 = "Assim, seu novo chapéu chega impecável e pronto para acompanhar você na fazenda, nos eventos ou no lazer."
+                split1_alt = f"Acabamento exclusivo BRK Agro no chapéu {formatted_title}"
+                split2_alt = f"Embalagem reforçada BRK para envio do chapéu {formatted_title}"
+            else:
+                details = [
+                    {
+                        "img": img1,
+                        "alt": f"Aba 360° com proteção solar do chapéu {formatted_title}",
+                        "title": "Aba 360° UV50+",
+                        "desc": "Aba circular ampla com costuras reforçadas, bloqueando os raios solares diretos no rosto, orelhas e pescoço com máxima cobertura."
+                    },
+                    {
+                        "img": img2,
+                        "alt": f"Cordão jugular com trava anti-vento do chapéu {formatted_title}",
+                        "title": "Cordão Jugular Anti-Vento",
+                        "desc": "Ajuste seguro sob o queixo com trava regulável, mantendo o chapéu firme mesmo sob rajadas de vento e navegação rápida."
+                    },
+                    {
+                        "img": img3,
+                        "alt": f"Protetor de nuca e acabamento do chapéu {formatted_title}",
+                        "title": "Protetor de Nuca Integrado",
+                        "desc": "Cobertura estendida para a nuca que previne queimaduras solares durante longas jornadas sob sol intenso."
+                    },
+                    {
+                        "img": img4,
+                        "alt": f"Tecido leve e respirável do chapéu {formatted_title}",
+                        "title": "Tecido Respirável & Leve",
+                        "desc": "Construção de secagem rápida com ilhoses de ventilação lateral para dissipação imediata de calor e sensação de frescor contínuo."
+                    }
+                ]
+                caract_title = "Características do Chapéu Safári BRK"
+                caract_items = [
+                    "Copa anatômica com ilhoses laterais que garantem circulação de ar constante.",
+                    "Aba larga circular de 360° com fator de proteção UV50+ permanente.",
+                    "Cordão jugular com trava ajustável de segurança contra quedas e vento forte.",
+                    "Protetor de nuca para proteção solar total na região posterior do pescoço.",
+                    "Tecido tecnológico leve de secagem ultra rápida e alta resistência ao desgaste."
+                ]
+                cuidados_title = "Cuidados com o Seu Chapéu"
+                cuidados_items = [
+                    "Lavar à mão com água fria e sabão neutro.",
+                    "Não lavar em máquina e não torcer para preservar a estrutura da aba.",
+                    "Secar estendido à sombra em superfície plana.",
+                    "Não usar alvejantes, amaciantes ou produtos à base de cloro.",
+                    "Guardar sem dobrar a aba estruturada para manter o caimento original."
+                ]
+                split1_p1 = "<strong>Cada chapéu BRK é desenvolvido pensando na proteção de quem enfrenta longas jornadas ao ar livre.</strong>"
+                split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem padrão de proteção solar certificado."
+                split1_p3 = "Construído com materiais leves e resistentes, oferece o máximo de conforto térmico para pescarias e trabalho sob sol forte."
+                split2_p1 = "<strong>A sua experiência começa antes mesmo de abrir a caixa.</strong>"
+                split2_p2 = "O chapéu é enviado em embalagem protegida BRK, projetada para evitar deformações na aba durante o transporte."
+                split2_p3 = "Seu novo chapéu chega pronto para encarar o sol com proteção e estilo incomparáveis."
+                split1_alt = f"Etiquetas BRK aplicadas no chapéu {formatted_title}"
+                split2_alt = f"Embalagem protegida BRK para envio do chapéu {formatted_title}"
 
         else:  # hats_country_cowboy
             item_type_label = "Chapéu Country"
@@ -905,13 +974,14 @@ class HTMLBuilder:
             img2 = gallery[1] if len(gallery) > 1 else img1
             img3 = gallery[2] if len(gallery) > 2 else img1
             img4 = gallery[3] if len(gallery) > 3 else img2
+            is_straw_country = any(w in title_low for w in ["bozeman", " cal", "palha"])
 
             details = [
                 {
                     "img": img1,
                     "alt": f"Aba larga estruturada do chapéu {formatted_title}",
                     "title": "Aba Larga Estruturada",
-                    "desc": "Formato clássico com curvatura marcante e acabamento impecável, unindo tradição, imponência e proteção solar no campo."
+                    "desc": "Formato clássico western com curvatura marcante e acabamento impecável, unindo tradição, imponência e proteção solar no campo."
                 },
                 {
                     "img": img2,
@@ -923,26 +993,34 @@ class HTMLBuilder:
                     "img": img3,
                     "alt": f"Fita decorativa e acabamento do chapéu {formatted_title}",
                     "title": "Fita & Acabamento Premium",
-                    "desc": "Banda decorativa exclusiva com detalhe refinado, reforçando a autenticidade e o visual rústico elegante."
+                    "desc": "Bandinha externa clássica com fivela, passador e ponteira metálica trabalhada, reforçando a autenticidade western."
                 },
                 {
                     "img": img4,
                     "alt": f"Estrutura de alta densidade do chapéu {formatted_title}",
-                    "title": "Estrutura Nobre & Firme",
-                    "desc": "Matéria-prima nobre de alta densidade que preserva a forma da copa e a curvatura da aba mesmo com uso contínuo."
+                    "title": "Copa Ventilada em Palha Nobre" if is_straw_country else "Feltro Country de Alta Densidade",
+                    "desc": (
+                        "Trama firme em fibra nobre com microperfurações na copa que favorecem a ventilação térmica mantendo a estrutura impecável."
+                        if is_straw_country else
+                        "Feltro encorpado de alta densidade que preserva os vincos da copa Cattleman e a curvatura da aba mesmo com uso contínuo."
+                    )
                 }
             ]
             caract_title = "Características do Chapéu Country"
             caract_items = [
-                "Copa alta estruturada e moldada no legítimo estilo western / campo.",
+                (
+                    "Copa alta estruturada em palha/fibra nobre com trama ventilada no legítimo estilo western."
+                    if is_straw_country else
+                    "Copa alta estruturada em feltro encorpado moldado no legítimo estilo Cattleman / Western."
+                ),
                 "Aba larga de presença marcante que proporciona excelente sombra e proteção.",
                 "Carneira interna acolchoada para conforto prolongado em cavalgadas e eventos.",
-                "Fita externa com acabamento nobre e identidade autêntica do homem e da mulher do campo.",
+                "Bandinha externa com conjunto de fivela metálica e identidade autêntica do campo.",
                 "Ideal para rodeios, feiras agropecuárias, lida na fazenda e dia a dia sertanejo."
             ]
             cuidados_title = "Cuidados & Conservação do Chapéu"
             cuidados_items = [
-                "Limpar delicadamente com escova de cerdas macias sempre no sentido das fibras.",
+                "Limpar delicadamente com escova de cerdas macias sempre no sentido da trama ou das fibras.",
                 "Evitar contato direto com chuva intensa ou umidade excessiva.",
                 "Armazenar sempre apoiado pela copa ou em suporte adequado para não desformar a aba.",
                 "Nunca dobrar, amassar ou deixar exposto no interior de veículos sob sol forte.",

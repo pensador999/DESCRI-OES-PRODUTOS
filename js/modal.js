@@ -768,18 +768,18 @@ const QUICK_BADGES_BY_ARCHETYPE = {
   "pants_cargo_tactical": [
     {
       "icon": "shield",
-      "title": "Ripstop Alta Tenacidade",
+      "title": "Tecido Alta Gramatura",
       "sub": "Resistente ao Atrito"
     },
     {
       "icon": "gear",
-      "title": "Reforço Cavalo e Joelhos",
-      "sub": "Modelagem Operacional"
+      "title": "Costuras Reforçadas",
+      "sub": "Travetes de Alta Tensão"
     },
     {
       "icon": "box",
-      "title": "Múltiplos Bolsos Cargo",
-      "sub": "Compartimentação Prática"
+      "title": "Bolsos Funcionais",
+      "sub": "Profundos e Estruturados"
     },
     {
       "icon": "return",
@@ -790,18 +790,18 @@ const QUICK_BADGES_BY_ARCHETYPE = {
   "overalls_workwear": [
     {
       "icon": "shield",
-      "title": "Costuras Duplas e Triplas",
-      "sub": "Alta Tenacidade"
+      "title": "100% Impermeável",
+      "sub": "Termossoldagem Estanque"
+    },
+    {
+      "icon": "shoe",
+      "title": "Bota Integrada",
+      "sub": "Solado Tratorado Firme"
     },
     {
       "icon": "gear",
       "title": "Alças Reguláveis",
       "sub": "Engate Rápido"
-    },
-    {
-      "icon": "box",
-      "title": "Bolsos Reforçados",
-      "sub": "Frontais, Laterais e Traseiros"
     },
     {
       "icon": "return",
@@ -1126,12 +1126,12 @@ const QUICK_BADGES_BY_ARCHETYPE = {
     {
       "icon": "care",
       "title": "Longa Duração",
-      "sub": "Até 30 a 45 Dias"
+      "sub": "Perfume Prolongado"
     },
     {
       "icon": "gear",
-      "title": "Fixação Prática",
-      "sub": "Retrovisor ou Grade de Ar"
+      "title": "Suspensão Prática",
+      "sub": "Retrovisor Interno"
     },
     {
       "icon": "return",
@@ -1297,7 +1297,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
       tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">${badgeTitle}</div><div class="brk-sg-subtitle">${subtitle}</div></div><table class="brk-sg-table"><thead><tr class="brk-sg-th-row"><th>TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
     }
   }
-  else if (["pants_cargo_tactical", "overalls_workwear"].includes(archetypeId) || (!isShirt && /\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao)\b/i.test(tLow))) {
+  else if ((["pants_cargo_tactical", "overalls_workwear"].includes(archetypeId) || (!isShirt && /\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao)\b/i.test(tLow))) && !tLow.includes("bota")) {
     guideTitle = "Tabela de Medidas - Calças & Bermudas (38 ao 52)";
     tipText = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Cintura na altura do cós | Quadril na parte mais larga | Comprimento da cintura até a barra). Dica: compare com uma peça sua estendida.";
     const rows = [
@@ -1473,14 +1473,29 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
   let cuidadosItems = [];
   let split1_p1, split1_p2, split1_p3, split2_p1, split2_p2, split2_p3;
 
+  const titleLow = formattedTitle.toLowerCase();
   if (archetypeId === "caps_trucker_snapback") {
+    const is6Gomos = titleLow.includes("6 gomos") || titleLow.includes("seis gomos");
+    const copaBullet = is6Gomos
+      ? "Copa estruturada de 6 gomos fechada em tecido camuflado, com frente firme e ilhoses bordados que favorecem a ventilação."
+      : "Copa estruturada estilo trucker, com frente firme e tela traseira que favorece a ventilação.";
+
+    let capTheme = stKey;
+    if (["fishing", "pesca", "robalo", "tucunar", "tambaqui", "traira", "traíra", "dourado", "pirarara", "red tail", "black bass"].some(w => titleLow.includes(w))) {
+      capTheme = "brk_fishing";
+    } else if (["agro", "peacemaker", "country", "texas", "bull", "nelore", "fazenda", "sertanejo"].some(w => titleLow.includes(w))) {
+      capTheme = "brk_agro";
+    } else if (["motors", "racing", "off-road", "off road", "motocross", "trilha"].some(w => titleLow.includes(w))) {
+      capTheme = "brk_motors";
+    }
+
     let exclusiveDesc = "Arte exclusiva inspirada no lifestyle BRK, combinando atitude e identidade visual marcante.";
-    if (storeKey === "brk_fishing") {
-      exclusiveDesc = "Arte exclusiva BRK Fishing inspirada no universo da pesca esportiva, para você se destacar em qualquer ambiente.";
-    } else if (storeKey === "brk_agro") {
-      exclusiveDesc = "Arte exclusiva BRK Agro inspirada na força do campo e do agronegócio, feita para quem tem orgulho da terra.";
-    } else if (storeKey === "brk_motors") {
-      exclusiveDesc = "Arte exclusiva BRK Motors com pegada esportiva e adrenalina do automobilismo.";
+    if (capTheme === "brk_fishing") {
+      exclusiveDesc = "Arte exclusiva BRK Fishing inspirada na pesca esportiva, para você se destacar dentro e fora da água.";
+    } else if (capTheme === "brk_agro") {
+      exclusiveDesc = "Arte exclusiva BRK Agro inspirada no campo e no agronegócio, para você se destacar em qualquer ambiente.";
+    } else if (capTheme === "brk_motors") {
+      exclusiveDesc = "Arte exclusiva BRK Motors inspirada na velocidade e no off-road, para você se destacar dentro e fora das pistas.";
     }
 
     details = [
@@ -1494,7 +1509,7 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
         img: "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/k2bupYT.jpg",
         alt: `Parte interna do boné ${formattedTitle} com costuras em tear`,
         title: "Interno em Tear",
-        desc: storeKey === "brk_fishing"
+        desc: capTheme === "brk_fishing"
           ? "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de pesca."
           : "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de uso contínuo."
       },
@@ -1513,13 +1528,19 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
     ];
     caractTitle = "Características do Boné BRK";
     caractItems = [
-      "Copa estruturada estilo trucker, com frente firme e tela traseira que favorece a ventilação.",
+      copaBullet,
       "Aba moldável com costuras reforçadas, oferecendo conforto e proteção para o rosto e os olhos.",
-      "Tamanho único com regulagem traseira, se ajustando com precisão à maioria dos formatos de cabeça.",
-      "Ideal para pesca esportiva, atividades ao ar livre e uso no dia a dia.",
-      storeKey === "brk_fishing"
+      "Tamanho único com regulagem traseira, se ajustando à maioria dos formatos de cabeça.",
+      capTheme === "brk_agro"
+        ? "Ideal para o campo, atividades ao ar livre e uso no dia a dia."
+        : (capTheme === "brk_motors"
+          ? "Ideal para trilha, velocidade, eventos automotivos e uso no dia a dia."
+          : "Ideal para pesca esportiva, atividades ao ar livre e uso no dia a dia."),
+      capTheme === "brk_fishing"
         ? "Acabamento interno pensado para máximo conforto mesmo em longas jornadas de pesca."
-        : "Acabamento interno pensado para máximo conforto mesmo em longas jornadas de uso contínuo."
+        : (capTheme === "brk_agro"
+          ? "Acabamento interno pensado para máximo conforto mesmo em longas jornadas de trabalho."
+          : "Acabamento interno pensado para máximo conforto mesmo em longas jornadas.")
     ];
     cuidadosTitle = "Cuidados com o Seu Boné";
     cuidadosItems = [
@@ -1530,27 +1551,27 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
       "Não utilize alvejante, não passe a ferro e não leve à secadora."
     ];
 
-    if (storeKey === "brk_fishing") {
+    if (capTheme === "brk_fishing") {
       split1_p1 = "Cada boné BRK é desenvolvido pensando no pescador que vive a pesca esportiva intensamente.";
       split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem que você está usando um item de alta performance.";
       split1_p3 = "Da escolha dos materiais ao acabamento final, tudo é pensado para entregar conforto, durabilidade e estilo em qualquer pescaria.";
       split2_p1 = "A sua experiência começa antes mesmo de abrir a caixa.";
       split2_p2 = "O boné é enviado em embalagem protegida e personalizada BRK, pensado para chegar até você em perfeitas condições.";
       split2_p3 = "Assim, seu novo boné de pesca chega pronto para encarar a próxima aventura, seja na beira do rio, na represa ou em alto mar.";
-    } else if (storeKey === "brk_agro") {
-      split1_p1 = "Cada boné BRK é desenvolvido pensando em quem vive o agronegócio com paixão e orgulho da terra.";
-      split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem padrão de acabamento robusto e durável.";
-      split1_p3 = "Da escolha dos tecidos ao acabamento das costuras, tudo é projetado para suportar o dia a dia pesado na lida da fazenda e nas feiras agrícolas.";
+    } else if (capTheme === "brk_agro") {
+      split1_p1 = "Cada boné BRK é desenvolvido pensando em quem vive a vida no campo intensamente.";
+      split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem que você está usando um item de alta performance.";
+      split1_p3 = "Da escolha dos materiais ao acabamento final, tudo é pensado para entregar conforto, durabilidade e estilo no campo ou na cidade.";
       split2_p1 = "A sua experiência começa antes mesmo de abrir a caixa.";
-      split2_p2 = "O boné é enviado em embalagem protegida e personalizada BRK, pensada para chegar impecável até você, sem amassar e pronto para o uso.";
-      split2_p3 = "Assim, seu novo boné chega pronto para encarar a lida na fazenda, nos eventos ou na cidade com presença marcante.";
-    } else if (storeKey === "brk_motors") {
-      split1_p1 = "Cada boné BRK é desenvolvido com o DNA da velocidade, alta performance e adrenalina das pistas.";
-      split1_p2 = "As etiquetas exclusivas BRK garantem a autenticidade de um produto feito para apaixonados por velocidade.";
-      split1_p3 = "Da modelagem ergonômica à escolha dos tecidos, cada detalhe expressa a atitude marcante do universo motorizado.";
+      split2_p2 = "O boné é enviado em embalagem protegida e personalizada BRK, pensado para chegar até você em perfeitas condições.";
+      split2_p3 = "Assim, seu novo boné chega pronto para encarar a lida na fazenda, feiras agropecuárias ou eventos sertanejos.";
+    } else if (capTheme === "brk_motors") {
+      split1_p1 = "Cada boné BRK é desenvolvido pensando no piloto e entusiasta que vive a velocidade intensamente.";
+      split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem que você está usando um item de alta performance.";
+      split1_p3 = "Da escolha dos materiais ao acabamento final, tudo é pensado para entregar conforto, durabilidade e estilo em qualquer aventura sobre rodas.";
       split2_p1 = "A sua experiência começa antes mesmo de abrir a caixa.";
-      split2_p2 = "O boné é enviado em embalagem protegida e personalizada BRK, pensada para chegar impecável até você, sem amassar e pronto para o uso.";
-      split2_p3 = "Assim, seu novo boné chega pronto para acompanhar você nas pistas, nos track days ou no dia a dia com estilo único.";
+      split2_p2 = "O boné é enviado em embalagem protegida e personalizada BRK, pensado para chegar até você em perfeitas condições.";
+      split2_p3 = "Assim, seu novo boné chega pronto para encarar a próxima trilha, viagem ou pista com atitude e proteção.";
     } else {
       split1_p1 = "Cada boné BRK é desenvolvido pensando em quem vive a vida ao ar livre intensamente.";
       split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem que você está usando um item original e de alta performance.";
@@ -1567,54 +1588,105 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
     const img3 = gallery[2] || img1;
     const img4 = gallery[3] || img2;
 
-    details = [
-      {
-        img: img1,
-        alt: `Aba 360° com proteção solar do chapéu ${formattedTitle}`,
-        title: "Aba 360° UV50+",
-        desc: "Aba circular ampla com costuras reforçadas, bloqueando os raios solares diretos no rosto, orelhas e pescoço com máxima cobertura."
-      },
-      {
-        img: img2,
-        alt: `Cordão jugular com trava anti-vento do chapéu ${formattedTitle}`,
-        title: "Cordão Jugular Anti-Vento",
-        desc: "Ajuste seguro sob o queixo com trava regulável, mantendo o chapéu firme mesmo sob rajadas de vento e navegação rápida."
-      },
-      {
-        img: img3,
-        alt: `Protetor de nuca e acabamento do chapéu ${formattedTitle}`,
-        title: "Protetor de Nuca Integrado",
-        desc: "Cobertura estendida para a nuca que previne queimaduras solares durante longas jornadas sob sol intenso."
-      },
-      {
-        img: img4,
-        alt: `Tecido leve e respirável do chapéu ${formattedTitle}`,
-        title: "Tecido Respirável & Leve",
-        desc: "Construção de secagem rápida com ilhoses de ventilação lateral para dissipação imediata de calor e sensação de frescor contínuo."
-      }
-    ];
-    caractTitle = "Características do Chapéu Safári BRK";
-    caractItems = [
-      "Copa anatômica com ilhoses laterais que garantem circulação de ar constante.",
-      "Aba larga circular de 360° com fator de proteção UV50+ permanente.",
-      "Cordão jugular com trava ajustável de segurança contra quedas e vento forte.",
-      "Protetor de nuca para proteção solar total na região posterior do pescoço.",
-      "Tecido tecnológico leve de secagem ultra rápida e alta resistência ao desgaste."
-    ];
-    cuidadosTitle = "Cuidados com o Seu Chapéu";
-    cuidadosItems = [
-      "Lavar à mão com água fria e sabão neutro.",
-      "Não lavar em máquina e não torcer para preservar a estrutura da aba.",
-      "Secar estendido à sombra em superfície plana.",
-      "Não usar alvejantes, amaciantes ou produtos à base de cloro.",
-      "Guardar sem dobrar a aba estruturada para manter o caimento original."
-    ];
-    split1_p1 = "Cada chapéu BRK é desenvolvido pensando na proteção de quem enfrenta longas jornadas ao ar livre.";
-    split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem padrão de proteção solar certificado.";
-    split1_p3 = "Construído com materiais leves e resistentes, oferece o máximo de conforto térmico para pescarias e trabalho sob sol forte.";
-    split2_p1 = "A sua experiência começa antes mesmo de abrir a caixa.";
-    split2_p2 = "O chapéu é enviado em embalagem protegida BRK, projetada para evitar deformações na aba durante o transporte.";
-    split2_p3 = "Seu novo chapéu chega pronto para encarar o sol com proteção e estilo incomparáveis.";
+    if (["juta", "bambu", "palha"].some(w => titleLow.includes(w))) {
+      details = [
+        {
+          img: img1,
+          alt: `Trama natural em juta e palha de bambu do chapéu ${formattedTitle}`,
+          title: "Trama em Juta & Bambu",
+          desc: "Trançado nobre em fibras selecionadas de juta e palha de bambu que proporciona ventilação natural constante e leveza superior."
+        },
+        {
+          img: img2,
+          alt: `Bandinha personalizada BRK Agro com fivela metálica do chapéu ${formattedTitle}`,
+          title: "Bandinha BRK Agro Exclusiva",
+          desc: "Acabamento externo em fita caramelo personalizada BRK Agro com fivela metálica lateral, conferindo identidade autêntica do campo."
+        },
+        {
+          img: img3,
+          alt: `Copa e aba estruturadas com viés protetor do chapéu ${formattedTitle}`,
+          title: "Copa & Aba Estruturadas",
+          desc: "Modelagem clássica com copa bem definida e aba ampla finalizada com viés de proteção nas bordas para excelente cobertura solar."
+        },
+        {
+          img: img4,
+          alt: `Carneira interna confortável do chapéu ${formattedTitle}`,
+          title: "Carneira Interna Confortável",
+          desc: "Faixa interna macia e anatômica que garante encaixe firme e estável na cabeça ao longo de todo o dia."
+        }
+      ];
+      caractTitle = "Características do Chapéu BRK Agro Juta & Bambu";
+      caractItems = [
+        "Confeccionado em trama selecionada de juta e palha de bambu altamente respirável.",
+        "Aba estruturada com acabamento em viés nas bordas para proteção solar no campo e lazer.",
+        "Bandinha externa personalizada BRK Agro em tom caramelo com fivela metálica.",
+        "Carneira interna macia que proporciona ajuste confortável e seguro na cabeça.",
+        "Ideal para dias de sol na fazenda, feiras agropecuárias, encontros sertanejos e lazer ao ar livre."
+      ];
+      cuidadosTitle = "Cuidados com o Seu Chapéu de Fibra Natural";
+      cuidadosItems = [
+        "Limpar delicadamente com pano seco ou escova de cerdas macias.",
+        "Não lavar em água, não submergir e não utilizar máquina de lavar.",
+        "Evitar exposição à chuva intensa ou ambientes úmidos fechados.",
+        "Caso receba respingos leves, deixe secar naturalmente à sombra em local arejado.",
+        "Guardar sempre apoiado pela copa ou em suporte próprio para preservar a aba estruturada."
+      ];
+      split1_p1 = "Estilo autêntico do campo aliado ao frescor das fibras naturais.";
+      split1_p2 = "O Chapéu BRK Agro Juta Palha de Bambu Premium foi desenvolvido para quem valoriza elegância rústica, conforto térmico e acabamento impecável.";
+      split1_p3 = "Cada detalhe — da trama ventilada à bandinha exclusiva BRK Agro — entrega presença marcante e bem-estar sob o sol.";
+      split2_p1 = "Embalagem protetora pensada para preservar o formato original.";
+      split2_p2 = "O chapéu é enviado em caixa reforçada BRK, projetada para proteger a copa e a aba durante todo o transporte.";
+      split2_p3 = "Assim, seu novo chapéu chega impecável e pronto para acompanhar você na fazenda, nos eventos ou no lazer.";
+    } else {
+      details = [
+        {
+          img: img1,
+          alt: `Aba 360° com proteção solar do chapéu ${formattedTitle}`,
+          title: "Aba 360° UV50+",
+          desc: "Aba circular ampla com costuras reforçadas, bloqueando os raios solares diretos no rosto, orelhas e pescoço com máxima cobertura."
+        },
+        {
+          img: img2,
+          alt: `Cordão jugular com trava anti-vento do chapéu ${formattedTitle}`,
+          title: "Cordão Jugular Anti-Vento",
+          desc: "Ajuste seguro sob o queixo com trava regulável, mantendo o chapéu firme mesmo sob rajadas de vento e navegação rápida."
+        },
+        {
+          img: img3,
+          alt: `Protetor de nuca e acabamento do chapéu ${formattedTitle}`,
+          title: "Protetor de Nuca Integrado",
+          desc: "Cobertura estendida para a nuca que previne queimaduras solares durante longas jornadas sob sol intenso."
+        },
+        {
+          img: img4,
+          alt: `Tecido leve e respirável do chapéu ${formattedTitle}`,
+          title: "Tecido Respirável & Leve",
+          desc: "Construção de secagem rápida com ilhoses de ventilação lateral para dissipação imediata de calor e sensação de frescor contínuo."
+        }
+      ];
+      caractTitle = "Características do Chapéu Safári BRK";
+      caractItems = [
+        "Copa anatômica com ilhoses laterais que garantem circulação de ar constante.",
+        "Aba larga circular de 360° com fator de proteção UV50+ permanente.",
+        "Cordão jugular com trava ajustável de segurança contra quedas e vento forte.",
+        "Protetor de nuca para proteção solar total na região posterior do pescoço.",
+        "Tecido tecnológico leve de secagem ultra rápida e alta resistência ao desgaste."
+      ];
+      cuidadosTitle = "Cuidados com o Seu Chapéu";
+      cuidadosItems = [
+        "Lavar à mão com água fria e sabão neutro.",
+        "Não lavar em máquina e não torcer para preservar a estrutura da aba.",
+        "Secar estendido à sombra em superfície plana.",
+        "Não usar alvejantes, amaciantes ou produtos à base de cloro.",
+        "Guardar sem dobrar a aba estruturada para manter o caimento original."
+      ];
+      split1_p1 = "Cada chapéu BRK é desenvolvido pensando na proteção de quem enfrenta longas jornadas ao ar livre.";
+      split1_p2 = "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem padrão de proteção solar certificado.";
+      split1_p3 = "Construído com materiais leves e resistentes, oferece o máximo de conforto térmico para pescarias e trabalho sob sol forte.";
+      split2_p1 = "A sua experiência começa antes mesmo de abrir a caixa.";
+      split2_p2 = "O chapéu é enviado em embalagem protegida BRK, projetada para evitar deformações na aba durante o transporte.";
+      split2_p3 = "Seu novo chapéu chega pronto para encarar o sol com proteção e estilo incomparáveis.";
+    }
   } else {
     const rawImgs = (liveP.cdn_images && liveP.cdn_images.length > 0) ? liveP.cdn_images : (liveP.gallery || liveP.images || []);
     const gallery = rawImgs.map(img => (typeof img === "object" ? img.src : img));
@@ -1622,13 +1694,14 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
     const img2 = gallery[1] || img1;
     const img3 = gallery[2] || img1;
     const img4 = gallery[3] || img2;
+    const isStrawCountry = ["bozeman", " cal", "palha"].some(w => titleLow.includes(w));
 
     details = [
       {
         img: img1,
         alt: `Aba larga estruturada do chapéu ${formattedTitle}`,
         title: "Aba Larga Estruturada",
-        desc: "Formato clássico com curvatura marcante e acabamento impecável, unindo tradição, imponência e proteção solar no campo."
+        desc: "Formato clássico western com curvatura marcante e acabamento impecável, unindo tradição, imponência e proteção solar no campo."
       },
       {
         img: img2,
@@ -1640,26 +1713,30 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
         img: img3,
         alt: `Fita decorativa e acabamento do chapéu ${formattedTitle}`,
         title: "Fita & Acabamento Premium",
-        desc: "Banda decorativa exclusiva com detalhe refinado, reforçando a autenticidade e o visual rústico elegante."
+        desc: "Bandinha externa clássica com fivela, passador e ponteira metálica trabalhada, reforçando a autenticidade western."
       },
       {
         img: img4,
         alt: `Estrutura de alta densidade do chapéu ${formattedTitle}`,
-        title: "Estrutura Nobre & Firme",
-        desc: "Matéria-prima nobre de alta densidade que preserva a forma da copa e a curvatura da aba mesmo com uso contínuo."
+        title: isStrawCountry ? "Copa Ventilada em Palha Nobre" : "Feltro Country de Alta Densidade",
+        desc: isStrawCountry
+          ? "Trama firme em fibra nobre com microperfurações na copa que favorecem a ventilação térmica mantendo a estrutura impecável."
+          : "Feltro encorpado de alta densidade que preserva os vincos da copa Cattleman e a curvatura da aba mesmo com uso contínuo."
       }
     ];
     caractTitle = "Características do Chapéu Country";
     caractItems = [
-      "Copa alta estruturada e moldada no legítimo estilo western / campo.",
+      isStrawCountry
+        ? "Copa alta estruturada em palha/fibra nobre com trama ventilada no legítimo estilo western."
+        : "Copa alta estruturada em feltro encorpado moldado no legítimo estilo Cattleman / Western.",
       "Aba larga de presença marcante que proporciona excelente sombra e proteção.",
       "Carneira interna acolchoada para conforto prolongado em cavalgadas e eventos.",
-      "Fita externa com acabamento nobre e identidade autêntica do homem e da mulher do campo.",
+      "Bandinha externa com conjunto de fivela metálica e identidade autêntica do campo.",
       "Ideal para rodeios, feiras agropecuárias, lida na fazenda e dia a dia sertanejo."
     ];
     cuidadosTitle = "Cuidados & Conservação do Chapéu";
     cuidadosItems = [
-      "Limpar delicadamente com escova de cerdas macias sempre no sentido das fibras.",
+      "Limpar delicadamente com escova de cerdas macias sempre no sentido da trama ou das fibras.",
       "Evitar contato direto com chuva intensa ou umidade excessiva.",
       "Armazenar sempre apoiado pela copa ou em suporte adequado para não desformar a aba.",
       "Nunca dobrar, amassar ou deixar exposto no interior de veículos sob sol forte.",
@@ -1674,9 +1751,9 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
   }
 
   let radialColor = "rgba(0, 168, 255, 0.15)";
-  if (storeKey === "brk_agro") {
+  if (stKey === "brk_agro") {
     radialColor = "rgba(21, 128, 61, 0.15)";
-  } else if (storeKey === "brk_motors") {
+  } else if (stKey === "brk_motors") {
     radialColor = "rgba(234, 88, 12, 0.15)";
   }
 

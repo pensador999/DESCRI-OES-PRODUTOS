@@ -923,15 +923,15 @@ class TemplateEngine:
                 "act3": {
                     "tag": "Praticidade & Estilo",
                     "fa_icon": "fa-solid fa-car",
-                    "title": "DESIGN COMPACTO COM FIXAÇÃO SIMPLES NO RETROVISOR OU DIFUSOR",
-                    "desc_tmpl": "Acompanha cordão ou presilha para fácil acoplamento no retrovisor interno ou grade de ventilação, sem manchar superfícies plásticas ou couro."
+                    "title": "DESIGN COMPACTO COM SUSPENSÃO PRÁTICA NO RETROVISOR INTERNO",
+                    "desc_tmpl": "Formato leve e discreto pensado para fácil suspensão no retrovisor interno ou pequenos ambientes, perfumando a cabine sem ocupar espaço no painel."
                 },
                 "base_specs": [
-                    {"label": "Função Principal", "default": "Aromatizador e desodorizador de ambientes automotivos"},
-                    {"label": "Formato de Difusão", "default": "Liberação gradual contínua e homogênea"},
-                    {"label": "Durabilidade Estimada", "default": "Até 30 a 45 dias de ação perfumada"},
-                    {"label": "Fixação", "default": "Cordão para retrovisor interno ou clipe para grade de ar"},
-                    {"label": "Indicação", "default": "Veículos, escritórios, guarda-roupas e pequenos ambientes"}
+                    {"label": "Função Principal", "default": "Aromatizador e neutralizador de odores automotivos e ambientes"},
+                    {"label": "Formato de Difusão", "default": "Liberação gradual contínua e homogênea da fragrância"},
+                    {"label": "Durabilidade Estimada", "default": "Ação perfumada prolongada de longa duração"},
+                    {"label": "Modo de Uso", "default": "Suspensão prática no retrovisor interno ou pequenos espaços"},
+                    {"label": "Indicação", "default": "Carros, caminhonetes, escritórios, armários e pequenos ambientes"}
                 ],
                 "care_tips": "Pendurar livremente evitando contato direto e contínuo com painéis plásticos e revestimentos de couro."
             },
@@ -3086,6 +3086,120 @@ class TemplateEngine:
                     {"label": "Tema Principal", "value": "Vida no campo, fazenda, cavalos, animais rurais e máquinas agrícolas"},
                     {"label": "Idioma", "value": "Português"},
                     {"label": "Público Indicado", "value": "Crianças, jovens e famílias apaixonadas pelo universo Agro"}
+                ]
+            else:
+                act1["tag"] = "Aventura na Pesca & Criatividade"
+                act1["title"] = "ILUSTRAÇÕES EXCLUSIVAS DO UNIVERSO DA PESCA ESPORTIVA E NATUREZA"
+                act1["desc_tmpl"] = "O {title} reúne desenhos exclusivos de peixes esportivos brasileiros, barcos, pescarias em família e cenários aquáticos, despertando a imaginação e o contato das crianças com a pesca esportiva."
+                act2["tag"] = "Qualidade Editorial BRK"
+                act2["title"] = "TRAÇOS NÍTIDOS EM ALTA DEFINIÇÃO E PAPEL ENCORPADO"
+                act2["desc_tmpl"] = "Impresso em papel de alta gramatura com contornos bem definidos, oferecendo excelente superfície para colorir com lápis de cor e giz de cera sem transferir facilmente para o verso."
+                act3["tag"] = "Presente & Momentos em Família"
+                act3["title"] = "DIVERSÃO EDUCATIVA LONGE DAS TELAS PARA PEQUENOS PESCADORES"
+                act3["desc_tmpl"] = "Ideal para estimular a coordenação motora fina, a concentração e a paixão pela natureza e pela preservação dos rios desde cedo."
+                new_specs = [
+                    {"label": "Formato", "value": "Livro de colorir impresso com encadernação reforçada"},
+                    {"label": "Acabamento", "value": "Capa colorida laminada e miolo em papel especial de alta gramatura"},
+                    {"label": "Tema Principal", "value": "Pesca esportiva, espécies de peixes, natureza e aventuras nos rios"},
+                    {"label": "Idioma", "value": "Português"},
+                    {"label": "Público Indicado", "value": "Crianças, jovens e famílias apaixonadas pela pesca esportiva"}
+                ]
+
+        # 14.6 Adaptação 360° para Calças Jeans Country Masculinas BRK Agro (pants_cargo_tactical)
+        elif archetype_id == "pants_cargo_tactical":
+            if any(w in t_low for w in ["jeans", "denim", "country", "western", "rancher", "dusty", "badlands", "stout", "hardland", "tennesse"]):
+                act1["tag"] = "Denim Encorpado & Corte Country"
+                act1["title"] = "JEANS DE ALTA GRAMATURA COM CAIMENTO TRADICIONAL WESTERN"
+                act1["desc_tmpl"] = "Desenvolvida para unir a resistência exigida na rotina do campo à elegância do estilo sertanejo, a {title} é confeccionada em tecido Denim encorpado de alta durabilidade, com corte tradicional country que acomoda perfeitamente o cano de botas e botinas."
+                act2["tag"] = "Conforto na Lida & Cós Estruturado"
+                act2["title"] = "LIBERDADE DE MOVIMENTOS NO CAMPO E PASSADORES REFORÇADOS PARA CINTO"
+                act2["desc_tmpl"] = "Projetada para acompanhar longas jornadas na fazenda, cavalgadas, rodeios e uso diário, conta com cós anatômico firme e passadores reforçados dimensionados para cintos country e fivelas tradicionais."
+                act3["tag"] = "Acabamento & Costuras Duplas"
+                act3["title"] = "5 BOLSOS FUNCIONAIS COM REBITES METÁLICOS E PESPONTOS DE ALTA TENACIDADE"
+                act3["desc_tmpl"] = "Construída com 5 bolsos clássicos profundos (frontais com bolso relógio e traseiros estruturados com pesponto western), travetes e rebites metálicos nos pontos de maior tensão que garantem longa vida útil mesmo sob uso intenso."
+                new_specs = [
+                    {"label": "Tecido Principal", "value": "Denim (Jeans) encorpado de alta gramatura e resistência ao atrito"},
+                    {"label": "Modelagem / Corte", "value": "Tradicional Country / Western Masculina (caimento ideal sobre botas e botinas)"},
+                    {"label": "Cós & Fechamento", "value": "Botão metálico personalizado, zíper reforçado e passadores largos para cinto"},
+                    {"label": "Bolsos & Reforços", "value": "5 bolsos tradicionais com rebites metálicos e costuras duplas de alta tenacidade"},
+                    {"label": "Uso Recomendado", "value": "Lida no campo, agronegócio, cavalgadas, rodeios, eventos sertanejos e dia a dia"}
+                ]
+                template["care_tips"] = "Lavar do avesso com sabão neutro para preservar a tonalidade original do jeans. Secar à sombra e não utilizar alvejantes."
+
+        # 14.7 Adaptação 360° para Macacão Jardineira de Pesca com Bota Impermeável Wader (overalls_workwear)
+        elif archetype_id == "overalls_workwear":
+            if any(w in t_low for w in ["pesca", "impermeavel", "impermeável", "bota", "silicone", "wader"]):
+                act1["tag"] = "Impermeabilidade Total (Wader)"
+                act1["title"] = "JARDINEIRA DE PESCA 100% IMPERMEÁVEL COM BOTAS ACOPLADAS"
+                act1["desc_tmpl"] = "Projetado para pescarias dentro d'água, manejo em açudes e ambientes alagados, o {title} forma uma barreira estanque integral que mantém o corpo e os pés completamente secos da cintura até a sola."
+                act2["tag"] = "Botas Integradas & Tração"
+                act2["title"] = "BOTAS DE PVC/SILICONE TERMOSSOLDADAS COM SOLADO TRATORADO ANTIDERRAPANTE"
+                act2["desc_tmpl"] = "Conta com botas impermeáveis fundidas diretamente à jardineira por termossoldagem de alta frequência (sem frestas ou costuras aparentes) e solado tratorado robusto para tração firme em lama, pedras e margens escorregadias."
+                act3["tag"] = "Suspensórios & Mobilidade"
+                act3["title"] = "ALÇAS ELÁSTICAS REGULÁVEIS COM FIVELAS DE ENGATE RÁPIDO"
+                act3["desc_tmpl"] = "Equipado com suspensórios de alta elasticidade, fivelas plásticas de trava rápida e ajuste de cintura que permitem vestir ou retirar a jardineira com facilidade sobre a roupa."
+                new_specs = [
+                    {"label": "Construção & Vedação", "value": "Composto impermeável de PVC/Nylon flexível com emendas termossoldadas estanques"},
+                    {"label": "Botas Acopladas", "value": "Botas de PVC/Silicone impermeáveis integradas diretamente à estrutura da jardineira"},
+                    {"label": "Solado", "value": "Tratorado antiderrapante de alta aderência para terrenos lamacentos e aquáticos"},
+                    {"label": "Sistema de Ajuste", "value": "Alças elásticas reguláveis com fivelas de engate rápido e ajuste na cintura"},
+                    {"label": "Indicação de Uso", "value": "Pesca embarcada ou vadeio, piscicultura, limpeza de tanques, lavoura irrigada e áreas alagadas"}
+                ]
+                template["care_tips"] = "Enxaguar com água doce limpa após o uso para remover lama ou sal. Secar completamente à sombra em local ventilado antes de guardar, mantendo as botas desdobradas."
+
+        # 14.8 Adaptação 360° para Chapéu BRK Agro Juta Palha de Bambu Premium (hats_safari_outdoor)
+        elif archetype_id == "hats_safari_outdoor":
+            if any(w in t_low for w in ["juta", "bambu", "palha"]):
+                act1["tag"] = "Trama Natural em Juta & Bambu"
+                act1["title"] = "VENTILAÇÃO NATURAL SUPERIOR E ESTILO AUTÊNTICO NO CAMPO"
+                act1["desc_tmpl"] = "Confeccionado com fibras selecionadas de juta e palha de bambu, o {title} combina leveza extrema, circulação constante de ar pela trama trançada e sombra generosa para dias ensolarados na fazenda, eventos agro ou lazer."
+                act2["tag"] = "Acabamento Exclusivo BRK Agro"
+                act2["title"] = "COPA E ABA ESTRUTURADAS COM BANDINHA PERSONALIZADA E FIVELA METÁLICA"
+                act2["desc_tmpl"] = "Possui copa moldada de caimento impecável, aba estruturada com viés protetor nas bordas e bandinha personalizada BRK Agro com fivela metálica lateral."
+                act3["tag"] = "Conforto Anatômico"
+                act3["title"] = "CARNEIRA INTERNA MACIA PARA USO PROLONGADO SEM APERTAR"
+                act3["desc_tmpl"] = "Equipado com faixa interna confortável que proporciona encaixe firme, macio e estável na cabeça durante todo o dia."
+                new_specs = [
+                    {"label": "Material Principal", "value": "Trama selecionada em fibra de Juta e Palha de Bambu respirável"},
+                    {"label": "Copa & Aba", "value": "Copa estruturada ventilada e aba ampla com acabamento em viés"},
+                    {"label": "Acabamento Externo", "value": "Bandinha exclusiva BRK Agro em tom caramelo com fivela metálica"},
+                    {"label": "Carneira Interna", "value": "Faixa anatômica macia de toque suave na testa"},
+                    {"label": "Embalagem de Envio", "value": "Caixa protetora reforçada BRK (anti-deformação)"}
+                ]
+                template["care_tips"] = "Limpar delicadamente com pano seco ou escova de cerdas macias. Não lavar em água, não submergir e armazenar em local seco e arejado apoiado pela copa."
+
+        # 14.9 Adaptação 360° para Chapéus Country American Hat — Palha Ventilada vs Feltro (hats_country_cowboy)
+        elif archetype_id == "hats_country_cowboy":
+            if any(w in t_low for w in ["bozeman", " cal", "palha"]):
+                act1["tag"] = "Tradição Western & Ventilação"
+                act1["title"] = "TRAMA NOBRE ESTRUTURADA COM COPA VENTILADA E ABA IMPONENTE"
+                act1["desc_tmpl"] = "O {title} une a imponência clássica dos chapéus American Hat à leveza de uma copa com trama ventilada, garantindo presença marcante e excelente conforto térmico sob o sol."
+                act2["tag"] = "Acabamento Autêntico"
+                act2["title"] = "BANDINHA FINA COM FIVELA METÁLICA E MODELAGEM CATTLEMAN"
+                act2["desc_tmpl"] = "Modelagem tradicional com vincos precisos na copa, aba larga curvada de alta sustentação e bandinha externa clássica com fivela e passador metálicos."
+                act3["tag"] = "Ajuste & Conforto"
+                act3["title"] = "CARNEIRA INTERNA MACIA COM ENCAIXE FIRME E CONFORTÁVEL"
+                act3["desc_tmpl"] = "Interior equipado com carneira anatômica que oferece ajuste seguro e toque suave na testa durante cavalgadas, rodeios, feiras agropecuárias e lida no campo."
+                new_specs = [
+                    {"label": "Material Principal", "value": "Palha / Fibra Nobre trançada de alta firmeza com copa ventilada"},
+                    {"label": "Formato da Copa", "value": "Tradicional Western / Cattleman com microperfurações de ventilação"},
+                    {"label": "Carneira Interna", "value": "Faixa anatômica macia de alto conforto e estabilidade"},
+                    {"label": "Acabamento Externo", "value": "Bandinha clássica com fivela, passador e ponteira metálica"},
+                    {"label": "Embalagem de Envio", "value": "Caixa rígida protetora especial (anti-deformação)"}
+                ]
+
+        # 14.10 Adaptação 360° para Boné 6 Gomos Fechado vs Trucker (caps_trucker_snapback)
+        elif archetype_id == "caps_trucker_snapback":
+            if "6 gomos" in t_low or "seis gomos" in t_low:
+                act1["tag"] = "Copa Fechada 6 Gomos"
+                act1["title"] = "ESTRUTURA INTEGRAL EM TECIDO CAMUFLADO COM ILHOSES DE VENTILAÇÃO"
+                act1["desc_tmpl"] = "O {title} apresenta construção clássica de 6 gomos fechados em tecido encorpado com ilhoses bordados para respiro, entregando visual tático autêntico e proteção integral contra o sol na pescaria ou no campo."
+                new_specs = [
+                    {"label": "Modelagem da Copa", "value": "6 Gomos fechada estruturada com ilhoses bordados de ventilação"},
+                    {"label": "Aba Frontal", "value": "Curva estruturada com 6 costuras de reforço"},
+                    {"label": "Sistema de Ajuste", "value": "Regulagem traseira anatômica (Tamanho Único Ajustável)"},
+                    {"label": "Acabamento Frontal", "value": "Bordado / Patch exclusivo BRK de alta definição"},
+                    {"label": "Carneira Interna", "value": "Faixa absorvente de suor de toque macio"}
                 ]
 
         # 15. Adaptação 360° para Cutelaria, Facas, Kits Faca & Chaira, Cutelo e Canivetes (cutlery_unique)
