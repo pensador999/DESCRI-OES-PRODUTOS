@@ -1306,11 +1306,11 @@ class TemplateEngine:
             return "Bandanas, Luvas & Manguitos"
         if archetype_id == "eyewear_sunglasses":
             return "Óculos Polarizados"
-        if archetype_id in ("fishing_lures", "fishing_tackle_gear"):
+        if archetype_id in ("fishing_lures", "fishing_tackle_gear", "overalls_workwear"):
             return "Equipamentos & Iscas"
         if archetype_id == "tackle_boxes_storage":
             return "Caixas & Organização"
-        if archetype_id in ("footwear_sandals_boaonda", "closed_footwear_sneakers", "overalls_workwear", "pants_cargo_tactical"):
+        if archetype_id in ("footwear_sandals_boaonda", "closed_footwear_sneakers", "pants_cargo_tactical"):
             return "Calçados & Sandálias"
         if archetype_id == "cutlery_unique":
             return "Cutelaria & Facas"
@@ -1732,9 +1732,19 @@ class TemplateEngine:
         # Filtragem inteligente de galerias mistas de família (MASC / FEM / INF no mesmo produto)
         def _classify_img_audience(u: str):
             fname = u.lower().split("?")[0].split("/")[-1]
-            has_masc = any(k in fname for k in ["masc", "man2", "homem"])
-            has_fem = any(k in fname for k in ["fem", "mulher"]) or bool(re.search(r'(?:^|[-_.\d])bl(?:[-_.\d]|$)', fname))
-            has_inf = any(k in fname for k in ["inf", "kids", "crianca", "juvenil"])
+            has_masc = (
+                any(k in fname for k in ["masc", "man2", "homem"])
+                or bool(re.search(r'(?:casual|c0|cm)\d+(?:pp|p|m|g|gg|xg|xgg|g1|g2|g3)(?:[-_.\d]|$)', fname))
+            )
+            has_fem = (
+                any(k in fname for k in ["fem", "mulher"])
+                or bool(re.search(r'(?:^|[-_.\d])bl(?:[-_.\d]|$)', fname))
+                or bool(re.search(r'(?:casual|c0|cf|cm)\d+bl', fname))
+            )
+            has_inf = (
+                any(k in fname for k in ["inf", "kids", "crianca", "juvenil"])
+                or bool(re.search(r'(?:casual|c0|cm)\d+i(?:pp|p|m|g|gg|g1|g2|\d+)?(?:[-_.\d]|$)', fname))
+            )
             only_masc = has_masc and not has_fem and not has_inf
             only_fem = has_fem and not has_masc and not has_inf
             only_inf = has_inf and not has_masc and not has_fem
@@ -2112,7 +2122,15 @@ class TemplateEngine:
             act2["tag"] = "Respirabilidade & Frescor"
             act2["fa_icon"] = "fa-solid fa-sun"
             act2["title"] = "TECNOLOGIA DRY FIT QUE MANTÉM AS CRIANÇAS FRESCAS E SECAS"
-            act2["desc_tmpl"] = "Tecido tecnológico respirável que absorve e dissipa o suor rapidamente, evitando o superaquecimento e mantendo o corpo seco e confortável durante todas as brincadeiras e pescarias em família."
+            kids_context = (
+                "passeios na fazenda, cavalgadas e brincadeiras ao ar livre"
+                if store_key == "brk_agro" else (
+                    "passeios, viagens em família e brincadeiras ao ar livre"
+                    if store_key == "brk_motors" else
+                    "todas as brincadeiras e pescarias em família"
+                )
+            )
+            act2["desc_tmpl"] = f"Tecido tecnológico respirável que absorve e dissipa o suor rapidamente, evitando o superaquecimento e mantendo o corpo seco e confortável durante {kids_context}."
 
             if not is_hooded:
                 act3["tag"] = "Durabilidade & Liberdade"
@@ -2147,7 +2165,15 @@ class TemplateEngine:
             act3["tag"] = "Capuz Anatômico & Punho com Dedeira"
             act3["fa_icon"] = "fa-solid fa-head-side-mask"
             act3["title"] = "CAPUZ ANATÔMICO INTEGRADO E PUNHO COM ABERTURA PARA POLEGAR"
-            act3["desc_tmpl"] = "Projetada com caimento leve, contínuo e livre de atrito, a camisa Hybrid integra capuz anatômico de proteção solar 360° para nuca e cabeça, mangas com costuras planas reforçadas e punhos com abertura para o polegar (dedeira) que protegem o dorso das mãos durante toda a pescaria ou atividade ao ar livre."
+            hybrid_context = (
+                "jornada no campo ou atividade ao ar livre"
+                if store_key == "brk_agro" else (
+                    "pilotagem, trilha ou atividade ao ar livre"
+                    if store_key == "brk_motors" else
+                    "pescaria ou atividade ao ar livre"
+                )
+            )
+            act3["desc_tmpl"] = f"Projetada com caimento leve, contínuo e livre de atrito, a camisa Hybrid integra capuz anatômico de proteção solar 360° para nuca e cabeça, mangas com costuras planas reforçadas e punhos com abertura para o polegar (dedeira) que protegem o dorso das mãos durante toda a {hybrid_context}."
 
         # 3.2 Adaptação Capuz Geral (Elimina 'gola padre', injeta cobertura 360° no rosto/nuca)
         elif is_hooded:
@@ -3572,6 +3598,98 @@ class TemplateEngine:
                     {"label": "Certificação", "value": "Peça exclusiva numerada/assinada com Certificado de Garantia Vitalícia"}
                 ]
 
+        # 16. Isolamento Semântico de Vocabulário entre Lojas (brk_agro e brk_motors sem jargão de pesca indevido)
+        has_explicit_fish_title = any(
+            w in t_low for w in [
+                "pesca", "pescaria", "fishing", "peixe", "tucunar", "robalo",
+                "dourado", "pirarara", "tambaqui", "traira", "traíra", "isca", "carretilha", "molinete"
+            ]
+        )
+        if store_key in ("brk_agro", "brk_motors") and not has_explicit_fish_title:
+            def _adapt_store_vocab(txt: str) -> str:
+                if not txt:
+                    return txt
+                if store_key == "brk_agro":
+                    replacements = [
+                        ("durante pescarias embarcadas, trilhas e pilotagem", "durante a lida no campo, cavalgadas e atividades ao ar livre"),
+                        ("durante pescarias e expedições extremas", "durante a lida no campo, cavalgadas e expedições rurais"),
+                        ("para pescarias, cavalgadas, praia, campo e dia a dia", "para a lida no campo, cavalgadas, rodeios, fazenda e dia a dia"),
+                        ("para pescadores, pilotos e aventureiros", "para o homem e a mulher do campo, cavaleiros e aventureiros"),
+                        ("no barco ou na moto", "no campo, a cavalo ou na caminhonete"),
+                        ("com chapéus e bonés de pesca", "com chapéus country e bonés no campo"),
+                        ("(pesca/campo)", "(campo/fazenda)"),
+                        ("essencial para pesca, ciclismo e atividades outdoor", "essencial para o trabalho no campo, cavalgadas e atividades outdoor"),
+                        ("movimentos de arremesso, pedalada ou corrida", "movimentos intensos na lida do campo, cavalgada ou lazer"),
+                        ("na pescaria, no ciclismo ou no trabalho ao ar livre", "na lida do campo, nas cavalgadas ou no trabalho ao ar livre"),
+                        ("durante arremessos, pedaladas ou condução de veículos", "durante a lida no campo, cavalgadas ou condução de veículos e máquinas"),
+                        ("durante pescarias, viagens e lazer", "durante viagens, rotina na fazenda e lazer"),
+                        ("Pescarias, praia, camping, viagens e dia a dia", "Fazenda, viagens, camping, rodeios e dia a dia"),
+                        ("pós-pescaria ou lazer", "lazer, descanso e rotina diária"),
+                        ("em longos dias de pescaria e caminhada", "em longos dias na fazenda, viagens e caminhada"),
+                        ("no barco, no pesqueiro ou na rotina diária", "na fazenda, nas viagens ou na rotina diária"),
+                        ("Embarcações, pesqueiros, praia, piscina e uso casual", "Fazenda, lazer, praia, piscina e uso casual"),
+                        ("pescarias em família, praia, piscina, passeios no campo", "passeios na fazenda, cavalgadas em família, praia, piscina"),
+                        ("Praia, piscina, pescarias em família, passeios ao ar livre e lazer infantil", "Fazenda, passeios em família, praia, piscina e lazer infantil ao ar livre"),
+                        ("Pesca esportiva, náutica, direção, campo e estilo casual ao ar livre", "Lida no campo, direção, cavalgadas, eventos agro e estilo casual ao ar livre"),
+                        ("Pesca esportiva, direção, viagens, campo e uso diário ao ar livre", "Lida no campo, direção, viagens, rodeios e uso diário ao ar livre"),
+                        ("Pesca esportiva, náutica, direção, ciclismo, campo e uso diário", "Lida no campo, direção, cavalgadas, viagens e uso diário"),
+                        ("pesca pesada em estruturas fechadas", "trabalho pesado no campo e atividades intensas"),
+                        ("durante pescarias, ciclismo e remo", "durante o trabalho no campo, manejo rural e atividades ao ar livre"),
+                        ("no toque da linha e carretilha", "no manuseio de ferramentas, rédeas e equipamentos"),
+                        ("atar nós de pesca, controlar o carretel da carretilha,", "manusear ferramentas, rédeas,"),
+                        ("Pesca esportiva, motociclismo, ciclismo, tiro esportivo e aventura", "Lida no campo, manejo rural, cavalgadas, ciclismo e aventura"),
+                        ("Motociclismo, trilha, airsoft, operações táticas, pesca e trabalho no campo", "Trabalho no campo, manejo rural, trilha, operações táticas e aventura"),
+                        ("uniforme de pesca, campo ou aventura", "uniforme de campo, comitiva ou aventura"),
+                        ("ideal para pescadores esportivos, torneios, comitivas, equipes", "ideal para comitivas, fazendas, eventos agropecuários, equipes"),
+                        ("Caixas de pesca, barcos, caiaques, caminhonetes, coolers e copos térmicos", "Caminhonetes, tratores, caixas térmicas, coolers e copos térmicos"),
+                        ("na pescaria ou no campo", "na fazenda, na lida ou no lazer"),
+                        ("no churrasco, no campo ou na pescaria", "no churrasco, na fazenda ou na lida campeira"),
+                        ("no camping, na pescaria ou em casa", "na fazenda, no camping ou em casa"),
+                        ("Churrascos, camping, pescarias, viagens e área gourmet", "Churrascos, fazenda, camping, viagens e área gourmet"),
+                        ("no campo ou na pescaria", "na lida do campo, na fazenda ou no camping"),
+                        ("Pesca esportiva, camping, lida no campo e uso diário (EDC)", "Lida no campo, fazenda, camping e uso diário (EDC)"),
+                        ("Porte na cintura, lida no campo, rodeios, cavalgadas, pesca e churrasco", "Porte na cintura, lida no campo, rodeios, cavalgadas e churrasco"),
+                        ("Pesca, camping, trilhas e uso diário (EDC)", "Lida no campo, camping, trilhas e uso diário (EDC)"),
+                    ]
+                else:  # brk_motors
+                    replacements = [
+                        ("durante pescarias embarcadas, trilhas e pilotagem", "durante a pilotagem, trilhas off-road e viagens de moto"),
+                        ("durante pescarias e expedições extremas", "durante trilhas off-road, pilotagem e expedições extremas"),
+                        ("para pescarias, cavalgadas, praia, campo e dia a dia", "para pilotagem, encontros de motos, viagens e dia a dia"),
+                        ("para pescadores, pilotos e aventureiros", "para pilotos, motociclistas e aventureiros"),
+                        ("no barco ou na moto", "na moto, no quadriciclo ou na trilha"),
+                        ("com chapéus e bonés de pesca", "com capacetes, óculos de proteção e bonés"),
+                        ("(pesca/campo)", "(estrada/trilha)"),
+                        ("essencial para pesca, ciclismo e atividades outdoor", "essencial para motociclismo, ciclismo, trilhas e atividades outdoor"),
+                        ("movimentos de arremesso, pedalada ou corrida", "movimentos de pilotagem, trilha, pedalada ou corrida"),
+                        ("na pescaria, no ciclismo ou no trabalho ao ar livre", "na pilotagem, nas trilhas, no ciclismo ou ao ar livre"),
+                        ("durante arremessos, pedaladas ou condução de veículos", "durante a pilotagem na estrada, trilhas ou condução de veículos"),
+                        ("durante pescarias, viagens e lazer", "durante viagens, trilhas, track days e lazer"),
+                        ("Pescarias, praia, camping, viagens e dia a dia", "Viagens, trilhas, camping, encontros automotivos e dia a dia"),
+                        ("Pesca esportiva, náutica, direção, campo e estilo casual ao ar livre", "Pilotagem, direção, viagens, encontros automotivos e estilo casual"),
+                        ("Pesca esportiva, direção, viagens, campo e uso diário ao ar livre", "Pilotagem, direção, viagens, estrada e uso diário ao ar livre"),
+                        ("Pesca esportiva, náutica, direção, ciclismo, campo e uso diário", "Pilotagem, direção, ciclismo, viagens e uso diário"),
+                        ("pesca pesada em estruturas fechadas", "pilotagem off-road, motocross e enduro"),
+                        ("durante pescarias, ciclismo e remo", "durante a pilotagem, ciclismo e trilhas"),
+                        ("no toque da linha e carretilha", "no acionamento de manetes e comandos"),
+                        ("atar nós de pesca, controlar o carretel da carretilha,", "acionar comandos com rapidez,"),
+                        ("Pesca esportiva, motociclismo, ciclismo, tiro esportivo e aventura", "Motociclismo, trilha, ciclismo, operações táticas e aventura"),
+                        ("Motociclismo, trilha, airsoft, operações táticas, pesca e trabalho no campo", "Motociclismo, trilha, enduro, airsoft e operações táticas"),
+                        ("uniforme de pesca, campo ou aventura", "uniforme de equipe, trilha ou motociclismo"),
+                        ("ideal para pescadores esportivos, torneios, comitivas, equipes", "ideal para pilotos, equipes de trilha e motocross, motoclubes"),
+                        ("Caixas de pesca, barcos, caiaques, caminhonetes, coolers e copos térmicos", "Capacetes, motos, carros, caixas de ferramentas, coolers e copos térmicos"),
+                        ("na pescaria ou no campo", "nas pistas, nas trilhas ou no dia a dia"),
+                    ]
+                out = txt
+                for old_s, new_s in replacements:
+                    out = out.replace(old_s, new_s)
+                return out
+
+            for act_obj in (act1, act2, act3):
+                act_obj["desc_tmpl"] = _adapt_store_vocab(act_obj.get("desc_tmpl", ""))
+            for sp in new_specs:
+                sp["value"] = _adapt_store_vocab(sp.get("value", ""))
+
         specs = new_specs
 
         source_type = "sibling_template" if sibling_info else "archetype_specialized"
@@ -3606,6 +3724,19 @@ class TemplateEngine:
         vendor = str(product.get("vendor") or brand_name or "BRK")
         price = str(product.get("price") or (product.get("variants") and product.get("variants")[0].get("price")) or "0.00")
 
+        details_grid = [dict(d) for d in template["details_grid"]] if template.get("details_grid") else None
+        if details_grid and cdn_images:
+            non_png = [u for u in cdn_images if not u.lower().split("?")[0].endswith(".png")]
+            hw_pool = non_png if len(non_png) >= 4 else (non_png + [u for u in cdn_images if u not in non_png] if non_png else list(cdn_images))
+            hw_imgs = [
+                hw_pool[0],
+                hw_pool[1] if len(hw_pool) > 1 else hw_pool[0],
+                hw_pool[2] if len(hw_pool) > 2 else hw_pool[0],
+                hw_pool[3] if len(hw_pool) > 3 else (hw_pool[1] if len(hw_pool) > 1 else hw_pool[0]),
+            ]
+            for idx, item in enumerate(details_grid[:4]):
+                item["img"] = hw_imgs[idx]
+
         return {
             "title": formatted_title,
             "formatted_title": formatted_title,
@@ -3624,7 +3755,7 @@ class TemplateEngine:
             "sibling_info": sibling_info,
             "archetype_id": archetype_id,
             "layout_format": template.get("layout_format", "standard_3act"),
-            "details_grid": template.get("details_grid"),
+            "details_grid": details_grid,
             "info_characteristics": template.get("info_characteristics"),
             "info_care": template.get("info_care"),
             "split_sections": template.get("split_sections"),

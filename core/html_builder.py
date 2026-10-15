@@ -756,8 +756,17 @@ class HTMLBuilder:
             color_accent = "#00a8ff"
             brand_label = "BRK Fishing"
 
-        # 1. Configuração Específica por Categoria
+        # 1. Configuração Específica por Categoria e Seleção das 4 Fotos Reais do Produto
         title_low = formatted_title.lower()
+        raw_gallery = enriched_data.get("images") or enriched_data.get("gallery") or []
+        gallery_urls = [img.get("src") if isinstance(img, dict) else str(img) for img in raw_gallery if img]
+        non_png = [u for u in gallery_urls if not u.lower().split("?")[0].endswith(".png")]
+        hw_pool = non_png if len(non_png) >= 4 else (non_png + [u for u in gallery_urls if u not in non_png] if non_png else gallery_urls)
+        img1 = hw_pool[0] if len(hw_pool) > 0 else "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg"
+        img2 = hw_pool[1] if len(hw_pool) > 1 else ("https://cdn.shopify.com/s/files/1/0628/1445/3826/files/k2bupYT.jpg" if len(hw_pool) == 0 else img1)
+        img3 = hw_pool[2] if len(hw_pool) > 2 else ("https://cdn.shopify.com/s/files/1/0628/1445/3826/files/BYAO1Oj.jpg" if len(hw_pool) == 0 else img1)
+        img4 = hw_pool[3] if len(hw_pool) > 3 else ("https://cdn.shopify.com/s/files/1/0628/1445/3826/files/cjeqbhc.jpg" if len(hw_pool) == 0 else img2)
+
         if archetype_id == "caps_trucker_snapback":
             item_type_label = "Boné"
             is_6_gomos = ("6 gomos" in title_low or "seis gomos" in title_low)
@@ -830,26 +839,26 @@ class HTMLBuilder:
 
             details = [
                 {
-                    "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg",
-                    "alt": "Aba do boné BRK com costuras reforçadas e estrutura moldável",
+                    "img": img1,
+                    "alt": f"Aba do boné {formatted_title} com costuras reforçadas e estrutura moldável",
                     "title": "Aba Moldável",
                     "desc": "Aba estruturada com diversas costuras e moldável, garantindo durabilidade e proteção extra contra o sol."
                 },
                 {
-                    "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/k2bupYT.jpg",
-                    "alt": "Parte interna do boné BRK com costuras em tear",
+                    "img": img2,
+                    "alt": f"Parte interna do boné {formatted_title} com costuras em tear",
                     "title": "Interno em Tear",
                     "desc": "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de pesca." if cap_theme == "brk_fishing" else "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de uso contínuo."
                 },
                 {
-                    "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/BYAO1Oj.jpg",
-                    "alt": "Etiqueta BRK de qualidade aplicada no boné",
+                    "img": img3,
+                    "alt": f"Etiqueta BRK de qualidade aplicada no boné {formatted_title}",
                     "title": "Etiqueta BRK de Qualidade",
                     "desc": "Etiqueta BRK aplicada com acabamento premium, garantindo autenticidade e padrão de qualidade."
                 },
                 {
-                    "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/cjeqbhc.jpg",
-                    "alt": f"Design exclusivo do boné {brand_label}",
+                    "img": img4,
+                    "alt": f"Design exclusivo do boné {formatted_title}",
                     "title": "Design Exclusivo",
                     "desc": exclusive_desc
                 }
@@ -868,11 +877,6 @@ class HTMLBuilder:
 
         elif archetype_id == "hats_safari_outdoor":
             item_type_label = "Chapéu"
-            gallery = enriched_data.get("images") or enriched_data.get("gallery") or []
-            img1 = gallery[0] if len(gallery) > 0 else "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg"
-            img2 = gallery[1] if len(gallery) > 1 else img1
-            img3 = gallery[2] if len(gallery) > 2 else img1
-            img4 = gallery[3] if len(gallery) > 3 else img2
 
             if any(w in title_low for w in ["juta", "bambu", "palha"]):
                 details = [
@@ -979,11 +983,6 @@ class HTMLBuilder:
 
         else:  # hats_country_cowboy
             item_type_label = "Chapéu Country"
-            gallery = enriched_data.get("images") or enriched_data.get("gallery") or []
-            img1 = gallery[0] if len(gallery) > 0 else "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg"
-            img2 = gallery[1] if len(gallery) > 1 else img1
-            img3 = gallery[2] if len(gallery) > 2 else img1
-            img4 = gallery[3] if len(gallery) > 3 else img2
             is_straw_country = any(w in title_low for w in ["bozeman", " cal", "palha"])
 
             details = [

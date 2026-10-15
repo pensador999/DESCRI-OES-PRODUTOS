@@ -1128,6 +1128,92 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         self.assertEqual(res.get("persona_id"), "agro_female_field")
         self.assertTrue(os.path.exists(res.get("local_path")))
 
+    def test_phase6_headwear_unique_gallery_images_and_store_vocabulary_isolation(self):
+        """
+        Fase 6:
+        1. Bonés e Chapéus utilizam suas próprias 4 fotos reais da galeria nos 4 Cards de Detalhes (sem repetir eQxQuY7/k2bupYT/BYAO1Oj/cjeqbhc quando há galeria própria).
+        2. Tabelas/gráficos .png são filtrados quando há >= 4 fotos reais (.jpg/.webp) na galeria do boné/chapéu.
+        3. Isolamento semântico de vocabulário entre lojas (zero vazamento de 'pescaria' em Infantil/Hybrid/Bandanas/Cutelaria de brk_agro e brk_motors).
+        4. Isolamento de fotos por público em famílias CASUAL* com SKU embutido (casual13bl, casual13ip, casual13g).
+        5. Reclassificação de overalls_workwear (Jardineira Wader) para 'Equipamentos & Iscas' em brk_fishing.
+        """
+        cap_a = {
+            "id": 9901,
+            "sku": "BA010",
+            "title": "Boné BRK Agro Country Edition Verde",
+            "images": [
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/tabela_medidas_bone.png",
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/ba010_foto1.jpg",
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/ba010_foto2.jpg",
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/ba010_foto3.jpg",
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/ba010_foto4.jpg",
+            ],
+        }
+        cap_b = {
+            "id": 9902,
+            "sku": "BM005",
+            "title": "Boné BRK Motors Racing Preto",
+            "images": [
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/bm005_foto1.jpg",
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/bm005_foto2.jpg",
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/bm005_foto3.jpg",
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/bm005_foto4.jpg",
+            ],
+        }
+        template_engine = TemplateEngine()
+        html_builder = HTMLBuilder()
+        enr_a = template_engine.generate_narrative_from_template(cap_a, "caps_trucker_snapback", cap_a["images"], store_key="brk_agro")
+        enr_b = template_engine.generate_narrative_from_template(cap_b, "caps_trucker_snapback", cap_b["images"], store_key="brk_motors")
+        html_a = html_builder.build_shopify_html(enr_a)
+        html_b = html_builder.build_shopify_html(enr_b)
+
+        for idx in range(1, 5):
+            self.assertIn(f"ba010_foto{idx}.jpg", html_a)
+            self.assertIn(f"bm005_foto{idx}.jpg", html_b)
+            self.assertNotIn(f"bm005_foto{idx}.jpg", html_a)
+        self.assertNotIn('src="https://cdn.shopify.com/s/files/1/0628/1445/3826/files/tabela_medidas_bone.png"', html_a)
+        self.assertNotIn("eQxQuY7.jpg", html_a)
+        self.assertNotIn("eQxQuY7.jpg", html_b)
+
+        # Isolamento de vocabulário em brk_agro e brk_motors
+        kids_agro = {
+            "id": 9903,
+            "sku": "C0200I",
+            "title": "Camisa Infantil Brk Agro Trator Com Proteção Solar UV50+",
+            "images": ["https://cdn.shopify.com/s/files/1/0628/1445/3826/files/c0200i_1.jpg"],
+        }
+        enr_kids_agro = template_engine.generate_narrative_from_template(kids_agro, "uv_performance", kids_agro["images"], store_key="brk_agro")
+        self.assertNotIn("pescaria", enr_kids_agro["act2"]["description"].lower())
+        self.assertIn("fazenda", enr_kids_agro["act2"]["description"].lower())
+
+        gaiter_motors = {
+            "id": 9904,
+            "sku": "BM100",
+            "title": "Bandana Tubeneck Brk Motors Racing Com Proteção Solar UV50+",
+            "images": ["https://cdn.shopify.com/s/files/1/0628/1445/3826/files/bm100_1.jpg"],
+        }
+        enr_gaiter_motors = template_engine.generate_narrative_from_template(gaiter_motors, "neck_gaiters_balaclavas", gaiter_motors["images"], store_key="brk_motors")
+        self.assertNotIn("pescaria", enr_gaiter_motors["act1"]["description"].lower())
+        self.assertIn("pilotagem", enr_gaiter_motors["act1"]["description"].lower())
+
+        # Isolamento de galeria mista CASUAL*
+        mixed_casual = [
+            "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/casual13g-1.jpg",
+            "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/casual13blp-1.jpg",
+            "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/casual13blp-2.jpg",
+            "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/casual13ip-1.jpg",
+        ]
+        fem_imgs = template_engine._select_apparel_act_images(mixed_casual, is_female=True, is_kids=False)
+        self.assertTrue(all("casual13blp" in u for u in fem_imgs if u))
+
+        # Reclassificação de Jardineira Wader em brk_fishing
+        cat_wader = template_engine.classify_store_category(
+            "Macacão Jardineira de Pesca Com Bota de Silicone Impermeável",
+            "overalls_workwear",
+            store_key="brk_fishing",
+        )
+        self.assertEqual(cat_wader, "Equipamentos & Iscas")
+
 
 def run_tests():
     suite = unittest.TestSuite()

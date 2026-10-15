@@ -1480,6 +1480,15 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
   let split1_p1, split1_p2, split1_p3, split2_p1, split2_p2, split2_p3;
 
   const titleLow = formattedTitle.toLowerCase();
+  const rawImgs = (liveP.cdn_images && liveP.cdn_images.length > 0) ? liveP.cdn_images : (liveP.gallery || liveP.images || []);
+  const galleryUrls = rawImgs.map(img => (typeof img === "object" ? img.src : img)).filter(Boolean);
+  const nonPng = galleryUrls.filter(u => !String(u).toLowerCase().split("?")[0].endsWith(".png"));
+  const hwPool = nonPng.length >= 4 ? nonPng : (nonPng.length > 0 ? [...nonPng, ...galleryUrls.filter(u => !nonPng.includes(u))] : galleryUrls);
+  const img1 = hwPool[0] || "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg";
+  const img2 = hwPool[1] || (hwPool.length === 0 ? "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/k2bupYT.jpg" : img1);
+  const img3 = hwPool[2] || (hwPool.length === 0 ? "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/BYAO1Oj.jpg" : img1);
+  const img4 = hwPool[3] || (hwPool.length === 0 ? "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/cjeqbhc.jpg" : img2);
+
   if (archetypeId === "caps_trucker_snapback") {
     const is6Gomos = titleLow.includes("6 gomos") || titleLow.includes("seis gomos");
     const copaBullet = is6Gomos
@@ -1506,13 +1515,13 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
 
     details = [
       {
-        img: "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg",
+        img: img1,
         alt: `Aba do boné ${formattedTitle} com costuras reforçadas e estrutura moldável`,
         title: "Aba Moldável",
         desc: "Aba estruturada com diversas costuras e moldável, garantindo durabilidade e proteção extra contra o sol."
       },
       {
-        img: "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/k2bupYT.jpg",
+        img: img2,
         alt: `Parte interna do boné ${formattedTitle} com costuras em tear`,
         title: "Interno em Tear",
         desc: capTheme === "brk_fishing"
@@ -1520,13 +1529,13 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
           : "Acabamento interno em tear com costuras reforçadas, pensado para aguentar longas jornadas de uso contínuo."
       },
       {
-        img: "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/BYAO1Oj.jpg",
+        img: img3,
         alt: `Etiqueta BRK de qualidade aplicada no boné ${formattedTitle}`,
         title: "Etiqueta BRK de Qualidade",
         desc: "Etiqueta BRK aplicada com acabamento premium, garantindo autenticidade e padrão de qualidade."
       },
       {
-        img: "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/cjeqbhc.jpg",
+        img: img4,
         alt: `Design exclusivo do boné ${formattedTitle}`,
         title: "Design Exclusivo",
         desc: exclusiveDesc
@@ -1587,13 +1596,6 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
       split2_p3 = "Assim, seu novo boné chega pronto para encarar a próxima aventura, seja no campo, na pista ou nas águas.";
     }
   } else if (archetypeId === "hats_safari_outdoor") {
-    const rawImgs = (liveP.cdn_images && liveP.cdn_images.length > 0) ? liveP.cdn_images : (liveP.gallery || liveP.images || []);
-    const gallery = rawImgs.map(img => (typeof img === "object" ? img.src : img));
-    const img1 = gallery[0] || "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg";
-    const img2 = gallery[1] || img1;
-    const img3 = gallery[2] || img1;
-    const img4 = gallery[3] || img2;
-
     if (["juta", "bambu", "palha"].some(w => titleLow.includes(w))) {
       details = [
         {
@@ -1694,12 +1696,6 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
       split2_p3 = "Seu novo chapéu chega pronto para encarar o sol com proteção e estilo incomparáveis.";
     }
   } else {
-    const rawImgs = (liveP.cdn_images && liveP.cdn_images.length > 0) ? liveP.cdn_images : (liveP.gallery || liveP.images || []);
-    const gallery = rawImgs.map(img => (typeof img === "object" ? img.src : img));
-    const img1 = gallery[0] || "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg";
-    const img2 = gallery[1] || img1;
-    const img3 = gallery[2] || img1;
-    const img4 = gallery[3] || img2;
     const isStrawCountry = ["bozeman", " cal", "palha"].some(w => titleLow.includes(w));
 
     details = [
@@ -2172,9 +2168,9 @@ function selectClientApparelActImages(cdnImages, isFemale = false, isKids = fals
 
   const classifyImgAudience = (u) => {
     const fname = (u || "").toLowerCase().split("?")[0].split("/").pop();
-    const hasMasc = ["masc", "man2", "homem"].some(k => fname.includes(k));
-    const hasFem = ["fem", "mulher"].some(k => fname.includes(k)) || /(?:^|[-_.\d])bl(?:[-_.\d]|$)/i.test(fname);
-    const hasInf = ["inf", "kids", "crianca", "juvenil"].some(k => fname.includes(k));
+    const hasMasc = ["masc", "man2", "homem"].some(k => fname.includes(k)) || /(?:casual|c0|cm)\d+(?:pp|p|m|g|gg|xg|xgg|g1|g2|g3)(?:[-_.\d]|$)/i.test(fname);
+    const hasFem = ["fem", "mulher"].some(k => fname.includes(k)) || /(?:^|[-_.\d])bl(?:[-_.\d]|$)/i.test(fname) || /(?:casual|c0|cf|cm)\d+bl/i.test(fname);
+    const hasInf = ["inf", "kids", "crianca", "juvenil"].some(k => fname.includes(k)) || /(?:casual|c0|cm)\d+i(?:pp|p|m|g|gg|g1|g2|\d+)?(?:[-_.\d]|$)/i.test(fname);
     const onlyMasc = hasMasc && !hasFem && !hasInf;
     const onlyFem = hasFem && !hasMasc && !hasInf;
     const onlyInf = hasInf && !hasMasc && !hasFem;
