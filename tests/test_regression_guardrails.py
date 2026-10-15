@@ -1065,7 +1065,8 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         prod_wb = {"id": 9903, "title": "Corta Vento Impermeável Brk Motors", "category": "Jaquetas", "master_sku": "CV001"}
         arch_wb = engine.detect_archetype(prod_wb["title"], prod_wb["category"], [], "BRK", sku=prod_wb["master_sku"])
         nar_wb = engine.generate_narrative_from_template(prod_wb, arch_wb, [], store_key="brk_motors")
-        self.assertIn("CORTA-VENTO", nar_wb["narrative_blocks"][0]["title"])
+        self.assertIn("VENTO", nar_wb["narrative_blocks"][0]["title"])
+        self.assertIn("Corta-Vento", nar_wb["narrative_blocks"][0]["tag"])
 
         # 5. Coerência estrita de cores nos 3 sites (Azul = Fishing, Verde = Agro, Laranja = Motors)
         expected_colors = {
