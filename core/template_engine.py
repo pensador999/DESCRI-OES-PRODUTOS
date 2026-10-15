@@ -674,28 +674,28 @@ class TemplateEngine:
                 "act1": {
                     "tag": "Lâmina & Geometria",
                     "fa_icon": "fa-solid fa-utensils",
-                    "title": "AÇO TRATADO TERMICAMENTE PARA FIO NAVALHA",
-                    "desc_tmpl": "Construída com precisão cirúrgica, a {title} oferece equilíbrio de peso ideal, proporcionando cortes limpos e suaves sem esforço."
+                    "title": "AÇO TRATADO TERMICAMENTE PARA CORTE PRECISO E DURÁVEL",
+                    "desc_tmpl": "Construída com precisão e excelente equilíbrio de peso, a {title} proporciona cortes limpos, firmes e suaves no churrasco, no campo ou na pescaria."
                 },
                 "act2": {
-                    "tag": "Empunhadura Nobre",
+                    "tag": "Empunhadura & Ergonomia",
                     "fa_icon": "fa-solid fa-gem",
-                    "title": "CABO ANATÔMICO EM MADEIRA NOBRE OU MATERIAL PREMIUM",
-                    "desc_tmpl": "Proporciona pegada firme e confortável até mesmo com mãos molhadas ou engorduradas, valorizando a exclusividade dos veios da matéria-prima."
+                    "title": "EMPUNHADURA ANATÔMICA DE ALTA FIRMEZA E SEGURANÇA",
+                    "desc_tmpl": "Projetada para oferecer pegada firme, ergonômica e confortável durante o manuseio contínuo, unindo acabamento refinado e alta durabilidade."
                 },
                 "act3": {
                     "tag": "Bainha & Proteção",
                     "fa_icon": "fa-solid fa-shield-halved",
-                    "title": "ACOMPANHA BAINHA FEITA SOB MEDIDA",
-                    "desc_tmpl": "Proteção segura para transporte e conservação da lâmina, costurada com linha grossa e travamento firme."
+                    "title": "ACOMPANHA BAINHA PROTETORA SOB MEDIDA",
+                    "desc_tmpl": "Proteção segura para transporte na cintura ou na tralha e conservação do fio da lâmina, com costura reforçada e travamento firme."
                 },
                 "base_specs": [
-                    {"label": "Material da Lâmina", "default": "Aço Especial com têmpera integral de alta dureza"},
-                    {"label": "Empunhadura", "default": "Anatômica com pinos de fixação em latão/inox"},
-                    {"label": "Fio de Corte", "default": "Geometria Razor com polimento espelhado"},
-                    {"label": "Acompanhamento", "default": "Bainha reforçada com passador para cinto"}
+                    {"label": "Material da Lâmina", "default": "Aço Inoxidável / Especial com tratamento térmico de alta dureza"},
+                    {"label": "Empunhadura", "default": "Anatômica de alta aderência com fixação reforçada"},
+                    {"label": "Acabamento & Fio", "default": "Afiação de precisão com acabamento acetinado de alta retenção de fio"},
+                    {"label": "Acompanhamento", "default": "Bainha protetora sob medida com passador para cinto"}
                 ],
-                "care_tips": "Lavar com água e esponja macia logo após o uso. Secar imediatamente para evitar oxidação. Aplicar leve camada de óleo mineral periodicamente."
+                "care_tips": "Lavar manualmente com água e lado macio da esponja logo após o uso. Secar imediatamente com pano limpo e seco antes de guardar na bainha."
             },
 
             # 16. Equipamentos de Pesca & Revenda (Varas, Carretilhas, Molinetes)
@@ -1700,6 +1700,71 @@ class TemplateEngine:
 
         return img1, img2, img3
 
+    def _select_cutlery_act_images(self, cdn_images: List[str], title: str = ""):
+        """
+        Seleciona cirurgicamente as fotos de cada Ato para a linha de Cutelaria (cutlery_unique),
+        garantindo alinhamento visual-textual absoluto:
+        - Ato 1: Conjunto Completo / Lâmina Principal
+        - Ato 2: Close-up da Empunhadura / Cabo (Madeira, Resina, Isca Encapsulada, Torneado)
+        - Ato 3: Bainha de Couro / Estojo / Uso Prático (nunca escolhe fotos gráficas .png de cota quando há fotos reais de estúdio)
+        """
+        if not cdn_images:
+            return "", "", ""
+        if len(cdn_images) == 1:
+            return cdn_images[0], "", ""
+        if len(cdn_images) == 2:
+            return cdn_images[0], cdn_images[1], ""
+        if len(cdn_images) == 3:
+            return cdn_images[0], cdn_images[1], cdn_images[2]
+
+        t_low = (title or "").lower()
+
+        # 1. Cutelo 6" em Inox (5 fotos: [0]=lâmina, [1]=cortando costela, [2]=cabo madeira, [3]=corpo inteiro, [4]=cota .png)
+        if "cutelo" in t_low:
+            return cdn_images[0], cdn_images[2], cdn_images[1]
+
+        # 2. Kit Faca e Chaira Karandá (8 fotos: [0]=conjunto, [1]=cota .png, [2]=afiando, [3]=bainha close-up, [4]=faca+chaira cabos)
+        if ("kit faca" in t_low or "chaira" in t_low) and ("karand" in t_low):
+            img2 = cdn_images[4] if len(cdn_images) > 4 else cdn_images[2]
+            img3 = cdn_images[3] if len(cdn_images) > 3 else cdn_images[2]
+            return cdn_images[0], img2, img3
+
+        # 3. Kit Faca e Chaira BRK 9" Floral / Trançada (8 fotos: [0]=conjunto, [1]=afiando, [2]=cota .png, [3]=detalhe cabos, [5]=bainha couro)
+        if "kit faca" in t_low or "chaira" in t_low:
+            img2 = cdn_images[3] if len(cdn_images) > 3 else cdn_images[1]
+            img3 = cdn_images[5] if len(cdn_images) > 5 else (cdn_images[4] if len(cdn_images) > 4 else cdn_images[1])
+            return cdn_images[0], img2, img3
+
+        # 4. Facas Compactas de Cintura: Faca Rodeio 5" & Faca Curva 3" (8 fotos)
+        # Evita fotos .png de cota gráfica (ex: -2.png, -3.png, -4.png, -5.png) e prioriza close-up do cabo (Ato 2) e faca na bainha (Ato 3)
+        if "rodeio" in t_low or "curva" in t_low:
+            img1 = cdn_images[0]
+            non_png_rest = [u for u in cdn_images[1:] if not u.lower().split("?")[0].endswith(".png")]
+            if len(non_png_rest) >= 2:
+                # Em galerias de 8 fotos BRK Rodeio/Curva, non_png_rest[0] é close-up do cabo/conjunto e non_png_rest[1] é faca na bainha
+                return img1, non_png_rest[0], non_png_rest[1]
+            return img1, cdn_images[3], cdn_images[4]
+
+        # 5. Facas 10" Cabo em Madeira e Resina (Pescaria com Isca / Resina com Abridor - 6 a 8 fotos)
+        # [0]=conjunto faca+bainha, [1]=ambientada, [2]=close-up do cabo em resina/isca, [3]=close-up lâmina, [4]=faca na bainha de couro
+        if "resina" in t_low:
+            img1 = cdn_images[0]
+            img2 = cdn_images[2] if len(cdn_images) > 2 else cdn_images[1]
+            img3 = cdn_images[4] if len(cdn_images) > 4 else cdn_images[3]
+            return img1, img2, img3
+
+        # 6. Facas 10" em Inox Personalizadas / Abridor de Garrafa (6 a 7 fotos)
+        # [0]=conjunto faca+bainha, [1]=ambientada, [2]=close-up cabo madeira e gravação, [3]=bainha de couro costurada
+        if "inox" in t_low and ('10"' in t_low or "10 " in t_low or "abridor" in t_low):
+            return cdn_images[0], cdn_images[2], cdn_images[3]
+
+        # 7. Facas Artesanais Gaúchas Forjadas (4 a 7 fotos: [0]=faca+bainha, [3]=detalhe lâmina/cabo, [1]=certificado/especificações)
+        if "artesanal" in t_low and len(cdn_images) >= 4:
+            return cdn_images[0], cdn_images[3], cdn_images[1]
+
+        # 8. Canivetes Táticos e demais itens de cutelaria
+        return cdn_images[0], cdn_images[1], cdn_images[2]
+
     def generate_narrative_from_template(self, product: Dict[str, Any], archetype_id: str, cdn_images: List[str], store_key: str = None, sibling_info: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Gera os 3 blocos narrativos e especificações prontos para o HTMLBuilder.
@@ -1790,6 +1855,8 @@ class TemplateEngine:
                 variations_summary = "Múltiplas variações e opções de cores disponíveis para escolha no anúncio."
         elif is_apparel:
             img1, img2, img3 = self._select_apparel_act_images(cdn_images)
+        elif archetype_id == "cutlery_unique":
+            img1, img2, img3 = self._select_cutlery_act_images(cdn_images, title)
         else:
             img1 = cdn_images[0] if len(cdn_images) > 0 else ""
             img2 = cdn_images[1] if len(cdn_images) > 1 else ""
@@ -2255,6 +2322,253 @@ class TemplateEngine:
                     {"label": "Tensão", "value": "Conversão automática Bivolt 110V/220V para 12V/24V DC"},
                     {"label": "Segurança", "value": "Proteção contra sobrecarga, curto-circuito e superaquecimento"},
                     {"label": "Procedência", "value": "Acessório 100% Original Elber"}
+                ]
+
+        # 15. Adaptação 360° para Cutelaria, Facas, Kits Faca & Chaira, Cutelo e Canivetes (cutlery_unique)
+        elif archetype_id == "cutlery_unique":
+            prod_id_str = str(product.get("id") or "")
+            # 15.1 Kit Churrasco Deyu com 3 Peças (Faca + Garfo + Pegador em Inox + Estojo com Zíper)
+            if "kit churrasco" in t_low and ("3 pe" in t_low or "deyu" in t_low):
+                act1["tag"] = "Conjunto Completo 3 em 1"
+                act1["title"] = "FACA, GARFO TRINCHANTE E PEGADOR EM AÇO INOXIDÁVEL"
+                act1["desc_tmpl"] = "Praticidade completa para o seu churrasco no camping, na pescaria ou em casa: o {title} reúne 1 faca de corte afiada, 1 garfo trinchante estruturado e 1 pegador multiuso construídos integralmente em aço inoxidável."
+                act2["tag"] = "Maleta Organizadora Portátil"
+                act2["title"] = "ESTOJO EM TECIDO REFORÇADO COM ZÍPER, ALÇA E ELÁSTICOS INTERNOS"
+                act2["desc_tmpl"] = "Acompanha estojo organizador compacto com fechamento em zíper, alças externas de transporte e fitas elásticas internas que mantêm cada utensílio fixo, protegido e organizado."
+                act3["tag"] = "Higiene & Durabilidade"
+                act3["title"] = "CABOS MONOBLOCO EM INOX RESISTENTES À CORROSÃO E FÁCIL LIMPEZA"
+                act3["desc_tmpl"] = "Utensílios com cabos tubulares em aço inoxidável e alças de suspensão nas extremidades, oferecendo alta resistência à umidade, zero absorção de odores e higienização rápida."
+                new_specs = [
+                    {"label": "Itens Inclusos", "value": "1 Faca de Churrasco, 1 Garfo Trinchante, 1 Pegador em Inox e 1 Estojo com Zíper"},
+                    {"label": "Material dos Utensílios", "value": "Aço Inoxidável integral (lâminas e cabos) com alças de suspensão"},
+                    {"label": "Armazenamento", "value": "Estojo organizador em nylon reforçado com elásticos internos e alça de mão"},
+                    {"label": "Indicação de Uso", "value": "Churrascos, camping, pescarias, viagens e área gourmet"}
+                ]
+            # 15.2 Canivetes Táticos Dobráveis Deyu (Cabo Madeira 018355 vs Metálico ZD W84)
+            elif "canivete" in t_low:
+                if "madeira" in t_low or "018355" in t_low:
+                    act1["tag"] = "Lâmina Dobrável Tática"
+                    act1["title"] = "AÇO INOXIDÁVEL COM ACABAMENTO ESCURECIDO E CORTE PRECISO"
+                    act1["desc_tmpl"] = "Compacto, versátil e sempre pronto para ação no campo ou na pescaria, o {title} possui lâmina principal em aço inoxidável com acabamento escurecido antirreflexo e sulco de abertura rápida."
+                    act2["tag"] = "Empunhadura em Madeira"
+                    act2["title"] = "TALAS ANATÔMICAS EM MADEIRA COM FIXAÇÃO METÁLICA E FURO PARA FIEL"
+                    act2["desc_tmpl"] = "Cabo ergonômico revestido em madeira selecionada, fixado por parafusos Torx de alta resistência e equipado com olhal traseiro para passagem de cordão fiel."
+                    act3["tag"] = "Lâmina Auxiliar & Segurança"
+                    act3["title"] = "CORTADOR DE LINHA E CINTO INTEGRADO COM PONTA DE PROTEÇÃO"
+                    act3["desc_tmpl"] = "Conta com lâmina secundária dobrável em formato de gancho cortador com ponta arredondada de segurança, ideal para cortar linhas, cordas e cintos com rapidez."
+                    new_specs = [
+                        {"label": "Tipo", "value": "Canivete Tático Dobrável de Bolso com Dupla Função"},
+                        {"label": "Material da Lâmina", "value": "Aço Inoxidável com revestimento escurecido protetor"},
+                        {"label": "Empunhadura", "value": "Talas anatômicas em madeira com parafusos reforçados e olhal para fiel"},
+                        {"label": "Recurso Adicional", "value": "Lâmina auxiliar cortadora de linha/corda com ponta de segurança"},
+                        {"label": "Aplicação", "value": "Pesca esportiva, camping, lida no campo e uso diário (EDC)"}
+                    ]
+                else:
+                    act1["tag"] = "Lâmina Tática em Aço Inox"
+                    act1["title"] = "CORTE ÁGIL COM ACABAMENTO ESCURECIDO E DORSO SERRILHADO"
+                    act1["desc_tmpl"] = "Projetado para máxima praticidade no bolso ou na caixa de pesca, o {title} combina lâmina em aço inoxidável com revestimento preto antirreflexo e apoio serrilhado para o polegar."
+                    act2["tag"] = "Empunhadura Metálica"
+                    act2["title"] = "CABO EM METAL TEXTURIZADO EM ALTO-RELEVO DE ALTA ADERÊNCIA"
+                    act2["desc_tmpl"] = "Estrutura integral metálica com textura artística em relevo que garante pegada firme, resistência a impactos e olhal integrado na extremidade para fiel ou mosquetão."
+                    act3["tag"] = "Portabilidade & Fechamento"
+                    act3["title"] = "DESIGN DOBRÁVEL COMPACTO COM TRAVA DE SEGURANÇA"
+                    act3["desc_tmpl"] = "Sistema dobrável seguro que recolhe totalmente o fio dentro do cabo metálico, permitindo transporte compacto e protegido no bolso, mochila ou colete de pesca."
+                    new_specs = [
+                        {"label": "Tipo", "value": "Canivete Tático Dobrável Compacto de Bolso"},
+                        {"label": "Material da Lâmina", "value": "Aço Inoxidável com acabamento escurecido e abertura rápida"},
+                        {"label": "Empunhadura", "value": "Corpo metálico texturizado em relevo com olhal traseiro para fiel"},
+                        {"label": "Mecanismo", "value": "Dobrável com trava de segurança firme"},
+                        {"label": "Aplicação", "value": "Pesca, camping, trilhas e uso diário (EDC)"}
+                    ]
+            # 15.3 Faca de Filetar Marine Sports Fillet Knife 19cm (MFK75T)
+            elif "fillet" in t_low or "mfk75t" in t_low:
+                act1["tag"] = "Lâmina Flexível de Filetagem (19 cm)"
+                act1["title"] = "PRECISÃO CIRÚRGICA PARA FILETAR PEIXES COM ZERO DESPERDÍCIO"
+                act1["desc_tmpl"] = "Desenvolvida especialmente para pescadores esportivos e preparo culinário de pescado, a {title} possui lâmina estreita e flexível de 19 cm (7,5\") em aço inox que contorna a espinha com suavidade."
+                act2["tag"] = "Empunhadura Antiderrapante"
+                act2["title"] = "CABO EMBORRACHADO TEXTURIZADO COM GUARDA DE SEGURANÇA"
+                act2["desc_tmpl"] = "Empunhadura ergonômica antiderrapante projetada para manter controle total mesmo com as mãos molhadas ou escorregadias, contando com guarda frontal de proteção para os dedos."
+                act3["tag"] = "Bainha Rígida com Afiador"
+                act3["title"] = "ACOMPANHA BAINHA RÍGIDA PROTETORA COM AFIADOR INTEGRADO"
+                act3["desc_tmpl"] = "Equipada com bainha rígida ventilada de polímero resistente, passador de cinto e afiador embutido para manter o fio navalha sempre pronto na beira do rio ou no barco."
+                new_specs = [
+                    {"label": "Material da Lâmina", "value": "Aço Inoxidável flexível de 19 cm (7,5 polegadas) resistente à corrosão"},
+                    {"label": "Empunhadura", "value": "Polímero emborrachado antiderrapante com guarda de proteção"},
+                    {"label": "Bainha Inclusa", "value": "Bainha rígida em polímero com passador de cinto e afiador integrado"},
+                    {"label": "Indicação de Uso", "value": "Filetagem de peixes, limpeza de pescado e culinária náutica"}
+                ]
+            # 15.4 Cutelo 6" em Inox BRK (Sem bainha nas fotos; foco em lâmina larga, cabo madeira e corte de carnes/costelas)
+            elif "cutelo" in t_low:
+                act1["tag"] = "Lâmina Larga Full Tang de 6\""
+                act1["title"] = "ESTRUTURA ROBUSTA EM AÇO INOX ESCOVADO COM DORSO MOSQUEADO"
+                act1["desc_tmpl"] = "Projetado para entregar força de impacto e estabilidade superior na tábua, o {title} conta com lâmina larga de 6 polegadas (aprox. 16 cm) em aço inoxidável escovado, dorso trabalhado (mosqueado), gravação BRK a laser e furo frontal de suspensão."
+                act2["tag"] = "Empunhadura Full Tang em Madeira"
+                act2["title"] = "CABO ANATÔMICO EM MADEIRA NOBRE FIXADO POR 3 REBITES METÁLICOS"
+                act2["desc_tmpl"] = "Construção integral Full Tang (espiga inteiriça) revestida por talas anatômicas de madeira nobre envernizada e fixada por 3 rebites metálicos em aço inox, assegurando equilíbrio perfeito e pegada firme."
+                act3["tag"] = "Performance no Churrasco & Cozinha"
+                act3["title"] = "IMPACTO PRECISO PARA CORTES DE CARNES, COSTELAS E TRINCHAMENTO"
+                act3["desc_tmpl"] = "O peso balanceado na parte frontal da lâmina facilita o corte limpo de peças altas de churrasco, costelas, aves e alimentos densos com mínimo esforço e máxima precisão."
+                new_specs = [
+                    {"label": "Material da Lâmina", "value": "Aço Inoxidável Full Tang de 6 polegadas (aprox. 16 cm) com dorso mosqueado"},
+                    {"label": "Empunhadura", "value": "Madeira nobre anatômica fixada por 3 rebites metálicos em inox"},
+                    {"label": "Acabamento da Lâmina", "value": "Inox escovado acetinado com furo de suspensão e gravação BRK a laser"},
+                    {"label": "Indicação de Uso", "value": "Cortes pesados de churrasco, costelas, trinchamento de carnes e cozinha gourmet"}
+                ]
+            # 15.5 Kit Faca e Chaira Karandá (Bainha com Pelo / Bainha Preta)
+            elif ("kit faca" in t_low or "chaira" in t_low) and ("karand" in t_low):
+                bainha_desc = "revestimento frontal em pelo bovino natural legítimo" if "pelo" in t_low else "couro legítimo preto de alta espessura"
+                bainha_title = "BAINHA DUPLA EM COURO COM PELO BOVINO NATURAL E TRAVAS DE PRESSÃO" if "pelo" in t_low else "BAINHA DUPLA EM COURO LEGÍTIMO PRETO COM TRAVAS DE PRESSÃO"
+                act1["tag"] = "Conjunto Completo Faca & Chaira Karandá"
+                act1["title"] = "LÂMINA EM AÇO INOXIDÁVEL POLIDO E CHAIRA ESTRIADA DE AFIAÇÃO"
+                act1["desc_tmpl"] = "Conjunto tradicional de cutelaria assinado pela Karandá: o {title} combina faca de churrasco em aço inoxidável de aproximadamente 21 cm de lâmina com chaira estriada de 19 cm para manter o fio sempre alinhado."
+                act2["tag"] = "Empunhadura Clássica & Guarda Polida"
+                act2["title"] = "CABOS TORNEADOS ERGONÔMICOS COM GUARDA E POMO EM METAL POLIDO"
+                act2["desc_tmpl"] = "Tanto a faca quanto a chaira apresentam cabos torneados de toque liso e anatômico em tom marfim clássico, finalizados com virola, guarda de proteção e pomo traseiro em metal polido."
+                act3["tag"] = "Bainha Dupla de Cintura"
+                act3["title"] = bainha_title
+                act3["desc_tmpl"] = f"Acompanha bainha dupla confeccionada em {bainha_desc}, equipada com compartimentos independentes, passador para cinto e tiras com botões de pressão que travam a faca e a chaira com segurança."
+                new_specs = [
+                    {"label": "Itens Inclusos", "value": "1 Faca em Aço Inox (lâmina aprox. 21 cm), 1 Chaira Estriada (19 cm) e 1 Bainha Dupla"},
+                    {"label": "Material da Lâmina", "value": "Aço Inoxidável Karandá de alta retenção de fio e fácil manutenção"},
+                    {"label": "Empunhadura", "value": "Cabos torneados ergonômicos com guarda e pomo em metal polido"},
+                    {"label": "Bainha Inclusa", "value": f"Bainha dupla em {bainha_desc} com passador de cinto e travas de pressão"}
+                ]
+            # 15.6 Kit Faca e Chaira 9" BRK (Bainha Caramelo/Marrom Floral ou Trançada)
+            elif "kit faca" in t_low or "chaira" in t_low:
+                cor_bainha = "caramelo" if "caramelo" in t_low else "marrom"
+                estilo_bainha = "relevo floral estampado" if "floral" in t_low else "textura trançada (balaiada) artesanal"
+                act1["tag"] = "Conjunto Completo Faca 9\" & Chaira"
+                act1["title"] = "FACA 9\" EM AÇO INOX COM DORSO MOSQUEADO E CHAIRA ESTRIADA"
+                act1["desc_tmpl"] = "Pronto para o mestre churrasqueiro e para a lida no campo, o {title} une uma faca de 9 polegadas em aço inox escovado com vazado Bull Head e dorso mosqueado a uma chaira estriada de afiação rápida."
+                act2["tag"] = "Empunhadura em Madeira Nobre"
+                act2["title"] = "CABOS EM MADEIRA SELECIONADA COM 3 REBITES E ARGOLA DE SUSPENSÃO"
+                act2["desc_tmpl"] = "A faca conta com construção Full Tang e cabo anatômico em madeira nobre fixado por 3 rebites metálicos, enquanto a chaira possui cabo em madeira torneada com guarda de proteção e argola metálica na extremidade."
+                act3["tag"] = "Bainha Dupla em Couro Trabalhado"
+                act3["title"] = f"BAINHA DUPLA EM COURO {cor_bainha.upper()} COM {estilo_bainha.upper()}"
+                act3["desc_tmpl"] = f"Acompanha bainha dupla confeccionada em couro legítimo {cor_bainha} com {estilo_bainha}, costuras reforçadas, passador de cinto e 2 travas individuais de botão de pressão para transporte seguro."
+                new_specs = [
+                    {"label": "Itens Inclusos", "value": "1 Faca 9\" em Aço Inox, 1 Chaira Estriada com cabo em madeira e 1 Bainha Dupla em Couro"},
+                    {"label": "Material da Lâmina", "value": "Aço Inoxidável Full Tang de 9 polegadas com dorso mosqueado e vazado Bull Head"},
+                    {"label": "Empunhadura", "value": "Madeira nobre anatômica (3 rebites na faca + cabo torneado com argola na chaira)"},
+                    {"label": "Bainha Inclusa", "value": f"Bainha dupla em couro {cor_bainha} com {estilo_bainha}, passador de cinto e 2 travas de pressão"}
+                ]
+            # 15.7 Facas Compactas de Cintura: Faca Rodeio 5" & Faca Curva 3" / Curva Nelore 3"
+            elif "rodeio" in t_low or "curva" in t_low:
+                cor_bainha = "caramelo" if "caramelo" in t_low else "marrom"
+                pol = '3"' if '3"' in t_low or ' 3 ' in t_low else '5"'
+                perfil_lamina = "perfil curvo Skinner de 3 polegadas com gancho superior" if "curva" in t_low else "perfil utilitário de 5 polegadas com dorso trabalhado"
+                gravacao_extra = " e gravação Nelore na lâmina" if "nelore" in t_low else ""
+                act1["tag"] = f"Lâmina Compacta Full Tang ({pol})"
+                act1["title"] = f"AÇO INOXIDÁVEL ESCOVADO COM VAZADO BULL HEAD E CORTE ÁGIL"
+                act1["desc_tmpl"] = f"Desenvolvida para o porte diário na cintura durante a lida no campo, rodeios, cavalgadas e churrascos, a {{title}} apresenta lâmina Full Tang em aço inoxidável escovado com {perfil_lamina}, vazado Bull Head{gravacao_extra} e excelente retenção de fio."
+                act2["tag"] = "Empunhadura em Madeira Nobre"
+                act2["title"] = "CABO ANATÔMICO EM MADEIRA FIXADO POR REBITES METÁLICOS"
+                act2["desc_tmpl"] = "Empunhadura anatômica em madeira nobre que preenche a palma da mão com firmeza e segurança, fixada à espiga integral de aço por rebites metálicos e furo traseiro para fiel."
+                act3["tag"] = "Bainha de Cintura em Couro"
+                act3["title"] = f"BAINHA EM COURO {cor_bainha.upper()} TRABALHADO COM PASSADOR DUPLO DE CINTO"
+                act3["desc_tmpl"] = f"Acompanha bainha sob medida em couro legítimo {cor_bainha} com textura balaiada/trançada em relevo, costura reforçada em linha grossa, trava de botão de pressão e fendas laterais para passagem horizontal ou inclinada no cinto."
+                new_specs = [
+                    {"label": "Material da Lâmina", "value": f"Aço Inoxidável Full Tang de {pol} com acabamento escovado e vazado Bull Head{gravacao_extra}"},
+                    {"label": "Empunhadura", "value": "Madeira nobre anatômica fixada por rebites metálicos com furo para fiel"},
+                    {"label": "Bainha Inclusa", "value": f"Bainha de cintura em couro legítimo {cor_bainha} trabalhado com trava de pressão e passador duplo de cinto"},
+                    {"label": "Indicação de Uso", "value": "Porte na cintura, lida no campo, rodeios, cavalgadas, pesca e churrasco"}
+                ]
+            # 15.8 Facas 10" Cabo em Madeira e Resina com Isca Artificial Encapsulada (Pescaria)
+            elif "resina" in t_low and "isca" in t_low:
+                tom_resina = "resina azul translúcida" if "resina azul" in t_low else "resina cristalina transparente"
+                act1["tag"] = "Lâmina 10\" Multifuncional em Inox"
+                act1["title"] = "AÇO INOX ESCOVADO COM DORSO MOSQUEADO, ABRIDOR E GRAVAÇÃO PESCARIA"
+                act1["desc_tmpl"] = "Uma peça de destaque absoluto para pescadores e churrasqueiros: a {title} possui lâmina robusta de 10 polegadas em aço inoxidável escovado com dorso mosqueado, abridor de garrafas integrado, gancho frontal e gravação temática 'PESCARIA'."
+                act2["tag"] = "Cabo Exclusivo com Isca Encapsulada"
+                act2["title"] = "EMPUNHADURA ARTÍSTICA EM MADEIRA NOBRE E RESINA COM ISCA ARTIFICIAL"
+                act2["desc_tmpl"] = f"O grande diferencial está no cabo anatômico híbrido confeccionado em madeira nobre e {tom_resina} de alto brilho, trazendo uma autêntica isca artificial encapsulada em 3D no interior do cabo."
+                act3["tag"] = "Bainha Protetora em Couro"
+                act3["title"] = "ACOMPANHA BAINHA EM COURO COSTURADO COM TRAVA DE BOTÃO DE PRESSÃO"
+                act3["desc_tmpl"] = "Acompanha bainha protetora sob medida em couro legítimo com costura reforçada, passador de cinto e presilha com botão de pressão que mantém a faca segura no transporte."
+                new_specs = [
+                    {"label": "Material da Lâmina", "value": "Aço Inoxidável de 10 polegadas (aprox. 26 cm) com dorso mosqueado e abridor de garrafas"},
+                    {"label": "Empunhadura Exclusiva", "value": f"Híbrida anatômica em madeira nobre e {tom_resina} com isca artificial encapsulada"},
+                    {"label": "Personalização na Lâmina", "value": "Gravação e vazado temático 'PESCARIA' + logo BRK Bull Head"},
+                    {"label": "Bainha Inclusa", "value": "Bainha em couro costurado com trava de botão de pressão e passador de cinto"}
+                ]
+            # 15.9 Facas 10" Cabo em Madeira e Resina com Abridor (São Bento, Nossa Senhora, Nelore, Brasil, Azul, Colorida, Tática)
+            elif "resina" in t_low:
+                detalhe_tema = "personalização exclusiva"
+                if "são bento" in t_low or "sao bento" in t_low:
+                    detalhe_tema = "Medalha de São Bento gravada na lâmina e inserto São Bento com medalha no pomo em resina"
+                elif "nossa senhora" in t_low:
+                    detalhe_tema = "homenagem a Nossa Senhora gravada na lâmina e acabamento artístico no cabo em resina"
+                elif "nelore" in t_low:
+                    detalhe_tema = "tema Nelore gravado na lâmina e cabo artístico em madeira e resina"
+                elif "brasil" in t_low:
+                    detalhe_tema = "identidade Brasil na lâmina e cabo exclusivo em madeira e resina"
+                elif prod_id_str == "10197363196201":
+                    detalhe_tema = "vazado de revólver na lâmina e miniatura de revólver encapsulada na resina translúcida"
+                elif prod_id_str == "10197363130665":
+                    detalhe_tema = "vazado de escopeta na lâmina e cartucho encapsulado no cabo em resina"
+                elif prod_id_str == "10197362737449":
+                    detalhe_tema = "vazado de rifle na lâmina e projétil dourado encapsulado no cabo em resina"
+                act1["tag"] = "Lâmina 10\" em Inox com Abridor"
+                act1["title"] = "AÇO INOXIDÁVEL ESCOVADO COM DORSO MOSQUEADO E ABRIDOR INTEGRADO"
+                act1["desc_tmpl"] = f"Projetada para unir alta performance de corte e design colecionável no churrasco, a {{title}} conta com lâmina de 10 polegadas (aprox. 26 cm) em aço inox escovado, dorso mosqueado, abridor de garrafas integrado e {detalhe_tema}."
+                act2["tag"] = "Cabo Híbrido em Madeira & Resina"
+                act2["title"] = "EMPUNHADURA ANATÔMICA EM MADEIRA NOBRE E RESINA DE ALTO BRILHO"
+                act2["desc_tmpl"] = "Cabo anatômico esculpido na fusão entre madeira nobre selecionada e resina artística polida de alta densidade, garantindo pegada firme, equilíbrio de peso e visual único em cada peça."
+                act3["tag"] = "Bainha Protetora em Couro"
+                act3["title"] = "ACOMPANHA BAINHA EM COURO COSTURADO COM TRAVA DE PRESSÃO"
+                act3["desc_tmpl"] = "Acompanha bainha sob medida em couro legítimo com costura pespontada, passador traseiro para cinto e presilha com botão de pressão para proteção total da lâmina."
+                new_specs = [
+                    {"label": "Material da Lâmina", "value": "Aço Inoxidável de 10 polegadas (aprox. 26 cm) com dorso mosqueado e abridor integrado"},
+                    {"label": "Empunhadura", "value": "Híbrida anatômica em madeira nobre e resina de alto brilho"},
+                    {"label": "Destaque Exclusivo", "value": detalhe_tema[:1].upper() + detalhe_tema[1:]},
+                    {"label": "Bainha Inclusa", "value": "Bainha protetora em couro costurado com trava de botão de pressão"}
+                ]
+            # 15.10 Facas 10" em Inox com Cabo em Madeira (São Bento, Nossa Senhora, Heróis da Estrada, Agro É Top, A Roça Venceu, Abridor)
+            elif "inox" in t_low and ('10"' in t_low or "10 " in t_low or "abridor" in t_low):
+                has_abridor = "abridor" in t_low
+                act1["tag"] = "Lâmina 10\" Full Tang em Aço Inox"
+                act1["title"] = "AÇO INOXIDÁVEL ESCOVADO DE 10 POLEGADAS COM GRAVAÇÃO EXCLUSIVA" if not has_abridor else "AÇO INOXIDÁVEL ESCOVADO DE 10 POLEGADAS COM ABRIDOR DE GARRAFA INTEGRADO"
+                act1["desc_tmpl"] = "Construída para dominar o churrasco com precisão e presença marcante, a {title} apresenta lâmina Full Tang de 10 polegadas (aprox. 26,5 cm) em aço inoxidável escovado de alta retenção de fio."
+                act2["tag"] = "Empunhadura Full Tang em Madeira"
+                act2["title"] = "CABO ANATÔMICO EM MADEIRA NOBRE FIXADO POR 3 REBITES METÁLICOS"
+                act2["desc_tmpl"] = "Espiga integral (Full Tang) revestida por talas anatômicas em madeira nobre selecionada e travada por 3 rebites metálicos em aço inox, proporcionando firmeza absoluta e equilíbrio no corte."
+                act3["tag"] = "Bainha de Couro Sob Medida"
+                act3["title"] = "ACOMPANHA BAINHA EM COURO COSTURADO COM TRAVA DE BOTÃO DE PRESSÃO"
+                act3["desc_tmpl"] = "Acompanha bainha protetora confeccionada em couro legítimo com costura lateral reforçada, passador de cinto e presilha com botão de pressão para transporte e armazenamento seguros."
+                new_specs = [
+                    {"label": "Material da Lâmina", "value": "Aço Inoxidável Full Tang de 10 polegadas (aprox. 26,5 cm) com acabamento escovado"},
+                    {"label": "Empunhadura", "value": "Madeira nobre anatômica fixada por 3 rebites metálicos em aço inox"},
+                    {"label": "Diferencial da Lâmina", "value": "Abridor de garrafas integrado à lâmina e gravação BRK" if has_abridor else "Gravação temática exclusiva de alta definição na lâmina"},
+                    {"label": "Bainha Inclusa", "value": "Bainha em couro legítimo costurado com trava de botão de pressão"}
+                ]
+            # 15.11 Facas Artesanais Gaúchas Forjadas (Aço Damasco / Aço Carbono - Cutelaria D'Avila)
+            elif "artesanal" in t_low:
+                is_damasco = "damasco" in t_low
+                pol_ga = '12"' if '12"' in t_low or "12'" in t_low else '8"'
+                aco_nome = "Aço Damasco forjado artesanalmente com padrão único de camadas" if is_damasco else "Aço Carbono forjado artesanalmente com acabamento brut de forge e dorso mosqueado"
+                if "chifre de cervo" in t_low:
+                    cabo_title = "CABO NOBRE EM CHIFRE DE CERVO E DETALHES EM ALPACA TRABALHADA"
+                    cabo_val = "Chifre de Cervo legítimo com guarda/pomo em Alpaca finamente trabalhada"
+                elif "hibrido" in t_low or "híbrido" in t_low:
+                    cabo_title = "CABO HÍBRIDO ANATÔMICO EM MADEIRA NOBRE ESTABILIZADA COM PINOS METÁLICOS"
+                    cabo_val = "Cabo híbrido anatômico em madeira nobre selecionada com pinos de fixação"
+                else:
+                    cabo_title = "CABO ARTESANAL EM MADEIRA NOBRE DE ALTA DENSIDADE E EQUILÍBRIO"
+                    cabo_val = "Madeira nobre gaúcha selecionada de alta densidade e ergonomia"
+                act1["tag"] = f"Forja Artesanal Gaúcha ({pol_ga})"
+                act1["title"] = "LÂMINA FORJADA EM AÇO DAMASCO COM FIO NAVALHA EXCEPCIONAL" if is_damasco else "LÂMINA FORJADA EM AÇO CARBONO COM TÊMPERA INTEGRAL E DORSO MOSQUEADO"
+                act1["desc_tmpl"] = f"Obra legítima da cutelaria artesanal gaúcha (Cutelaria D'Avila), a {{title}} é forjada individualmente em {aco_nome}, entregando poder de corte cirúrgico para churrascos, carneadas e uso no campo."
+                act2["tag"] = "Empunhadura Exclusiva"
+                act2["title"] = cabo_title
+                act2["desc_tmpl"] = "Cada empunhadura possui veios e texturas naturais únicos, moldada artesanalmente para proporcionar encaixe firme na mão, equilíbrio impecável e nobreza estética."
+                act3["tag"] = "Bainha de Couro & Garantia Vitalícia"
+                act3["title"] = "ACOMPANHA BAINHA EM COURO LEGÍTIMO E CERTIFICADO DE PROPRIEDADE"
+                act3["desc_tmpl"] = "Acompanha bainha artesanal sob medida em couro legítimo e Certificado de Propriedade com Garantia Vitalícia, consagrando uma peça exclusiva para colecionar ou usar por gerações."
+                new_specs = [
+                    {"label": "Material da Lâmina", "value": f"{aco_nome} ({pol_ga})"},
+                    {"label": "Empunhadura", "value": cabo_val},
+                    {"label": "Acompanhamento", "value": "Bainha artesanal em couro legítimo sob medida"},
+                    {"label": "Certificação", "value": "Peça exclusiva numerada/assinada com Certificado de Garantia Vitalícia"}
                 ]
 
         specs = new_specs

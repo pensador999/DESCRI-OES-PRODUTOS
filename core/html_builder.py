@@ -607,7 +607,13 @@ class HTMLBuilder:
         formatted_title = enriched_data.get("formatted_title") or enriched_data.get("title", "Produto BRK")
         brand_name = enriched_data.get("brand_name", "BRK")
         sku = enriched_data.get("sku") or ""
-        price = enriched_data.get("price") or "0.00"
+        raw_price = str(enriched_data.get("price") or "0.00")
+        clean_price = re.sub(r'[^\d,.]', '', raw_price).strip()
+        if ',' in clean_price and '.' in clean_price:
+            clean_price = clean_price.replace('.', '').replace(',', '.')
+        elif ',' in clean_price:
+            clean_price = clean_price.replace(',', '.')
+        price = clean_price if clean_price else "0.00"
 
         blocks = enriched_data.get("narrative_blocks", [])
         desc_parts = []
@@ -898,9 +904,10 @@ class HTMLBuilder:
         # Montagem dos Detalhes em HTML
         details_html = []
         for d in details:
+            safe_d_alt = str(d['alt']).replace('"', '&quot;')
             details_html.append(f"""<!-- {d['title']} -->
 <article class="brk-cap-detail-item">
-<div class="brk-cap-detail-image"><img src="{d['img']}" alt="{d['alt']}"></div>
+<div class="brk-cap-detail-image"><img src="{d['img']}" alt="{safe_d_alt}"></div>
 <h3>{d['title']}</h3>
 <p>{d['desc']}</p>
 </article>""")
@@ -1256,7 +1263,7 @@ class HTMLBuilder:
 <!-- SEÇÕES IMAGEM + TEXTO -->
 <section class="brk-cap-section brk-cap-split-sections"><!-- 1ª seção: Etiquetas BRK (FOTO -> TEXTO) -->
 <div class="brk-cap-split">
-<div class="brk-cap-split-image"><img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764952819862-13-Tags.webp" alt="{split1_alt}"></div>
+<div class="brk-cap-split-image"><img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764952819862-13-Tags.webp" alt="{str(split1_alt).replace('"', '&quot;')}"></div>
 <div class="brk-cap-split-content">
 <h2>PRODUTO PREMIUM BRK</h2>
 <p>{split1_p1}</p>
@@ -1266,7 +1273,7 @@ class HTMLBuilder:
 </div>
 <!-- 2ª seção: Caixa / Entrega (TEXTO <- FOTO) -->
 <div class="brk-cap-split reverse">
-<div class="brk-cap-split-image"><img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764962764537-CAIXA-BRK.webp" alt="{split2_alt}"></div>
+<div class="brk-cap-split-image"><img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764962764537-CAIXA-BRK.webp" alt="{str(split2_alt).replace('"', '&quot;')}"></div>
 <div class="brk-cap-split-content">
 <h2>ENTREGA SEGURA BRK</h2>
 <p>{split2_p1}</p>
@@ -1391,19 +1398,21 @@ class HTMLBuilder:
             act_desc = block.get("description", "")
             block_split_imgs = block.get("split_images") or (split_images if idx == 0 else None)
             
+            safe_title_alt = str(formatted_title).replace('"', '&quot;')
+            safe_block_alt = str(block.get('alt', formatted_title)).replace('"', '&quot;')
             # Layout de Mídia: Split para iscas/variações ou Imagem Única
             if block_split_imgs and len(block_split_imgs) >= 2:
                 media_html = f"""<div class="brk-desc-media brk-desc-media-split">
         <div class="brk-split-item">
-          <img src="{block_split_imgs[0]}" alt="{formatted_title} - Opção 1" loading="lazy" referrerpolicy="no-referrer" />
+          <img src="{block_split_imgs[0]}" alt="{safe_title_alt} - Opção 1" loading="lazy" referrerpolicy="no-referrer" />
         </div>
         <div class="brk-split-item">
-          <img src="{block_split_imgs[1]}" alt="{formatted_title} - Opção 2" loading="lazy" referrerpolicy="no-referrer" />
+          <img src="{block_split_imgs[1]}" alt="{safe_title_alt} - Opção 2" loading="lazy" referrerpolicy="no-referrer" />
         </div>
       </div>"""
             elif img_src:
                 media_html = f"""<div class="brk-desc-media">
-        <img src="{img_src}" alt="{block.get('alt', formatted_title)}" loading="lazy" referrerpolicy="no-referrer" />
+        <img src="{img_src}" alt="{safe_block_alt}" loading="lazy" referrerpolicy="no-referrer" />
       </div>"""
             else:
                 media_html = ""

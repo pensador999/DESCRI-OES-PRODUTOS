@@ -1376,7 +1376,14 @@ function buildClientSchemaJsonLd(liveP) {
   const formattedTitle = liveP.formatted_title || originInfo.formattedTitle;
   const brandName = liveP.brand_name || originInfo.brandName;
   const sku = liveP.master_sku || liveP.sku || liveP.id || "";
-  const price = liveP.price || (liveP.variants && liveP.variants[0] && liveP.variants[0].price) || "0.00";
+  const rawPrice = String(liveP.price || (liveP.variants && liveP.variants[0] && liveP.variants[0].price) || "0.00");
+  let cleanPrice = rawPrice.replace(/[^\d,.]/g, "").trim();
+  if (cleanPrice.includes(",") && cleanPrice.includes(".")) {
+    cleanPrice = cleanPrice.replace(/\./g, "").replace(",", ".");
+  } else if (cleanPrice.includes(",")) {
+    cleanPrice = cleanPrice.replace(",", ".");
+  }
+  const price = cleanPrice || "0.00";
 
   const rawImgs = (liveP.cdn_images && liveP.cdn_images.length > 0)
     ? liveP.cdn_images
@@ -1652,12 +1659,15 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
     radialColor = "rgba(234, 88, 12, 0.15)";
   }
 
-  const detailsMarkup = details.map(d => `      <!-- ${d.title} -->
+  const detailsMarkup = details.map(d => {
+    const safeAlt = String(d.alt || "").replace(/"/g, "&quot;");
+    return `      <!-- ${d.title} -->
       <article class="brk-cap-detail-item">
-        <div class="brk-cap-detail-image"><img src="${d.img}" alt="${d.alt}"></div>
+        <div class="brk-cap-detail-image"><img src="${d.img}" alt="${safeAlt}"></div>
         <h3>${d.title}</h3>
         <p>${d.desc}</p>
-      </article>`).join("\n");
+      </article>`;
+  }).join("\n");
 
   const caractLi = caractItems.map(item => `            <li>${item}</li>`).join("\n");
   const cuidadosLi = cuidadosItems.map(item => `            <li>${item}</li>`).join("\n");
@@ -2103,6 +2113,39 @@ function selectClientApparelActImages(cdnImages) {
   return [img1, img2, img3];
 }
 
+function selectClientCutleryActImages(cdnImages, title = "") {
+  if (!cdnImages || cdnImages.length === 0) return ["", "", ""];
+  if (cdnImages.length === 1) return [cdnImages[0], "", ""];
+  if (cdnImages.length === 2) return [cdnImages[0], cdnImages[1], ""];
+
+  const tLow = (title || "").toLowerCase();
+  const isPng = (u) => u.toLowerCase().split("?")[0].endsWith(".png");
+
+  if (tLow.includes("cutelaria d'avila") || tLow.includes("cutelaria davila")) {
+    const validAfter = cdnImages.slice(1).filter(u => !u.toLowerCase().includes("designsemnome"));
+    const img1 = cdnImages[0];
+    const img2 = validAfter[0] || cdnImages[1];
+    const img3 = validAfter[1] || (cdnImages[2] || "");
+    return [img1, img2, img3];
+  }
+
+  if ((tLow.includes("rodeio 5") || tLow.includes("curva 3") || tLow.includes("curva nelore 3")) && cdnImages.some(isPng)) {
+    const jpgs = cdnImages.filter(u => !isPng(u));
+    if (jpgs.length >= 3) {
+      const img1 = jpgs[0];
+      const img2 = jpgs[jpgs.length - 1];
+      const img3 = jpgs.length >= 4 ? jpgs[2] : jpgs[1];
+      return [img1, img2, img3];
+    }
+  }
+
+  if (tLow.includes("faca") && tLow.includes("10") && (tLow.includes("resina") || tLow.includes("madeira")) && cdnImages.length >= 4) {
+    return [cdnImages[0], cdnImages[2], cdnImages[1]];
+  }
+
+  return [cdnImages[0], cdnImages[1], cdnImages[2]];
+}
+
 function getProductModeBHTML(liveP) {
   if (!liveP) return "";
   const originInfo = resolveClientOriginAndTitle(liveP);
@@ -2162,6 +2205,8 @@ function getProductModeBHTML(liveP) {
     img3 = images[3] || "";
   } else if (isApparel) {
     [img1, img2, img3] = selectClientApparelActImages(images);
+  } else if (archetypeId === "cutlery_unique") {
+    [img1, img2, img3] = selectClientCutleryActImages(images, liveP.title || "");
   }
 
   const tLowModal = (liveP.title || "").toLowerCase();
@@ -2444,15 +2489,17 @@ function getProductModeBHTML(liveP) {
     const actDesc = block.description || "";
     const blockSplitImgs = block.split_images || (idx === 0 ? splitImages : null);
 
+    const safeTitleAlt = String(formattedTitle || "").replace(/"/g, "&quot;");
+    const safeBlockAlt = String(block.alt || formattedTitle || "").replace(/"/g, "&quot;");
     let mediaHtml = "";
     if (blockSplitImgs && blockSplitImgs.length >= 2) {
       mediaHtml = `<div class="brk-desc-media brk-desc-media-split">
-        <div class="brk-split-item"><img src="${blockSplitImgs[0]}" alt="${formattedTitle} - Opção 1" loading="lazy" referrerpolicy="no-referrer" /></div>
-        <div class="brk-split-item"><img src="${blockSplitImgs[1]}" alt="${formattedTitle} - Opção 2" loading="lazy" referrerpolicy="no-referrer" /></div>
+        <div class="brk-split-item"><img src="${blockSplitImgs[0]}" alt="${safeTitleAlt} - Opção 1" loading="lazy" referrerpolicy="no-referrer" /></div>
+        <div class="brk-split-item"><img src="${blockSplitImgs[1]}" alt="${safeTitleAlt} - Opção 2" loading="lazy" referrerpolicy="no-referrer" /></div>
       </div>`;
     } else if (blockImg) {
       mediaHtml = `<div class="brk-desc-media">
-        <img src="${blockImg}" alt="${block.alt || formattedTitle}" loading="lazy" referrerpolicy="no-referrer" />
+        <img src="${blockImg}" alt="${safeBlockAlt}" loading="lazy" referrerpolicy="no-referrer" />
       </div>`;
     }
 
