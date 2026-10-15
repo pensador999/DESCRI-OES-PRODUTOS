@@ -353,7 +353,52 @@ def build_dist():
         with open(os.path.join(store_p, "analytics.js"), "w", encoding="utf-8") as f:
             f.write("window.__STORE_ANALYTICS = " + json.dumps(analytics_data, ensure_ascii=False) + ";\n")
 
-    print("  -> data/stores/ gravados com sucesso em ambos os diretorios.")
+        # Atualizar whitelist de IP da máquina autorizada
+        ip_wl_path = os.path.join(store_p, "ip_whitelist.json")
+        allowed_ips = ["104.28.199.94", "104.28.199.96", "2a09:bac5:779:2555::3b8:7a", "127.0.0.1", "::1"]
+        allowed_prefixes = ["104.28.199.", "104.28.", "2a09:bac5:779:2555:"]
+        if os.path.exists(ip_wl_path):
+            try:
+                with open(ip_wl_path, "r", encoding="utf-8") as f:
+                    old_wl = json.load(f)
+                for ip_item in old_wl.get("allowed_ips", []):
+                    if ip_item not in allowed_ips:
+                        allowed_ips.append(ip_item)
+                for pfx_item in old_wl.get("allowed_prefixes", []):
+                    if pfx_item not in allowed_prefixes:
+                        allowed_prefixes.append(pfx_item)
+            except Exception:
+                pass
+        try:
+            import urllib.request
+            for probe_url in ("https://api.ipify.org", "https://api64.ipify.org"):
+                try:
+                    req = urllib.request.Request(probe_url, headers={"User-Agent": "BRK-IP-Sync/1.0"})
+                    with urllib.request.urlopen(req, timeout=2.5) as resp:
+                        cur_ip = resp.read().decode("utf-8").strip()
+                        if cur_ip and cur_ip not in allowed_ips:
+                            allowed_ips.append(cur_ip)
+                        if "." in cur_ip:
+                            pfx24 = ".".join(cur_ip.split(".")[:3]) + "."
+                            if pfx24 not in allowed_prefixes:
+                                allowed_prefixes.append(pfx24)
+                        elif ":" in cur_ip:
+                            pfx64 = ":".join(cur_ip.split(":")[:4]) + ":"
+                            if pfx64 not in allowed_prefixes:
+                                allowed_prefixes.append(pfx64)
+                except Exception:
+                    pass
+        except Exception:
+            pass
+        ip_wl_data = {
+            "allowed_ips": allowed_ips,
+            "allowed_prefixes": allowed_prefixes,
+            "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        with open(ip_wl_path, "w", encoding="utf-8") as f:
+            json.dump(ip_wl_data, f, ensure_ascii=False, indent=2)
+
+    print("  -> data/stores/ gravados com sucesso.")
 
     fishing_skus = enriched_fishing.get("store", {}).get("total_skus", 12582)
     fishing_skus_fmt = f"{fishing_skus:,}".replace(",", ".")

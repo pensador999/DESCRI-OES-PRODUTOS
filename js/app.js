@@ -1437,7 +1437,131 @@ function copyTampermonkeyQueueJson() {
   });
 }
 
-// Inicialização Inicial
+// Guardião de Acesso Restrito por IP da Máquina Autorizada
+const BRK_TRUSTED_TOKEN_KEY = "BRK_MACHINE_AUTHORIZED_TOKEN";
+const BRK_TRUSTED_TOKEN_VAL = "BRK_LUCAS_LIMA_TRUSTED";
+const BRK_ALLOWED_IPS = ["104.28.199.94", "104.28.199.96", "2a09:bac5:779:2555::3b8:7a", "127.0.0.1", "::1"];
+const BRK_ALLOWED_PREFIXES = ["104.28.199.", "104.28.", "2a09:bac5:779:2555:"];
+
+function isClientIpAllowed(ipStr) {
+  if (!ipStr) return false;
+  const clean = String(ipStr).trim().toLowerCase();
+  if (BRK_ALLOWED_IPS.includes(clean)) return true;
+  return BRK_ALLOWED_PREFIXES.some(pfx => clean.startsWith(pfx));
+}
+
+function renderIpLockScreen(detectedIp) {
+  // Oculta o conteúdo do portal para terceiros não autorizados
+  Array.from(document.body.children).forEach(el => {
+    if (el.id !== "brk-ip-lock-overlay") el.style.display = "none";
+  });
+
+  let overlay = document.getElementById("brk-ip-lock-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "brk-ip-lock-overlay";
+    overlay.className = "fixed inset-0 z-[9999] bg-slate-950 flex items-center justify-center p-4 text-white";
+    document.body.appendChild(overlay);
+  }
+
+  overlay.innerHTML = `
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-7 shadow-2xl text-center space-y-5">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-2xl">
+        🔒
+      </div>
+      <div class="space-y-1.5">
+        <span class="px-2.5 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/30 text-[10px] font-extrabold uppercase tracking-wider">
+          Firewall de IP Ativo
+        </span>
+        <h1 class="text-lg font-extrabold text-white pt-1">Acesso Restrito por IP</h1>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          Este portal é privado e exclusivo da máquina autorizada <strong>BRK Master Workstation</strong>.
+        </p>
+      </div>
+      <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs font-mono text-slate-300">
+        IP Detectado: <strong class="text-amber-400">${detectedIp || "Não identificado"}</strong><br>
+        <span class="text-[10px] text-slate-500">Status: Bloqueado para leitura externa</span>
+      </div>
+      <div class="pt-2 border-t border-slate-800/80 space-y-2.5 text-left">
+        <label class="block text-[11px] font-bold text-slate-400">
+          É o proprietário e seu roteador trocou de IP? Autorize esta máquina:
+        </label>
+        <div class="flex gap-2">
+          <input id="brk-ip-unlock-input" type="password" placeholder="Código de autorização..." class="flex-1 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-blue-500" />
+          <button onclick="unlockCurrentMachineByPin()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-extrabold text-white transition-all">
+            Liberar IP
+          </button>
+        </div>
+        <p id="brk-ip-unlock-err" class="text-[11px] text-red-400 font-bold hidden">Código inválido.</p>
+      </div>
+    </div>
+  `;
+}
+
+function unlockCurrentMachineByPin() {
+  const inp = document.getElementById("brk-ip-unlock-input");
+  const err = document.getElementById("brk-ip-unlock-err");
+  const val = (inp ? inp.value : "").trim().toLowerCase();
+  if (["1025", "2026", "brk", "brk2026", "lucas"].includes(val)) {
+    localStorage.setItem(BRK_TRUSTED_TOKEN_KEY, BRK_TRUSTED_TOKEN_VAL);
+    const overlay = document.getElementById("brk-ip-lock-overlay");
+    if (overlay) overlay.remove();
+    Array.from(document.body.children).forEach(el => {
+      el.style.display = "";
+    });
+    switchStore("brk_fishing");
+  } else if (err) {
+    err.classList.remove("hidden");
+  }
+}
+
+async function verifyMachineIPAccess() {
+  // 1. Execução local (file:// ou localhost) ou máquina já autenticada abre instantaneamente
+  if (
+    location.protocol === "file:" ||
+    location.hostname === "localhost" ||
+    location.hostname === "127.0.0.1" ||
+    localStorage.getItem(BRK_TRUSTED_TOKEN_KEY) === BRK_TRUSTED_TOKEN_VAL
+  ) {
+    switchStore("brk_fishing");
+    return;
+  }
+
+  // 2. Consulta o endpoint serverless /api/ip_guard na Vercel
+  let detectedIp = "";
+  try {
+    const resp = await fetch("/api/ip_guard?t=" + Date.now(), { cache: "no-store" });
+    if (resp.ok) {
+      const data = await resp.json();
+      detectedIp = data.client_ip || "";
+      if (data.authorized || isClientIpAllowed(detectedIp)) {
+        localStorage.setItem(BRK_TRUSTED_TOKEN_KEY, BRK_TRUSTED_TOKEN_VAL);
+        switchStore("brk_fishing");
+        return;
+      }
+    }
+  } catch (e) {}
+
+  // 3. Fallback via ipify caso esteja em CDN estática
+  try {
+    const resp2 = await fetch("https://api.ipify.org?format=json", { cache: "no-store" });
+    if (resp2.ok) {
+      const data2 = await resp2.json();
+      detectedIp = data2.ip || detectedIp;
+      if (isClientIpAllowed(detectedIp)) {
+        localStorage.setItem(BRK_TRUSTED_TOKEN_KEY, BRK_TRUSTED_TOKEN_VAL);
+        switchStore("brk_fishing");
+        return;
+      }
+    }
+  } catch (e) {}
+
+  // 4. Se não for o IP da máquina autorizada, bloqueia a tela inteira
+  renderIpLockScreen(detectedIp);
+}
+
+// Inicialização Inicial Protegida por IP
 document.addEventListener("DOMContentLoaded", () => {
-  switchStore("brk_fishing");
+  verifyMachineIPAccess();
 });
+
