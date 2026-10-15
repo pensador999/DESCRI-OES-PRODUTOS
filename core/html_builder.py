@@ -88,19 +88,19 @@ QUICK_BADGES_BY_ARCHETYPE: Dict[str, List[Dict[str, str]]] = {
     "sun_sleeves_manguitos": [
         {"icon": "sun", "title": "FPU 50+ Permanente", "sub": "Proteção Solar Certificada"},
         {"icon": "bolt", "title": "Tecnologia Dry Fit", "sub": "Evaporação do Suor"},
-        {"icon": "shield", "title": "Silicone no Bíceps", "sub": "Fixação Antiderrapante"},
+        {"icon": "shield", "title": "Fixação Anatômica", "sub": "Ajuste Firme no Braço"},
         _TROCA,
     ],
     "neck_gaiters_balaclavas": [
         {"icon": "sun", "title": "FPU 50+ Permanente", "sub": "Bloqueador de Radiação"},
-        {"icon": "shield", "title": "Tubular Seamless", "sub": "Sem Costuras Anti-Atrito"},
-        {"icon": "bolt", "title": "Elasticidade 4-Way", "sub": "Memória de Forma"},
+        {"icon": "shield", "title": "Toque Frio Anti-Atrito", "sub": "Conforto e Respirabilidade"},
+        {"icon": "bolt", "title": "Secagem Ultra Rápida", "sub": "Tecido Tecnológico Leve"},
         _TROCA,
     ],
     "gloves_tactical_fishing": [
-        {"icon": "shield", "title": "Palma Antiderrapante", "sub": "Material Texturizado"},
+        {"icon": "shield", "title": "Palma Antiderrapante", "sub": "Alta Aderência e Grip"},
         {"icon": "bolt", "title": "Dorso Respirável", "sub": "Secagem Ultra Rápida"},
-        {"icon": "gear", "title": "Ajuste no Punho", "sub": "Fita Regulável"},
+        {"icon": "gear", "title": "Encaixe Anatômico", "sub": "Firmeza no Pulso"},
         _TROCA,
     ],
     # --- Chapéus e bonés ---
@@ -542,7 +542,7 @@ class HTMLBuilder:
                 ("P / M", "24 a 30 cm", "16 a 20 cm", "45 cm"),
                 ("G / GG", "30 a 38 cm", "18 a 24 cm", "48 cm"),
             ]
-            rows_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td><td>{r[2]}</td></tr>\n" for r in rows])
+            rows_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td></tr>\n" for r in rows])
             table_html = f"""<table class="brk-sg-table">
         <thead>
           <tr>
@@ -556,11 +556,75 @@ class HTMLBuilder:
 {rows_html}        </tbody>
       </table>"""
 
-        # 7. Bandanas / Balaclavas
-        elif archetype_id == "neck_gaiters_balaclavas" or any(w in title_low for w in ["bandana", "tubeneck", "buff", "balaclava"]):
-            guide_title = "Dimensões - Bandana Tubular Seamless Multifuncional"
-            tip_text = "<strong>Dimensões do produto:</strong> Microfibra tubular seamless de alta elasticidade com proteção UV50+ e memória anatômica."
-            table_html = """<table class="brk-sg-table">
+        # 7. Bandanas / Balaclavas / Lenços / Black Mask
+        elif archetype_id == "neck_gaiters_balaclavas" or any(w in title_low for w in ["bandana", "tubeneck", "buff", "balaclava", "lenço", "lenco"]):
+            if "lenço" in title_low or "lenco" in title_low:
+                guide_title = "Dimensões - Lenço Quadrado de Amarração UV50+"
+                tip_text = "<strong>Dimensões do produto:</strong> Modelagem quadrada plana em tecido leve com proteção UV50+ para amarração versátil na cabeça, cabelo ou pescoço."
+                table_html = """<table class="brk-sg-table">
+        <thead>
+          <tr>
+            <th>Tamanho</th>
+            <th>Formato</th>
+            <th>Dimensões Aproximadas</th>
+            <th>Ajuste</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Tamanho Único</strong></td>
+            <td>Quadrado Plano</td>
+            <td>Aprox. 55 x 55 cm</td>
+            <td>Amarração livre ajustável (cabeça, pescoço, cabelo ou acessórios)</td>
+          </tr>
+        </tbody>
+      </table>"""
+            elif "black mask" in title_low or "blackmask" in title_low:
+                guide_title = "Dimensões - Bandana Anatômica Black Mask UV50+"
+                tip_text = "<strong>Dimensões do produto:</strong> Modelagem anatômica 3D com recorte nasal ergonômico, painel frontal respirável em tela Mesh e cobertura alongada de pescoço."
+                table_html = """<table class="brk-sg-table">
+        <thead>
+          <tr>
+            <th>Tamanho</th>
+            <th>Largura Facial</th>
+            <th>Altura Frontal / Pescoço</th>
+            <th>Estrutura</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Tamanho Único</strong></td>
+            <td>Aprox. 25 cm (Elástica)</td>
+            <td>Aprox. 36 cm</td>
+            <td>Recorte nasal anatômico + Tela respirável frontal + Tecido UV50+</td>
+          </tr>
+        </tbody>
+      </table>"""
+            elif "balaclava" in title_low and "tubeneck" not in title_low:
+                guide_title = "Dimensões - Capuz Balaclava Integral UV50+"
+                tip_text = "<strong>Dimensões do produto:</strong> Capuz integral elástico com visor ocular anatômico para cobertura completa de cabeça, rosto, orelhas e pescoço."
+                table_html = """<table class="brk-sg-table">
+        <thead>
+          <tr>
+            <th>Tamanho</th>
+            <th>Circunferência Cabeça</th>
+            <th>Comprimento Total</th>
+            <th>Elasticidade</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Tamanho Único</strong></td>
+            <td>54 cm a 62 cm (Adaptável)</td>
+            <td>Aprox. 40 cm</td>
+            <td>Malha tecnológica elástica com visor ocular anatômico</td>
+          </tr>
+        </tbody>
+      </table>"""
+            else:
+                guide_title = "Dimensões - Bandana Tubular Multifuncional UV50+"
+                tip_text = "<strong>Dimensões do produto:</strong> Microfibra tubular de alta elasticidade com proteção UV50+ e memória anatômica."
+                table_html = """<table class="brk-sg-table">
         <thead>
           <tr>
             <th>Tamanho</th>
@@ -574,7 +638,7 @@ class HTMLBuilder:
             <td><strong>Tamanho Único</strong></td>
             <td>Aprox. 24 cm</td>
             <td>Aprox. 48 cm</td>
-            <td>Microfibra tubular elástica seamless com memória anatômica</td>
+            <td>Microfibra tubular elástica 4-Way Stretch com memória anatômica</td>
           </tr>
         </tbody>
       </table>"""

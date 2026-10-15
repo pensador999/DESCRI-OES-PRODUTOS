@@ -566,7 +566,14 @@ function resolveClientOriginAndTitle(liveP) {
     'Loomis', 'Monster 3X', 'Moriah', 'Kowalsky', 'VMC', 'Mustad', 
     'Crown', 'Ottoni', 'Pesca Brasil', 'Sumax', 'Saint', 'Jogá', 'Joga'
   ];
-  const rawTitle = (liveP.title || "Produto BRK").trim();
+  const rawTitle = (liveP.title || "Produto BRK").trim()
+    .replace(/\bÒculos\b/g, "Óculos")
+    .replace(/\bòculos\b/g, "óculos")
+    .replace(/\bProtecão\b/g, "Proteção")
+    .replace(/\bprotecão\b/g, "proteção")
+    .replace(/\bBalaclava\s+Balaclava\b/gi, "Balaclava")
+    .replace(/\s{2,}/g, " ")
+    .trim();
   const vendor = (liveP.vendor || "").trim();
   const tags = Array.isArray(liveP.tags) ? liveP.tags.join(" ") : (liveP.tags || "");
   const fullInfo = `${rawTitle} ${vendor} ${tags}`.toLowerCase();
@@ -815,8 +822,8 @@ const QUICK_BADGES_BY_ARCHETYPE = {
     },
     {
       "icon": "shield",
-      "title": "Silicone no Bíceps",
-      "sub": "Fixação Antiderrapante"
+      "title": "Fixação Anatômica",
+      "sub": "Ajuste Firme no Braço"
     },
     {
       "icon": "return",
@@ -832,13 +839,13 @@ const QUICK_BADGES_BY_ARCHETYPE = {
     },
     {
       "icon": "shield",
-      "title": "Tubular Seamless",
-      "sub": "Sem Costuras Anti-Atrito"
+      "title": "Toque Frio Anti-Atrito",
+      "sub": "Conforto e Respirabilidade"
     },
     {
       "icon": "bolt",
-      "title": "Elasticidade 4-Way",
-      "sub": "Memória de Forma"
+      "title": "Secagem Ultra Rápida",
+      "sub": "Tecido Tecnológico Leve"
     },
     {
       "icon": "return",
@@ -850,7 +857,7 @@ const QUICK_BADGES_BY_ARCHETYPE = {
     {
       "icon": "shield",
       "title": "Palma Antiderrapante",
-      "sub": "Material Texturizado"
+      "sub": "Alta Aderência e Grip"
     },
     {
       "icon": "bolt",
@@ -859,8 +866,8 @@ const QUICK_BADGES_BY_ARCHETYPE = {
     },
     {
       "icon": "gear",
-      "title": "Ajuste no Punho",
-      "sub": "Fita Regulável"
+      "title": "Encaixe Anatômico",
+      "sub": "Firmeza no Pulso"
     },
     {
       "icon": "return",
@@ -1336,10 +1343,24 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
       ["G / GG", "30 a 38 cm", "18 a 24 cm", "48 cm"]
     ];
     tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Circunferência Bíceps</th><th>Circunferência Punho</th><th>Comprimento Total</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
-  } else if (archetypeId === "neck_gaiters_balaclavas" || /bandana|tubeneck|buff|balaclava/i.test(tLow)) {
-    guideTitle = "Dimensões - Bandana Tubular Seamless Multifuncional";
-    tipText = "<strong>Dimensões do produto:</strong> Microfibra tubular seamless de alta elasticidade com proteção UV50+ e memória anatômica.";
-    tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Largura (Plana)</th><th>Comprimento</th><th>Elasticidade</th></tr></thead><tbody><tr><td><strong>Tamanho Único</strong></td><td>Aprox. 24 cm</td><td>Aprox. 48 cm</td><td>Microfibra tubular elástica seamless com memória anatômica</td></tr></tbody></table>`;
+  } else if (archetypeId === "neck_gaiters_balaclavas" || /bandana|tubeneck|buff|balaclava|lenço|lenco/i.test(tLow)) {
+    if (tLow.includes("lenço") || tLow.includes("lenco")) {
+      guideTitle = "Dimensões - Lenço Quadrado de Amarração UV50+";
+      tipText = "<strong>Dimensões do produto:</strong> Modelagem quadrada plana em tecido leve com proteção UV50+ para amarração versátil na cabeça, cabelo ou pescoço.";
+      tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Formato</th><th>Dimensões Aproximadas</th><th>Ajuste</th></tr></thead><tbody><tr><td><strong>Tamanho Único</strong></td><td>Quadrado Plano</td><td>Aprox. 55 x 55 cm</td><td>Amarração livre ajustável (cabeça, pescoço, cabelo ou acessórios)</td></tr></tbody></table>`;
+    } else if (tLow.includes("black mask") || tLow.includes("blackmask")) {
+      guideTitle = "Dimensões - Bandana Anatômica Black Mask UV50+";
+      tipText = "<strong>Dimensões do produto:</strong> Modelagem anatômica 3D com recorte nasal ergonômico, painel frontal respirável em tela Mesh e cobertura alongada de pescoço.";
+      tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Largura Facial</th><th>Altura Frontal / Pescoço</th><th>Estrutura</th></tr></thead><tbody><tr><td><strong>Tamanho Único</strong></td><td>Aprox. 25 cm (Elástica)</td><td>Aprox. 36 cm</td><td>Recorte nasal anatômico + Tela respirável frontal + Tecido UV50+</td></tr></tbody></table>`;
+    } else if (tLow.includes("balaclava") && !tLow.includes("tubeneck")) {
+      guideTitle = "Dimensões - Capuz Balaclava Integral UV50+";
+      tipText = "<strong>Dimensões do produto:</strong> Capuz integral elástico com visor ocular anatômico para cobertura completa de cabeça, rosto, orelhas e pescoço.";
+      tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Circunferência Cabeça</th><th>Comprimento Total</th><th>Elasticidade</th></tr></thead><tbody><tr><td><strong>Tamanho Único</strong></td><td>54 cm a 62 cm (Adaptável)</td><td>Aprox. 40 cm</td><td>Malha tecnológica elástica com visor ocular anatômico</td></tr></tbody></table>`;
+    } else {
+      guideTitle = "Dimensões - Bandana Tubular Multifuncional UV50+";
+      tipText = "<strong>Dimensões do produto:</strong> Microfibra tubular de alta elasticidade com proteção UV50+ e memória anatômica.";
+      tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Largura (Plana)</th><th>Comprimento</th><th>Elasticidade</th></tr></thead><tbody><tr><td><strong>Tamanho Único</strong></td><td>Aprox. 24 cm</td><td>Aprox. 48 cm</td><td>Microfibra tubular elástica 4-Way Stretch com memória anatômica</td></tr></tbody></table>`;
+    }
   } else {
     return "";
   }
@@ -2184,7 +2205,16 @@ function getProductModeBHTML(liveP) {
     }
   });
   const nonBanner = rawDeduped.filter(u => !u.toLowerCase().includes("catalogobrkfishing_iscapremiumemdetalhes"));
-  const images = nonBanner.length >= 3 ? nonBanner : rawDeduped;
+  let images = nonBanner.length >= 3 ? nonBanner : rawDeduped;
+  const bannerTokens = [
+    "capacategoria", "prancheta_1_copiar", "versao3", "diferencialuv",
+    "diferencialtela", "guia-de-tamanhos", "star-feminino", "dfubcro", "mqlxrlf"
+  ];
+  const realPhotos = images.filter(u => !bannerTokens.some(tok => u.toLowerCase().includes(tok)));
+  const infoBanners = images.filter(u => bannerTokens.some(tok => u.toLowerCase().includes(tok)));
+  if (realPhotos.length > 0 && infoBanners.length > 0) {
+    images = [...realPhotos, ...infoBanners];
+  }
 
   const isApparel = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work", "pants_cargo_tactical"].includes(archetypeId);
   const isLure = (archetypeId === "fishing_lures");

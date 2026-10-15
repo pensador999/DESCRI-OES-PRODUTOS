@@ -1664,6 +1664,12 @@ class TemplateEngine:
         is_revenda = detected_brand is not None and detected_brand.lower() != "brk"
         
         t_clean = title.strip()
+        t_clean = re.sub(r'\bÒculos\b', 'Óculos', t_clean)
+        t_clean = re.sub(r'\bòculos\b', 'óculos', t_clean)
+        t_clean = re.sub(r'\bProtecão\b', 'Proteção', t_clean)
+        t_clean = re.sub(r'\bprotecão\b', 'proteção', t_clean)
+        t_clean = re.sub(r'\bBalaclava\s+Balaclava\b', 'Balaclava', t_clean, flags=re.IGNORECASE)
+        t_clean = re.sub(r'\s{2,}', ' ', t_clean).strip()
         if is_revenda:
             origin_type = "revenda"
             brand_name = detected_brand
@@ -1837,8 +1843,9 @@ class TemplateEngine:
     def _sanitize_and_dedup_images(self, cdn_images: List[str], archetype_id: str = "", title: str = "") -> List[str]:
         """
         Desduplica imagens da galeria removendo sufixos UUID gerados pela Shopify em uploads repetidos
-        (ex: 1755280683947-3_ad5e5a9c-9510-404a-a7a5-20cb91ef3c0c.jpg vs 1755280683947-3.jpg)
-        e remove banners genéricos de catálogo quando já existem >= 3 fotos reais do produto.
+        (ex: 1755280683947-3_ad5e5a9c-9510-404a-a7a5-20cb91ef3c0c.jpg vs 1755280683947-3.jpg),
+        remove banners genéricos de catálogo quando já existem >= 3 fotos reais do produto,
+        e move cards gráficos institucionais para o final da fila para priorizar fotos reais nos Atos 1, 2 e 3.
         """
         if not cdn_images:
             return []
@@ -1860,6 +1867,17 @@ class TemplateEngine:
         non_banner = [u for u in deduped if "catalogobrkfishing_iscapremiumemdetalhes" not in u.lower()]
         if len(non_banner) >= 3:
             deduped = non_banner
+
+        # Move cards informativos / banners de categoria para o final da galeria para que fotos reais ocupem os Atos 1, 2 e 3
+        banner_tokens = (
+            "capacategoria", "prancheta_1_copiar", "versao3", "diferencialuv",
+            "diferencialtela", "guia-de-tamanhos", "star-feminino", "dfubcro", "mqlxrlf"
+        )
+        real_photos = [u for u in deduped if not any(tok in u.lower() for tok in banner_tokens)]
+        info_banners = [u for u in deduped if any(tok in u.lower() for tok in banner_tokens)]
+        if real_photos and info_banners:
+            deduped = real_photos + info_banners
+
         return deduped
 
     def generate_narrative_from_template(self, product: Dict[str, Any], archetype_id: str, cdn_images: List[str], store_key: str = None, sibling_info: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -2509,24 +2527,342 @@ class TemplateEngine:
                 {"label": "Indicação de Uso", "value": "Lida no campo, rodeios, viagens e uso diário"}
             ]
 
-        # 12. Adaptação 360° para Botinas Country / Agro (closed_footwear_sneakers)
-        elif archetype_id == "closed_footwear_sneakers" and any(w in t_low for w in ["botina", "bota "]):
-            act1["tag"] = "Tradição & Robustez no Campo"
-            act1["title"] = "CONSTRUÇÃO REFORÇADA PARA A LIDA E O ESTILO COUNTRY"
-            act1["desc_tmpl"] = "Projetada para enfrentar o trabalho pesado na fazenda, terrenos irregulares e uso prolongado com máximo conforto, a {title} entrega proteção superior aos pés e durabilidade comprovada."
-            act2["tag"] = "Solado de Alta Tração"
-            act2["title"] = "ADERÊNCIA SEGURA E ABSORÇÃO DE IMPACTO"
-            act2["desc_tmpl"] = "Solado tratorado antiderrapante de alta resistência, garantindo estabilidade na terra, lama ou piso molhado, aliado a palmilha macia que reduz a fadiga plantar."
-            act3["tag"] = "Calce Fácil & Durabilidade"
-            act3["title"] = "ACABAMENTO RESISTENTE COM AJUSTE ANATÔMICO NO TORNOZELO"
-            act3["desc_tmpl"] = "Cabedal estruturado de alta resistência com elásticos laterais reforçados e puxador, facilitando o calce rápido e firme no dia a dia."
-            new_specs = [
-                {"label": "Cabedal", "value": "Couro / Material de alta resistência com costuras reforçadas"},
-                {"label": "Solado", "value": "Borracha antiderrapante de alta tração e durabilidade"},
-                {"label": "Palmilha", "value": "Anatômica em espuma de alta densidade antibacteriana"},
-                {"label": "Sistema de Calce", "value": "Calce fácil com elástico lateral reforçado e puxador"},
-                {"label": "Uso Recomendado", "value": "Lida no campo, agronegócio, cavalgadas e uso diário"}
-            ]
+        # 12. Adaptação 360° para Botinas Country / Agro e Tênis de Pesca RaptorX (closed_footwear_sneakers)
+        elif archetype_id == "closed_footwear_sneakers":
+            if "raptorx" in t_low or "tênis" in t_low or "tenis" in t_low:
+                act1["tag"] = "Performance Anfíbia & Estabilidade"
+                act1["title"] = "CANO MÉDIO COM SUPORTE DE TORNOZELO E CABEDAL RESPIRÁVEL DE DRENAGEM RÁPIDA"
+                act1["desc_tmpl"] = "Desenvolvido especialmente para pescadores esportivos e aventureiros que enfrentam pedras molhadas, barrancos, caiaques e convés de embarcações, o {title} combina estrutura firme de cano médio com cabedal em trama respirável que não retém água e acelera a secagem."
+                act2["tag"] = "Amarração Rápida & Proteção"
+                act2["title"] = "GANCHOS METÁLICOS SUPERIORES, BIQUEIRA REFORÇADA E PALMILHA DE ABSORÇÃO"
+                act2["desc_tmpl"] = "Equipado com passadores reforçados e ganchos metálicos superiores para ajuste firme no tornozelo, biqueira frontal estruturada contra impactos em pedras e galhos, puxador traseiro de calce ágil e palmilha macia de alta densidade."
+                act3["tag"] = "Tração Extrema Multi-Terreno"
+                act3["title"] = "SOLADO TRATORADO DE BORRACHA ANTIDERRAPANTE PARA SUPERFÍCIES MOLHADAS"
+                act3["desc_tmpl"] = "Solado robusto com garras multidirecionais profundas que expulsam a lama e a água, garantindo aderência superior em pisos lisos de barcos, margens de rios, trilhas úmidas e terrenos acidentados."
+                new_specs = [
+                    {"label": "Cabedal", "value": "Trama técnica respirável de secagem rápida com reforços estruturais em PU"},
+                    {"label": "Cano & Fechamento", "value": "Cano médio com acolchoamento no tornozelo e cadarço com ganchos metálicos superiores"},
+                    {"label": "Proteção Frontal", "value": "Biqueira e calcanhar estruturados contra impactos em pedras e estruturas"},
+                    {"label": "Solado", "value": "Borracha tratorada antiderrapante com sulcos de escoamento de água e lama"},
+                    {"label": "Indicação de Uso", "value": "Pesca esportiva (embarcada, caiaque ou barranco), trilhas, camping e aventura"}
+                ]
+            elif any(w in t_low for w in ["botina", "bota "]):
+                is_fem_boot = "feminina" in t_low or "feminino" in t_low
+                estilo_publico = "design country feminino elegante e anatômico" if is_fem_boot else "design country tradicional robusto"
+                act1["tag"] = "Tradição & Robustez no Campo"
+                act1["title"] = "COURO LEGÍTIMO E ESTRUTURA REFORÇADA PARA A LIDA E O ESTILO COUNTRY"
+                act1["desc_tmpl"] = f"Projetada com {estilo_publico} para enfrentar a rotina na fazenda, eventos sertanejos e uso prolongado com máximo conforto, a {{title}} entrega proteção superior aos pés e durabilidade comprovada."
+                act2["tag"] = "Solado Blaqueado de Alta Tração"
+                act2["title"] = "SOLADO DE BORRACHA ANTIDERRAPANTE COM ACABAMENTO BLAQUEADO LATERAL"
+                act2["desc_tmpl"] = "Solado tratorado antiderrapante com borda blaqueada de alta tenacidade e brasão western no salto, garantindo estabilidade na terra, estribo ou piso molhado, aliado a palmilha macia que reduz a fadiga plantar."
+                act3["tag"] = "Calce Fácil & Ajuste Firme"
+                act3["title"] = "ELÁSTICOS LATERAIS COBERTOS E PUXADOR TRASEIRO ANATÔMICO"
+                act3["desc_tmpl"] = "Cabedal estruturado em couro nobre com elásticos laterais de alta memória e puxadores superiores que facilitam o calce rápido e mantêm o ajuste firme no tornozelo ao longo do dia."
+                new_specs = [
+                    {"label": "Cabedal", "value": "Couro legítimo selecionado de alta resistência e toque macio"},
+                    {"label": "Solado", "value": "Borracha antiderrapante de alta tração com acabamento blaqueado lateral"},
+                    {"label": "Palmilha", "value": "Anatômica em espuma de alta densidade com absorção de impacto"},
+                    {"label": "Sistema de Calce", "value": "Calce fácil Chelsea com elásticos laterais reforçados e puxador"},
+                    {"label": "Uso Recomendado", "value": "Lida no campo, agronegócio, rodeios, cavalgadas e uso diário"}
+                ]
+
+        # 12.1 Adaptação 360° para Sandálias/Babuches vs Chinelos Boaonda (footwear_sandals_boaonda)
+        elif archetype_id == "footwear_sandals_boaonda":
+            if "chinelo" in t_low:
+                act1["tag"] = "Conforto Ortopédico Extremo"
+                act1["title"] = "CHINELO ANATÔMICO DE ABSORÇÃO DE IMPACTO PARA PÉS SENSÍVEIS"
+                act1["desc_tmpl"] = "Desenvolvido com engenharia ergonômica para proporcionar alívio imediato à planta dos pés, calcanhares e articulações, o {title} absorve até 80% do impacto da pisada no uso diário, pós-pescaria ou lazer."
+                act2["tag"] = "Tiras Largas & Base Texturizada"
+                act2["title"] = "TIRAS ANATÔMICAS VENTILADAS E PALMILHA TEXTURIZADA ANTIESTRESSE"
+                act2["desc_tmpl"] = "Conta com tiras largas flexíveis com aberturas laterais de ventilação que não machucam o peito do pé e base interna levemente texturizada que estimula a circulação plantar e evita que o pé escorregue."
+                act3["tag"] = "Termoplástico 100% Impermeável"
+                act3["title"] = "SOLADO ANTIDERRAPANTE, ANTIBACTERIANO E LIVRE DE ODORES"
+                act3["desc_tmpl"] = "Produzido integralmente em elastômero termoplástico nobre Boaonda 100% impermeável, fácil de lavar, imune a deformações e seguro para pisos molhados de barcos, piscinas e áreas externas."
+                new_specs = [
+                    {"label": "Modelo", "value": "Chinelo de dedo anatômico ortopédico com tiras largas ventiladas"},
+                    {"label": "Material", "value": "Termoplástico nobre Boaonda (TR/EVA) flexível, antiodor e lavável"},
+                    {"label": "Biomecânica", "value": "Absorção superior de impacto (ideal para esporão de calcâneo e fascite plantar)"},
+                    {"label": "Solado", "value": "Antiderrapante com ranhuras de segurança para pisos úmidos"},
+                    {"label": "Origem / Distribuição", "value": "Produto 100% Original Boaonda com garantia oficial"}
+                ]
+            else:
+                act1["tag"] = "Palmilha Maxisense Anti-Impacto"
+                act1["title"] = "SANDÁLIA BABUCHE ORTOPÉDICA COM AMORTECIMENTO PROLONGADO"
+                act1["desc_tmpl"] = "Projetada para oferecer descanso ativo e proteção integral aos pés durante longas horas em pé no barco, no pesqueiro ou na rotina diária, a {title} conta com palmilha anatômica removível de altíssima absorção de impacto."
+                act2["tag"] = "Alça Reversível & Ventilação"
+                act2["title"] = "USO 2 EM 1 COM TIRA TRASEIRA MÓVEL E ABERTURAS DE DRENAGEM"
+                act2["desc_tmpl"] = "Sua alça traseira articulada permite usar como sandália presa ao calcanhar para caminhadas e navegação segura ou rebatida à frente como babuche/clog de calce rápido, com janelas laterais que ventilam os pés e escoam a água."
+                act3["tag"] = "Solado Naval Antiderrapante"
+                act3["title"] = "POLÍMERO NOBRE IMPERMEÁVEL, ANTIBACTERIANO E DE FÁCIL LIMPEZA"
+                act3["desc_tmpl"] = "Injetada em termoplástico flexível Boaonda que não retém odores, seca em instantes e oferece aderência confiável em convés molhado de embarcações, pedras, rampas e pisos lisos."
+                new_specs = [
+                    {"label": "Modelo", "value": "Sandália Babuche / Clog fechada na frente com alça traseira reversível 2 em 1"},
+                    {"label": "Material do Cabedal", "value": "Termoplástico nobre Boaonda flexível, impermeável e fácil de lavar"},
+                    {"label": "Palmilha", "value": "Anatômica anti-impacto removível (alívio para esporão e fascite plantar)"},
+                    {"label": "Ventilação & Solado", "value": "Aberturas laterais de respiração/drenagem e solado antiderrapante"},
+                    {"label": "Origem / Distribuição", "value": "Produto 100% Original Boaonda com garantia oficial"}
+                ]
+
+        # 12.2 Adaptação 360° para Óculos de Sol Polarizados UV400 (eyewear_sunglasses)
+        elif archetype_id == "eyewear_sunglasses":
+            if "infantil" in t_low or "kids" in t_low:
+                act1["tag"] = "Proteção Ocular Infantil UV400"
+                act1["title"] = "LENTES POLARIZADAS COM BLOQUEIO 100% UVA E UVB PARA OS PEQUENOS"
+                act1["desc_tmpl"] = "Desenvolvido especialmente para proteger a visão sensível das crianças sob o sol forte, o {title} conta com lentes polarizadas UV400 que eliminam o ofuscamento da água e da areia com conforto visual imediato."
+                act2["tag"] = "Armação Infantil Flexível & Leve"
+                act2["title"] = "DIMENSIONAMENTO ANATÔMICO INFANTIL RESISTENTE A QUEDAS E BRINCADEIRAS"
+                act2["desc_tmpl"] = "Construído em polímero leve, flexível e seguro com encaixe sob medida para o rosto infantil, oferecendo firmeza sem apertar as têmporas ou escorregar pelo nariz durante as brincadeiras."
+                act3["tag"] = "Aventura em Família"
+                act3["title"] = "DESIGN COLORIDO EXCLUSIVO COM ESTOJO E FLANELA INCLUSOS"
+                act3["desc_tmpl"] = "Perfeito para acompanhar os pequenos aventureiros em pescarias em família, praia, piscina, passeios no campo e atividades ao ar livre com muito estilo e proteção."
+                new_specs = [
+                    {"label": "Tecnologia das Lentes", "value": "Polarizadas TAC com filtro antirreflexo e proteção UV400"},
+                    {"label": "Proteção Solar", "value": "100% de bloqueio contra raios nocivos UVA e UVB"},
+                    {"label": "Material da Armação", "value": "Polímero infantil flexível ultraleve e resistente a impactos"},
+                    {"label": "Dimensionamento", "value": "Anatômico Infantil / Juvenil de encaixe seguro e confortável"},
+                    {"label": "Itens Inclusos", "value": "Estojo protetor oficial BRK e flanela especial de microfibra"},
+                    {"label": "Uso Recomendado", "value": "Praia, piscina, pescarias em família, passeios ao ar livre e lazer infantil"}
+                ]
+            elif any(w in t_low for w in ["bambu", "bamboo", "wood", "madeira", "timber"]):
+                act2["tag"] = "Design Nobre & Leveza"
+                act2["title"] = "FRONTAL DE ALTA RESISTÊNCIA COMBINADO A HASTES EM MADEIRA / BAMBU NATURAL"
+                act2["desc_tmpl"] = "Sua estrutura une frontal ergonômico de alta tenacidade a hastes trabalhadas em madeira/bambu natural legítimo, resultando em um óculos extremamente leve, equilibrado e com acabamento artesanal exclusivo."
+                act3["tag"] = "Dobradiças Flexíveis & Conforto"
+                act3["title"] = "DOBRADIÇAS METÁLICAS COM MOLA FLEXÍVEL PARA ENCAIXE SOB MEDIDA"
+                act3["desc_tmpl"] = "Equipado com dobradiças metálicas com sistema de mola (Spring Hinge) que se adaptam suavemente a diferentes larguras de rosto sem pressionar as têmporas, acompanhando estojo protetor e flanela."
+                new_specs = [
+                    {"label": "Tecnologia das Lentes", "value": "Polarizadas TAC de alta definição com filtro antirreflexo"},
+                    {"label": "Proteção Solar", "value": "Fator UV400 com 100% de bloqueio contra raios UVA e UVB"},
+                    {"label": "Material da Armação", "value": "Frontal em polímero nobre com hastes artesanais em Bambu / Madeira natural"},
+                    {"label": "Articulação", "value": "Dobradiças metálicas reforçadas com mola flexível autoajustável"},
+                    {"label": "Itens Inclusos", "value": "Estojo protetor oficial BRK e flanela especial de microfibra"},
+                    {"label": "Uso Recomendado", "value": "Pesca esportiva, náutica, direção, campo e estilo casual ao ar livre"}
+                ]
+            elif any(w in t_low for w in ["aviador", "aviator", "metal", "steel", "octagon", "rose gold", "maverick", "dubai", "Ibiza".lower()]):
+                act2["tag"] = "Armação Metálica Nobre"
+                act2["title"] = "ESTRUTURA EM LIGA METÁLICA ANTICORROSIVA E PLAQUETAS NASAIS AJUSTÁVEIS"
+                act2["desc_tmpl"] = "Construído com perfil metálico fino de alta rigidez e baixíssimo peso, equipado com plaquetas nasais anatômicas ajustáveis que garantem apoio suave e personalizado sem marcar o rosto."
+                new_specs = [
+                    {"label": "Tecnologia das Lentes", "value": "Polarizadas TAC de alta definição com filtro antirreflexo HD"},
+                    {"label": "Proteção Solar", "value": "Fator UV400 com 100% de bloqueio contra raios UVA e UVB"},
+                    {"label": "Material da Armação", "value": "Liga metálica nobre anticorrosiva de baixo peso e alta durabilidade"},
+                    {"label": "Apoio Nasal", "value": "Plaquetas anatômicas macias e ajustáveis para encaixe preciso"},
+                    {"label": "Itens Inclusos", "value": "Estojo protetor oficial BRK e flanela especial de microfibra"},
+                    {"label": "Uso Recomendado", "value": "Pesca esportiva, direção, viagens, campo e uso diário ao ar livre"}
+                ]
+            else:
+                new_specs = [
+                    {"label": "Tecnologia das Lentes", "value": "Polarizadas TAC de alta definição com filtro antirreflexo HD"},
+                    {"label": "Proteção Solar", "value": "Fator UV400 com 100% de bloqueio contra raios UVA e UVB"},
+                    {"label": "Material da Armação", "value": "Policarbonato / Acetato ultraleve de alta resistência a impactos"},
+                    {"label": "Apoio Nasal", "value": "Ponte anatômica integrada que distribui o peso sem marcar a pele"},
+                    {"label": "Itens Inclusos", "value": "Estojo protetor oficial BRK e flanela especial de microfibra"},
+                    {"label": "Uso Recomendado", "value": "Pesca esportiva, náutica, direção, ciclismo, campo e uso diário"}
+                ]
+
+        # 12.3 Adaptação 360° para Luvas Táticas, Esportivas e de Pesca (gloves_tactical_fishing)
+        elif archetype_id == "gloves_tactical_fishing":
+            if "dedo inteiro" in t_low or "yl020" in t_low:
+                act1["tag"] = "Proteção Dorsal Rígida & Grip"
+                act1["title"] = "CASQUILHO PROTETOR NAS ARTICULAÇÕES E PALMA ANTIDERRAPANTE REFORÇADA"
+                act1["desc_tmpl"] = "Projetada para operações táticas, motociclismo, trilha e pesca pesada em estruturas fechadas, a {title} integra escudo dorsal rígido absorvedor de impactos sobre os nós dos dedos e palma texturizada de alta aderência."
+                act2["tag"] = "Cobertura Integral Dedo Inteiro"
+                act2["title"] = "PROTEÇÃO COMPLETA DOS 5 DEDOS COM ENTRADAS DE VENTILAÇÃO NAS FALANGES"
+                act2["desc_tmpl"] = "Sua modelagem de dedo inteiro protege integralmente as mãos contra galhos, espinhos, abrasão, sol e vento, contando com dutos de ventilação sobre as falanges que dissipam o calor interno."
+                act3["tag"] = "Fixação Firme no Pulso"
+                act3["title"] = "FECHAMENTO REGULÁVEL NO PUNHO PARA MÁXIMA ESTABILIDADE"
+                act3["desc_tmpl"] = "Equipada com cinta de pulso ajustável de alta fixação que mantém a luva perfeitamente firme na mão durante a pilotagem, manuseio de equipamentos ou trabalho pesado."
+                new_specs = [
+                    {"label": "Modelagem", "value": "Dedo Inteiro (cobertura integral dos 5 dedos com proteção tática)"},
+                    {"label": "Proteção Dorsal", "value": "Casquilho rígido termoplástico nas articulações + respiros nas falanges"},
+                    {"label": "Palma da Mão", "value": "Reforço sintético texturizado antiderrapante de alta resistência à abrasão"},
+                    {"label": "Ajuste no Punho", "value": "Cinta regulável no pulso com fecho de contato firme"},
+                    {"label": "Indicação de Uso", "value": "Motociclismo, trilha, airsoft, operações táticas, pesca e trabalho no campo"}
+                ]
+            elif "dorsal" in t_low or "yl025" in t_low or "yl018" in t_low:
+                act1["tag"] = "Escudo Dorsal & Pegada Firme"
+                act1["title"] = "PROTETOR DORSAL NAS ARTICULAÇÕES E PALMA ANTIDERRAPANTE REFORÇADA"
+                act1["desc_tmpl"] = "Desenvolvida para unir proteção robusta no dorso da mão e controle absoluto de empunhadura, a {title} conta com proteção estruturada sobre as articulações e palma revestida com textura antiderrapante."
+                act2["tag"] = "Corte Meio Dedo de Precisão"
+                act2["title"] = "PONTAS DOS DEDOS LIVRES PARA SENSIBILIDADE TÁTIL IMEDIATA"
+                act2["desc_tmpl"] = "O corte meio dedo mantém as pontas dos dedos livres para atar nós de pesca, controlar o carretel da carretilha, acionar comandos da moto ou manusear ferramentas com precisão milimétrica."
+                act3["tag"] = "Punho Regulável & Respirabilidade"
+                act3["title"] = "AJUSTE FIRME NO PULSO E TECIDO VENTILADO DE SECAGEM RÁPIDA"
+                act3["desc_tmpl"] = "Construída com dorso respirável que evita o acúmulo de suor e fecho regulável no punho para encaixe anatômico sem folgas."
+                new_specs = [
+                    {"label": "Modelagem", "value": "Meio Dedo Tática / Esportiva (pontas livres para sensibilidade tátil)"},
+                    {"label": "Proteção Dorsal", "value": "Reforço protetor estruturado sobre as articulações do dorso"},
+                    {"label": "Palma da Mão", "value": "Material sintético antiderrapante resistente ao atrito contínuo"},
+                    {"label": "Ajuste no Punho", "value": "Cinta regulável no pulso de fixação rápida e segura"},
+                    {"label": "Indicação de Uso", "value": "Pesca esportiva, motociclismo, ciclismo, tiro esportivo e aventura"}
+                ]
+            elif "2 dedos" in t_low or "yl013" in t_low:
+                act1["tag"] = "Design Especial de Pesca (3 Dedos Livres)"
+                act1["title"] = "SENSIBILIDADE MÁXIMA NO POLEGAR, INDICADOR E MÉDIO COM PROTEÇÃO LATERAL"
+                act1["desc_tmpl"] = "Projetada especificamente para a mecânica do arremesso com carretilha e molinete, a {title} mantém o polegar, o indicador e o dedo médio expostos para controle fino da linha, enquanto protege integralmente os dedos anelar e mínimo."
+                act2["tag"] = "Grip em Silicone na Palma"
+                act2["title"] = "PALMA COM TRILHAS ANTIDERRAPANTES PARA CONTROLE DA VARA MOLHADA"
+                act2["desc_tmpl"] = "Superfície palmar com aplicação de trilhas de silicone de alta aderência que travam o cabo da vara na mão mesmo sob chuva ou respingos constantes."
+                act3["tag"] = "Conforto Térmico & Ajuste"
+                act3["title"] = "DORSO CAMUFLADO RESPIRÁVEL E FECHAMENTO REGULÁVEL NO PUNHO"
+                act3["desc_tmpl"] = "Tecido elástico leve de secagem ultra rápida com estampa camuflada Florest e ajuste de pulso firme para centenas de arremessos sem fadiga."
+                new_specs = [
+                    {"label": "Modelagem", "value": "Especial de Pesca (2 dedos cobertos + 3 dedos com pontas livres para arremesso)"},
+                    {"label": "Palma da Mão", "value": "Revestimento com trilhas de silicone antiderrapante de alto grip"},
+                    {"label": "Dorso", "value": "Malha elástica respirável camuflada Florest de secagem rápida"},
+                    {"label": "Ajuste no Punho", "value": "Fechamento regulável anatômico no pulso"},
+                    {"label": "Origem / Distribuição", "value": "Produto Original Albatroz Fishing com garantia oficial"}
+                ]
+            elif "deyu" in t_low:
+                act1["tag"] = "Palma Ventilada com Silicone"
+                act1["title"] = "MICROPERFURAÇÕES DE RESPIRAÇÃO E PONTOS DE SILICONE ANTIDERRAPANTE"
+                act1["desc_tmpl"] = "Ultraleve e anatômica para longas jornadas de pesca sob sol forte, a {title} combina palma microperfurada com matriz de silicone antiderrapante que garante pegada firme e fresca na vara de pesca."
+                act2["tag"] = "Proteção Solar UV & Toque Frio"
+                act2["title"] = "DORSO EM LYCRA ELÁSTICA RESPIRÁVEL E CORTE MEIO DEDO"
+                act2["desc_tmpl"] = "Confeccionada em tecido elástico de toque gelado que protege o dorso das mãos contra a radiação solar enquanto deixa os dedos livres para trocar iscas e fazer nós com agilidade."
+                act3["tag"] = "Punho Alongado & Puxador Rápido"
+                act3["title"] = "PUNHO ELÁSTICO ANATÔMICO COM ALÇA INTEGRADA PARA CALCE FÁCIL"
+                act3["desc_tmpl"] = "Modelagem slip-on sem velcro que não enrosca na linha multifilamento, contando com punho elástico alongado e puxador integrado na base da palma para vestir com rapidez."
+                new_specs = [
+                    {"label": "Modelagem", "value": "Meio Dedo de Pesca Slip-On (sem velcro para não enroscar na linha)"},
+                    {"label": "Palma da Mão", "value": "Microperfurada respirável com pontos de silicone antiderrapante"},
+                    {"label": "Dorso & Punho", "value": "Tecido elástico UV de secagem rápida com puxador de calce rápido Deyu"},
+                    {"label": "Origem / Distribuição", "value": "Produto Original Deyu com garantia oficial"}
+                ]
+            elif "yl015" in t_low:
+                act1["tag"] = "Palma Antiderrapante Ventilada"
+                act1["title"] = "REFORÇO PALMAR DE ALTA ADERÊNCIA COM ABERTURA CENTRAL DE RESPIRAÇÃO"
+                act1["desc_tmpl"] = "Desenvolvida para garantir pegada firme e ventilação contínua na palma da mão durante pescarias, ciclismo e remo, a {title} possui reforço anatômico antiderrapante com respiro central estratégico."
+                act2["tag"] = "Agilidade Meio Dedo"
+                act2["title"] = "DEDOS LIVRES PARA SENSIBILIDADE TÁTIL E DORSO ELÁSTICO"
+                act2["desc_tmpl"] = "Corte meio dedo esportivo que preserva a sensibilidade no toque da linha e carretilha, combinado a dorso flexível de secagem rápida."
+                act3["tag"] = "Estabilidade no Pulso"
+                act3["title"] = "FECHAMENTO REGULÁVEL NO PUNHO PARA ENCAIXE PERSONALIZADO"
+                act3["desc_tmpl"] = "Cinta de pulso com regulagem rápida que mantém a luva estável e previne calosidades e bolhas em movimentos repetitivos."
+                new_specs = [
+                    {"label": "Modelagem", "value": "Meio Dedo Esportiva com abertura central de ventilação na palma"},
+                    {"label": "Palma da Mão", "value": "Reforço sintético antiderrapante contra calosidades e atrito"},
+                    {"label": "Dorso", "value": "Tecido elástico respirável de secagem rápida"},
+                    {"label": "Ajuste no Punho", "value": "Fita regulável de fixação firme no pulso"},
+                    {"label": "Origem / Distribuição", "value": "Produto Original Albatroz Fishing com garantia oficial"}
+                ]
+
+        # 12.4 Adaptação 360° para Manguitos de Proteção Solar (sun_sleeves_manguitos)
+        elif archetype_id == "sun_sleeves_manguitos":
+            if "tattoo" in t_low:
+                act1["tag"] = "Arte Full-Print 360° & Proteção UV50+"
+                act1["title"] = "ESTAMPA TATTOO EM ALTA DEFINIÇÃO COM BLOQUEIO SOLAR CERTIFICADO"
+                act1["desc_tmpl"] = "Desenvolvido para motociclistas, ciclistas e aventureiros que buscam visual autêntico aliado à proteção térmica e solar, o {title} traz arte sublimada em 360° de altíssima definição com fator FPU 50+."
+                act2["tag"] = "Ajuste Anatômico Segunda Pele"
+                act2["title"] = "MALHA ELÁSTICA DE TOQUE FRIO QUE ABRAÇA O BRAÇO SEM ESCORREGAR"
+                act2["desc_tmpl"] = "Confeccionado em poliamida/poliéster tecnológico com elastano de memória elástica que se molda perfeitamente ao contorno do bíceps ao punho, mantendo fixação firme durante a pilotagem."
+                act3["tag"] = "Conforto Térmico & Secagem Rápida"
+                act3["title"] = "PUNHO TRADICIONAL CONFORTÁVEL E DISSIPAÇÃO IMEDIATA DO SUOR"
+                act3["desc_tmpl"] = "Acabamento de punho reto anatômico que encaixa perfeitamente com luvas e relógios, acelerando a evaporação do suor e mantendo os braços frescos sob o sol."
+                new_specs = [
+                    {"label": "Proteção Solar", "value": "Fator FPU 50+ permanente integrado ao tecido"},
+                    {"label": "Estamparia", "value": "Sublimação digital Full-Print 360° de alta definição (Estilo Tattoo)"},
+                    {"label": "Modelagem", "value": "Anatômica segunda pele com punho reto tradicional e borda elástica no bíceps"},
+                    {"label": "Tecnologia", "value": "Toque frio, alta respirabilidade e secagem ultra rápida (Dry Fit)"},
+                    {"label": "Conteúdo da Embalagem", "value": "1 Par de Manguitos (braço direito e esquerdo)"}
+                ]
+            elif "com proteção" in t_low or "com protecao" in t_low:
+                act1["tag"] = "Proteção UV50+ Braço & Dorso da Mão"
+                act1["title"] = "COBERTURA SOLAR INTEGRAL DO BÍCEPS AO DORSO DA MÃO COM DEDEIRA"
+                act1["desc_tmpl"] = "Projetado para quem exige proteção solar sem brechas na pescaria, no ciclismo ou no trabalho ao ar livre, o {title} bloqueia até 98% dos raios UVA e UVB com tecido de toque gelado."
+                act2["tag"] = "Punho com Encaixe de Polegar"
+                act2["title"] = "ABERTURA ANATÔMICA PARA O POLEGAR QUE PROTEGE O DORSO DA MÃO"
+                act2["desc_tmpl"] = "Conta com encaixe anatômico para o polegar na extremidade inferior, mantendo o manguito esticado sobre o dorso da mão durante arremessos, pedaladas ou condução de veículos."
+                act3["tag"] = "Fixação Firme & Frescor"
+                act3["title"] = "ELÁSTICO SUPERIOR NO BÍCEPS E EVAPORAÇÃO INSTANTÂNEA DE SUOR"
+                act3["desc_tmpl"] = "Borda superior estruturada que impede que a peça escorregue pelo braço, combinada à tecnologia Dry Fit de secagem rápida que mantém a pele fresca o dia inteiro."
+                new_specs = [
+                    {"label": "Proteção Solar", "value": "Fator FPU 50+ permanente certificado"},
+                    {"label": "Diferencial no Punho", "value": "Punho estendido com abertura anatômica para o polegar (protege o dorso da mão)"},
+                    {"label": "Fixação Superior", "value": "Borda elástica anatômica de fixação firme no bíceps"},
+                    {"label": "Composição & Toque", "value": "Malha tecnológica flexível de toque frio e secagem rápida"},
+                    {"label": "Conteúdo da Embalagem", "value": "1 Par de Manguitos (braço direito e esquerdo)"}
+                ]
+
+        # 12.5 Adaptação 360° para Bandanas Tubeneck, ArmorX, Black Mask, Balaclavas e Lenços (neck_gaiters_balaclavas)
+        elif archetype_id == "neck_gaiters_balaclavas":
+            prod_id_str = str(product.get("id") or "")
+            if "lenço" in t_low or "lenco" in t_low:
+                act1["tag"] = "Proteção Solar & Estilo Versátil"
+                act1["title"] = "LENÇO QUADRADO DE AMARRAÇÃO COM PROTEÇÃO SOLAR UV50+"
+                act1["desc_tmpl"] = "Desenvolvido em tecido tecnológico leve de toque sedoso e proteção solar FPU 50+ permanente, o {title} protege a cabeça, os cabelos, a nuca ou o pescoço contra o sol e o vento com máxima elegância e frescor."
+                act2["tag"] = "Toque Macio & Acabamento"
+                act2["title"] = "MODELAGEM QUADRADA PLANA DE FÁCIL AMARRAÇÃO E SECAGEM RÁPIDA"
+                act2["desc_tmpl"] = "Sua construção plana com bordas de acabamento refinado permite dobrar e amarrar com firmeza sem escorregar, sem pesar e sem abafar, destacando-se pela estampa exclusiva em alta definição."
+                act3["tag"] = "Múltiplas Formas de Uso"
+                act3["title"] = "USE NA CABEÇA, NO PESCOÇO, NOS CABELOS OU COMO ACESSÓRIO"
+                act3["desc_tmpl"] = "Extremamente versátil para pescarias, cavalgadas, praia, campo e dia a dia: pode ser usado amarrado na cabeça estilo bandana/camponesa, no pescoço estilo cowboy/outdoor, como faixa de cabelo ou preso a bolsas e chapéus."
+                new_specs = [
+                    {"label": "Proteção Solar", "value": "Fator FPU 50+ permanente integrado ao tecido"},
+                    {"label": "Modelagem / Formato", "value": "Lenço quadrado plano de amarração versátil"},
+                    {"label": "Tecido", "value": "Microfibra tecnológica leve de toque macio e secagem rápida"},
+                    {"label": "Estamparia", "value": "Sublimação digital HD de cores vivas resistente ao desbotamento"},
+                    {"label": "Tamanho", "value": "Único amplo para múltiplas formas de dobra e amarração"}
+                ]
+            elif "black mask" in t_low or "blackmask" in t_low:
+                act1["tag"] = "Design Anatômico Black Mask"
+                act1["title"] = "RECORTE ERGONÔMICO NASAL E COBERTURA INTEGRAL DE ROSTO E PESCOÇO"
+                act1["desc_tmpl"] = "Projetada com engenharia facial 3D para pescadores, pilotos e aventureiros, a {title} possui recorte superior anatômico que contorna o nariz e as maçãs do rosto com perfeição, além de aba inferior alongada que protege todo o pescoço."
+                act2["tag"] = "Painel Frontal Respirável"
+                act2["title"] = "TELA MICROPERFURADA PARA RESPIRAÇÃO LIVRE SEM EMBAÇAR OS ÓCULOS"
+                act2["desc_tmpl"] = "Conta com painel central em tela Mesh microperfurada estrategicamente posicionado sobre o nariz e a boca, garantindo fluxo de ar contínuo, fala clara e evitando que seus óculos polarizados ou viseira embacem."
+                act3["tag"] = "Conforto Térmico & Fixação"
+                act3["title"] = "TECIDO GELADO UV50+ COM VIÉS SUPERIOR MACIO QUE NÃO ESCORREGA"
+                act3["desc_tmpl"] = "Confeccionada em malha elástica de toque frio com proteção FPU 50+ permanente e acabamento superior em viés elástico macio que mantém a máscara firme no rosto mesmo em alta velocidade no barco ou na moto."
+                new_specs = [
+                    {"label": "Proteção Solar", "value": "Fator FPU 50+ permanente certificado"},
+                    {"label": "Construção", "value": "Modelagem anatômica Black Mask com recorte nasal e viés elástico superior"},
+                    {"label": "Respirabilidade", "value": "Painel frontal em tela Mesh microperfurada (anti-embaçamento de óculos)"},
+                    {"label": "Tecido & Conforto", "value": "Malha elástica de toque frio, leve e de secagem ultra rápida"},
+                    {"label": "Tamanho", "value": "Único anatômico de encaixe firme no rosto e pescoço"}
+                ]
+            elif ("balaclava" in t_low and "tubeneck" not in t_low) or prod_id_str == "9880439324967":
+                act1["tag"] = "Cobertura Integral 360°"
+                act1["title"] = "CAPUZ BALACLAVA COMPLETO PARA CABEÇA, ROSTO, ORELHAS E PESCOÇO"
+                act1["desc_tmpl"] = "Desenvolvida para oferecer blindagem completa contra sol intenso, vento, poeira e insetos, a {title} envolve integralmente a cabeça, a nuca, as orelhas, o rosto e o pescoço com ajuste anatômico de segunda pele."
+                act2["tag"] = "Visor Ocular Anatômico"
+                act2["title"] = "ABERTURA FRONTAL COM VIÉS ELÁSTICO PERFEITA PARA USO SOB CAPACETE OU BONÉ"
+                act2["desc_tmpl"] = "Possui abertura ocular contornada por viés macio de alta elasticidade e costuras planas que não marcam a pele, proporcionando visão ampla e encaixe perfeito por baixo de capacetes de motociclismo ou com chapéus e bonés de pesca."
+                act3["tag"] = "Proteção UV50+ & Toque Frio"
+                act3["title"] = "TECIDO TECNOLÓGICO RESPIRÁVEL DE SECAGEM ULTRA RÁPIDA"
+                act3["desc_tmpl"] = "Confeccionada em malha tecnológica leve com elastano e fator FPU 50+ permanente, facilita a respiração, absorve o suor instantaneamente e mantém o conforto térmico em qualquer estação."
+                new_specs = [
+                    {"label": "Proteção Solar", "value": "Fator FPU 50+ permanente certificado"},
+                    {"label": "Construção", "value": "Capuz Balaclava integral com abertura ocular anatômica e costura plana"},
+                    {"label": "Tecido", "value": "Malha tecnológica Poliéster com Elastano de toque frio e secagem rápida"},
+                    {"label": "Versatilidade", "value": "Ideal para uso sob capacetes (moto/trilha/kart) ou ao ar livre (pesca/campo)"},
+                    {"label": "Tamanho", "value": "Único elástico adaptável a qualquer formato de cabeça"}
+                ]
+            elif "armorx" in t_low:
+                act1["tag"] = "Linha Premium ArmorX UV50+"
+                act1["title"] = "ESCUDO SOLAR E TÉRMICO DE ALTA PERFORMANCE PARA ROSTO E PESCOÇO"
+                act1["desc_tmpl"] = "Integrante da linha de elite ArmorX da BRK, a {title} protege o rosto, a nuca e o pescoço contra a radiação solar intensa, vento forte, poeira e insetos durante pescarias e expedições extremas."
+                act2["tag"] = "Borda Superior Antiderrapante"
+                act2["title"] = "BAINHA ESTRUTURADA COM FITA ELÁSTICA INTERNA QUE NÃO ENROLA E NÃO CAI"
+                act2["desc_tmpl"] = "Diferente das bandanas comuns, o modelo ArmorX conta com borda superior estruturada com fita elástica interna antiderrapante e acabamento reforçado, garantindo que a peça permaneça firme sobre o nariz mesmo em movimento intenso."
+                act3["tag"] = "Toque Gelado & Respirabilidade"
+                act3["title"] = "MALHA ELÁSTICA 4-WAY STRETCH DE SECAGEM RÁPIDA"
+                act3["desc_tmpl"] = "Tecido tecnológico de toque frio que dissipa o calor rapidamente, facilita a respiração e seca em poucos minutos após contato com suor ou respingos d'água."
+                new_specs = [
+                    {"label": "Proteção Solar", "value": "Fator FPU 50+ permanente certificado (Linha Premium ArmorX)"},
+                    {"label": "Diferencial ArmorX", "value": "Borda superior estruturada com fita elástica interna antiderrapante que não enrola"},
+                    {"label": "Construção", "value": "Tubular anatômica com bainhas reforçadas e elasticidade 4-Way Stretch"},
+                    {"label": "Respirabilidade", "value": "Malha tecnológica de toque frio e secagem ultra rápida"},
+                    {"label": "Tamanho", "value": "Único anatômico de alta estabilidade no rosto"}
+                ]
+            else:
+                new_specs = [
+                    {"label": "Proteção Solar", "value": "Fator FPU 50+ bloqueador permanente de radiação UVA e UVB"},
+                    {"label": "Construção", "value": "Tubular multifuncional em microfibra elástica anti-atrito"},
+                    {"label": "Elasticidade", "value": "Multidirecional 4-Way Stretch com memória de forma"},
+                    {"label": "Respirabilidade", "value": "Tecido leve de toque frio que facilita a respiração e seca rápido"},
+                    {"label": "Tamanho", "value": "Único anatômico adaptável a qualquer formato de rosto e cabeça"}
+                ]
 
         # 13. Adaptação 360° para Camisas de Botão Xadrez / UV50+ (shirts_button_work)
         elif archetype_id == "shirts_button_work":
