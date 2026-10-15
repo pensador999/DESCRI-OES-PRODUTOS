@@ -522,31 +522,31 @@ class TemplateEngine:
                 "theme_color": "#0891b2",
                 "theme_bg": "#ecfeff",
                 "category_keywords": ["copo", "garrafa", "caneca", "cantil", "termico", "térmico", "cooler", "elber", "geladeira"],
-                "default_tagline": "Retenção Térmica a Vácuo em Aço Inox 18/8 Livre de BPA",
+                "default_tagline": "Retenção Térmica a Vácuo em Aço Inox 18/8 com Abridor Integrado na Tampa",
                 "act1": {
                     "tag": "Retenção Térmica a Vácuo",
                     "fa_icon": "fa-solid fa-snowflake",
-                    "title": "BEBIDAS GELADAS POR HORAS MESMO SOB SOL INTENSO",
-                    "desc_tmpl": "Com parede dupla de aço inoxidável e isolamento a vácuo, o(a) {title} preserva sua bebida na temperatura perfeita da primeira à última gota."
+                    "title": "PAREDE DUPLA EM AÇO INOXIDÁVEL COM ISOLAMENTO TÉRMICO A VÁCUO",
+                    "desc_tmpl": "Projetado com parede dupla em aço inoxidável 18/8 e isolamento térmico a vácuo, o(a) {title} preserva sua bebida gelada por horas sob sol intenso ou quente nas manhãs frias, mantendo o sabor original da primeira à última gota."
                 },
                 "act2": {
-                    "tag": "Zero Condensação Externa",
-                    "fa_icon": "fa-solid fa-droplet-slash",
-                    "title": "PAREDE EXTERNA SECA QUE NÃO TRANSPIRA",
-                    "desc_tmpl": "A tecnologia térmica impede a condensação externa, permitindo segurar o copo confortavelmente sem molhar as mãos, porta-copos ou móveis."
+                    "tag": "Tampa com Abridor em Inox",
+                    "fa_icon": "fa-solid fa-shield-halved",
+                    "title": "TAMPA COM VEDAÇÃO EM SILICONE E ABRIDOR DE GARRAFAS BRK INTEGRADO",
+                    "desc_tmpl": "Equipado com tampa removível em polímero livre de BPA com anel de vedação em silicone anti-respingos, bocal anatômico e abridor de garrafas em aço inox gravado BRK acoplado diretamente no topo da tampa."
                 },
                 "act3": {
-                    "tag": "Construção em Inox 18/8",
-                    "fa_icon": "fa-solid fa-shield-halved",
-                    "title": "AÇO INOXIDÁVEL DE GRAU ALIMENTÍCIO LIVRE DE BPA",
-                    "desc_tmpl": "Material atóxico, imune a ferrugem e que não transfere nem absorve sabores, com tampa de alta vedação contra respingos."
+                    "tag": "Arte Exclusiva & Zero Condensação",
+                    "fa_icon": "fa-solid fa-droplet-slash",
+                    "title": "REVESTIMENTO TEXTURIZADO EXCLUSIVO BRK E PAREDE QUE NÃO TRANSPIRA",
+                    "desc_tmpl": "Revestimento externo texturizado em alta definição com arte exclusiva BRK e base inferior em aço inox escovado. O isolamento a vácuo impede a condensação externa: o copo não sua, mantendo a pegada firme e seca."
                 },
                 "base_specs": [
-                    {"label": "Material", "default": "Aço Inoxidável 18/8 (Grau Alimentício atóxico)"},
-                    {"label": "Isolamento", "default": "Parede dupla com vácuo térmico de alta eficiência"},
-                    {"label": "Tampa", "default": "Acrílico livre de BPA com vedação hermética em silicone"},
-                    {"label": "Eficiência Térmica", "default": "Mantém gelado por até 12h (com gelo) / quente por até 4h"},
-                    {"label": "Acabamento Externo", "default": "Pintura eletrostática a pó anti-risco e anti-deslizante"}
+                    {"label": "Material", "default": "Aço Inoxidável 18/8 (Grau Alimentício atóxico livre de BPA)"},
+                    {"label": "Isolamento Térmico", "default": "Parede dupla com vácuo térmico de alta eficiência (zero condensação)"},
+                    {"label": "Tampa & Recurso Extra", "default": "Tampa com vedação em silicone e abridor de garrafas em aço inox integrado"},
+                    {"label": "Acabamento Externo", "default": "Revestimento texturizado premium anti-deslizante com arte exclusiva BRK e base em inox"},
+                    {"label": "Eficiência Térmica", "default": "Mantém bebidas geladas ou quentes por horas com máxima conservação"}
                 ],
                 "care_tips": "Lavar com detergente neutro e esponja macia. Não levar ao micro-ondas nem ao congelador."
             },
@@ -1462,17 +1462,75 @@ class TemplateEngine:
 
         # Especialização Cirúrgica para Equipamentos de Pesca (Evita 'rolamentos' em Varas, Linhas, Anzóis, Alicates e Suportes)
         if archetype_id == "fishing_tackle_gear":
-            origem_val = f"Produto Original {vendor} com garantia oficial" if vendor else "Produto original com procedência e garantia"
+            origin_res = self.resolve_product_origin_and_title(title=title, vendor=vendor, product=product)
+            eff_brand = origin_res["brand_name"] if origin_res.get("brand_name") else (vendor or "BRK")
+            origem_val = f"Produto Original {eff_brand} com garantia oficial"
+
+            if "trava vara" in t_low or "trava-vara" in t_low:
+                return [
+                    {"label": "Categoria", "value": f"Trava-Varas de Convés para Embarcações e Caiaques {eff_brand}".strip()},
+                    {"label": "Capacidade", "value": "Acomoda e trava até 3 varas de pesca simultaneamente"},
+                    {"label": "Fixação Inclusa", "value": "Suportes de engate rápido + Parafusos em Aço Inoxidável inclusos"},
+                    {"label": "Material", "value": "Cinta elástica de alta memória, bases em polímero naval e inox"},
+                    {"label": "Aplicação", "value": "Barcos de alumínio, bass boats, lanchas e caiaques de pesca"},
+                ]
+            if ("alça" in t_low or "alca" in t_low) and "vara" in t_low:
+                return [
+                    {"label": "Categoria", "value": f"Alça de Transporte de Ombro para Varas de Pesca {eff_brand}".strip()},
+                    {"label": "Sistema de Fixação", "value": "2 cintas agrupadoras de fixação firme com fivelas de engate rápido"},
+                    {"label": "Ergonomia", "value": "Ombreira acolchoada antiderrapante com tira ajustável (até 120 cm)"},
+                    {"label": "Aplicação", "value": "Transporte seguro de múltiplos conjuntos de varas com mãos livres"},
+                    {"label": "Origem / Distribuição", "value": origem_val},
+                ]
+            if "capa protetora" in t_low and "carretilha" in t_low:
+                return [
+                    {"label": "Categoria", "value": f"Capa Protetora para Carretilha de Perfil Baixo {eff_brand}".strip()},
+                    {"label": "Material", "value": "Neoprene flexível de alta densidade com absorção de impacto"},
+                    {"label": "Compatibilidade", "value": "Carretilhas de Perfil Baixo (direitas e esquerdas), avulsas ou montadas na vara"},
+                    {"label": "Fechamento", "value": "Abas anatômicas de fixação rápida e ajuste firme"},
+                    {"label": "Acabamento", "value": "Estampa exclusiva BRK Fishing em alta definição"},
+                ]
+            if "cinto" in t_low and "apoiador" in t_low:
+                return [
+                    {"label": "Categoria", "value": f"Cinto Colete Apoiador Dorsal para Pesca Pesada {eff_brand}".strip()},
+                    {"label": "Estrutura", "value": "Painel dorsal anatômico acolchoado com alças reguláveis em X"},
+                    {"label": "Conexão da Carretilha", "value": "Ganchos metálicos reforçados com tiras de alta tração e fivelas de engate rápido"},
+                    {"label": "Função Principal", "value": "Distribuição ergonômica da tração entre costas e ombros em brigas pesadas"},
+                    {"label": "Indicação de Uso", "value": "Pesca pesada de grandes peixes de couro (Piraíba, Jaú, Pirarara) e oceânica"},
+                ]
+            if "passaguá" in t_low or "passagua" in t_low or "puçá" in t_low or "puca" in t_low:
+                return [
+                    {"label": "Categoria", "value": f"Passaguá / Puçá de Pesca Dobrável {eff_brand}".strip()},
+                    {"label": "Dimensões", "value": "Arco de 40 x 40 cm | Comprimento total montado: 180 cm (1,80 m)"},
+                    {"label": "Estrutura do Cabo", "value": "Alumínio leve dividido em 2 partes com trava de encaixe rápido e punho antiderrapante"},
+                    {"label": "Rede", "value": "Malha resistente de secagem rápida amiga do Pesque e Solte"},
+                    {"label": "Origem / Distribuição", "value": origem_val},
+                ]
+            if "alicate" in t_low and ("contenção" in t_low or "contencao" in t_low or "balança" in t_low or "balanca" in t_low):
+                return [
+                    {"label": "Categoria", "value": f"Alicate de Contenção (Lip Grip) com Balança Integrada {eff_brand}".strip()},
+                    {"label": "Estrutura & Pinça", "value": "Tubo metálico anticorrosivo com garras de travamento em aço inox"},
+                    {"label": "Balança Integrada", "value": "Escala mecânica de pesagem embutida no corpo do alicate"},
+                    {"label": "Segurança & Ergonomia", "value": "Cabo emborrachado antiderrapante com gatilho duplo e cordão fiel de pulso"},
+                    {"label": "Origem / Distribuição", "value": origem_val},
+                ]
+            if "alicate" in t_low:
+                return [
+                    {"label": "Categoria", "value": f"Alicate de Pesca e Corte de Precisão {eff_brand}".strip()},
+                    {"label": "Material", "value": "Aço carbono / inox forjado com tratamento superficial anticorrosivo"},
+                    {"label": "Funções", "value": "Corte de linhas, remoção de anzóis/garatéias e manutenção de terminais"},
+                    {"label": "Empunhadura", "value": "Cabo anatômico emborrachado antiderrapante com mola de retorno"},
+                    {"label": "Origem / Distribuição", "value": origem_val},
+                ]
+
             is_rod_kit = "kit vara" in t_low and ("molinete" in t_low or "carretilha" in t_low)
-            is_rod = bool(re.search(r'\bvaras?\b', t_low)) and not is_rod_kit and not any(w in t_low for w in ["trava vara", "alça", "alca", "suporte", "porta vara"])
+            is_rod = bool(re.search(r'\bvaras?\b', t_low)) and not is_rod_kit
             is_line = bool(re.search(r'\blinhas?\b', t_low))
             is_hook_terminal = any(w in t_low for w in ["anzol", "anzóis", "anzois", "snap", "girador", "argola", "empate", "chumbada", "chumbo", "garateia", "garatéia"])
-            is_pliers = "alicate" in t_low or "passaguá" in t_low or "passagua" in t_low
-            is_belt_holder = any(w in t_low for w in ["cinto", "apoiador", "trava vara", "alça", "alca", "suporte"])
 
             if is_rod_kit:
                 return [
-                    {"label": "Categoria", "value": f"Kit Conjunto Vara e Molinete {vendor}".strip()},
+                    {"label": "Categoria", "value": f"Kit Conjunto Vara e Molinete {eff_brand}".strip()},
                     {"label": "Vara (Blank & Passadores)", "value": "Blank em compósito resistente de 2 partes com passadores anti-atrito"},
                     {"label": "Molinete (Recolhimento)", "value": "Carretel balanceado com sistema de fricção progressiva e recolhimento macio"},
                     {"label": "Empunhadura", "value": "Cabo anatômico em EVA de alta densidade com Reel Seat firme"},
@@ -1480,44 +1538,55 @@ class TemplateEngine:
                 ]
             if is_rod:
                 return [
-                    {"label": "Categoria", "value": f"Vara de Pesca Esportiva {vendor}".strip()},
+                    {"label": "Categoria", "value": f"Vara de Pesca Esportiva {eff_brand}".strip()},
                     {"label": "Blank (Corpo)", "value": "Compósito de alta sensibilidade e resistência à tração"},
                     {"label": "Passadores", "value": "Passadores reforçados anti-atrito de alto desempenho"},
                     {"label": "Cabo & Fixador", "value": "Cabo anatômico de alta aderência com Reel Seat de travamento firme"},
                     {"label": "Origem / Distribuição", "value": origem_val},
                 ]
             if is_line:
-                is_multi = any(w in t_low for w in ["multi", "x4", "x8", "j-braid", "vexter", "siglon", "rapinova"])
-                tipo_linha = "Multifilamento trançado de alta tenacidade" if is_multi else "Monofilamento / Fluorcarbono calibrado de alta resistência"
+                is_multi = any(w in t_low for w in ["multi", "x4", "x8", "4x", "8x", "j-braid", "vexter", "siglon", "rapinova"])
+                if is_multi:
+                    tipo_linha = "Multifilamento trançado em fibras PE de alta tenacidade e elasticidade próxima de zero"
+                elif "fluor" in t_low:
+                    tipo_linha = "Nylon especial com revestimento de Fluorcarbono (baixa visibilidade na água)"
+                else:
+                    tipo_linha = "Monofilamento de Nylon (Poliamida) copolímero calibrado de alta resistência"
                 return [
-                    {"label": "Categoria", "value": f"Linha de Pesca {vendor}".strip()},
+                    {"label": "Categoria", "value": f"Linha de Pesca {eff_brand}".strip()},
                     {"label": "Construção", "value": tipo_linha},
                     {"label": "Resistência", "value": "Alta resistência linear à tração, ao nó e à abrasão"},
-                    {"label": "Desempenho", "value": "Baixíssima memória mecânica para arremessos precisos"},
+                    {"label": "Desempenho", "value": "Baixíssima memória mecânica para arremessos longos e precisos"},
+                    {"label": "Origem / Distribuição", "value": origem_val},
+                ]
+            if "argola" in t_low:
+                return [
+                    {"label": "Categoria", "value": f"Argola (Split Ring) para Iscas Artificiais {eff_brand}".strip()},
+                    {"label": "Material", "value": "Aço Inoxidável forjado de alta memória elástica"},
+                    {"label": "Modelo", "value": "Split Ring tradicional sem trava de alta resistência à tração"},
+                    {"label": "Aplicação", "value": "Fixação segura de garatéias, anzóis inline e snaps em iscas artificiais"},
                     {"label": "Origem / Distribuição", "value": origem_val},
                 ]
             if is_hook_terminal:
+                if "anz" in t_low and "sabiki" in t_low:
+                    prec_val = "Sistema multi-anzol Sabiki com filetes atrativos para captura rápida"
+                elif "anz" in t_low and "encastoado" in t_low:
+                    prec_val = "Anzol afiado quimicamente encastoado em cabo de aço flexível anti-corte"
+                elif "anz" in t_low:
+                    prec_val = "Afiamento químico de penetração rápida e farpa de retenção firme"
+                elif "girador" in t_low and "snap" in t_low:
+                    prec_val = "Giro livre 360° anti-torção de linha com snap de engate rápido"
+                elif "girador" in t_low:
+                    prec_val = "Rotação livre 360° de alta velocidade que elimina a torção da linha"
+                elif "empate" in t_low:
+                    prec_val = "Cabo de aço flexível revestido com girador e snap contra dentes cortantes"
+                else:
+                    prec_val = "Trava segura de alta pressão para troca rápida de iscas"
                 return [
-                    {"label": "Categoria", "value": f"Terminal de Pesca de Alta Resistência {vendor}".strip()},
+                    {"label": "Categoria", "value": f"Terminal de Pesca de Alta Resistência {eff_brand}".strip()},
                     {"label": "Material", "value": "Aço carbono / inox forjado de alta resistência à tração"},
                     {"label": "Acabamento", "value": "Tratamento anticorrosivo para água doce e salgada"},
-                    {"label": "Precisão", "value": "Afiamento químico de penetração rápida" if "anz" in t_low else "Trava segura de alta pressão para troca rápida"},
-                    {"label": "Origem / Distribuição", "value": origem_val},
-                ]
-            if is_pliers:
-                return [
-                    {"label": "Categoria", "value": f"Ferramenta de Precisão e Contenção {vendor}".strip()},
-                    {"label": "Estrutura", "value": "Corpo metálico reforçado com proteção anticorrosiva"},
-                    {"label": "Empunhadura", "value": "Anatômica antiderrapante para firmeza com mãos molhadas"},
-                    {"label": "Aplicação", "value": "Contenção segura, manutenção de garatéias e corte de linhas"},
-                    {"label": "Origem / Distribuição", "value": origem_val},
-                ]
-            if is_belt_holder:
-                return [
-                    {"label": "Categoria", "value": f"Acessório de Suporte e Transporte para Pesca {vendor}".strip()},
-                    {"label": "Estrutura", "value": "Material reforçado de alta resistência mecânica e durabilidade"},
-                    {"label": "Ergonomia", "value": "Encaixe firme e seguro para proteção do equipamento"},
-                    {"label": "Aplicação", "value": "Apoio em brigas pesadas ou transporte seguro de varas"},
+                    {"label": "Especificação Técnica", "value": prec_val},
                     {"label": "Origem / Distribuição", "value": origem_val},
                 ]
 
@@ -1765,6 +1834,34 @@ class TemplateEngine:
         # 8. Canivetes Táticos e demais itens de cutelaria
         return cdn_images[0], cdn_images[1], cdn_images[2]
 
+    def _sanitize_and_dedup_images(self, cdn_images: List[str], archetype_id: str = "", title: str = "") -> List[str]:
+        """
+        Desduplica imagens da galeria removendo sufixos UUID gerados pela Shopify em uploads repetidos
+        (ex: 1755280683947-3_ad5e5a9c-9510-404a-a7a5-20cb91ef3c0c.jpg vs 1755280683947-3.jpg)
+        e remove banners genéricos de catálogo quando já existem >= 3 fotos reais do produto.
+        """
+        if not cdn_images:
+            return []
+        deduped = []
+        seen_keys = set()
+        uuid_re = re.compile(r'_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\.[a-z0-9]+$)', re.IGNORECASE)
+        for u in cdn_images:
+            if not u or not isinstance(u, str):
+                continue
+            clean_u = u.strip()
+            if not clean_u:
+                continue
+            fname = clean_u.split("?")[0].split("/")[-1].lower()
+            norm_key = uuid_re.sub("", fname)
+            if norm_key not in seen_keys:
+                seen_keys.add(norm_key)
+                deduped.append(clean_u)
+
+        non_banner = [u for u in deduped if "catalogobrkfishing_iscapremiumemdetalhes" not in u.lower()]
+        if len(non_banner) >= 3:
+            deduped = non_banner
+        return deduped
+
     def generate_narrative_from_template(self, product: Dict[str, Any], archetype_id: str, cdn_images: List[str], store_key: str = None, sibling_info: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Gera os 3 blocos narrativos e especificações prontos para o HTMLBuilder.
@@ -1775,6 +1872,7 @@ class TemplateEngine:
         sku = product.get("master_sku") or product.get("sku") or ""
         vendor = product.get("vendor", "")
         tags = product.get("tags") or []
+        cdn_images = self._sanitize_and_dedup_images(cdn_images, archetype_id=archetype_id, title=title)
 
         # Resolução de Origem, Título Formatado e Direitos Autorais C0
         origin_info = self.resolve_product_origin_and_title(title=title, vendor=vendor, sku=sku, tags=tags, product=product)
@@ -1857,6 +1955,8 @@ class TemplateEngine:
             img1, img2, img3 = self._select_apparel_act_images(cdn_images)
         elif archetype_id == "cutlery_unique":
             img1, img2, img3 = self._select_cutlery_act_images(cdn_images, title)
+        elif archetype_id == "fishing_tackle_gear" and "trava vara" in title.lower() and len(cdn_images) >= 3:
+            img1, img2, img3 = cdn_images[0], cdn_images[2], cdn_images[1]
         else:
             img1 = cdn_images[0] if len(cdn_images) > 0 else ""
             img2 = cdn_images[1] if len(cdn_images) > 1 else ""
@@ -2122,7 +2222,87 @@ class TemplateEngine:
 
         # 9. Adaptação 360° por Subtipo de Equipamentos de Pesca (fishing_tackle_gear)
         elif archetype_id == "fishing_tackle_gear":
-            if any(w in t_low for w in ["vara ", "vara de", "varas"]):
+            if "trava vara" in t_low or "trava-vara" in t_low:
+                act1["tag"] = "Fixação Segura no Convés"
+                act1["title"] = "TRAVA-VARAS ELÁSTICO DE CONVÉS PARA BARCOS, LANCHAS E CAIAQUES"
+                act1["desc_tmpl"] = "Desenvolvido para manter suas varas de pesca perfeitamente alinhadas e imóveis no convés da embarcação mesmo sob ondas e navegação rápida, o {title} evita quedas, batidas de blanks e enroscos de linha."
+                act2["tag"] = "Capacidade para 3 Varas & Inox"
+                act2["title"] = "ACOMODA ATÉ 3 VARAS COM ENGATE RÁPIDO E PARAFUSOS EM AÇO INOX"
+                act2["desc_tmpl"] = "Cinta elástica de alta memória com divisórias protetoras que estabilizam até 3 varas simultaneamente, equipada com fivela de engate rápido lateral e acompanhada de parafusos em aço inoxidável para instalação imediata."
+                act3["tag"] = "Durabilidade Náutica"
+                act3["title"] = "RESISTÊNCIA SUPERIOR AO SOL, UMIDADE E AMBIENTE MARINHO"
+                act3["desc_tmpl"] = "Construído com polímero técnico de alta tenacidade, cordão elástico reforçado e fixadores em aço inox, suportando exposição solar contínua e respingos em água doce ou salgada."
+            elif ("alça" in t_low or "alca" in t_low) and "vara" in t_low:
+                act1["tag"] = "Transporte Prático de Varas"
+                act1["title"] = "ALÇA DE OMBRO COM CINTAS AGRUPADORAS PARA TRANSPORTE SEGURO"
+                act1["desc_tmpl"] = "Projetada para facilitar a caminhada até o pesqueiro, barranco ou embarcação com as mãos livres, a {title} agrupa múltiplas varas de pesca com segurança e evita o entrelaçamento de linhas e ponteiras."
+                act2["tag"] = "Conforto & Ajuste Rápido"
+                act2["title"] = "OMBREIRA ACOLCHOADA ANTIDERRAPANTE E FIVELAS DE ENGATE RÁPIDO"
+                act2["desc_tmpl"] = "Conta com apoio de ombro macio e texturizado que distribui o peso sem escorregar, além de cintas reguláveis com fechos de engate rápido que abraçam os cabos e blanks sem danificar os passadores."
+                act3["tag"] = "Qualidade Marine Sports"
+                act3["title"] = "MATERIAL RESISTENTE À UMIDADE E REGULAGEM DE COMPRIMENTO"
+                act3["desc_tmpl"] = "Confeccionada em fita sintética de alta tenacidade com ajuste de altura (até 1,20 m), garantindo durabilidade e praticidade em todas as suas jornadas de pesca."
+            elif "capa protetora" in t_low and "carretilha" in t_low:
+                act1["tag"] = "Proteção em Neoprene"
+                act1["title"] = "CAPA PROTETORA EM NEOPRENE PARA CARRETILHAS DE PERFIL BAIXO"
+                act1["desc_tmpl"] = "Desenvolvida sob medida para proteger sua carretilha de perfil baixo contra riscos, impactos, poeira e maresia durante o transporte ou armazenamento, a {title} preserva a pintura e a mecânica do seu equipamento."
+                act2["tag"] = "Encaixe Anatômico na Vara"
+                act2["title"] = "MODELAGEM INTELIGENTE QUE PERMITE USO MESMO MONTADA NA VARA"
+                act2["desc_tmpl"] = "Sua estrutura flexível com abas de fixação rápida envolve a carretilha com firmeza tanto avulsa na maleta quanto já fixada no reel seat da vara de pesca, agilizando a proteção no barco ou no carro."
+                act3["tag"] = "Identidade Exclusiva BRK"
+                act3["title"] = "ACABAMENTO EM ALTA DEFINIÇÃO E AMORTECIMENTO ANTI-IMPACTO"
+                act3["desc_tmpl"] = "Confeccionada em neoprene espesso de alta elasticidade que absorve pequenos choques mecânicos, estampada com grafismo exclusivo BRK Fishing de cores vivas e duráveis."
+            elif "cinto" in t_low and "apoiador" in t_low:
+                act1["tag"] = "Suporte Dorsal para Pesca Pesada"
+                act1["title"] = "ARNÊS LOMBAR E DORSAL PARA BRIGAS COM GRANDES TROFÉUS"
+                act1["desc_tmpl"] = "Projetado para distribuir o esforço físico nas costas e nos ombros durante longas batalhas com grandes peixes de couro e oceânicos, o {title} reduz drasticamente a fadiga lombar e nos braços do pescador."
+                act2["tag"] = "Ganchos Metálicos & Alças em X"
+                act2["title"] = "GANCHOS DE APOIO EM METAL REFORÇADO E FIVELAS DE ENGATE RÁPIDO"
+                act2["desc_tmpl"] = "Equipado com tiras de regulagem de alta tenacidade, fivelas frontais de travamento seguro e ganchos metálicos inferiores para conexão firme aos olhais de carretilhas de pesca pesada."
+                act3["tag"] = "Conforto & Ventilação"
+                act3["title"] = "ESTRUTURA ACOLCHOADA RESPIRÁVEL COM ESTAMPA EXCLUSIVA BRK"
+                act3["desc_tmpl"] = "Painel dorsal ergonômico com revestimento interno respirável que amortece a pressão nas costas, finalizado com arte exclusiva BRK em alta resolução."
+            elif "passaguá" in t_low or "passagua" in t_low or "puçá" in t_low or "puca" in t_low:
+                act1["tag"] = "Embarque Seguro do Troféu"
+                act1["title"] = "PASSAGUÁ RETRÁTIL DE AMPLA ABERTURA (40X40 CM) E 1,80 M DE ALCANCE"
+                act1["desc_tmpl"] = "Essencial para garantir o embarque seguro do peixe na hora decisiva sem forçar a ponta da vara ou estourar a linha, o {title} oferece alcance total de 1,80 m e arco amplo de 40x40 cm."
+                act2["tag"] = "Cabo em 2 Partes & Dobrável"
+                act2["title"] = "HASTE METÁLICA EM 2 SEÇÕES COM TRAVA RÁPIDA E EMPUNHADURA FIRME"
+                act2["desc_tmpl"] = "Construído com cabo tubular leve e resistente desmontável em 2 partes e arco dobrável com trava central, ocupando mínimo espaço no barco, caiaque ou porta-malas do veículo."
+                act3["tag"] = "Rede Protetora & Pesque e Solte"
+                act3["title"] = "MALHA MACIA DE SECAGEM RÁPIDA QUE PRESERVA O MUCO DO PEIXE"
+                act3["desc_tmpl"] = "Rede confeccionada em malha resistente e macia que reduz o enrosco de garatéias e protege as escamas e o muco protetor do peixe para uma soltura saudável no Pesque e Solte."
+            elif "alicate" in t_low and ("contenção" in t_low or "contencao" in t_low or "balança" in t_low or "balanca" in t_low):
+                act1["tag"] = "Contenção Firme & Pesagem"
+                act1["title"] = "ALICATE DE CONTENÇÃO (LIP GRIP) COM BALANÇA INTEGRADA"
+                act1["desc_tmpl"] = "Desenvolvido para imobilizar o peixe pela mandíbula com total segurança e realizar a pesagem imediata do seu troféu, o {title} protege as mãos do pescador contra dentes afiados e garatéias."
+                act2["tag"] = "Pinça de Travamento & Gatilho"
+                act2["title"] = "GARRA DE AÇO INOX COM FECHAMENTO AUTOMÁTICO E GATILHO ANATÔMICO"
+                act2["desc_tmpl"] = "Mecanismo de pinça de alta precisão acionado por gatilho suave de dois dedos, mantendo a boca do peixe travada com firmeza sem machucar a estrutura óssea do exemplar."
+                act3["tag"] = "Empunhadura & Cordão Fiel"
+                act3["title"] = "CABO EMBORRACHADO ANTIDERRAPANTE E FIEL DE PULSO DE SEGURANÇA"
+                act3["desc_tmpl"] = "Conta com empunhadura anatômica antiderrapante para uso com as mãos molhadas, visor de escala de peso integrado no tubo e cordão fiel ajustável para evitar perda na água."
+            elif "alicate" in t_low:
+                act1["tag"] = "Precisão & Manutenção de Tralha"
+                act1["title"] = "ALICATE DE PESCA EM AÇO PARA CORTE DE LINHAS E REMOÇÃO DE ANZÓIS"
+                act1["desc_tmpl"] = "Ferramenta indispensável no colete ou na caixa de pesca, o {title} proporciona agilidade e segurança para retirar anzóis e garatéias, cortar linhas, apertar chumbadas e preparar encastoados."
+                act2["tag"] = "Bico Funcional & Lâmina de Corte"
+                act2["title"] = "LÂMINA DE CORTE PRECISA E ABERTURA DE ARGOLAS (SPLIT RING)"
+                act2["desc_tmpl"] = "Projetado com mandíbula serrilhada de alta firmeza, área de corte afiada para linhas monofilamento e multifilamento e retorno por mola que permite operação prática com apenas uma mão."
+                act3["tag"] = "Empunhadura Antiderrapante"
+                act3["title"] = "CABO ERGONÔMICO REVESTIDO E TRATAMENTO ANTICORROSIVO"
+                act3["desc_tmpl"] = "Acabamento metálico resistente à oxidação aliado a cabos anatômicos emborrachados que garantem pegada firme e confortável mesmo com as mãos molhadas."
+            elif "kit vara" in t_low and ("molinete" in t_low or "carretilha" in t_low):
+                act1["tag"] = "Conjunto Pronto para Pescar"
+                act1["title"] = "KIT EQUILIBRADO VARA EM 2 PARTES E MOLINETE DE RECOLHIMENTO MACIO"
+                act1["desc_tmpl"] = "Praticidade imediata para suas pescarias em rios, lagos e pesqueiros: o {title} combina uma vara de 1,50 m desmontável em 2 partes com um molinete tamanho 200 perfeitamente balanceado."
+                act2["tag"] = "Transporte Compacto & Conforto"
+                act2["title"] = "VARA DE 2 SEÇÕES COM PASSADORES REFORÇADOS E CABO EM EVA"
+                act2["desc_tmpl"] = "A vara dividida em duas partes facilita o transporte na mochila ou no porta-malas, contando com cabo anatômico em EVA antiderrapante, reel seat firme e passadores resistentes ao atrito."
+                act3["tag"] = "Molinete 200 & Fricção Ajustável"
+                act3["title"] = "SISTEMA DE FRICÇÃO PROGRESSIVA E MANIVELA REVERSÍVEL"
+                act3["desc_tmpl"] = "O molinete 200 oferece recolhimento suave, freio ajustável ponto a ponto e manivela intercambiável (direito/esquerdo), sendo excelente para pescadores iniciantes, jovens e lazer em família."
+            elif any(w in t_low for w in ["vara ", "vara de", "varas"]):
                 act1["tag"] = "Ação & Sensibilidade de Arremesso"
                 act1["title"] = "BLANK DE ALTA SENSIBILIDADE E ARREMESSOS DE PRECISÃO"
                 act1["desc_tmpl"] = "Projetada para pescadores que exigem leitura imediata da isca e fisgadas rápidas, a {title} combina leveza, equilíbrio de blank e reserva de potência para dominar predadores esportivos com total controle."
@@ -2142,7 +2322,17 @@ class TemplateEngine:
                 act3["tag"] = "Força de Nó & Durabilidade"
                 act3["title"] = "SEGURANÇA SUPERIOR EM NÓS E TENSÃO CONTÍNUA"
                 act3["desc_tmpl"] = "Fibras selecionadas com tratamento impermeabilizante que evita absorção de água e preserva a resistência original mesmo após longas jornadas de pesca."
-            elif any(w in t_low for w in ["anzol", "anzois", "anzóis", "garateia", "garatéia", "snap", "girador", "encastoado", "chumbada", "boia", "bóia", "jig head"]):
+            elif "argola" in t_low:
+                act1["tag"] = "Conexão de Alta Tração"
+                act1["title"] = "ARGOLAS (SPLIT RINGS) EM AÇO INOX DE ALTA MEMÓRIA ELÁSTICA"
+                act1["desc_tmpl"] = "Desenvolvida para conectar garatéias, anzóis inline e snaps às iscas artificiais com máxima segurança, a {title} possui construção espiral sem trava de altíssima resistência à tração."
+                act2["tag"] = "Memória Mecânica Calibrada"
+                act2["title"] = "RESISTÊNCIA EXTREMA SEM DEFORMAÇÃO APÓS A TROCA DE GARATÉIAS"
+                act2["desc_tmpl"] = "Fabricada em aço inoxidável forjado com memória mecânica calibrada: abre para a passagem do olhal com alicate de split ring e retorna imediatamente ao fechamento original sem perder pressão."
+                act3["tag"] = "Durabilidade Anticorrosiva"
+                act3["title"] = "PROTEÇÃO INTEGRAL CONTRA FERRUGEM EM ÁGUA DOCE E SALGADA"
+                act3["desc_tmpl"] = "Acabamento polido anticorrosivo que mantém a integridade estrutural e não altera o equilíbrio nem a flutuação das suas iscas artificiais."
+            elif any(w in t_low for w in ["anzol", "anzois", "anzóis", "garateia", "garatéia", "snap", "girador", "encastoado", "empate", "chumbada", "boia", "bóia", "jig head"]):
                 act1["tag"] = "Fisgada Rápida & Segurança"
                 act1["title"] = "AÇO DE ALTA RESISTÊNCIA E CONFIABILIDADE EXTREMA"
                 act1["desc_tmpl"] = "Componente essencial para não perder o troféu na hora decisiva, o(a) {title} é fabricado(a) em liga metálica de alta tenacidade para suportar forte tração sem abrir ou deformar."
@@ -2152,16 +2342,115 @@ class TemplateEngine:
                 act3["tag"] = "Performance Profissional"
                 act3["title"] = "PADRONIZAÇÃO RIGOROSA PARA MONTAGENS SEGURAS"
                 act3["desc_tmpl"] = "Dimensionamento exato que garante equilíbrio na apresentação da isca e máxima segurança durante o trabalho e a briga com grandes peixes."
-            elif any(w in t_low for w in ["alicate", "balança", "balanca", "pegador", "boga", "passagua", "passaguá", "puçá", "puca", "cinto apoiador"]):
-                act1["tag"] = "Manuseio Seguro & Precisão"
-                act1["title"] = "ESTRUTURA DE ALTA RESISTÊNCIA PARA CONTROLE TOTAL"
-                act1["desc_tmpl"] = "Acessório indispensável para o pescador esportivo, o(a) {title} garante manuseio firme, seguro e rápido durante a contenção do peixe e operação da tralha."
-                act2["tag"] = "Ergonomia & Firmeza"
-                act2["title"] = "EMPUNHADURA ANATÔMICA E OPERAÇÃO PRÁTICA"
-                act2["desc_tmpl"] = "Projetado para oferecer pegada firme mesmo em ambiente úmido, proporcionando praticidade e segurança contra acidentes."
-                act3["tag"] = "Durabilidade Naval"
-                act3["title"] = "MATERIAIS RESISTENTES À CORROSÃO E AO USO INTENSO"
-                act3["desc_tmpl"] = "Construído com componentes resistentes à oxidação e à umidade constante, acompanhando o pescador por muitas temporadas em rios, represas ou mar."
+
+        # 9.5 Adaptação 360° por Subtipo de Iscas Artificiais (fishing_lures)
+        elif archetype_id == "fishing_lures":
+            if any(w in t_low for w in ["soft", "criatura", "crayfish"]):
+                act1["tag"] = "Elastômero Flexível & Vibração"
+                act1["title"] = "CORPO MACIO DE ALTA ELASTICIDADE E NADO NATURAL REALISTA"
+                act1["desc_tmpl"] = "Desenvolvida em elastômero macio de alta flexibilidade e resistência, a {title} possui apêndices e garras vibrantes que movimentam a água ao menor toque de ponta de vara, simulando com perfeição uma presa natural no fundo ou meia-água."
+                act2["tag"] = "Montagem Versátil Anti-Enrosco"
+                act2["title"] = "IDEAL PARA MONTAGENS COM ANZOL OFFSET, JIG HEAD OU TEXAS RIG"
+                act2["desc_tmpl"] = "Sua anatomia equilibrada permite montagens anti-enrosco com anzol Offset (Texas Rig, Carolina Rig, Florida Rig) ou com Jig Head, trabalhando com eficiência dentro de galhadas, estruturas submersas, pedras e vegetação."
+                act3["tag"] = "Durabilidade & Poder Atrativo"
+                act3["title"] = "ALTA RESISTÊNCIA A MORDIDAS E APRESENTAÇÃO IRRESISTÍVEL"
+                act3["desc_tmpl"] = "Composto polimérico flexível projetado para suportar múltiplos ataques de predadores sem rasgar facilmente, mantendo a maciez necessária para que o peixe retenha a isca por mais tempo na boca e garanta fisgadas certeiras."
+                new_specs = [
+                    {"label": "Tipo / Construção", "value": "Isca Artificial Soft em elastômero flexível de alta resistência"},
+                    {"label": "Ação do Trabalho", "value": "Fundo e Meia-Água com garras/apêndices de vibração contínua"},
+                    {"label": "Montagem Recomendada", "value": "Anzol Offset (anti-enrosco), Jig Head, Texas Rig ou Jig Trailer"},
+                    {"label": "Diferencial", "value": "Textura macia realista que prolonga a retenção na boca do predador"},
+                    {"label": "Peixes Indicados", "value": "Traíra, Black Bass, Tucunaré, Robalo, Dourado e predadores de estrutura"}
+                ]
+            elif any(w in t_low for w in ["frog", "sapinho", "sapo"]):
+                act1["tag"] = "Superfície Anti-Enrosco"
+                act1["title"] = "CORPO OCO MACIO PARA PESCA SOBRE VEGETAÇÃO E GALHADAS"
+                act1["desc_tmpl"] = "Projetada especialmente para desafiar estruturas fechadas, aguapés, capinzais e galhadas onde os grandes predadores se escondem, a {title} desliza sobre a superfície sem enroscar e provoca ataques explosivos."
+                act2["tag"] = "Anzol Duplo Colado ao Corpo"
+                act2["title"] = "SISTEMA DE COMPRESSÃO RÁPIDA E FISGADA EFICIENTE"
+                act2["desc_tmpl"] = "Equipada com anzol duplo reforçado posicionado rente ao dorso macio: no momento do bote, o corpo flexível se comprime instantaneamente e expõe as pontas afiadas para uma fisgada limpa e segura."
+                act3["tag"] = "Cerdas Atrativas & Equilíbrio"
+                act3["title"] = "CERDAS TRASEIRAS VIBRATÓRIAS E PESO TRASEIRO BALANCEADO"
+                act3["desc_tmpl"] = "Conta com cerdas de borracha nas extremidades que simulam o movimento das patas na água e lastro traseiro calibrado para arremessos precisos e trabalho em Zara curta ou toques contínuos."
+                new_specs = [
+                    {"label": "Tipo / Construção", "value": "Isca Artificial Frog (Sapo) de corpo oco macio anti-enrosco"},
+                    {"label": "Ação do Trabalho", "value": "Superfície (Anti-Enrosco sobre vegetação, aguapés e estruturas)"},
+                    {"label": "Armação", "value": "Anzol duplo em aço carbono de alta penetração integrado ao corpo"},
+                    {"label": "Atrativo Extra", "value": "Cerdas traseiras flexíveis que simulam patas em movimento"},
+                    {"label": "Peixes Indicados", "value": "Traíra, Trairão, Tucunaré, Black Bass e predadores de superfície"}
+                ]
+            elif "jig" in t_low:
+                act1["tag"] = "Metal Jig de Alta Densidade"
+                act1["title"] = "PERFIL HIDRODINÂMICO EM LIGA METÁLICA PARA ARREMESSOS EXTREMOS"
+                act1["desc_tmpl"] = "Construída em liga metálica compacta de alta densidade, a {title} corta o vento com facilidade para alcançar longas distâncias de arremesso e afunda rapidamente até a zona de ação dos predadores."
+                act2["tag"] = "Queda Errática & Brilho 3D"
+                act2["title"] = "AÇÃO FLUTTERING VIBRATÓRIA NA DESCIDA E NO RECOLHIMENTO"
+                act2["desc_tmpl"] = "Seu centro de gravidade balanceado produz um nado errático e deslizante durante a queda livre e nos toques de ponta de vara (Jigging vertical ou arremesso), emitindo reflexos intensos que despertam o ataque por reflexo."
+                act3["tag"] = "Pintura Holográfica & Olhos 3D"
+                act3["title"] = "ACABAMENTO METALIZADO MULTICAMADAS DE ALTA VISIBILIDADE"
+                act3["desc_tmpl"] = "Revestimento holográfico espelhado com olhos 3D realistas que refletem a luminosidade mesmo em águas profundas ou turvas, resistindo ao desgaste severo da pesca em água doce ou salgada."
+                new_specs = [
+                    {"label": "Tipo / Construção", "value": "Metal Jig / Jumping Jig em liga metálica de alta densidade"},
+                    {"label": "Ação do Trabalho", "value": "Meia-Água e Fundo (Jigging vertical ou recolhimento com toques)"},
+                    {"label": "Acabamento", "value": "Pintura holográfica espelhada multicamadas com olhos 3D"},
+                    {"label": "Diferencial", "value": "Perfil compacto aerodinâmico para arremessos longos e descida rápida"},
+                    {"label": "Peixes Indicados", "value": "Tucunaré, Robalo, Dourado, Xaréu, Olhete, Anchova e predadores esportivos"}
+                ]
+            else:
+                if "silent" in t_low:
+                    act2["tag"] = "Apresentação Furtiva (Silent)"
+                    act2["title"] = "SISTEMA SILENT COM PESOS FIXOS DE TUNGSTÊNIO PARA PEIXES MANHOSOS"
+                    act2["desc_tmpl"] = "Projetada sem esferas de chocalho (Silent) e com lastros internos fixos perfeitamente equilibrados, entrega nado deslizante natural e silencioso, sendo letal em dias de alta pressão de pesca ou águas cristalinas com predadores ariscos."
+                if "popper" in t_low:
+                    acao_exata = "Superfície (Popper — estalos e bolhas na flor d'água)"
+                elif any(w in t_low for w in ["superficie", "superfície", "bonnie", "zara", "stick"]):
+                    acao_exata = "Superfície (Zara / Stick — nado em Z na flor d'água)"
+                elif any(w in t_low for w in ["fundo", "deep"]):
+                    acao_exata = "Fundo / Meia-Água Profunda (Barbela de imersão rápida)"
+                else:
+                    acao_exata = "Meia-Água (Floating / Suspending com nado errático provocante)"
+                for sp in new_specs:
+                    if "ação" in sp["label"].lower():
+                        sp["value"] = acao_exata
+                    elif "sistema sonoro" in sp["label"].lower() and "silent" in t_low:
+                        sp["value"] = "Silent (Silenciosa — sem chocalho, ideal para peixes manhosos e águas claras)"
+
+        # 9.8 Adaptação 360° por Subtipo de Caixas, Bolsas e Organização (tackle_boxes_storage)
+        elif archetype_id == "tackle_boxes_storage":
+            if "primeiros socorros" in t_low or "bolsa tática" in t_low or "bolsa tatica" in t_low:
+                act1["tag"] = "Organização Tática & Emergência"
+                act1["title"] = "BOLSA TÁTICA MODULAR PARA KIT DE PRIMEIROS SOCORROS E UTILIDADES"
+                act1["desc_tmpl"] = "Desenvolvida para manter itens de primeiros socorros, medicamentos e equipamentos de emergência sempre organizados e acessíveis em pescarias, acampamentos e expedições, a {title} oferece estrutura compacta de pronta resposta."
+                act2["tag"] = "Sistema Modular & Engate Rápido"
+                act2["title"] = "TIRAS DE FIXAÇÃO MODULAR (MOLLE), FIVELA DE TRAVA E DIVISÓRIAS ELÁSTICAS"
+                act2["desc_tmpl"] = "Equipada com cinta externa de segurança com fivela de engate rápido, tiras traseiras com botões de pressão para acoplamento em mochilas, coletes ou cintos, e compartimento interno com fitas elásticas organizadoras."
+                act3["tag"] = "Nylon Oxford de Alta Densidade"
+                act3["title"] = "CONSTRUÇÃO ROBUSTA RESISTENTE À ABRASÃO E INTEMPÉRIES"
+                act3["desc_tmpl"] = "Confeccionada em nylon Oxford 600D de alta tenacidade resistente a respingos e atrito severo, contando com emblema frontal de identificação de emergência e abertura ampla de 180° para visualização imediata."
+                new_specs = [
+                    {"label": "Categoria", "value": "Bolsa Tática Modular de Primeiros Socorros e Emergência Deyu"},
+                    {"label": "Material Externo", "value": "Nylon Oxford 600D de alta densidade resistente à abrasão e respingos"},
+                    {"label": "Fixação & Fechamento", "value": "Sistema modular traseiro com botões de pressão + Cinta frontal com fivela de engate rápido"},
+                    {"label": "Organização Interna", "value": "Abertura ampla com divisórias e fitas elásticas de fixação firme"},
+                    {"label": "Aplicação", "value": "Pesca esportiva, camping, trilhas, veículos 4x4, barcos e primeiros socorros"}
+                ]
+            elif "suporte porta iscas" in t_low or ("porta iscas" in t_low and "inox" in t_low):
+                act1["tag"] = "Organização Rápida na Embarcação"
+                act1["title"] = "SUPORTE ORGANIZADOR EM AÇO INOXIDÁVEL PARA ISCAS, ALICATES E TESOURA"
+                act1["desc_tmpl"] = "Projetado para manter suas iscas artificiais mais utilizadas e ferramentas de contenção/corte sempre à mão na borda do barco ou lancha, o {title} elimina a bagunça no convés e agiliza a troca de iscas durante a pescaria."
+                act2["tag"] = "Fendas de Encaixe & Elástico"
+                act2["title"] = "5 RANHURAS FRONTAIS PARA GARATÉIAS E COMPARTIMENTO COM TRAVA ELÁSTICA"
+                act2["desc_tmpl"] = "Conta com 5 fendas frontais usinadas para pendurar iscas artificiais pelas garatéias sem enroscar e aberturas superiores dimensionadas para acomodar alicates e tesoura de pesca, com cordão elástico de retenção lateral."
+                act3["tag"] = "Aço Inox Escovado Naval"
+                act3["title"] = "CHAPA DE AÇO INOXIDÁVEL DOBRADA IMUNE À FERRUGEM E À MARESIA"
+                act3["desc_tmpl"] = "Fabricado integralmente em aço inoxidável escovado de alta espessura com furos de fixação, suportando sol, chuva e ambiente marinho por muitos anos com zero manutenção."
+                new_specs = [
+                    {"label": "Categoria", "value": "Suporte Organizador de Embarcação em Aço Inox Pesca Plus"},
+                    {"label": "Material", "value": "Aço Inoxidável escovado de alta resistência à corrosão (água doce e salgada)"},
+                    {"label": "Capacidade", "value": "5 fendas frontais para iscas artificiais + Alojamentos superiores para alicates e tesoura"},
+                    {"label": "Segurança", "value": "Elástico retentor integrado para manter os alicates firmes durante a navegação"},
+                    {"label": "Instalação", "value": "Fixação prática na borda ou console de barcos, lanchas e caiaques"}
+                ]
 
         # 10. Adaptação 360° para Geladeiras Portáteis e Bolsas Térmicas (drinkware_thermo)
         elif archetype_id == "drinkware_thermo":
@@ -2265,21 +2554,37 @@ class TemplateEngine:
                     {"label": "Ventilação", "value": "Tela mosquiteiro de poliéster superfino"},
                     {"label": "Acessórios Inclusos", "value": "Estacas metálicas, cordas de fixação e bolsa de transporte"}
                 ]
-            elif any(w in t_low for w in ["cadeira", "banqueta", "mesa dobravel", "mesa dobrável", "mesa de camping"]):
-                act1["tag"] = "Conforto & Praticidade Outdoor"
-                act1["title"] = "ESTRUTURA DOBRÁVEL REFORÇADA PARA PESCA, CAMPING E LAZER"
-                act1["desc_tmpl"] = "Desenvolvida para garantir máximo conforto e estabilidade na beira do rio, no acampamento ou na praia, a {title} abre e fecha em segundos ocupando mínimo espaço no porta-malas."
-                act2["tag"] = "Estabilidade & Resistência"
-                act2["title"] = "ESTRUTURA TUBULAR ANTICORROSIVA E MATERIAL DE ALTA TENACIDADE"
-                act2["desc_tmpl"] = "Construída com estrutura metálica reforçada e material de alta tenacidade resistente ao peso, à umidade e à exposição solar."
-                act3["tag"] = "Transporte Descomplicado"
-                act3["title"] = "DESIGN COMPACTO E PONTEIRAS ESTABILIZADORAS"
-                act3["desc_tmpl"] = "Equipada com apoios estabilizadores para terrenos de terra, grama ou areia, sendo leve e prática para transportar em qualquer pescaria ou viagem."
+            elif any(w in t_low for w in ["mesa dobravel", "mesa dobrável", "mesa de camping"]):
+                act1["tag"] = "Bancada Portátil (95x56x60 cm)"
+                act1["title"] = "AMPLA MESA DOBRÁVEL PARA CAMPING, PESCA E CHURRASCO"
+                act1["desc_tmpl"] = "Desenvolvida para oferecer uma superfície firme, espaçosa (95 x 56 cm) e na altura ideal (60 cm) para refeições e preparo de tralhas no acampamento ou na beira do rio, a {title} monta e desmonta em poucos segundos."
+                act2["tag"] = "Tampo Articulado & Base em X"
+                act2["title"] = "ESTRUTURA TUBULAR REFORÇADA E TAMPO DE FÁCIL HIGIENIZAÇÃO"
+                act2["desc_tmpl"] = "Construída com cavalete tubular metálico em X com ponteiras antiderrapantes e tampo superior articulado com acabamento anticorrosivo, garantindo estabilidade mesmo em terrenos de grama, terra ou areia."
+                act3["tag"] = "Transporte Compacto"
+                act3["title"] = "DESMONTAGEM RÁPIDA COM BOLSA DE TRANSPORTE INCLUSA"
+                act3["desc_tmpl"] = "Quando fechada, recolhe-se em um volume compacto e leve dentro da bolsa de transporte, ocupando mínimo espaço no porta-malas ou na embarcação."
                 new_specs = [
-                    {"label": "Estrutura", "value": "Tubos de aço/alumínio com pintura anticorrosiva"},
-                    {"label": "Material Principal", "value": "Tecido Oxford de alta tenacidade / Polímero reforçado"},
-                    {"label": "Sistema", "value": "Dobrável de montagem rápida e compacta"},
-                    {"label": "Uso Recomendado", "value": "Pesca esportiva, camping, praia e lazer ao ar livre"}
+                    {"label": "Dimensões Montada", "value": "95 cm (comprimento) x 56 cm (largura) x 60 cm (altura)"},
+                    {"label": "Estrutura", "value": "Tubular metálica em X com pintura eletrostática preta anticorrosiva"},
+                    {"label": "Tampo", "value": "Ripas articuladas resistentes à umidade e de fácil limpeza"},
+                    {"label": "Portabilidade", "value": "Totalmente dobrável/desmontável com bolsa de transporte inclusa"}
+                ]
+            elif any(w in t_low for w in ["cadeira", "banqueta"]):
+                act1["tag"] = "Conforto & Estabilidade (Até 100 kg)"
+                act1["title"] = "CADEIRA DOBRÁVEL REFORÇADA PARA PESCA, CAMPING E LAZER"
+                act1["desc_tmpl"] = "Desenvolvida para garantir máximo conforto e estabilidade na beira do rio, no acampamento ou na praia, a {title} suporta até 100 kg com 73 cm de altura e abre em segundos."
+                act2["tag"] = "Porta-Copo & Tecido Camuflado"
+                act2["title"] = "APOIO DE BRAÇOS COM PORTA-COPO EM TELA E TECIDO DE ALTA TENACIDADE"
+                act2["desc_tmpl"] = "Equipada com apoios de braço ergonômicos, porta-copo integrado em malha no braço direito e assento/encosto em tecido Oxford camuflado resistente ao peso e à umidade."
+                act3["tag"] = "Transporte Descomplicado"
+                act3["title"] = "FECHAMENTO COMPACTO E SAPATAS ESTABILIZADORAS"
+                act3["desc_tmpl"] = "Conta com sapatas articuladas para terrenos de terra ou grama e acompanha bolsa com alça para transporte prático no ombro ou no porta-malas."
+                new_specs = [
+                    {"label": "Capacidade & Altura", "value": "Suporta até 100 kg | Altura total: 73 cm"},
+                    {"label": "Estrutura", "value": "Tubos de aço com pintura anticorrosiva e sapatas estabilizadoras"},
+                    {"label": "Assento & Encosto", "value": "Tecido Oxford camuflado de alta tenacidade com porta-copo integrado"},
+                    {"label": "Origem / Distribuição", "value": "Produto Original Marine Sports com garantia oficial"}
                 ]
             elif "fogareiro" in t_low:
                 act1["tag"] = "Chama Potente & Portabilidade"
@@ -2300,28 +2605,151 @@ class TemplateEngine:
             elif any(w in t_low for w in ["capa de caiaque", "saco estanque", "bolsa estanque"]):
                 act1["tag"] = "Proteção Impermeável & UV"
                 act1["title"] = "BLINDAGEM COMPLETA CONTRA SOL, CHUVA, POEIRA E UMIDADE"
-                act1["desc_tmpl"] = "Desenvolvida para proteger seu equipamento durante o armazenamento ou transporte, o(a) {title} preserva a integridade contra raios solares, respingos e sujeira."
-                act2["tag"] = "Ajuste Firme & Vedação"
-                act2["title"] = "MATERIAL REFORÇADO DE ALTA TENACIDADE"
-                act2["desc_tmpl"] = "Confeccionado com material impermeável de alta gramatura e acabamento reforçado que não rasga com facilidade."
+                act1["desc_tmpl"] = "Desenvolvida para proteger seu caiaque durante o armazenamento na garagem, quintal ou marina, a {title} preserva o casco e os acessórios contra raios solares, chuva, poeira e folhas."
+                act2["tag"] = "Ajuste Elástico Perimetral"
+                act2["title"] = "MATERIAL IMPERMEÁVEL DE ALTA TENACIDADE COM BORDA ELÁSTICA"
+                act2["desc_tmpl"] = "Confeccionada em material impermeável de alta gramatura com elástico embutido em toda a borda, abraçando o formato do caiaque com firmeza e rapidez."
                 act3["tag"] = "Vida Útil Prolongada"
-                act3["title"] = "PRATICIDADE NO USO E CONSERVAÇÃO DO SEU EQUIPAMENTO"
-                act3["desc_tmpl"] = "Fácil de instalar, dobrar e higienizar, evitando o desbotamento precoce e o ressecamento do seu caiaque ou tralha."
-            elif any(w in t_low for w in ["fonte conversora", "cabo plug", "cabo de força"]):
-                act1["tag"] = "Alimentação Elétrica Segura"
-                act1["title"] = "CONEXÃO ESTÁVEL E PROTEÇÃO ELÉTRICA PARA SUA GELADEIRA ELBER"
-                act1["desc_tmpl"] = "Acessório original desenvolvido para garantir alimentação contínua e segura da sua geladeira portátil Elber, o(a) {title} oferece encaixe perfeito e proteção contra oscilações."
-                act2["tag"] = "Versatilidade 110V/220V & 12V/24V"
-                act2["title"] = "EFICIÊNCIA ENERGÉTICA EM CASA, NO BARCO OU NA ESTRADA"
-                act2["desc_tmpl"] = "Permite ligar sua geladeira portátil na rede elétrica residencial (110V/220V) ou na tomada veicular (12V/24V) com conversão estável e cabos de bitola dimensionada."
+                act3["title"] = "PREVENÇÃO CONTRA DESBOTAMENTO E RESSECAMENTO DO CASCO"
+                act3["desc_tmpl"] = "Fácil de vestir, dobrar e higienizar, evitando o ressecamento do polietileno e mantendo seu caiaque sempre limpo e pronto para a próxima pescaria."
+                new_specs = [
+                    {"label": "Categoria", "value": "Capa Protetora Impermeável para Caiaque BRK"},
+                    {"label": "Material", "value": "Tecido técnico impermeável de alta gramatura com proteção UV"},
+                    {"label": "Sistema de Ajuste", "value": "Borda perimetral com elástico reforçado de ajuste rápido ao casco"},
+                    {"label": "Proteção", "value": "Barreira completa contra sol, chuva, poeira, folhas e maresia"},
+                    {"label": "Aplicação", "value": "Armazenamento e conservação de caiaques de pesca e lazer"}
+                ]
+            elif any(w in t_low for w in ["cabo plug", "cabo de força", "cabo de alimentacao", "cabo de alimentação"]):
+                act1["tag"] = "Alimentação Veicular 12V/24V"
+                act1["title"] = "CABO DE ALIMENTAÇÃO VEICULAR 12V/24V ORIGINAL ELBER"
+                act1["desc_tmpl"] = "Peça de reposição original desenvolvida para garantir alimentação contínua e segura da sua geladeira portátil Elber no veículo ou na embarcação, o {title} assegura encaixe preciso e máxima condutividade."
+                act2["tag"] = "Plugue com Fusível Integrado"
+                act2["title"] = "CONECTOR PADRÃO AUTOMOTIVO/NÁUTICO COM PROTEÇÃO ELÉTRICA"
+                act2["desc_tmpl"] = "Equipado com plugue 12V/24V de contato firme que não solta com a trepidação da estrada ou das ondas, contando com fusível interno de proteção contra surtos de corrente."
                 act3["tag"] = "Qualidade Original Elber"
-                act3["title"] = "ISOLAMENTO REFORÇADO E ALTA DURABILIDADE"
-                act3["desc_tmpl"] = "Construído com componentes homologados, plugues firmes que não aquecem e revestimento resistente a dobras e impactos."
+                act3["title"] = "BITOLA DIMENSIONADA E ISOLAMENTO RESISTENTE SEM SUPERAQUECIMENTO"
+                act3["desc_tmpl"] = "Construído com cabos de cobre de bitola homologada pela engenharia Elber e revestimento flexível resistente a dobras e calor."
+                new_specs = [
+                    {"label": "Compatibilidade", "value": "Geladeiras portáteis Elber 12V/24V (Linha TB / CAB)"},
+                    {"label": "Tensão de Operação", "value": "12V / 24V DC (Tomada veicular ou embarcação)"},
+                    {"label": "Segurança", "value": "Plugue com fusível interno de proteção contra surtos e curto-circuito"},
+                    {"label": "Procedência", "value": "Peça de reposição 100% Original Elber"}
+                ]
+            elif "fonte conversora" in t_low:
+                act1["tag"] = "Conversão 110V/220V para 12V/24V"
+                act1["title"] = "LIGUE SUA GELADEIRA PORTÁTIL ELBER NA TOMADA RESIDENCIAL"
+                act1["desc_tmpl"] = "Acessório original desenvolvido para converter a energia da tomada comum (110V/220V) para 12V/24V contínuos, a {title} permite pré-resfriar ou utilizar sua geladeira portátil Elber em casa, no rancho, no hotel ou na marina."
+                act2["tag"] = "Bivolt Automático Estabilizado"
+                act2["title"] = "EFICIÊNCIA ENERGÉTICA COM PROTEÇÃO CONTRA OSCILAÇÕES"
+                act2["desc_tmpl"] = "Opera em faixa Bivolt automática (110V/220V AC) entregando tensão contínua estabilizada para o compressor da geladeira, sem risco de sobrecarga."
+                act3["tag"] = "Qualidade Original Elber"
+                act3["title"] = "GABINETE ISOLADO E CONECTOR PADRÃO DE ENCAIXE DIRETO"
+                act3["desc_tmpl"] = "Construída com componentes homologados, saída fêmea padrão 12V para acoplamento direto do cabo da geladeira e proteção térmica integrada."
                 new_specs = [
                     {"label": "Compatibilidade", "value": "Geladeiras portáteis Elber 12V/24V"},
-                    {"label": "Tensão", "value": "Conversão automática Bivolt 110V/220V para 12V/24V DC"},
+                    {"label": "Tensão", "value": "Entrada Bivolt automática 110V/220V AC -> Saída 12V/24V DC"},
                     {"label": "Segurança", "value": "Proteção contra sobrecarga, curto-circuito e superaquecimento"},
                     {"label": "Procedência", "value": "Acessório 100% Original Elber"}
+                ]
+            elif "suporte magnético" in t_low or "suporte magnetico" in t_low:
+                act1["tag"] = "Acesso Rápido com Uma Mão"
+                act1["title"] = "SUPORTE MAGNÉTICO DE ALTA FORÇA COM ENGATE E SAQUE INSTANTÂNEO"
+                act1["desc_tmpl"] = "Projetado para prender passaguás, alicates, cortadores de linha e ferramentas diretamente no colete, mochila ou cinto, o {title} permite liberar o equipamento com um simples puxão e reconectá-lo automaticamente pela força do ímã."
+                act2["tag"] = "Mosquetão & Fiel Espiral"
+                act2["title"] = "MOSQUETÃO DE ALUMÍNIO E CORDÃO ESPIRAL ELÁSTICO ANTI-PERDA"
+                act2["desc_tmpl"] = "Equipado com mosquetão de engate rápido e cabo espiral retrátil de segurança que acompanha o movimento das mãos, impedindo que seu alicate ou passaguá caia na água durante a pescaria."
+                act3["tag"] = "Resistência à Corrosão"
+                act3["title"] = "ESTRUTURA METÁLICA ANODIZADA PARA ÁGUA DOCE E SALGADA"
+                act3["desc_tmpl"] = "Construído com cápsula magnética blindada, argolas em aço inox e acabamento anodizado resistente à umidade, garantindo fixação confiável em pescarias de vadeio, caiaque ou barco."
+                new_specs = [
+                    {"label": "Categoria", "value": "Suporte Magnético Salva-Tralha com Mosquetão Deyu"},
+                    {"label": "Sistema de Engate", "value": "Ímã de neodímio de alta tração para conexão e liberação rápida"},
+                    {"label": "Componentes", "value": "Cápsula magnética dupla + Mosquetão de engate + Cabo espiral elástico (fiel)"},
+                    {"label": "Aplicação", "value": "Fixação de passaguás, alicates de contenção, tesouras e ferramentas no colete ou cinto"},
+                    {"label": "Origem / Distribuição", "value": "Produto Original Deyu com garantia oficial"}
+                ]
+            elif "fita para proteção" in t_low or "fita para protecao" in t_low:
+                act1["tag"] = "Proteção nos Arremessos"
+                act1["title"] = "FITA PROTETORA DE DEDOS CONTRA CORTES DE LINHA E ATRITO"
+                act1["desc_tmpl"] = "Desenvolvida para proteger os dedos do pescador contra cortes provocados por linhas multifilamento e pelo atrito repetitivo em centenas de arremessos e recolhimentos, a {title} garante conforto e firmeza na pegada."
+                act2["tag"] = "Tecnologia Autoaderente"
+                act2["title"] = "ADERÊNCIA COESIVA SEM COLA QUE NÃO DEIXA RESÍDUOS NA PELE"
+                act2["desc_tmpl"] = "Sua tecnologia autoaderente (coesiva) faz com que a fita grude apenas sobre si mesma, moldando-se perfeitamente às articulações dos dedos ou ao cabo da vara sem colar na pele ou nos pelos."
+                act3["tag"] = "Respirável & Camuflada"
+                act3["title"] = "LARGURA DE 2,5 CM FLEXÍVEL, RESPIRÁVEL E RESISTENTE À ÁGUA"
+                act3["desc_tmpl"] = "Com 2,5 cm de largura e acabamento Camo Preto, mantém a sensibilidade tátil no controle do carretel e resiste a respingos d'água e suor durante toda a jornada de pesca."
+                new_specs = [
+                    {"label": "Categoria", "value": "Fita Coesiva Protetora de Dedos para Pesca Albatroz Fishing"},
+                    {"label": "Largura", "value": "2,5 cm (ideal para falanges dos dedos e empunhaduras)"},
+                    {"label": "Tecnologia de Fixação", "value": "Autoaderente (gruda sobre si mesma sem deixar resíduo de cola na pele)"},
+                    {"label": "Função Principal", "value": "Prevenção de cortes por linha multifilamento, calos e bolhas nos arremessos"},
+                    {"label": "Origem / Distribuição", "value": "Produto Original Albatroz Fishing com garantia oficial"}
+                ]
+            elif "coleira" in t_low or "peitoral" in t_low:
+                act1["tag"] = "Conforto & Segurança Pet"
+                act1["title"] = "PEITORAL ANATÔMICO RESPIRÁVEL COM GUIA PARA CÃES E GATOS"
+                act1["desc_tmpl"] = "Projetado para distribuir a pressão de forma suave pelo tórax sem forçar o pescoço do animal, o {title} proporciona passeios seguros, confortáveis e cheios de liberdade para o seu pet."
+                act2["tag"] = "Visibilidade Noturna & Trava"
+                act2["title"] = "FAIXAS REFLETIVAS DE ALTA VISIBILIDADE E FIVELA DE ENGATE RÁPIDO"
+                act2["desc_tmpl"] = "Conta com detalhes refletivos que aumentam a visualização em caminhadas noturnas ou ao entardecer, além de fecho traseiro de engate rápido e argola metálica dupla para conexão da guia."
+                act3["tag"] = "Malha Aerada & Ajuste"
+                act3["title"] = "TECIDO MESH VENTILADO QUE NÃO AQUECE E REGULAGEM ANATÔMICA"
+                act3["desc_tmpl"] = "Confeccionado em malha aerada macia (Air Mesh) que permite ventilação contínua na pelagem e tiras reguláveis para um ajuste sob medida ao corpo do seu cão ou gato."
+                new_specs = [
+                    {"label": "Categoria", "value": "Conjunto Peitoral Anatômico com Guia para Pets (Cães e Gatos)"},
+                    {"label": "Material", "value": "Malha respirável Air Mesh acolchoada com fitas de nylon de alta resistência"},
+                    {"label": "Segurança", "value": "Faixas refletivas 360° + Fivela de engate rápido + Meia-argola metálica para guia"},
+                    {"label": "Itens Inclusos", "value": "1 Coleira Peitoral Anatômica + 1 Guia de Passeio"}
+                ]
+            elif "personalização" in t_low or "personalizacao" in t_low:
+                act1["tag"] = "Exclusividade Oficial BRK"
+                act1["title"] = "PERSONALIZE SUA CAMISA BRK COM SEU NOME OU EQUIPE"
+                act1["desc_tmpl"] = "Torne seu uniforme de pesca, campo ou aventura único: o serviço de {title} aplica seu nome ou apelido diretamente na sua camisa BRK com padrão gráfico profissional de fábrica."
+                act2["tag"] = "Alta Definição & Durabilidade"
+                act2["title"] = "APLICAÇÃO DE ALTA FIXAÇÃO QUE NÃO DESBOTA E NÃO DESCASCA"
+                act2["desc_tmpl"] = "Executada pela equipe de produção oficial da BRK com tecnologia de termotransferência/sublimação de alta aderência, preservando a elasticidade, a leveza e a respirabilidade do tecido."
+                act3["tag"] = "Identidade Profissional"
+                act3["title"] = "TIPOGRAFIA ESPORTIVA ALINHADA AO DESIGN DA SUA CAMISA"
+                act3["desc_tmpl"] = "Posicionamento e dimensionamento harmonizados com a arte do modelo escolhido, ideal para pescadores esportivos, torneios, comitivas, equipes e presentes personalizados."
+                new_specs = [
+                    {"label": "Categoria", "value": "Serviço Oficial de Personalização de Nome BRK"},
+                    {"label": "Método de Aplicação", "value": "Termotransferência / Sublimação profissional de alta fixação"},
+                    {"label": "Durabilidade", "value": "Não racha, não desbota e acompanha a elasticidade do tecido"},
+                    {"label": "Compatibilidade", "value": "Camisas e vestuário oficial BRK adquiridos no mesmo pedido"}
+                ]
+            elif "chaveiro" in t_low:
+                new_specs = [
+                    {"label": "Categoria", "value": "Chaveiro Colecionável Oficial BRK"},
+                    {"label": "Material", "value": "Emborrachado em relevo de alta densidade com argola e corrente metálica"},
+                    {"label": "Aplicação", "value": "Chaves de veículos, caminhonetes, tratores, barcos, mochilas e bolsas"},
+                    {"label": "Durabilidade", "value": "Resistente à água, atrito e exposição solar"}
+                ]
+            elif "adesivo" in t_low or "sticker" in t_low:
+                new_specs = [
+                    {"label": "Categoria", "value": "Cartela de Adesivos Colecionáveis Oficiais BRK"},
+                    {"label": "Material", "value": "Vinil adesivo automotivo de alta aderência com recorte preciso"},
+                    {"label": "Aplicação", "value": "Caixas de pesca, barcos, caiaques, caminhonetes, coolers e copos térmicos"},
+                    {"label": "Durabilidade", "value": "Resistente à água e exposição solar"}
+                ]
+
+        # 14.5 Adaptação 360° para Livros de Colorir BRK Agro vs BRK Fishing (books_publications)
+        elif archetype_id == "books_publications":
+            if store_key == "brk_agro" or "agro" in t_low:
+                act1["tag"] = "Universo do Campo & Diversão"
+                act1["title"] = "IMERSÃO LÚDICA NA VIDA DA FAZENDA, ANIMAIS E NATUREZA"
+                act1["desc_tmpl"] = "O {title} traz ilustrações exclusivas e envolventes sobre o universo do campo, cavalos, pecuária, tratores e vida na fazenda, estimulando a criatividade e conectando crianças e famílias às raízes do agronegócio."
+                act2["tag"] = "Qualidade Editorial BRK"
+                act2["title"] = "TRAÇOS EM ALTA DEFINIÇÃO E PAPEL DE ALTA GRAMATURA"
+                act2["desc_tmpl"] = "Produzido com acabamento gráfico de alta qualidade, desenhos ricos em detalhes e páginas resistentes ideais para lápis de cor e giz de cera."
+                act3["tag"] = "Presente & Aprendizado"
+                act3["title"] = "EXCELENTE OPÇÃO PARA PRESENTEAR OS PEQUENOS APAIXONADOS PELO AGRO"
+                act3["desc_tmpl"] = "Uma atividade educativa e criativa longe das telas, perfeita para incentivar a coordenação motora e o amor pela vida no campo desde a infância."
+                new_specs = [
+                    {"label": "Formato", "value": "Livro de colorir impresso com encadernação de alta qualidade"},
+                    {"label": "Acabamento", "value": "Capa colorida laminada e páginas em papel especial de alta gramatura"},
+                    {"label": "Tema Principal", "value": "Vida no campo, fazenda, cavalos, animais rurais e máquinas agrícolas"},
+                    {"label": "Idioma", "value": "Português"},
+                    {"label": "Público Indicado", "value": "Crianças, jovens e famílias apaixonadas pelo universo Agro"}
                 ]
 
         # 15. Adaptação 360° para Cutelaria, Facas, Kits Faca & Chaira, Cutelo e Canivetes (cutlery_unique)

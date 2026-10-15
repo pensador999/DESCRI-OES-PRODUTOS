@@ -151,6 +151,7 @@ def build_dist():
             vendor = p.get("vendor", "")
             sku_code = p.get("master_sku") or p.get("sku") or (p.get("variants_skus") and p.get("variants_skus")[0]) or ""
             archetype_id = p.get("archetype_id") or template_engine.detect_archetype(title, category, tags, vendor=vendor, sku=sku_code)
+            images = template_engine._sanitize_and_dedup_images(images, archetype_id=archetype_id, title=title)
             canonical_cat = template_engine.classify_store_category(title, archetype_id, store_key=store_key, tags=tags, sku=sku_code)
             arch_info = template_engine.templates.get(archetype_id, template_engine.templates["uv_performance"])
             

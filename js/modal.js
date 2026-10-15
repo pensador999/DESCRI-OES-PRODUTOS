@@ -2171,17 +2171,20 @@ function getProductModeBHTML(liveP) {
       : ((liveP.images || []).map(img => (typeof img === "object" ? img.src : img)));
 
   const seenRoots = new Set();
-  const images = [];
+  const rawDeduped = [];
+  const uuidRe = /_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\.[a-z0-9]+$)/i;
   rawSources.forEach(u => {
     if (!u || typeof u !== "string") return;
     const cleanU = u.trim();
     if (!cleanU) return;
-    const root = cleanU.split("?")[0].toLowerCase();
-    if (!seenRoots.has(root)) {
-      seenRoots.add(root);
-      images.push(cleanU);
+    const fname = cleanU.split("?")[0].split("/").pop().toLowerCase().replace(uuidRe, "");
+    if (!seenRoots.has(fname)) {
+      seenRoots.add(fname);
+      rawDeduped.push(cleanU);
     }
   });
+  const nonBanner = rawDeduped.filter(u => !u.toLowerCase().includes("catalogobrkfishing_iscapremiumemdetalhes"));
+  const images = nonBanner.length >= 3 ? nonBanner : rawDeduped;
 
   const isApparel = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work", "pants_cargo_tactical"].includes(archetypeId);
   const isLure = (archetypeId === "fishing_lures");
@@ -2207,6 +2210,8 @@ function getProductModeBHTML(liveP) {
     [img1, img2, img3] = selectClientApparelActImages(images);
   } else if (archetypeId === "cutlery_unique") {
     [img1, img2, img3] = selectClientCutleryActImages(images, liveP.title || "");
+  } else if (archetypeId === "fishing_tackle_gear" && (liveP.title || "").toLowerCase().includes("trava vara") && images.length >= 3) {
+    [img1, img2, img3] = [images[0], images[2], images[1]];
   }
 
   const tLowModal = (liveP.title || "").toLowerCase();
