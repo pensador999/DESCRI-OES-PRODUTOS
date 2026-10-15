@@ -1,0 +1,102 @@
+[
+ {
+  "rule": "textil_em_nao_textil",
+  "severity": "ERROR",
+  "desc": "Vocabulario de roupa (Dry Fit, FPU 50+, costura, zíper, manga, gola, tecido) em produto que nao e roupa",
+  "evidence": "costura refor",
+  "store": "brk_fishing",
+  "id": 8411025539138,
+  "title": "Faca Brk Pescaria Cabo Madeira e Resina Transparente com Isca Azul e Bainha de Couro",
+  "archetype": "cutlery_unique"
+ },
+ {
+  "rule": "textil_em_nao_textil",
+  "severity": "ERROR",
+  "desc": "Vocabulario de roupa (Dry Fit, FPU 50+, costura, zíper, manga, gola, tecido) em produto que nao e roupa",
+  "evidence": "costura refor",
+  "store": "brk_agro",
+  "id": 10198017671465,
+  "title": "Faca Brk Pescaria 10\" Resina Transparente com Isca",
+  "archetype": "cutlery_unique"
+ },
+ {
+  "rule": "textil_em_nao_textil",
+  "severity": "ERROR",
+  "desc": "Vocabulario de roupa (Dry Fit, FPU 50+, costura, zíper, manga, gola, tecido) em produto que nao e roupa",
+  "evidence": "costura refor",
+  "store": "brk_agro",
+  "id": 10198017638697,
+  "title": "Faca Brk Pescaria 10\" Resina Azul com Isca Artificial",
+  "archetype": "cutlery_unique"
+ },
+ {
+  "rule": "textil_em_nao_textil",
+  "severity": "ERROR",
+  "desc": "Vocabulario de roupa (Dry Fit, FPU 50+, costura, zíper, manga, gola, tecido) em produto que nao e roupa",
+  "evidence": "costura refor",
+  "store": "brk_agro",
+  "id": 10197364015401,
+  "title": "Faca Curva Nelore 3\" Bainha Caramelo",
+  "archetype": "cutlery_unique"
+ },
+ {
+  "rule": "textil_em_nao_textil",
+  "severity": "ERROR",
+  "desc": "Vocabulario de roupa (Dry Fit, FPU 50+, costura, zíper, manga, gola, tecido) em produto que nao e roupa",
+  "evidence": "costura refor",
+  "store": "brk_agro",
+  "id": 10197364343081,
+  "title": "Faca Rodeio 5\" Bainha Caramelo",
+  "archetype": "cutlery_unique"
+ },
+ {
+  "rule": "textil_em_nao_textil",
+  "severity": "ERROR",
+  "desc": "Vocabulario de roupa (Dry Fit, FPU 50+, costura, zíper, manga, gola, tecido) em produto que nao e roupa",
+  "evidence": "costura refor",
+  "store": "brk_agro",
+  "id": 10197364408617,
+  "title": "Faca Rodeio 5\" Bainha Marrom",
+  "archetype": "cutlery_unique"
+ },
+ {
+  "rule": "textil_em_nao_textil",
+  "severity": "ERROR",
+  "desc": "Vocabulario de roupa (Dry Fit, FPU 50+, costura, zíper, manga, gola, tecido) em produto que nao e roupa",
+  "evidence": "costura refor",
+  "store": "brk_agro",
+  "id": 10197364146473,
+  "title": "Faca Curva Nelore 3\" Bainha Marrom",
+  "archetype": "cutlery_unique"
+ },
+ {
+  "rule": "textil_em_nao_textil",
+  "severity": "ERROR",
+  "desc": "Vocabulario de roupa (Dry Fit, FPU 50+, costura, zíper, manga, gola, tecido) em produto que nao e roupa",
+  "evidence": "costura refor",
+  "store": "brk_agro",
+  "id": 10197364244777,
+  "title": "Faca Curva 3\" Bainha Marrom",
+  "archetype": "cutlery_unique"
+ },
+ {
+  "rule": "textil_em_nao_textil",
+  "severity": "ERROR",
+  "desc": "Vocabulario de roupa (Dry Fit, FPU 50+, costura, zíper, manga, gola, tecido) em produto que nao e roupa",
+  "evidence": "costura refor",
+  "store": "brk_agro",
+  "id": 10198017802537,
+  "title": "Faca Brk Pescaria 10\" Resina Transparente com Isca Azul",
+  "archetype": "cutlery_unique"
+ },
+ {
+  "rule": "textil_em_nao_textil",
+  "severity": "ERROR",
+  "desc": "Vocabulario de roupa (Dry Fit, FPU 50+, costura, zíper, manga, gola, tecido) em produto que nao e roupa",
+  "evidence": "ZÍPER",
+  "store": "brk_agro",
+  "id": 10003521012009,
+  "title": "Kit Churrasco Deyu com 3 Peças",
+  "archetype": "cutlery_unique"
+ }
+]

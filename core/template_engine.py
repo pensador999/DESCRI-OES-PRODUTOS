@@ -2327,21 +2327,21 @@ class TemplateEngine:
         # 15. Adaptação 360° para Cutelaria, Facas, Kits Faca & Chaira, Cutelo e Canivetes (cutlery_unique)
         elif archetype_id == "cutlery_unique":
             prod_id_str = str(product.get("id") or "")
-            # 15.1 Kit Churrasco Deyu com 3 Peças (Faca + Garfo + Pegador em Inox + Estojo com Zíper)
+            # 15.1 Kit Churrasco Deyu com 3 Peças (Faca + Garfo + Pegador em Inox + Estojo Organizador)
             if "kit churrasco" in t_low and ("3 pe" in t_low or "deyu" in t_low):
                 act1["tag"] = "Conjunto Completo 3 em 1"
                 act1["title"] = "FACA, GARFO TRINCHANTE E PEGADOR EM AÇO INOXIDÁVEL"
                 act1["desc_tmpl"] = "Praticidade completa para o seu churrasco no camping, na pescaria ou em casa: o {title} reúne 1 faca de corte afiada, 1 garfo trinchante estruturado e 1 pegador multiuso construídos integralmente em aço inoxidável."
                 act2["tag"] = "Maleta Organizadora Portátil"
-                act2["title"] = "ESTOJO EM TECIDO REFORÇADO COM ZÍPER, ALÇA E ELÁSTICOS INTERNOS"
-                act2["desc_tmpl"] = "Acompanha estojo organizador compacto com fechamento em zíper, alças externas de transporte e fitas elásticas internas que mantêm cada utensílio fixo, protegido e organizado."
+                act2["title"] = "ESTOJO ORGANIZADOR COM FECHAMENTO PERIMETRAL, ALÇA E ELÁSTICOS INTERNOS"
+                act2["desc_tmpl"] = "Acompanha estojo organizador compacto com fechamento perimetral completo, alças externas de transporte e fitas elásticas internas que mantêm cada utensílio fixo, protegido e organizado."
                 act3["tag"] = "Higiene & Durabilidade"
                 act3["title"] = "CABOS MONOBLOCO EM INOX RESISTENTES À CORROSÃO E FÁCIL LIMPEZA"
                 act3["desc_tmpl"] = "Utensílios com cabos tubulares em aço inoxidável e alças de suspensão nas extremidades, oferecendo alta resistência à umidade, zero absorção de odores e higienização rápida."
                 new_specs = [
-                    {"label": "Itens Inclusos", "value": "1 Faca de Churrasco, 1 Garfo Trinchante, 1 Pegador em Inox e 1 Estojo com Zíper"},
+                    {"label": "Itens Inclusos", "value": "1 Faca de Churrasco, 1 Garfo Trinchante, 1 Pegador em Inox e 1 Estojo Organizador"},
                     {"label": "Material dos Utensílios", "value": "Aço Inoxidável integral (lâminas e cabos) com alças de suspensão"},
-                    {"label": "Armazenamento", "value": "Estojo organizador em nylon reforçado com elásticos internos e alça de mão"},
+                    {"label": "Armazenamento", "value": "Estojo organizador em nylon estruturado com elásticos internos e alça de mão"},
                     {"label": "Indicação de Uso", "value": "Churrascos, camping, pescarias, viagens e área gourmet"}
                 ]
             # 15.2 Canivetes Táticos Dobráveis Deyu (Cabo Madeira 018355 vs Metálico ZD W84)
@@ -2445,7 +2445,7 @@ class TemplateEngine:
                 act2["desc_tmpl"] = "A faca conta com construção Full Tang e cabo anatômico em madeira nobre fixado por 3 rebites metálicos, enquanto a chaira possui cabo em madeira torneada com guarda de proteção e argola metálica na extremidade."
                 act3["tag"] = "Bainha Dupla em Couro Trabalhado"
                 act3["title"] = f"BAINHA DUPLA EM COURO {cor_bainha.upper()} COM {estilo_bainha.upper()}"
-                act3["desc_tmpl"] = f"Acompanha bainha dupla confeccionada em couro legítimo {cor_bainha} com {estilo_bainha}, costuras reforçadas, passador de cinto e 2 travas individuais de botão de pressão para transporte seguro."
+                act3["desc_tmpl"] = f"Acompanha bainha dupla confeccionada em couro legítimo {cor_bainha} com {estilo_bainha}, costuras de alta tenacidade, passador de cinto e 2 travas individuais de botão de pressão para transporte seguro."
                 new_specs = [
                     {"label": "Itens Inclusos", "value": "1 Faca 9\" em Aço Inox, 1 Chaira Estriada com cabo em madeira e 1 Bainha Dupla em Couro"},
                     {"label": "Material da Lâmina", "value": "Aço Inoxidável Full Tang de 9 polegadas com dorso mosqueado e vazado Bull Head"},
@@ -2466,7 +2466,7 @@ class TemplateEngine:
                 act2["desc_tmpl"] = "Empunhadura anatômica em madeira nobre que preenche a palma da mão com firmeza e segurança, fixada à espiga integral de aço por rebites metálicos e furo traseiro para fiel."
                 act3["tag"] = "Bainha de Cintura em Couro"
                 act3["title"] = f"BAINHA EM COURO {cor_bainha.upper()} TRABALHADO COM PASSADOR DUPLO DE CINTO"
-                act3["desc_tmpl"] = f"Acompanha bainha sob medida em couro legítimo {cor_bainha} com textura balaiada/trançada em relevo, costura reforçada em linha grossa, trava de botão de pressão e fendas laterais para passagem horizontal ou inclinada no cinto."
+                act3["desc_tmpl"] = f"Acompanha bainha sob medida em couro legítimo {cor_bainha} com textura balaiada/trançada em relevo, costura perimetral em linha encerada grossa, trava de botão de pressão e fendas laterais para passagem horizontal ou inclinada no cinto."
                 new_specs = [
                     {"label": "Material da Lâmina", "value": f"Aço Inoxidável Full Tang de {pol} com acabamento escovado e vazado Bull Head{gravacao_extra}"},
                     {"label": "Empunhadura", "value": "Madeira nobre anatômica fixada por rebites metálicos com furo para fiel"},
@@ -2484,7 +2484,7 @@ class TemplateEngine:
                 act2["desc_tmpl"] = f"O grande diferencial está no cabo anatômico híbrido confeccionado em madeira nobre e {tom_resina} de alto brilho, trazendo uma autêntica isca artificial encapsulada em 3D no interior do cabo."
                 act3["tag"] = "Bainha Protetora em Couro"
                 act3["title"] = "ACOMPANHA BAINHA EM COURO COSTURADO COM TRAVA DE BOTÃO DE PRESSÃO"
-                act3["desc_tmpl"] = "Acompanha bainha protetora sob medida em couro legítimo com costura reforçada, passador de cinto e presilha com botão de pressão que mantém a faca segura no transporte."
+                act3["desc_tmpl"] = "Acompanha bainha protetora sob medida em couro legítimo com costura perimetral em linha encerada, passador de cinto e presilha com botão de pressão que mantém a faca segura no transporte."
                 new_specs = [
                     {"label": "Material da Lâmina", "value": "Aço Inoxidável de 10 polegadas (aprox. 26 cm) com dorso mosqueado e abridor de garrafas"},
                     {"label": "Empunhadura Exclusiva", "value": f"Híbrida anatômica em madeira nobre e {tom_resina} com isca artificial encapsulada"},
@@ -2516,7 +2516,7 @@ class TemplateEngine:
                 act2["desc_tmpl"] = "Cabo anatômico esculpido na fusão entre madeira nobre selecionada e resina artística polida de alta densidade, garantindo pegada firme, equilíbrio de peso e visual único em cada peça."
                 act3["tag"] = "Bainha Protetora em Couro"
                 act3["title"] = "ACOMPANHA BAINHA EM COURO COSTURADO COM TRAVA DE PRESSÃO"
-                act3["desc_tmpl"] = "Acompanha bainha sob medida em couro legítimo com costura pespontada, passador traseiro para cinto e presilha com botão de pressão para proteção total da lâmina."
+                act3["desc_tmpl"] = "Acompanha bainha sob medida em couro legítimo com costura perimetral em linha encerada, passador traseiro para cinto e presilha com botão de pressão para proteção total da lâmina."
                 new_specs = [
                     {"label": "Material da Lâmina", "value": "Aço Inoxidável de 10 polegadas (aprox. 26 cm) com dorso mosqueado e abridor integrado"},
                     {"label": "Empunhadura", "value": "Híbrida anatômica em madeira nobre e resina de alto brilho"},
@@ -2534,7 +2534,7 @@ class TemplateEngine:
                 act2["desc_tmpl"] = "Espiga integral (Full Tang) revestida por talas anatômicas em madeira nobre selecionada e travada por 3 rebites metálicos em aço inox, proporcionando firmeza absoluta e equilíbrio no corte."
                 act3["tag"] = "Bainha de Couro Sob Medida"
                 act3["title"] = "ACOMPANHA BAINHA EM COURO COSTURADO COM TRAVA DE BOTÃO DE PRESSÃO"
-                act3["desc_tmpl"] = "Acompanha bainha protetora confeccionada em couro legítimo com costura lateral reforçada, passador de cinto e presilha com botão de pressão para transporte e armazenamento seguros."
+                act3["desc_tmpl"] = "Acompanha bainha protetora confeccionada em couro legítimo com costura lateral em linha encerada, passador de cinto e presilha com botão de pressão para transporte e armazenamento seguros."
                 new_specs = [
                     {"label": "Material da Lâmina", "value": "Aço Inoxidável Full Tang de 10 polegadas (aprox. 26,5 cm) com acabamento escovado"},
                     {"label": "Empunhadura", "value": "Madeira nobre anatômica fixada por 3 rebites metálicos em aço inox"},
