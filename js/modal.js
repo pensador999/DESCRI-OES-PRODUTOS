@@ -2201,10 +2201,8 @@ function selectClientApparelActImages(cdnImages, isFemale = false, isKids = fals
     const orderedCompatible = preferred.length > 0
       ? [...preferred, ...compatible.filter(u => !preferred.includes(u))]
       : compatible;
-    if (orderedCompatible.length >= 3) {
+    if (orderedCompatible.length >= 1) {
       workingImages = orderedCompatible;
-    } else if (orderedCompatible.length >= 1) {
-      workingImages = [...orderedCompatible, ...cdnImages.filter(u => !orderedCompatible.includes(u))];
     }
   }
 

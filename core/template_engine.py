@@ -1763,10 +1763,9 @@ class TemplateEngine:
                         compatible.append(u)
 
             ordered_compatible = preferred + [u for u in compatible if u not in preferred] if preferred else compatible
-            if len(ordered_compatible) >= 3:
+            if len(ordered_compatible) >= 1:
                 working_images = ordered_compatible
-            elif len(ordered_compatible) >= 1:
-                working_images = ordered_compatible + [u for u in cdn_images if u not in ordered_compatible]
+
 
         # Ato 1 (Hero Frontal): evita foto de costas se houver foto frontal/não-costas disponível
         img1 = working_images[0]

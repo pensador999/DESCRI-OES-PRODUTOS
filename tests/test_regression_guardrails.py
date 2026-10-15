@@ -1036,12 +1036,12 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
             "https://cdn.shopify.com/s/files/1/0595/3185/3999/files/C0253_INF_FRENTE.jpg",
             "https://cdn.shopify.com/s/files/1/0595/3185/3999/files/C0253_INF_COSTAS.jpg",
         ]
-        fem_acts = engine._select_apparel_act_images(mixed_gallery, is_female=True, is_kids=False)
-        self.assertTrue(all("_FEM_" in u for u in fem_acts), f"Camisa feminina recebeu foto masculina/infantil: {fem_acts}")
-        kids_acts = engine._select_apparel_act_images(mixed_gallery, is_female=False, is_kids=True)
-        self.assertTrue(all("_INF_" in u for u in kids_acts), f"Camisa infantil recebeu foto adulta: {kids_acts}")
-        masc_acts = engine._select_apparel_act_images(mixed_gallery, is_female=False, is_kids=False)
-        self.assertTrue(all("_MASC_" in u for u in masc_acts), f"Camisa masculina recebeu foto fem/inf: {masc_acts}")
+        fem_acts = [u for u in engine._select_apparel_act_images(mixed_gallery, is_female=True, is_kids=False) if u]
+        self.assertTrue(len(fem_acts) >= 2 and all("_FEM_" in u for u in fem_acts), f"Camisa feminina recebeu foto masculina/infantil: {fem_acts}")
+        kids_acts = [u for u in engine._select_apparel_act_images(mixed_gallery, is_female=False, is_kids=True) if u]
+        self.assertTrue(len(kids_acts) >= 2 and all("_INF_" in u for u in kids_acts), f"Camisa infantil recebeu foto adulta: {kids_acts}")
+        masc_acts = [u for u in engine._select_apparel_act_images(mixed_gallery, is_female=False, is_kids=False) if u]
+        self.assertTrue(len(masc_acts) >= 2 and all("_MASC_" in u for u in masc_acts), f"Camisa masculina recebeu foto fem/inf: {masc_acts}")
 
         # 2. Camisa Infantil por Idade + Tamanho (1 a 13 Anos | PP ao G2) e detecção por SKU (C0612I / CI0040)
         nar_kids = engine.generate_narrative_from_template(
