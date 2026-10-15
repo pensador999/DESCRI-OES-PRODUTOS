@@ -129,42 +129,52 @@ def get_engine_and_builder():
     return _ENGINE, _BUILDER
 
 def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
-    """Garante que a descrição seja o Modo B oficial compilado (>1000 chars, com 3 Atos e Detalhes Técnicos XTech Pro)."""
+    """Garante que a descrição seja o Modo B oficial compilado (>1000 chars, com 3 Atos ou Molde D2C Bonés e Ficha Técnica)."""
     raw_b = p.get("mode_b_html")
     arch_id = p.get("archetype_id") or ""
     title_l = (p.get("title") or "").lower()
+    sku_str = str(p.get("master_sku") or p.get("sku") or "").strip()
     is_cap_or_hat = arch_id in ("caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy") or (
         bool(re.search(r'\b(boné|bone|bonés|chapéu|chapeu|chapéus|chapeus)\b', title_l))
         and not any(w in title_l for w in ["copo", "garrafa", "camisa", "till the bones"])
     )
     is_uv = (arch_id == "uv_performance") or any(w in title_l for w in ["camisa", "uv", "armorx", "xtech"])
 
-    # Se já tem o formato oficial correspondente, reaproveita direto
-    if raw_b and len(raw_b.strip()) > 500 and "<!-- BRK-MODO-B" in raw_b:
+    # Verificar se a cor de tema corresponde à loja
+    expected_theme_marker = {
+        "brk_fishing": ("#0284c7", "#00a8ff"),
+        "brk_agro": ("#15803d", "#22c55e"),
+        "brk_motors": ("#ea580c", "#f97316"),
+    }.get(store_key, ("#0284c7", "#00a8ff"))
+
+    # Se já tem o formato oficial correspondente e atualizado (Fase 5/6), reaproveita direto
+    if raw_b and len(raw_b.strip()) > 500 and "<!-- BRK-MODO-B" in raw_b and "use-brk-images-s3" not in raw_b:
+        has_store_color = any(c in raw_b for c in expected_theme_marker)
         if is_cap_or_hat:
-            if "brk-cap-description" in raw_b:
+            if "brk-cap-description" in raw_b and has_store_color:
                 return raw_b
         elif not is_uv:
-            return raw_b
+            if has_store_color:
+                return raw_b
         else:
-            has_new_sg = any(term in raw_b for term in ["49,5 cm", "Baby Look", "1 a 2 Anos", "brk-sg-subtitle"]) and "ALTURA" in raw_b
+            has_new_sg = any(term in raw_b for term in ["49,5 cm", "Baby Look", "2 Anos", "1 a 2 Anos", "brk-sg-subtitle"]) and "ALTURA" in raw_b
             engine, builder = get_engine_and_builder()
             is_ready = engine.is_ready_delivery(p) if engine else False
             expected_prazo = "Pronta entrega" if is_ready else "10 dias úteis"
             has_correct_prazo = expected_prazo in raw_b
-            
-            sku_low = str(p.get("master_sku") or p.get("sku") or "").lower()
+
+            sku_low = sku_str.lower()
             is_fusion_or_hyb = "fusion" in title_l or "fusion" in sku_low or "hybrid" in title_l or sku_low.startswith("hyb")
             has_no_zipper_violation = not is_fusion_or_hyb or (not bool(re.search(r'\b(zíper|ziper)\b', raw_b, re.I)))
-            
-            if "Detalhes Técnicos" in raw_b and "XTech Pro" in raw_b and has_new_sg and has_correct_prazo and has_no_zipper_violation:
+
+            if "Detalhes Técnicos" in raw_b and has_new_sg and has_correct_prazo and has_no_zipper_violation and has_store_color:
                 return raw_b
 
     engine, builder = get_engine_and_builder()
     if engine and builder:
         try:
             detected_arch = arch_id or engine.detect_archetype(
-                p.get("title", ""), p.get("category", ""), p.get("tags", []), vendor=p.get("vendor", "")
+                p.get("title", ""), p.get("category", ""), p.get("tags", []), vendor=p.get("vendor", ""), sku=sku_str
             )
             images = p.get("gallery") or p.get("cdn_images") or []
             narrative = engine.generate_narrative_from_template(p, detected_arch, images, store_key=store_key)
@@ -177,18 +187,59 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
     # Fallback apenas se a compilação falhar
     return p.get("mode_b_html") or p.get("body_html") or ""
 
+STORE_THEME_METADATA = {
+    "brk_fishing": {
+        "name": "BRK Fishing",
+        "accent": "#0284c7",
+        "accent_light": "#38bdf8",
+        "badge_bg": "#0c4a6e",
+        "label": "Azul Náutico (#0284c7)"
+    },
+    "brk_agro": {
+        "name": "BRK Agro",
+        "accent": "#15803d",
+        "accent_light": "#4ade80",
+        "badge_bg": "#14532d",
+        "label": "Verde Campo (#15803d)"
+    },
+    "brk_motors": {
+        "name": "BRK Motors",
+        "accent": "#ea580c",
+        "accent_light": "#fb923c",
+        "badge_bg": "#7c2d12",
+        "label": "Laranja Racing (#ea580c)"
+    }
+}
+
+def detect_audience_badge(p: dict, mode_b: str) -> str:
+    title_l = (p.get("title") or "").lower()
+    sku_u = str(p.get("master_sku") or p.get("sku") or "").upper()
+    if "INFANTIL" in mode_b or "2 Anos" in mode_b or any(w in title_l for w in ["infantil", "kids", "juvenil", "junior"]):
+        return "INFANTIL (2 a 13 Anos | PP ao G2)"
+    if "FEMININO" in mode_b or "Baby Look" in mode_b or any(w in title_l for w in ["feminina", "feminino", "baby look", "babylook", "dama"]):
+        return "FEMININO (Baby Look)"
+    return "ADULTO / MASCULINO"
+
 def sanitize_product(p: dict, store_key: str = "brk_fishing") -> dict:
-    """Retorna apenas os campos necessários para a injeção do Modo B garantido"""
+    """Retorna os campos necessários para a injeção do Modo B garantido e diagnóstico completo no HUD"""
     mode_b = ensure_mode_b_html(p, store_key)
     imgs = p.get("cdn_images") or p.get("gallery") or []
+    is_cap_layout = "brk-cap-description" in mode_b
+    has_size_guide = "brk-size-guide" in mode_b
+    delivery_time = "Pronta entrega" if "Pronta entrega" in mode_b else "10 dias úteis"
     return {
         "id": str(p.get("id", "")),
         "handle": p.get("handle", ""),
         "master_sku": p.get("master_sku") or p.get("sku") or "",
         "title": p.get("title", "Sem Título"),
+        "category": p.get("category") or "Geral",
         "status": p.get("status", "SAUDAVEL"),
         "archetype_id": p.get("archetype_id", "uv_performance"),
         "archetype_name": p.get("archetype_name", "Modo B"),
+        "audience_badge": detect_audience_badge(p, mode_b),
+        "layout_type": "Molde D2C Bonés & Chapéus" if is_cap_layout else ("3 Atos + Ficha + Guia de Medidas" if has_size_guide else "3 Atos + Ficha Técnica"),
+        "delivery_time": delivery_time,
+        "store_theme": STORE_THEME_METADATA.get(store_key, STORE_THEME_METADATA["brk_fishing"]),
         "cdn_images": imgs,
         "gallery": imgs,
         "mode_b_html": mode_b,
@@ -244,6 +295,7 @@ class handler(BaseHTTPRequestHandler):
         # ---------------------------------------------------------------------
         if action == "queue":
             status_filter = (qs.get("status") or ["SEM_DESCRICAO"])[0].upper()
+            category_filter = (qs.get("category") or ["ALL"])[0].strip()
             try:
                 limit = int((qs.get("limit") or ["25"])[0])
             except ValueError:
@@ -256,6 +308,35 @@ class handler(BaseHTTPRequestHandler):
             else:
                 pool = db["products"]
 
+            if category_filter and category_filter.upper() != "ALL":
+                cat_l = category_filter.lower()
+                filtered_pool = []
+                for p in pool:
+                    p_cat = str(p.get("category") or "").lower()
+                    p_arch = str(p.get("archetype_id") or "").lower()
+                    p_title = str(p.get("title") or "").lower()
+                    if cat_l == "bones_chapeus":
+                        if p_arch in ("caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy") or "boné" in p_cat or "chapéu" in p_cat or "boné" in p_title or "chapéu" in p_title:
+                            filtered_pool.append(p)
+                    elif cat_l == "camisas":
+                        if "camisa" in p_cat or p_arch in ("uv_performance", "casual_cotton", "casual_lifestyle", "button_shirts_work"):
+                            filtered_pool.append(p)
+                    elif cat_l == "calcas":
+                        if "calça" in p_cat or "bermuda" in p_cat or p_arch == "pants_tactical":
+                            filtered_pool.append(p)
+                    elif cat_l == "corta_vento":
+                        if "corta" in p_cat or "jaqueta" in p_cat or "moletom" in p_cat or p_arch in ("windbreaker_jacket", "hoodie_fleece"):
+                            filtered_pool.append(p)
+                    elif cat_l == "infantil":
+                        if any(w in p_title for w in ["infantil", "kids", "juvenil", "junior"]):
+                            filtered_pool.append(p)
+                    elif cat_l == "feminino":
+                        if any(w in p_title for w in ["feminina", "feminino", "baby look", "babylook"]):
+                            filtered_pool.append(p)
+                    elif cat_l in p_cat or cat_l in p_arch:
+                        filtered_pool.append(p)
+                pool = filtered_pool
+
             batch = pool[:limit]
             sanitized_batch = [sanitize_product(p, store_key) for p in batch]
 
@@ -263,6 +344,7 @@ class handler(BaseHTTPRequestHandler):
                 "success": True,
                 "store": store_key,
                 "status_filter": status_filter,
+                "category_filter": category_filter,
                 "total_available": len(pool),
                 "count": len(sanitized_batch),
                 "items": sanitized_batch
@@ -272,13 +354,19 @@ class handler(BaseHTTPRequestHandler):
         # 2. Estatísticas do Banco de Dados (Action = stats)
         # ---------------------------------------------------------------------
         if action == "stats":
+            cat_counts = {}
+            for p in db["products"]:
+                c = p.get("category") or "Geral"
+                cat_counts[c] = cat_counts.get(c, 0) + 1
             return self._respond_json(200, {
                 "success": True,
                 "store": store_key,
+                "store_theme": STORE_THEME_METADATA.get(store_key, STORE_THEME_METADATA["brk_fishing"]),
                 "total_products": db["total"],
                 "sem_descricao_count": len(db["empty"]),
                 "imagens_quebradas_count": len(db["broken"]),
-                "healthy_count": db["total"] - len(db["empty"]) - len(db["broken"])
+                "healthy_count": db["total"] - len(db["empty"]) - len(db["broken"]),
+                "categories": cat_counts
             }, cache_control="public, s-maxage=120")
 
         # ---------------------------------------------------------------------
