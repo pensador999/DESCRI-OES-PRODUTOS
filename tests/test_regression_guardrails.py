@@ -1044,28 +1044,28 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         self.assertTrue(len(masc_acts) >= 2 and all("_MASC_" in u for u in masc_acts), f"Camisa masculina recebeu foto fem/inf: {masc_acts}")
 
         # 2. Camisa Infantil por Idade + Tamanho (1 a 13 Anos | PP ao G2) e detecção por SKU (C0612I / CI0040)
-        nar_kids = engine.generate_narrative_from_template(
-            "uv_performance", "Camisa de Pesca Infantil BRK UV50+", "C0612I", mixed_gallery, store_key="brk_fishing"
-        )
-        html_kids = builder.build_vertical_3_acts("Camisa de Pesca Infantil BRK UV50+", nar_kids, "uv_performance")
+        prod_kids = {"id": 9901, "title": "Camisa de Pesca BRK UV50+", "category": "Camisas de Pesca UV", "master_sku": "C0612I"}
+        arch_kids = engine.detect_archetype(prod_kids["title"], prod_kids["category"], [], "BRK", sku=prod_kids["master_sku"])
+        nar_kids = engine.generate_narrative_from_template(prod_kids, arch_kids, mixed_gallery, store_key="brk_fishing")
+        html_kids = builder.build_shopify_html(nar_kids)
         self.assertIn("IDADE / TAMANHO", html_kids)
         self.assertIn("1 a 2 Anos (PP)", html_kids)
         self.assertIn("12 a 13 Anos (G2)", html_kids)
         self.assertIn("1 a 13 Anos | PP ao G2", html_kids)
 
         # 3. Camisa Work (CMB011) não deve ter gola redonda duplicada
-        nar_work = engine.generate_narrative_from_template(
-            "shirts_button_work", "Camisa Work Brk Agro UV50+ Verde Militar", "CMB011", [], store_key="brk_agro"
-        )
-        specs_work_str = json.dumps(nar_work.get("specs", {}), ensure_ascii=False)
+        prod_work = {"id": 9902, "title": "Camisa Work Brk Agro UV50+ Verde Militar", "category": "Camisas Agro", "master_sku": "CMB011"}
+        arch_work = engine.detect_archetype(prod_work["title"], prod_work["category"], [], "BRK", sku=prod_work["master_sku"])
+        nar_work = engine.generate_narrative_from_template(prod_work, arch_work, [], store_key="brk_agro")
+        specs_work_str = json.dumps(nar_work.get("specs", []), ensure_ascii=False)
         self.assertNotIn("Gola redonda anatômica", specs_work_str)
         self.assertIn("Abotoamento frontal reforçado", specs_work_str)
 
         # 4. Corta-Vento (Windbreaker)
-        nar_wb = engine.generate_narrative_from_template(
-            "uv_performance", "Corta Vento Impermeável Brk Motors", "CV001", [], store_key="brk_motors"
-        )
-        self.assertIn("CORTA-VENTO", nar_wb["acts"][0]["title"])
+        prod_wb = {"id": 9903, "title": "Corta Vento Impermeável Brk Motors", "category": "Jaquetas", "master_sku": "CV001"}
+        arch_wb = engine.detect_archetype(prod_wb["title"], prod_wb["category"], [], "BRK", sku=prod_wb["master_sku"])
+        nar_wb = engine.generate_narrative_from_template(prod_wb, arch_wb, [], store_key="brk_motors")
+        self.assertIn("CORTA-VENTO", nar_wb["narrative_blocks"][0]["title"])
 
         # 5. Coerência estrita de cores nos 3 sites (Azul = Fishing, Verde = Agro, Laranja = Motors)
         expected_colors = {
@@ -1074,17 +1074,18 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
             "brk_motors": "#f97316",
         }
         for sk, hex_color in expected_colors.items():
-            nar_st = engine.generate_narrative_from_template(
-                "uv_performance", "Camisa UV50+ Teste", "C0999", [], store_key=sk
-            )
-            html_st = builder.build_vertical_3_acts("Camisa UV50+ Teste", nar_st, "uv_performance")
+            prod_st = {"id": 9904, "title": "Camisa UV50+ Teste", "category": "Camisas", "master_sku": "C0999"}
+            arch_st = engine.detect_archetype(prod_st["title"], prod_st["category"], [], "BRK", sku=prod_st["master_sku"])
+            nar_st = engine.generate_narrative_from_template(prod_st, arch_st, [], store_key=sk)
+            html_st = builder.build_shopify_html(nar_st)
             self.assertIn(hex_color, html_st, f"Cor oficial {hex_color} ausente no HTML da loja {sk}")
             self.assertNotIn("#2e7d32", html_st, f"Verde legado #2e7d32 vazou no HTML da loja {sk}")
-            nar_cap = engine.generate_narrative_from_template(
-                "caps_and_hats", "Boné Trucker Oficial", "BN999", [], store_key=sk
-            )
-            html_cap = builder.build_vertical_3_acts("Boné Trucker Oficial", nar_cap, "caps_and_hats")
+            prod_cap = {"id": 9905, "title": "Boné Trucker Oficial", "category": "Bonés", "master_sku": "BN999"}
+            arch_cap = engine.detect_archetype(prod_cap["title"], prod_cap["category"], [], "BRK", sku=prod_cap["master_sku"])
+            nar_cap = engine.generate_narrative_from_template(prod_cap, arch_cap, [], store_key=sk)
+            html_cap = builder.build_shopify_html(nar_cap)
             self.assertIn(hex_color, html_cap, f"Cor oficial {hex_color} ausente no Boné D2C da loja {sk}")
+
 
 
 
