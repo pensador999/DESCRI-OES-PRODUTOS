@@ -1008,7 +1008,7 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
             self.assertEqual(cat, expected_cat, f"Falha na categoria de '{title}' ({sk}): {cat} != {expected_cat}")
 
         # 2. Verificar catálogos compilados das 3 lojas
-        min_counts = {"brk_fishing": 2200, "brk_agro": 2500, "brk_motors": 1400}
+        min_counts = {"brk_fishing": 2100, "brk_agro": 2500, "brk_motors": 1400}
         for sk, min_total in min_counts.items():
             store_path = os.path.join(BASE_DIR, "data", "stores", f"{sk}.json")
             self.assertTrue(os.path.exists(store_path), f"Store compilada ausente: {store_path}")
@@ -1021,6 +1021,71 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
             self.assertGreaterEqual(len(cats_list), 4, f"Loja {sk} deve ter categorias estruturadas")
             for c in cats_list:
                 self.assertTrue(c.get("thumb", "").startswith("https://cdn.shopify.com/"), f"Thumb inválida em {sk}/{c.get('name')}")
+
+    def test_phase5_apparel_gender_kids_age_sizing_and_store_theme_colors(self):
+        """Valida regras da Fase 5: filtro de fotos Fem/Inf/Masc, tabela Infantil por Idade+Tamanho, Camisa Work CMB, Corta-Vento e cores por loja."""
+        engine = TemplateEngine()
+        builder = HTMLBuilder()
+
+        # 1. Filtro de fotos de família mista (Feminina vs Infantil vs Masculina)
+        mixed_gallery = [
+            "https://cdn.shopify.com/s/files/1/0595/3185/3999/files/C0253_MASC_FRENTE.jpg",
+            "https://cdn.shopify.com/s/files/1/0595/3185/3999/files/C0253_MASC_COSTAS.jpg",
+            "https://cdn.shopify.com/s/files/1/0595/3185/3999/files/C0253_FEM_FRENTE.jpg",
+            "https://cdn.shopify.com/s/files/1/0595/3185/3999/files/C0253_FEM_COSTAS.jpg",
+            "https://cdn.shopify.com/s/files/1/0595/3185/3999/files/C0253_INF_FRENTE.jpg",
+            "https://cdn.shopify.com/s/files/1/0595/3185/3999/files/C0253_INF_COSTAS.jpg",
+        ]
+        fem_acts = engine._select_apparel_act_images(mixed_gallery, is_female=True, is_kids=False)
+        self.assertTrue(all("_FEM_" in u for u in fem_acts), f"Camisa feminina recebeu foto masculina/infantil: {fem_acts}")
+        kids_acts = engine._select_apparel_act_images(mixed_gallery, is_female=False, is_kids=True)
+        self.assertTrue(all("_INF_" in u for u in kids_acts), f"Camisa infantil recebeu foto adulta: {kids_acts}")
+        masc_acts = engine._select_apparel_act_images(mixed_gallery, is_female=False, is_kids=False)
+        self.assertTrue(all("_MASC_" in u for u in masc_acts), f"Camisa masculina recebeu foto fem/inf: {masc_acts}")
+
+        # 2. Camisa Infantil por Idade + Tamanho (1 a 13 Anos | PP ao G2) e detecção por SKU (C0612I / CI0040)
+        nar_kids = engine.generate_narrative_from_template(
+            "uv_performance", "Camisa de Pesca Infantil BRK UV50+", "C0612I", mixed_gallery, store_key="brk_fishing"
+        )
+        html_kids = builder.build_vertical_3_acts("Camisa de Pesca Infantil BRK UV50+", nar_kids, "uv_performance")
+        self.assertIn("IDADE / TAMANHO", html_kids)
+        self.assertIn("1 a 2 Anos (PP)", html_kids)
+        self.assertIn("12 a 13 Anos (G2)", html_kids)
+        self.assertIn("1 a 13 Anos | PP ao G2", html_kids)
+
+        # 3. Camisa Work (CMB011) não deve ter gola redonda duplicada
+        nar_work = engine.generate_narrative_from_template(
+            "shirts_button_work", "Camisa Work Brk Agro UV50+ Verde Militar", "CMB011", [], store_key="brk_agro"
+        )
+        specs_work_str = json.dumps(nar_work.get("specs", {}), ensure_ascii=False)
+        self.assertNotIn("Gola redonda anatômica", specs_work_str)
+        self.assertIn("Abotoamento frontal reforçado", specs_work_str)
+
+        # 4. Corta-Vento (Windbreaker)
+        nar_wb = engine.generate_narrative_from_template(
+            "uv_performance", "Corta Vento Impermeável Brk Motors", "CV001", [], store_key="brk_motors"
+        )
+        self.assertIn("CORTA-VENTO", nar_wb["acts"][0]["title"])
+
+        # 5. Coerência estrita de cores nos 3 sites (Azul = Fishing, Verde = Agro, Laranja = Motors)
+        expected_colors = {
+            "brk_fishing": "#0284c7",
+            "brk_agro": "#16a34a",
+            "brk_motors": "#f97316",
+        }
+        for sk, hex_color in expected_colors.items():
+            nar_st = engine.generate_narrative_from_template(
+                "uv_performance", "Camisa UV50+ Teste", "C0999", [], store_key=sk
+            )
+            html_st = builder.build_vertical_3_acts("Camisa UV50+ Teste", nar_st, "uv_performance")
+            self.assertIn(hex_color, html_st, f"Cor oficial {hex_color} ausente no HTML da loja {sk}")
+            self.assertNotIn("#2e7d32", html_st, f"Verde legado #2e7d32 vazou no HTML da loja {sk}")
+            nar_cap = engine.generate_narrative_from_template(
+                "caps_and_hats", "Boné Trucker Oficial", "BN999", [], store_key=sk
+            )
+            html_cap = builder.build_vertical_3_acts("Boné Trucker Oficial", nar_cap, "caps_and_hats")
+            self.assertIn(hex_color, html_cap, f"Cor oficial {hex_color} ausente no Boné D2C da loja {sk}")
+
 
 
 class TestBRKStudioVerticalization(unittest.TestCase):

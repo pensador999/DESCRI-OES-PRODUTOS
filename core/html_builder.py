@@ -330,10 +330,20 @@ class HTMLBuilder:
 {rows_html}        </tbody>
       </table>"""
 
-            # 1.2 Camisas UV C0 Infantil (1 a 13 Anos)
-            elif is_kids or any(w in title_low for w in ["infantil", "kids", "juvenil", "criança", "crianca"]) or "kids" in sku_low or "inf" in sku_low:
+            # 1.2 Camisas UV C0 Infantil (1 a 13 Anos | PP ao G2)
+            elif (
+                is_kids
+                or any(w in title_low for w in ["infantil", "kids", "juvenil", "criança", "crianca"])
+                or "kids" in sku_low
+                or "inf" in sku_low
+                or (
+                    (sku_low.startswith("ci") or bool(re.search(r'^(?:c0|ci|cf|cm|casual|adv|cadv|ccpbr|bp|hyb|fusion|cax|raglan)\d+i(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_low)))
+                    and not any(w in title_low for w in ["feminina", "feminino", "baby look", "babylook", "masculina", "masculino", "adulto"])
+                )
+            ):
                 guide_title = "Guia de Tamanhos Infantil (1 a 13 Anos)"
                 badge_title = "INFANTIL"
+                tip_text = "<strong>Escolha por Idade com Referência de Tamanho (PP ao G2):</strong> Na linha Infantil BRK, a seleção é guiada pela faixa de idade (1 a 13 Anos) mantendo a indicação do tamanho equivalente (PP ao G2). Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | Manga do ombro ao punho)."
                 shirt_sub_prefix = "Camiseta Algodão Premium" if archetype_id == "agro_field" else ("Camisa Manga Curta UV50" if is_short_sleeve else "Camisa Manga Longa UV50")
                 subtitle = f"{shirt_sub_prefix} | *As medidas podem variar de 2cm a 3cm"
                 rows = [
@@ -353,7 +363,7 @@ class HTMLBuilder:
       <table class="brk-sg-table">
         <thead>
           <tr class="brk-sg-th-row">
-            <th>TAMANHO</th>
+            <th>IDADE / TAMANHO</th>
             <th>TÓRAX</th>
             <th>ALTURA</th>
             <th>MANGA</th>
@@ -2037,7 +2047,7 @@ class HTMLBuilder:
       background: {theme_bg};
     }}
     .brk-sg-card-header {{
-      background: #2e7d32;
+      background: {theme_color};
       color: #ffffff;
       padding: 12px 16px;
       border-radius: 10px 10px 0 0;
@@ -2267,19 +2277,17 @@ class HTMLBuilder:
 
         # Tabela de medidas inteligente em Markdown
         if is_kids:
-            md_parts.append("### 📐 Tabela de Medidas Infantil (02 a 16 Anos)\n")
-            m_header = "Manga Curta" if is_short_sleeve else "Manga Longa"
-            md_parts.append(f"| Idade / Tam | Tórax | Comprimento | {m_header} |")
+            md_parts.append("### 📐 Guia de Tamanhos Infantil (1 a 13 Anos | PP ao G2)\n")
+            md_parts.append("| Idade / Tamanho | Tórax | Altura | Manga |")
             md_parts.append("| :--- | :--- | :--- | :--- |")
             k_rows = [
-                ("02 Anos", "64 cm", "42 cm", "14 cm" if is_short_sleeve else "40 cm"),
-                ("04 Anos", "70 cm", "46 cm", "15 cm" if is_short_sleeve else "44 cm"),
-                ("06 Anos", "76 cm", "50 cm", "16 cm" if is_short_sleeve else "48 cm"),
-                ("08 Anos", "82 cm", "54 cm", "17 cm" if is_short_sleeve else "52 cm"),
-                ("10 Anos", "88 cm", "58 cm", "18 cm" if is_short_sleeve else "56 cm"),
-                ("12 Anos", "92 cm", "62 cm", "19 cm" if is_short_sleeve else "60 cm"),
-                ("14 Anos", "96 cm", "65 cm", "20 cm" if is_short_sleeve else "64 cm"),
-                ("16 Anos", "100 cm", "68 cm", "21 cm" if is_short_sleeve else "68 cm"),
+                ("1 a 2 Anos (PP)", "31 cm", "41 cm", "31 cm"),
+                ("2 a 3 Anos (P)", "33 cm", "45 cm", "35 cm"),
+                ("4 a 5 Anos (M)", "35 cm", "49 cm", "37 cm"),
+                ("6 a 7 Anos (G)", "38 cm", "52 cm", "39 cm"),
+                ("8 a 9 Anos (GG)", "39 cm", "55 cm", "42 cm"),
+                ("10 a 11 Anos (G1)", "41 cm", "58 cm", "44 cm"),
+                ("12 a 13 Anos (G2)", "43 cm", "61 cm", "45 cm"),
             ]
             for r in k_rows:
                 md_parts.append(f"| **{r[0]}** | {r[1]} | {r[2]} | {r[3]} |")

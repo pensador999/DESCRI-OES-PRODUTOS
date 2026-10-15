@@ -1723,26 +1723,65 @@ class TemplateEngine:
             return True
         return bool(re.search(r'(?:^|[-_.\s])(2|02|b)(?:[-_.\s]|masc|fem|inf|kids|bl|$)', fname_no_ts))
 
-    def _select_apparel_act_images(self, cdn_images: List[str]):
+    def _select_apparel_act_images(self, cdn_images: List[str], is_female: bool = False, is_kids: bool = False):
         if not cdn_images:
             return "", "", ""
         if len(cdn_images) == 1:
             return cdn_images[0], "", ""
 
+        # Filtragem inteligente de galerias mistas de família (MASC / FEM / INF no mesmo produto)
+        def _classify_img_audience(u: str):
+            fname = u.lower().split("?")[0].split("/")[-1]
+            has_masc = any(k in fname for k in ["masc", "man2", "homem"])
+            has_fem = any(k in fname for k in ["fem", "mulher"]) or bool(re.search(r'(?:^|[-_.\d])bl(?:[-_.\d]|$)', fname))
+            has_inf = any(k in fname for k in ["inf", "kids", "crianca", "juvenil"])
+            only_masc = has_masc and not has_fem and not has_inf
+            only_fem = has_fem and not has_masc and not has_inf
+            only_inf = has_inf and not has_masc and not has_fem
+            return has_masc, has_fem, has_inf, only_masc, only_fem, only_inf
+
+        working_images = list(cdn_images)
+        if is_kids or is_female or any(_classify_img_audience(u)[3:] != (False, False, False) for u in cdn_images):
+            preferred = []
+            compatible = []
+            for u in cdn_images:
+                has_masc, has_fem, has_inf, only_masc, only_fem, only_inf = _classify_img_audience(u)
+                if is_kids:
+                    if has_inf:
+                        preferred.append(u)
+                    if not only_masc and not only_fem:
+                        compatible.append(u)
+                elif is_female:
+                    if has_fem:
+                        preferred.append(u)
+                    if not only_masc and not only_inf:
+                        compatible.append(u)
+                else:
+                    if has_masc:
+                        preferred.append(u)
+                    if not only_fem and not only_inf:
+                        compatible.append(u)
+
+            ordered_compatible = preferred + [u for u in compatible if u not in preferred] if preferred else compatible
+            if len(ordered_compatible) >= 3:
+                working_images = ordered_compatible
+            elif len(ordered_compatible) >= 1:
+                working_images = ordered_compatible + [u for u in cdn_images if u not in ordered_compatible]
+
         # Ato 1 (Hero Frontal): evita foto de costas se houver foto frontal/não-costas disponível
-        img1 = cdn_images[0]
+        img1 = working_images[0]
         if self._is_back_view_url(img1):
             pure_front_candidates = [
-                u for u in cdn_images
+                u for u in working_images
                 if not self._is_back_view_url(u)
                 and any(k in u.lower().split("/")[-1] for k in ["frente", "01", "-1", "capa"])
                 and not any(p in u.lower().split("/")[-1] for p in ["persp", "zoom"])
             ]
             front_candidates = [
-                u for u in cdn_images
+                u for u in working_images
                 if not self._is_back_view_url(u) and any(k in u.lower().split("/")[-1] for k in ["frente", "01", "-1", "capa"])
             ]
-            non_back_candidates = [u for u in cdn_images if not self._is_back_view_url(u)]
+            non_back_candidates = [u for u in working_images if not self._is_back_view_url(u)]
             if pure_front_candidates:
                 img1 = pure_front_candidates[0]
             elif front_candidates:
@@ -1750,7 +1789,7 @@ class TemplateEngine:
             elif non_back_candidates:
                 img1 = non_back_candidates[0]
 
-        rem = [u for u in cdn_images if u != img1]
+        rem = [u for u in working_images if u != img1]
         if not rem:
             return img1, "", ""
         if len(rem) == 1:
@@ -1950,6 +1989,63 @@ class TemplateEngine:
 
         is_apparel = archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work", "pants_cargo_tactical")
 
+        # Contextual Intelligence Flags para Adaptação Narrativa e Seleção Semântica de Fotos
+        t_low = title.lower()
+        tags_list = tags if isinstance(tags, list) else [str(tags)]
+        tags_low = " ".join([str(t).lower() for t in tags_list])
+        body_low = (product.get("body_html") or "").lower()
+        all_info = f"{t_low} {tags_low} {body_low}"
+
+        sku_clean_for_flags = str(product.get("master_sku") or product.get("sku") or "").lower().strip()
+        is_fusion = is_apparel and (
+            any(w in t_low for w in ["fusion", "fusionx"]) or
+            "fusion" in sku_clean_for_flags or
+            "fusion" in tags_low
+        )
+        is_hybrid = is_apparel and (
+            any(w in t_low for w in ["hybrid"]) or
+            sku_clean_for_flags.startswith("hyb") or
+            "hybrid" in sku_clean_for_flags or
+            "hybrid" in tags_low
+        )
+        is_hooded = (is_apparel and any(w in t_low for w in ["capuz", "hood", "hoodie"])) or is_fusion or is_hybrid
+        is_kids_sku = is_apparel and (
+            sku_clean_for_flags.startswith("ci")
+            or bool(re.search(r'^(?:c0|ci|cf|cm|casual|adv|cadv|ccpbr|bp|hyb|fusion|cax|raglan)\d+i(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_clean_for_flags))
+        ) and not any(w in t_low for w in ["feminina", "feminino", "baby look", "babylook", "masculina", "masculino", "adulto"])
+        is_kids = is_apparel and (
+            any(w in t_low for w in ["infantil", "kids", "juvenil"])
+            or bool(re.search(r'\bmini\b', t_low))
+            or is_kids_sku
+        )
+        if any(w in t_low for w in ["adulto", "unissex adulto"]):
+            is_kids = False
+        is_segunda_pele = is_apparel and ("segunda pele" in t_low or sku_clean_for_flags.startswith("raglan"))
+        is_short_sleeve = is_apparel and (
+            any(w in t_low for w in ["manga curta", "manga-curta", "camiseta"])
+            or ("curta" in t_low and "manga" in t_low)
+            or (sku_clean_for_flags.startswith(("casual", "bp", "cm", "cadv", "cf")) and not sku_clean_for_flags.startswith(("cmb", "cbt")))
+        ) and not any(w in t_low for w in ["manga longa", "manga-longa"]) and not is_segunda_pele
+        is_has_glove = is_apparel and (any(w in t_low for w in ["com luva", "e luva", "luva integrada", "armorx"]) or sku_clean_for_flags.startswith("cax"))
+        is_female = (
+            any(w in t_low for w in ["feminina", "feminino", "baby look", "babylook", "mulher"]) or
+            "femin" in tags_low or
+            (is_apparel and bool(re.search(r'bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_clean_for_flags)))
+        ) and not is_kids
+        is_round_neck = (
+            is_apparel
+            and archetype_id != "shirts_button_work"
+            and not sku_clean_for_flags.startswith(("cmb", "cbt"))
+            and not any(w in t_low for w in ["botão", "botao", "colarinho", "xadrez", "camisa work"])
+            and (
+                is_segunda_pele
+                or is_short_sleeve
+                or any(w in t_low for w in ["gola careca", "gola redonda", "sem zíper", "sem ziper", "t-shirt", "camisa casual", "casual"])
+            )
+            and not any(w in t_low for w in ["com zíper", "com ziper"])
+        )
+        is_windbreaker = is_apparel and any(w in t_low for w in ["corta vento", "corta-vento", "windbreaker", "jaqueta", "anorak"]) and "rosa dos ventos" not in t_low
+
         # Tratamento Especial para Iscas e Produtos com Várias Variações (Split Media estrito para fishing_lures)
         is_lure = (archetype_id == "fishing_lures")
         variants = product.get("variants") or []
@@ -1970,7 +2066,7 @@ class TemplateEngine:
             else:
                 variations_summary = "Múltiplas variações e opções de cores disponíveis para escolha no anúncio."
         elif is_apparel:
-            img1, img2, img3 = self._select_apparel_act_images(cdn_images)
+            img1, img2, img3 = self._select_apparel_act_images(cdn_images, is_female=is_female, is_kids=is_kids)
         elif archetype_id == "cutlery_unique":
             img1, img2, img3 = self._select_cutlery_act_images(cdn_images, title)
         elif archetype_id == "fishing_tackle_gear" and "trava vara" in title.lower() and len(cdn_images) >= 3:
@@ -1990,55 +2086,25 @@ class TemplateEngine:
         act2 = dict(template["act2"])
         act3 = dict(template["act3"])
 
-        # Contextual Intelligence Flags para Adaptação Narrativa Dinâmica
-        t_low = title.lower()
-        tags_list = tags if isinstance(tags, list) else [str(tags)]
-        tags_low = " ".join([str(t).lower() for t in tags_list])
-        body_low = (product.get("body_html") or "").lower()
-        all_info = f"{t_low} {tags_low} {body_low}"
-        
-        sku_clean_for_flags = str(product.get("master_sku") or product.get("sku") or "").lower()
-        is_fusion = is_apparel and (
-            any(w in t_low for w in ["fusion", "fusionx"]) or
-            "fusion" in sku_clean_for_flags or
-            "fusion" in tags_low
-        )
-        is_hybrid = is_apparel and (
-            any(w in t_low for w in ["hybrid"]) or
-            sku_clean_for_flags.startswith("hyb") or
-            "hybrid" in sku_clean_for_flags or
-            "hybrid" in tags_low
-        )
-        is_hooded = (is_apparel and any(w in t_low for w in ["capuz", "hood", "hoodie"])) or is_fusion or is_hybrid
-        # is_kids só vale para vestuário: o texto/tabela infantil é de roupa (FPU 50+, Dry Fit, tórax/manga).
-        # Óculos, calçados etc. com "Infantil" no título NÃO podem receber essa narrativa.
-        is_kids = is_apparel and (any(w in t_low for w in ["infantil", "kids", "juvenil"]) or bool(re.search(r'\bmini\b', t_low)))
-        if any(w in t_low for w in ["adulto", "unissex adulto"]):
-            is_kids = False
-        is_segunda_pele = is_apparel and ("segunda pele" in t_low or sku_clean_for_flags.startswith("raglan"))
-        is_short_sleeve = is_apparel and (
-            any(w in t_low for w in ["manga curta", "manga-curta", "camiseta"])
-            or ("curta" in t_low and "manga" in t_low)
-            or sku_clean_for_flags.startswith(("casual", "bp", "cm"))
-        ) and not any(w in t_low for w in ["manga longa", "manga-longa"]) and not is_segunda_pele
-        is_has_glove = is_apparel and any(w in t_low for w in ["com luva", "e luva", "luva integrada"])
-        is_female = (
-            any(w in t_low for w in ["feminina", "feminino", "baby look", "babylook", "mulher"]) or
-            "femin" in tags_low or
-            (is_apparel and bool(re.search(r'bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_clean_for_flags)))
-        ) and not is_kids
-        is_round_neck = is_apparel and (
-            is_segunda_pele
-            or is_short_sleeve
-            or any(w in t_low for w in ["gola careca", "gola redonda", "sem zíper", "sem ziper", "t-shirt", "camisa casual", "casual"])
-        ) and not any(w in t_low for w in ["com zíper", "com ziper"])
+        # 0. Adaptação Corta-Vento / Jaqueta (Proteção aerodinâmica contra vento e respingos)
+        if is_windbreaker:
+            act1["tag"] = "Barreira Corta-Vento & Leveza"
+            act1["fa_icon"] = "fa-solid fa-wind"
+            act1["title"] = "PROTEÇÃO AERODINÂMICA CONTRA VENTO, FRIO LEVE E RESPINGOS"
+            act1["desc_tmpl"] = "Desenvolvido para bloquear rajadas de vento na navegação, na pilotagem ou nas manhãs frias no campo sem adicionar peso, o(a) {title} atua como um escudo térmico leve, compacto e resistente a respingos."
+            act2["tag"] = "Isolamento & Portabilidade"
+            act2["title"] = "TECIDO TÉCNICO REPELENTE À UMIDADE E DOBRA ULTRACOMPACTA"
+            act2["desc_tmpl"] = "Confeccionado em tecido plano técnico de alta densidade que corta o vento frio e preserva o equilíbrio térmico corporal, dobrando de forma compacta para transporte fácil na mochila, barco ou alforge."
+            act3["tag"] = "Fechamento & Vedação"
+            act3["title"] = "ZÍPER FRONTAL INTEGRAL, CAPUZ ANATÔMICO E PUNHOS ELÁSTICOS"
+            act3["desc_tmpl"] = "Equipado com fechamento frontal prático, punhos e barra com acabamento elástico que impedem a entrada de ar frio e costuras reforçadas de alta durabilidade."
 
-        # 1. Adaptação Kids / Infantil (Eliminação de "homem e mulher", foco em aventura e proteção suave)
-        if is_kids:
+        # 1. Adaptação Kids / Infantil (Seleção por Idade mantendo a referência de Tamanho PP ao G2)
+        elif is_kids:
             act1["tag"] = "Proteção Infantil & Conforto"
             act1["fa_icon"] = "fa-solid fa-child"
             act1["title"] = "CONFORTO E PROTEÇÃO SOLAR TOTAL PARA OS PEQUENOS AVENTUREIROS"
-            act1["desc_tmpl"] = "Desenvolvida especialmente para crianças e jovens exploradores, o(a) {title} oferece proteção solar máxima FPU 50+ com toque extra suave na pele, garantindo segurança, leveza e liberdade total para brincar e se divertir ao ar livre."
+            act1["desc_tmpl"] = "Desenvolvida especialmente para crianças e jovens exploradores com grade inteligente por faixa de idade (1 a 13 anos, mantendo a referência dos tamanhos PP ao G2), o(a) {title} oferece proteção solar máxima FPU 50+ com toque extra suave na pele, garantindo segurança, leveza e liberdade total para brincar ao ar livre."
 
             act2["tag"] = "Respirabilidade & Frescor"
             act2["fa_icon"] = "fa-solid fa-sun"
@@ -2054,13 +2120,17 @@ class TemplateEngine:
         # 1.1 Adaptação Segunda Pele Térmica / UV (RAGLAN)
         elif is_segunda_pele:
             act1["tag"] = "Segunda Pele Térmica & UV50+"
-            act1["title"] = "CONFORTO TÉRMICO, AJUSTE ANATÔMICO E PROTEÇÃO SOLAR UV50+"
-            act1["desc_tmpl"] = "Projetada para atuar como uma verdadeira segunda pele sob jaquetas, macacões ou no uso direto ao ar livre, a {title} mantém o equilíbrio térmico corporal, reduz o atrito com equipamentos e garante proteção solar FPU 50+ com liberdade total de movimentos."
+            if is_female:
+                act1["title"] = "MODELAGEM FEMININA ANATÔMICA, CONFORTO TÉRMICO E PROTEÇÃO UV50+"
+                act1["desc_tmpl"] = "Projetada sob medida para a anatomia feminina para atuar como uma verdadeira segunda pele sob jaquetas, macacões ou no uso direto ao ar livre, a {title} mantém o equilíbrio térmico corporal, reduz o atrito e garante proteção solar FPU 50+ com caimento acinturado impecável."
+            else:
+                act1["title"] = "CONFORTO TÉRMICO, AJUSTE ANATÔMICO E PROTEÇÃO SOLAR UV50+"
+                act1["desc_tmpl"] = "Projetada para atuar como uma verdadeira segunda pele sob jaquetas, macacões ou no uso direto ao ar livre, a {title} mantém o equilíbrio térmico corporal, reduz o atrito com equipamentos e garante proteção solar FPU 50+ com liberdade total de movimentos."
 
-        # 2. Adaptação Feminina (Corte anatômico e caimento sob medida)
-        elif is_female and archetype_id == "uv_performance" and not is_hooded:
+        # 2. Adaptação Feminina (Corte anatômico Baby Look em todas as linhas UV50+, incluindo FusionX, Hybrid e Capuz)
+        elif is_female and archetype_id == "uv_performance":
             act1["title"] = "MODELAGEM FEMININA ANATÔMICA COM CAIMENTO IMPECÁVEL"
-            act1["desc_tmpl"] = "Projetada sob medida para a anatomia feminina, a {title} combina corte acinturado esportivo, máxima liberdade de movimentos e proteção solar FPU 50+ com toque suave e elegante."
+            act1["desc_tmpl"] = "Projetada sob medida para a anatomia feminina, a {title} combina corte acinturado esportivo (Baby Look), máxima liberdade de movimentos e proteção solar FPU 50+ com toque suave e elegante."
 
         # 3. Adaptação Fusion (Capuz com Máscara Facial Integrada e Punhos com Dedeira - SEM ZÍPER)
         if is_fusion:
@@ -2149,12 +2219,12 @@ class TemplateEngine:
                 val = re.sub(r'punhos anatômicos[^,;.]*', 'mangas curtas reforçadas', val, flags=re.IGNORECASE)
                 val = re.sub(r'mangas raglan esportivas', 'mangas curtas com barra reforçada', val, flags=re.IGNORECASE)
 
-            # Kids: elimina jargão adulto
+            # Kids: elimina jargão adulto e explicita grade por idade + tamanho
             if is_kids:
                 val = re.sub(r'homem e da mulher do campo', 'pequenos aventureiros', val, flags=re.IGNORECASE)
                 val = re.sub(r'lida no campo|lida diária', 'atividades ao ar livre', val, flags=re.IGNORECASE)
                 if "modelagem" in lbl.lower():
-                    val = "Infantil / Juvenil anatômica confortável"
+                    val = "Infantil / Juvenil anatômica confortável (1 a 13 Anos | PP ao G2)"
 
             # Gola Redonda: elimina zíper
             if is_round_neck and not is_hooded:
@@ -2171,6 +2241,15 @@ class TemplateEngine:
                     val = "Punhos estendidos anatômicos com luva integrada para o dorso da mão"
 
             new_specs.append({"label": lbl, "value": val})
+
+        if is_windbreaker:
+            new_specs = [
+                {"label": "Construção", "value": "Tecido plano técnico Corta-Vento de alta densidade repelente a respingos"},
+                {"label": "Proteção", "value": "Barreira contra vento frio, sereno e radiação solar UV50+"},
+                {"label": "Fechamento & Capuz", "value": "Zíper frontal integral reforçado e capuz anatômico de proteção"},
+                {"label": "Punhos & Barra", "value": "Acabamento elástico anatômico para vedação contra entrada de vento"},
+                {"label": "Portabilidade", "value": "Ultraleve e dobrável (compacto para mochila, barco ou alforge)"}
+            ]
 
         if is_has_glove and not is_short_sleeve and not any("luva" in s["label"].lower() for s in new_specs):
             new_specs.append({"label": "Punhos / Luva", "value": "Punhos estendidos anatômicos com luva integrada para o dorso da mão"})
@@ -2509,9 +2588,14 @@ class TemplateEngine:
 
         # 11. Adaptação 360° para Calça Jeans / Denim (pants_cargo_tactical)
         elif archetype_id == "pants_cargo_tactical" and any(w in t_low for w in ["jeans", "denim"]):
+            is_fem_jeans = "feminina" in t_low or "feminino" in t_low
             act1["tag"] = "Denim Encorpado & Tradição"
-            act1["title"] = "JEANS DE ALTA GRAMATURA PARA A LIDA E O DIA A DIA"
-            act1["desc_tmpl"] = "Desenvolvida para suportar a rotina intensa no campo, viagens e uso casual com elegância rústica, a {title} une tecido Denim resistente a um corte anatômico que garante conforto na sela, na caminhonete ou na cidade."
+            act1["title"] = "JEANS COUNTRY FEMININO DE ALTA GRAMATURA E CAIMENTO ANATÔMICO" if is_fem_jeans else "JEANS DE ALTA GRAMATURA PARA A LIDA E O DIA A DIA"
+            act1["desc_tmpl"] = (
+                "Desenvolvida para unir a resistência do legítimo Jeans Country a uma modelagem anatômica que valoriza a silhueta feminina, a {title} garante conforto superior na sela, em rodeios ou no dia a dia."
+                if is_fem_jeans else
+                "Desenvolvida para suportar a rotina intensa no campo, viagens e uso casual com elegância rústica, a {title} une tecido Denim resistente a um corte anatômico que garante conforto na sela, na caminhonete ou na cidade."
+            )
             act2["tag"] = "Conforto & Mobilidade"
             act2["title"] = "CAIMENTO ESTRUTURADO COM LIBERDADE DE MOVIMENTOS"
             act2["desc_tmpl"] = "Modelagem tradicional pensada para não prender os movimentos ao agachar ou montar, com toque macio interno e excelente estabilidade dimensional após a lavagem."
@@ -2520,7 +2604,7 @@ class TemplateEngine:
             act3["desc_tmpl"] = "Equipada com 5 bolsos funcionais profundos, passantes largos para cinto country, zíper metálico de alta trava e costuras reforçadas nos pontos de maior tensão."
             new_specs = [
                 {"label": "Tecido Principal", "value": "Denim / Jeans de alta gramatura e resistência"},
-                {"label": "Modelagem", "value": "Tradicional / Country anatômica com ótimo caimento"},
+                {"label": "Modelagem", "value": "Country Feminina anatômica com cintura estruturada" if is_fem_jeans else "Tradicional / Country Masculina anatômica com ótimo caimento"},
                 {"label": "Bolsos", "value": "5 bolsos funcionais profundos com rebites de reforço"},
                 {"label": "Costuras & Cós", "value": "Pesponto reforçado e passantes largos para cinto"},
                 {"label": "Fechamento", "value": "Braguilha com zíper metálico reforçado e botão personalizado"},
@@ -2864,12 +2948,48 @@ class TemplateEngine:
                     {"label": "Tamanho", "value": "Único anatômico adaptável a qualquer formato de rosto e cabeça"}
                 ]
 
-        # 13. Adaptação 360° para Camisas de Botão Xadrez / UV50+ (shirts_button_work)
+        # 13. Adaptação 360° para Camisas de Botão Xadrez Country/Farm e Camisas Work UV50+ (shirts_button_work)
         elif archetype_id == "shirts_button_work":
-            if "xadrez" in t_low:
-                act1["title"] = "PADRONAGEM XADREZ CLÁSSICA E ESTRUTURA DE ALTA DURABILIDADE"
-            if any(w in t_low for w in ["uv", "uv50", "solar", "fpu"]) and not any("proteção" in s["label"].lower() for s in new_specs):
-                new_specs.append({"label": "Proteção Solar", "value": "Fator UV50+ integrado ao tecido"})
+            if "xadrez" in t_low and is_short_sleeve:
+                act1["tag"] = "Tradição Country & Frescor"
+                act1["title"] = "PADRONAGEM XADREZ CLÁSSICA E MANGAS CURTAS VENTILADAS"
+                act1["desc_tmpl"] = "Desenvolvida para unir a autêntica tradição do estilo Country e Farm ao frescor ideal para os dias quentes no campo, rodeios ou cidade, a {title} apresenta padronagem xadrez de fios tintos com caimento alinhado e confortável."
+                act2["tag"] = "Colarinho & Abotoamento"
+                act2["title"] = "COLARINHO ESTRUTURADO, BOTÕES PERSONALIZADOS E BOLSO FRONTAL"
+                act2["desc_tmpl"] = "Conta com fechamento frontal por botões de alta resistência, colarinho estruturado que mantém o alinhamento impecável e bolso frontal funcional no peito com acabamento de alfaiataria country."
+                act3["tag"] = "Mobilidade & Acabamento"
+                act3["title"] = "PALA TRASEIRA ANATÔMICA E COSTURAS REFORÇADAS"
+                act3["desc_tmpl"] = "Construída com mangas curtas de barra pespontada, pala traseira anatômica que favorece a movimentação dos ombros e tecido macio de alta durabilidade."
+                new_specs = [
+                    {"label": "Fechamento Frontal", "value": "Botões reforçados aplicados com costura em 'X'"},
+                    {"label": "Colarinho / Gola", "value": "Colarinho tradicional estruturado com entretela de sustentação"},
+                    {"label": "Mangas", "value": "Mangas curtas confortáveis com acabamento em pesponto duplo"},
+                    {"label": "Bolso Frontal", "value": "Bolso funcional no peito com acabamento country"},
+                    {"label": "Composição do Tecido", "value": "Algodão / Tricoline fio tinto respirável de alta durabilidade"},
+                    {"label": "Modelagem", "value": "Country / Farm confortável com ampla mobilidade nos braços"}
+                ]
+            elif "xadrez" in t_low:
+                if is_female:
+                    act1["tag"] = "Elegância Country Feminina"
+                    act1["title"] = "PADRONAGEM XADREZ CLÁSSICA E MODELAGEM FEMININA ACINTURADA"
+                    act1["desc_tmpl"] = "Projetada especialmente para valorizar a silhueta feminina com a autenticidade do estilo Country e Farm, a {title} combina padronagem xadrez clássica em tecido macio a um caimento acinturado elegante para o campo, rodeios e dia a dia."
+                else:
+                    act1["tag"] = "Estilo Country & Durabilidade"
+                    act1["title"] = "PADRONAGEM XADREZ CLÁSSICA E ESTRUTURA DE ALTA DURABILIDADE"
+                    act1["desc_tmpl"] = "Desenvolvida para quem vive a cultura do campo, rodeios e rotina agropecuária com elegância, a {title} traz padronagem xadrez clássica em tecido encorpado e macio, garantindo presença marcante e resistência superior."
+                act2["tag"] = "Abotoamento & Punhos"
+                act2["title"] = "ABOTOAMENTO FRONTAL CLÁSSICO, COLARINHO FIRME E PUNHOS ABOTOADOS"
+                act2["desc_tmpl"] = "Equipada com fechamento frontal integral por botões reforçados, colarinho estruturado de ótimo caimento e mangas longas com punhos abotoados ajustáveis."
+                new_specs = [
+                    {"label": "Fechamento Frontal", "value": "Botões reforçados aplicados com costura em 'X'"},
+                    {"label": "Colarinho & Punhos", "value": "Colarinho tradicional estruturado e punhos com abotoamento ajustável"},
+                    {"label": "Bolso Frontal", "value": "Bolso funcional no peito com acabamento country"},
+                    {"label": "Composição do Tecido", "value": "Algodão / Tricoline fio tinto macio e resistente"},
+                    {"label": "Modelagem", "value": "Country Feminina acinturada anatômica" if is_female else "Country / Farm confortável com folga estratégica nos braços"}
+                ]
+            else:
+                if any(w in t_low for w in ["uv", "uv50", "solar", "fpu"]) and not any("proteção" in s["label"].lower() for s in new_specs):
+                    new_specs.append({"label": "Proteção Solar", "value": "Fator UV50+ integrado ao tecido"})
 
         # 14. Adaptação 360° para Equipamentos de Camping, Náutica e Acessórios Específicos (accessories_general)
         elif archetype_id == "accessories_general":
@@ -3492,6 +3612,7 @@ class TemplateEngine:
             "has_multiple_variations": has_multiple_variations,
             "split_images": split_images,
             "variations_summary": variations_summary,
+            "store_key": store_key,
             "theme_color": theme_color,
             "theme_bg": theme_bg,
             "care_icon": care_icon,
@@ -3505,6 +3626,7 @@ class TemplateEngine:
             "info_care": template.get("info_care"),
             "split_sections": template.get("split_sections"),
             "is_kids": is_kids,
+            "is_female": is_female,
             "is_short_sleeve": is_short_sleeve,
             "is_hooded": is_hooded,
             "sku": sku,

@@ -1245,10 +1245,16 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
       ];
       tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Tórax / Circunferência</th><th>Comprimento Total</th><th>${mHeader}</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
     }
-    // 1.2 Camisas UV C0 Infantil (1 a 13 Anos)
-    else if (isKids || /infantil|kids|juvenil|criança|crianca/i.test(tLow) || /kids|inf/i.test(skuLow)) {
+    // 1.2 Camisas UV C0 Infantil (1 a 13 Anos | PP ao G2)
+    else if (
+      isKids
+      || /infantil|kids|juvenil|criança|crianca/i.test(tLow)
+      || /kids|inf/i.test(skuLow)
+      || ((skuLow.startsWith("ci") || /^(?:c0|ci|cf|cm|casual|adv|cadv|ccpbr|bp|hyb|fusion|cax|raglan)\d+i(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$/i.test(skuLow)) && !/feminina|feminino|baby look|babylook|masculina|masculino|adulto/i.test(tLow))
+    ) {
       guideTitle = "Guia de Tamanhos Infantil (1 a 13 Anos)";
       const badgeTitle = "INFANTIL";
+      tipText = "<strong>Escolha por Idade com Referência de Tamanho (PP ao G2):</strong> Na linha Infantil BRK, a seleção é guiada pela faixa de idade (1 a 13 Anos) mantendo a indicação do tamanho equivalente (PP ao G2). Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | Manga do ombro ao punho).";
       const shirtSubPrefix = archetypeId === "agro_field" ? "Camiseta Algodão Premium" : (isShortSleeve ? "Camisa Manga Curta UV50" : "Camisa Manga Longa UV50");
       const subtitle = `${shirtSubPrefix} | *As medidas podem variar de 2cm a 3cm`;
       const rows = [
@@ -1260,7 +1266,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
         ["10 a 11 Anos (G1)", "41 cm", "58 cm", "44 cm"],
         ["12 a 13 Anos (G2)", "43 cm", "61 cm", "45 cm"],
       ];
-      tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">${badgeTitle}</div><div class="brk-sg-subtitle">${subtitle}</div></div><table class="brk-sg-table"><thead><tr class="brk-sg-th-row"><th>TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
+      tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">${badgeTitle}</div><div class="brk-sg-subtitle">${subtitle}</div></div><table class="brk-sg-table"><thead><tr class="brk-sg-th-row"><th>IDADE / TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
     }
     // 1.3 Camisas UV C0 Feminina / Baby Look (PP ao G2)
     else if (/feminina|feminino|baby look|fem|babylook/i.test(tLow) || skuLow.includes("bl")) {
@@ -2160,21 +2166,59 @@ function isClientBackViewUrl(url, include03 = false) {
   return /(?:^|[-_.\s])(2|02|b)(?:[-_.\s]|masc|fem|inf|kids|bl|$)/i.test(fnameNoTs);
 }
 
-function selectClientApparelActImages(cdnImages) {
+function selectClientApparelActImages(cdnImages, isFemale = false, isKids = false) {
   if (!cdnImages || cdnImages.length === 0) return ["", "", ""];
   if (cdnImages.length === 1) return [cdnImages[0], "", ""];
 
-  let img1 = cdnImages[0];
+  const classifyImgAudience = (u) => {
+    const fname = (u || "").toLowerCase().split("?")[0].split("/").pop();
+    const hasMasc = ["masc", "man2", "homem"].some(k => fname.includes(k));
+    const hasFem = ["fem", "mulher"].some(k => fname.includes(k)) || /(?:^|[-_.\d])bl(?:[-_.\d]|$)/i.test(fname);
+    const hasInf = ["inf", "kids", "crianca", "juvenil"].some(k => fname.includes(k));
+    const onlyMasc = hasMasc && !hasFem && !hasInf;
+    const onlyFem = hasFem && !hasMasc && !hasInf;
+    const onlyInf = hasInf && !hasMasc && !hasFem;
+    return { hasMasc, hasFem, hasInf, onlyMasc, onlyFem, onlyInf };
+  };
+
+  let workingImages = [...cdnImages];
+  if (isKids || isFemale || cdnImages.some(u => { const c = classifyImgAudience(u); return c.onlyMasc || c.onlyFem || c.onlyInf; })) {
+    const preferred = [];
+    const compatible = [];
+    cdnImages.forEach(u => {
+      const { hasMasc, hasFem, hasInf, onlyMasc, onlyFem, onlyInf } = classifyImgAudience(u);
+      if (isKids) {
+        if (hasInf) preferred.push(u);
+        if (!onlyMasc && !onlyFem) compatible.push(u);
+      } else if (isFemale) {
+        if (hasFem) preferred.push(u);
+        if (!onlyMasc && !onlyInf) compatible.push(u);
+      } else {
+        if (hasMasc) preferred.push(u);
+        if (!onlyFem && !onlyInf) compatible.push(u);
+      }
+    });
+    const orderedCompatible = preferred.length > 0
+      ? [...preferred, ...compatible.filter(u => !preferred.includes(u))]
+      : compatible;
+    if (orderedCompatible.length >= 3) {
+      workingImages = orderedCompatible;
+    } else if (orderedCompatible.length >= 1) {
+      workingImages = [...orderedCompatible, ...cdnImages.filter(u => !orderedCompatible.includes(u))];
+    }
+  }
+
+  let img1 = workingImages[0];
   if (isClientBackViewUrl(img1)) {
-    const pureFrontCandidates = cdnImages.filter(
+    const pureFrontCandidates = workingImages.filter(
       u => !isClientBackViewUrl(u)
         && ["frente", "01", "-1", "capa"].some(k => u.toLowerCase().split("/").pop().includes(k))
         && !["persp", "zoom"].some(p => u.toLowerCase().split("/").pop().includes(p))
     );
-    const frontCandidates = cdnImages.filter(
+    const frontCandidates = workingImages.filter(
       u => !isClientBackViewUrl(u) && ["frente", "01", "-1", "capa"].some(k => u.toLowerCase().split("/").pop().includes(k))
     );
-    const nonBackCandidates = cdnImages.filter(u => !isClientBackViewUrl(u));
+    const nonBackCandidates = workingImages.filter(u => !isClientBackViewUrl(u));
     if (pureFrontCandidates.length > 0) {
       img1 = pureFrontCandidates[0];
     } else if (frontCandidates.length > 0) {
@@ -2184,7 +2228,7 @@ function selectClientApparelActImages(cdnImages) {
     }
   }
 
-  const rem = cdnImages.filter(u => u !== img1);
+  const rem = workingImages.filter(u => u !== img1);
   if (rem.length === 0) return [img1, "", ""];
   if (rem.length === 1) return [img1, rem[0], ""];
 
@@ -2305,6 +2349,20 @@ function getProductModeBHTML(liveP) {
     variationsSummary = "Múltiplas variações e opções de cores disponíveis para escolha no anúncio.";
   }
 
+  const tLowModal = (liveP.title || "").toLowerCase();
+  const skuLowModal = (liveP.sku || liveP.master_sku || "").toLowerCase().trim();
+  const tagsLowModal = (Array.isArray(liveP.tags) ? liveP.tags.join(" ") : (liveP.tags || "")).toLowerCase();
+  const isFusionModal = isApparel && (/\b(fusion|fusionx)\b/i.test(tLowModal) || /fusion/i.test(skuLowModal) || /fusion/i.test(tagsLowModal));
+  const isHybridModal = isApparel && (/\bhybrid\b/i.test(tLowModal) || /^hyb/i.test(skuLowModal) || /hybrid/i.test(skuLowModal) || /hybrid/i.test(tagsLowModal));
+  const isHoodedModal = (isApparel && /\b(capuz|hood|hoodie)\b/i.test(tLowModal)) || isFusionModal || isHybridModal;
+  const isKidsSkuModal = isApparel && (skuLowModal.startsWith("ci") || /^(?:c0|ci|cf|cm|casual|adv|cadv|ccpbr|bp|hyb|fusion|cax|raglan)\d+i(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$/i.test(skuLowModal)) && !/\b(feminina|feminino|baby look|babylook|masculina|masculino|adulto)\b/i.test(tLowModal);
+  const isKidsModal = isApparel && (/\b(infantil|kids|juvenil|mini)\b/i.test(tLowModal) || isKidsSkuModal) && !/\b(adulto|unissex adulto)\b/i.test(tLowModal);
+  const isSegundaPeleModal = isApparel && (tLowModal.includes("segunda pele") || skuLowModal.startsWith("raglan"));
+  const isShortSleeveModal = isApparel && (/\b(manga curta|manga-curta|camiseta)\b/i.test(tLowModal) || (tLowModal.includes("curta") && tLowModal.includes("manga")) || ((/^(casual|bp|cm|cadv|cf)/i.test(skuLowModal)) && !/^(cmb|cbt)/i.test(skuLowModal))) && !/\b(manga longa|manga-longa)\b/i.test(tLowModal) && !isSegundaPeleModal;
+  const isHasGloveModal = isApparel && (/\b(com luva|e luva|luva integrada|armorx)\b/i.test(tLowModal) || skuLowModal.startsWith("cax"));
+  const isFemaleModal = (/\b(feminina|feminino|baby look|babylook|mulher)\b/i.test(tLowModal) || /femin/i.test(tagsLowModal) || (isApparel && /bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$/i.test(skuLowModal))) && !isKidsModal;
+  const isRoundNeckModal = isApparel && archetypeId !== "shirts_button_work" && !/^(cmb|cbt)/i.test(skuLowModal) && !/\b(botão|botao|colarinho|xadrez|camisa work)\b/i.test(tLowModal) && (isSegundaPeleModal || isShortSleeveModal || /\b(gola careca|gola redonda|sem zíper|sem ziper|t-shirt|camisa casual|casual)\b/i.test(tLowModal)) && !/\b(com zíper|com ziper)\b/i.test(tLowModal);
+
   // Atribuição de imagens exclusivas por ato - ZERO DUPLICAÇÃO e Alinhamento Semântico
   let img1 = images[0] || "";
   let img2 = images[1] || "";
@@ -2314,24 +2372,12 @@ function getProductModeBHTML(liveP) {
     img2 = images[2] || "";
     img3 = images[3] || "";
   } else if (isApparel) {
-    [img1, img2, img3] = selectClientApparelActImages(images);
+    [img1, img2, img3] = selectClientApparelActImages(images, isFemaleModal, isKidsModal);
   } else if (archetypeId === "cutlery_unique") {
     [img1, img2, img3] = selectClientCutleryActImages(images, liveP.title || "");
   } else if (archetypeId === "fishing_tackle_gear" && (liveP.title || "").toLowerCase().includes("trava vara") && images.length >= 3) {
     [img1, img2, img3] = [images[0], images[2], images[1]];
   }
-
-  const tLowModal = (liveP.title || "").toLowerCase();
-  const skuLowModal = (liveP.sku || liveP.master_sku || "").toLowerCase();
-  const tagsLowModal = (Array.isArray(liveP.tags) ? liveP.tags.join(" ") : (liveP.tags || "")).toLowerCase();
-  const isFusionModal = isApparel && (/\b(fusion|fusionx)\b/i.test(tLowModal) || /fusion/i.test(skuLowModal) || /fusion/i.test(tagsLowModal));
-  const isHybridModal = isApparel && (/\bhybrid\b/i.test(tLowModal) || /^hyb/i.test(skuLowModal) || /hybrid/i.test(skuLowModal) || /hybrid/i.test(tagsLowModal));
-  const isHoodedModal = (isApparel && /\b(capuz|hood|hoodie)\b/i.test(tLowModal)) || isFusionModal || isHybridModal;
-  const isKidsModal = isApparel && /\b(infantil|kids|juvenil|mini)\b/i.test(tLowModal) && !/\b(adulto|unissex adulto)\b/i.test(tLowModal);
-  const isShortSleeveModal = isApparel && (/\b(manga curta|manga-curta)\b/i.test(tLowModal) || (tLowModal.includes("curta") && tLowModal.includes("manga"))) && !/\b(manga longa|manga-longa)\b/i.test(tLowModal);
-  const isHasGloveModal = isApparel && /\b(com luva|e luva|luva integrada)\b/i.test(tLowModal);
-  const isFemaleModal = (/\b(feminina|feminino|baby look|babylook|mulher)\b/i.test(tLowModal) || /femin/i.test(tagsLowModal) || (isApparel && /bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$/i.test(skuLowModal))) && !isKidsModal;
-  const isRoundNeckModal = isApparel && (/\b(gola careca|gola redonda|sem zíper|sem ziper|t-shirt)\b/i.test(tLowModal) || (/\bcamiseta\b/i.test(tLowModal) && !/\b(ziper|zíper)\b/i.test(tLowModal)));
 
   let blocks = liveP.narrative_blocks ? liveP.narrative_blocks.map(b => ({ ...b })) : null;
   if (!blocks || blocks.length === 0) {
@@ -2350,7 +2396,7 @@ function getProductModeBHTML(liveP) {
 
       if (isKidsModal) {
         act1Title = "CONFORTO E PROTEÇÃO SOLAR TOTAL PARA OS PEQUENOS AVENTUREIROS";
-        act1Desc = `Desenvolvida especialmente para crianças e jovens exploradores, o(a) ${formattedTitle} oferece proteção solar máxima FPU 50+ com toque extra suave na pele, garantindo segurança, leveza e liberdade total para brincar e se divertir ao ar livre.`;
+        act1Desc = `Desenvolvida especialmente para crianças e jovens exploradores com grade inteligente por faixa de idade (1 a 13 anos, mantendo a referência dos tamanhos PP ao G2), o(a) ${formattedTitle} oferece proteção solar máxima FPU 50+ com toque extra suave na pele, garantindo segurança, leveza e liberdade total para brincar ao ar livre.`;
         act2Title = "TECNOLOGIA DRY FIT QUE MANTÉM AS CRIANÇAS FRESCAS E SECAS";
         act2Desc = "Tecido tecnológico respirável que absorve e dissipa o suor rapidamente, evitando o superaquecimento e mantendo o corpo seco e confortável durante todas as brincadeiras e pescarias em família.";
         if (!isHoodedModal) {
@@ -2358,9 +2404,9 @@ function getProductModeBHTML(liveP) {
           act3Title = "COSTURAS PLANAS ANTI-ATRITO E MÁXIMA DURABILIDADE";
           act3Desc = "Construída com acabamento elástico de alta resistência que não pinica nem irrita a pele sensível das crianças, oferecendo caimento confortável que aguenta todas as aventuras infantis.";
         }
-      } else if (isFemaleModal && archetypeId === "uv_performance" && !isHoodedModal) {
+      } else if (isFemaleModal && archetypeId === "uv_performance") {
         act1Title = "MODELAGEM FEMININA ANATÔMICA COM CAIMENTO IMPECÁVEL";
-        act1Desc = `Projetada sob medida para a anatomia feminina, a ${formattedTitle} combina corte acinturado esportivo, máxima liberdade de movimentos e proteção solar FPU 50+ com toque suave e elegante.`;
+        act1Desc = `Projetada sob medida para a anatomia feminina, a ${formattedTitle} combina corte acinturado esportivo (Baby Look), máxima liberdade de movimentos e proteção solar FPU 50+ com toque suave e elegante.`;
       }
 
       if (isFusionModal) {
@@ -2579,8 +2625,8 @@ function getProductModeBHTML(liveP) {
   </div>`;
 
   const tLowTitle = (formattedTitle || liveP.title || "").toLowerCase();
-  const isKids = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId) && (liveP.is_kids !== undefined ? liveP.is_kids : (/\b(infantil|kids|juvenil|mini)\b/i.test(tLowTitle) && !/\b(adulto|unissex adulto)\b/i.test(tLowTitle)));
-  const isShortSleeve = liveP.is_short_sleeve !== undefined ? liveP.is_short_sleeve : (/\b(manga curta|manga-curta)\b/i.test(tLowTitle) && !/\b(manga longa|manga-longa)\b/i.test(tLowTitle));
+  const isKids = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId) && (liveP.is_kids !== undefined ? liveP.is_kids : isKidsModal);
+  const isShortSleeve = liveP.is_short_sleeve !== undefined ? liveP.is_short_sleeve : isShortSleeveModal;
 
   const quickBadgesHtml = buildClientQuickBadges(themeColor, themeBg, archetypeId, liveP);
   const sizeGuideHtml = buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortSleeve, liveP);
@@ -3091,7 +3137,7 @@ function getProductModeBHTML(liveP) {
       background: ${themeBg};
     }
     .brk-sg-card-header {
-      background: #2e7d32;
+      background: ${themeColor};
       color: #ffffff;
       padding: 12px 16px;
       border-radius: 10px 10px 0 0;
