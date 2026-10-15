@@ -74,7 +74,7 @@ def sync_to_github(custom_message=None):
         print("[4/5] Criando commit...")
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         commit_msg = custom_message or f"feat(catalog): atualizacao automatica das descricoes [{timestamp}]"
-        code, out, err = run_cmd(f'git commit -m "{commit_msg}"')
+        code, out, err = run_cmd(f'git commit -q -m "{commit_msg}"')
         if code == 0:
             print(f"  -> Commit realizado: {commit_msg}")
         else:
