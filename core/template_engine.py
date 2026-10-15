@@ -197,14 +197,14 @@ class TemplateEngine:
                 ],
                 "split_sections": [
                     {
-                        "img": "https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764952819862-13-Tags.webp",
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/13-Tags.webp?v=1785788893",
                         "title": "PRODUTO PREMIUM BRK",
                         "highlight": "Cada chapéu BRK é desenvolvido pensando na proteção de quem enfrenta longas jornadas ao ar livre.",
                         "p1": "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem padrão de proteção solar certificado.",
                         "p2": "Construído com materiais leves e resistentes, oferece o máximo de conforto térmico para pescarias e trabalho sob sol forte."
                     },
                     {
-                        "img": "https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764962764537-CAIXA-BRK.webp",
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/CAIXA-BRK.webp?v=1785788895",
                         "title": "ENTREGA SEGURA BRK",
                         "highlight": "A sua experiência começa antes mesmo de abrir a caixa.",
                         "p1": "O chapéu é enviado em embalagem protegida BRK, projetada para evitar deformações na aba durante o transporte.",
@@ -287,14 +287,14 @@ class TemplateEngine:
                 ],
                 "split_sections": [
                     {
-                        "img": "https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764952819862-13-Tags.webp",
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/13-Tags.webp?v=1785788893",
                         "title": "PRODUTO PREMIUM BRK",
                         "highlight": "Cada boné BRK é desenvolvido pensando no pescador que vive a pesca esportiva intensamente.",
                         "p1": "As etiquetas exclusivas BRK reforçam a autenticidade do produto e garantem que você está usando um item de alta performance.",
                         "p2": "Da escolha dos materiais ao acabamento final, tudo é pensado para entregar conforto, durabilidade e estilo em qualquer pescaria."
                     },
                     {
-                        "img": "https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764962764537-CAIXA-BRK.webp",
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/CAIXA-BRK.webp?v=1785788895",
                         "title": "ENTREGA SEGURA BRK",
                         "highlight": "A sua experiência começa antes mesmo de abrir a caixa.",
                         "p1": "O boné é enviado em embalagem protegida e personalizada BRK, pensado para chegar até você em perfeitas condições.",
@@ -783,14 +783,14 @@ class TemplateEngine:
                 ],
                 "split_sections": [
                     {
-                        "img": "https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764952819862-13-Tags.webp",
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/13-Tags.webp?v=1785788893",
                         "title": "PRODUTO PREMIUM BRK",
                         "highlight": "A tradição e o orgulho do campo em cada detalhe artesanal.",
                         "p1": "Desenvolvido com rigor técnico para quem valoriza a autêntica vida sertaneja.",
                         "p2": "Estrutura nobre, acabamento de precisão e caimento perfeito para cavalgadas e ocasiões especiais."
                     },
                     {
-                        "img": "https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764962764537-CAIXA-BRK.webp",
+                        "img": "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/CAIXA-BRK.webp?v=1785788895",
                         "title": "ENTREGA SEGURA NA CAIXA",
                         "highlight": "A sua experiência começa antes mesmo de abrir a caixa.",
                         "p1": "O chapéu é embalado com proteção reforçada contra amassados para preservar 100% da sua modelagem original.",

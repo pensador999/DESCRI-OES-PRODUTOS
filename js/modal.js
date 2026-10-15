@@ -2118,7 +2118,7 @@ ${cuidadosLi}
     <!-- 1ª seção: Etiquetas BRK (FOTO -> TEXTO) -->
     <div class="brk-cap-split">
       <div class="brk-cap-split-image">
-        <img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764952819862-13-Tags.webp" alt="Etiquetas BRK aplicadas em produtos originais">
+        <img src="https://cdn.shopify.com/s/files/1/0628/1445/3826/files/13-Tags.webp?v=1785788893" alt="Etiquetas BRK aplicadas em produtos originais">
       </div>
       <div class="brk-cap-split-content">
         <h2>PRODUTO PREMIUM BRK</h2>
@@ -2131,7 +2131,7 @@ ${cuidadosLi}
     <!-- 2ª seção: Caixa / Entrega (TEXTO <- FOTO) -->
     <div class="brk-cap-split reverse">
       <div class="brk-cap-split-image">
-        <img src="https://use-brk-images-s3.s3.us-east-1.amazonaws.com/1764962764537-CAIXA-BRK.webp" alt="Caixa personalizada BRK para envio seguro">
+        <img src="https://cdn.shopify.com/s/files/1/0628/1445/3826/files/CAIXA-BRK.webp?v=1785788895" alt="Caixa personalizada BRK para envio seguro">
       </div>
       <div class="brk-cap-split-content">
         <h2>ENTREGA SEGURA BRK</h2>

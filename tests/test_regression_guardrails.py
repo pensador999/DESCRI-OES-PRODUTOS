@@ -721,7 +721,8 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         self.assertIn("Design Exclusivo", html_bone)
         self.assertIn("PRODUTO PREMIUM BRK", html_bone)
         self.assertIn("ENTREGA SEGURA BRK", html_bone)
-        self.assertIn("1764962764537-CAIXA-BRK.webp", html_bone)
+        self.assertIn("CAIXA-BRK.webp", html_bone)
+        self.assertNotIn("use-brk-images-s3", html_bone)
 
         # 2. Chapéu Safári
         prod_safari = {"id": 21, "title": "Chapéu de Pesca Australiano BRK com Protetor de Nuca UV50+", "master_sku": "CHP01"}
