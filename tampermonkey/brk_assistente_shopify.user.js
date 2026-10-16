@@ -566,6 +566,17 @@
       if (currentHtml.includes("1 a 2 Anos")) {
         reasons.push("Tabela Infantil antiga (sem idade 2 a 13 Anos)");
       }
+      // Contingência Anti-Duplicação da 1ª Foto na Descrição
+      const editorImgMatches = Array.from(currentHtml.matchAll(/<img[^>]+src=["']([^"']+)["']/gi)).map(m => m[1].split("?")[0].toLowerCase());
+      if (editorImgMatches.length > new Set(editorImgMatches).size) {
+        reasons.push("Foto repetida na descrição");
+      } else if (prod && Array.isArray(prod.cdn_images) && prod.cdn_images.length > 0 && editorImgMatches.length >= 2) {
+        const officialRoots = new Set(prod.cdn_images.map(u => String(u).split("?")[0].toLowerCase()));
+        const hasPurgedDup = editorImgMatches.some(u => u.includes("productonchannel") && !officialRoots.has(u));
+        if (hasPurgedDup) {
+          reasons.push("1ª foto duplicada pela Shopify no Ato 2 (corrigida pelo Modo B)");
+        }
+      }
       // Verificar se a cor da loja está correta no HTML do editor
       const themeMarkers = currentTheme.markers || ["#0284c7"];
       const hasStoreColor = themeMarkers.some(color => currentHtml.toLowerCase().includes(color.toLowerCase()));

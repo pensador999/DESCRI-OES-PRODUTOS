@@ -147,28 +147,34 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
         "brk_motors": ("#ea580c", "#f97316"),
     }.get(store_key, ("#0284c7", "#00a8ff"))
 
-    # Se já tem o formato oficial correspondente e atualizado (Fase 5/6), reaproveita direto
+    # Se já tem o formato oficial correspondente e atualizado (Fase 5/6/7), verifica saúde de imagens e reaproveita
+    engine, builder = get_engine_and_builder()
     if raw_b and len(raw_b.strip()) > 500 and "<!-- BRK-MODO-B" in raw_b and "use-brk-images-s3" not in raw_b:
+        img_srcs = re.findall(r'<img[^>]+src=["\']([^"\']+)["\']', raw_b, re.I)
+        img_roots = [u.split("?")[0].lower() for u in img_srcs]
+        has_dup_imgs = len(img_roots) != len(set(img_roots))
+        if not has_dup_imgs and engine and hasattr(engine, "KNOWN_SHOPIFY_DUP_IMAGE_TOKENS"):
+            has_dup_imgs = any(tok in u for u in img_roots for tok in engine.KNOWN_SHOPIFY_DUP_IMAGE_TOKENS)
         has_store_color = any(c in raw_b for c in expected_theme_marker)
-        if is_cap_or_hat:
-            if "brk-cap-description" in raw_b and has_store_color:
-                return raw_b
-        elif not is_uv:
-            if has_store_color:
-                return raw_b
-        else:
-            has_new_sg = any(term in raw_b for term in ["49,5 cm", "Baby Look", "2 Anos", "1 a 2 Anos", "brk-sg-subtitle"]) and "ALTURA" in raw_b
-            engine, builder = get_engine_and_builder()
-            is_ready = engine.is_ready_delivery(p) if engine else False
-            expected_prazo = "Pronta entrega" if is_ready else "10 dias úteis"
-            has_correct_prazo = expected_prazo in raw_b
+        if not has_dup_imgs:
+            if is_cap_or_hat:
+                if "brk-cap-description" in raw_b and has_store_color:
+                    return raw_b
+            elif not is_uv:
+                if has_store_color:
+                    return raw_b
+            else:
+                has_new_sg = any(term in raw_b for term in ["49,5 cm", "Baby Look", "2 Anos", "1 a 2 Anos", "brk-sg-subtitle"]) and "ALTURA" in raw_b
+                is_ready = engine.is_ready_delivery(p) if engine else False
+                expected_prazo = "Pronta entrega" if is_ready else "10 dias úteis"
+                has_correct_prazo = expected_prazo in raw_b
 
-            sku_low = sku_str.lower()
-            is_fusion_or_hyb = "fusion" in title_l or "fusion" in sku_low or "hybrid" in title_l or sku_low.startswith("hyb")
-            has_no_zipper_violation = not is_fusion_or_hyb or (not bool(re.search(r'\b(zíper|ziper)\b', raw_b, re.I)))
+                sku_low = sku_str.lower()
+                is_fusion_or_hyb = "fusion" in title_l or "fusion" in sku_low or "hybrid" in title_l or sku_low.startswith("hyb")
+                has_no_zipper_violation = not is_fusion_or_hyb or (not bool(re.search(r'\b(zíper|ziper)\b', raw_b, re.I)))
 
-            if "Detalhes Técnicos" in raw_b and has_new_sg and has_correct_prazo and has_no_zipper_violation and has_store_color:
-                return raw_b
+                if "Detalhes Técnicos" in raw_b and has_new_sg and has_correct_prazo and has_no_zipper_violation and has_store_color:
+                    return raw_b
 
     engine, builder = get_engine_and_builder()
     if engine and builder:
@@ -176,7 +182,10 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
             detected_arch = arch_id or engine.detect_archetype(
                 p.get("title", ""), p.get("category", ""), p.get("tags", []), vendor=p.get("vendor", ""), sku=sku_str
             )
-            images = p.get("gallery") or p.get("cdn_images") or []
+            raw_images = p.get("images") or p.get("gallery") or p.get("cdn_images") or []
+            images = engine._sanitize_and_dedup_images(raw_images, archetype_id=detected_arch, title=p.get("title", ""))
+            p["cdn_images"] = images
+            p["gallery"] = images
             narrative = engine.generate_narrative_from_template(p, detected_arch, images, store_key=store_key)
             compiled_b = builder.build_shopify_html(narrative)
             p["mode_b_html"] = compiled_b
@@ -412,13 +421,11 @@ class handler(BaseHTTPRequestHandler):
                 print(f"[!] Fallback live lookup falhou para ID={p_id} Handle={p_handle}: {ex}")
 
             if live_p:
-                raw_imgs = [img.get("src") if isinstance(img, dict) else img for img in (live_p.get("images") or []) if img]
-                dedup_imgs, seen_r = [], set()
-                for u in raw_imgs:
-                    r = u.split("?")[0].lower()
-                    if r not in seen_r:
-                        seen_r.add(r)
-                        dedup_imgs.append(u)
+                engine_inst, _ = get_engine_and_builder()
+                if engine_inst:
+                    dedup_imgs = engine_inst._sanitize_and_dedup_images(live_p.get("images") or [], title=live_p.get("title", ""))
+                else:
+                    dedup_imgs = [img.get("src") if isinstance(img, dict) else img for img in (live_p.get("images") or []) if img]
                 variants = live_p.get("variants") or []
                 v_skus = [str(v.get("sku") or "").strip() for v in variants if v.get("sku")]
                 master_s = v_skus[0].split("-")[0] if v_skus else ""
@@ -462,13 +469,15 @@ class handler(BaseHTTPRequestHandler):
                             if live_data.get("title"):
                                 found_product["title"] = live_data["title"]
                             if live_data.get("images"):
-                                raw_imgs = [img.get("src") if isinstance(img, dict) else img for img in live_data["images"] if img]
-                                dedup_imgs, seen_r = [], set()
-                                for u in raw_imgs:
-                                    r = u.split("?")[0].lower()
-                                    if r not in seen_r:
-                                        seen_r.add(r)
-                                        dedup_imgs.append(u)
+                                engine_inst, _ = get_engine_and_builder()
+                                if engine_inst:
+                                    dedup_imgs = engine_inst._sanitize_and_dedup_images(
+                                        live_data["images"],
+                                        archetype_id=found_product.get("archetype_id", "uv_performance"),
+                                        title=live_data.get("title") or found_product.get("title", "")
+                                    )
+                                else:
+                                    dedup_imgs = [img.get("src") if isinstance(img, dict) else img for img in live_data["images"] if img]
                                 if dedup_imgs:
                                     found_product["images"] = live_data["images"]
                                     found_product["cdn_images"] = dedup_imgs

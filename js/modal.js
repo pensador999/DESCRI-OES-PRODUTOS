@@ -54,8 +54,8 @@ function openProductModal(product) {
   const thumbsContainer = document.getElementById("modal-gallery-thumbs");
   if (thumbsContainer) {
     thumbsContainer.innerHTML = "";
-    const rawImgs = product.cdn_images || product.gallery || (product.images || []).map(i => i.src || i) || [];
-    const imgs = [...new Set(rawImgs.filter(u => typeof u === "string" && u.trim().length > 0))];
+    const rawImgs = (product.images && product.images.length > 0) ? product.images : (product.cdn_images || product.gallery || []);
+    const imgs = sanitizeAndDedupClientImages(rawImgs, product.archetype_id, product.title);
     const countBadge = document.getElementById("modal-photos-count-badge");
     if (countBadge) countBadge.innerText = imgs.length + " Foto(s) Oficiais";
     imgs.forEach((url, idx) => {
@@ -104,7 +104,7 @@ async function syncLiveProductImages(btn) {
       if (resp.ok) {
         const data = await resp.json();
         if (data && data.product && data.product.images) {
-          newImgs = data.product.images.map(i => (typeof i === "object" ? i.src : i)).filter(Boolean);
+          newImgs = sanitizeAndDedupClientImages(data.product.images, p.archetype_id, data.product.title || p.title);
         }
       }
     } catch (netErr) {
@@ -129,8 +129,8 @@ async function syncLiveProductImages(btn) {
       throw new Error("Nenhuma foto encontrada na vitrine online da Shopify.");
     }
 
-    // Desduplicar fotos preservando a ordem oficial da Shopify
-    const uniqueImgs = [...new Set(newImgs)];
+    // Desduplicar fotos com contingência anti-duplicação da 1ª foto na Shopify
+    const uniqueImgs = sanitizeAndDedupClientImages(newImgs, p.archetype_id, p.title);
     p.images = uniqueImgs.map((src, i) => ({ id: i, src: src }));
     p.cdn_images = uniqueImgs;
     p.gallery = uniqueImgs;
@@ -1398,6 +1398,352 @@ function buildClientTrackingMarker(sku, archetypeId) {
   return `<!-- BRK-MODO-B v${MODO_B_VERSION} | sku:${clean(sku)} | molde:${clean(archetypeId)} -->`;
 }
 
+const KNOWN_SHOPIFY_DUP_IMAGE_TOKENS = new Set([
+  "0130fa478fe94fbd808e04a745ee4a96",
+  "02539031efdb45bf80aa2ff07750588e",
+  "02bce54ffdae4737bb5cb3e65005a9ed",
+  "074d5ba735b4483990428b74a35b7ed1",
+  "07f53a4c219149f4ae6734d196d54620",
+  "0900789cc8c1460abd7df610904c4b2d",
+  "09b4d40da2274d05b2fd0c2c5d868a55",
+  "09c44b69f2b649ef9d8231a30021d36a",
+  "0b12bc26bd6d4a4da12ee35cc0d3c616",
+  "0b6247882ff24f63a7d106240fe5bd89",
+  "0bd070689a8f4402be998734076dd2c8",
+  "0bd1ffe19a9d47158d0e9e1750def8cd",
+  "0c5e319cca3b40f6897bf96d9577a79f",
+  "0e23c5eea4be458e92e74f121ec48b39",
+  "0e3d4728d00a4c92970906d3311d6408",
+  "0fb7c8ba7f0840c6911a0aebc7d1cf5a",
+  "109a04128bc948b9a56797e0f732b00f",
+  "10d106b973e3438286b054bf3e9f5c12",
+  "119a7881885f43eeab36697519b2affe",
+  "123ecc4f111f41688371d047a376887c",
+  "1420181cbd1043e884b6094186b0f526",
+  "1475b5209eab42b79cde7956bb0e76ab",
+  "1750954608038-01_masc.jpg",
+  "1750954608038-01_masc_91379c43-6657-4f6a-9d59-f80edaabe345.jpg",
+  "1750954608038-01_masc_a1e40c2a-873f-4d53-9122-870039114d3b.jpg",
+  "1750954608038-01_masc_cae84974-db9e-4cf5-bba1-78e49197cbdf.jpg",
+  "1750954608038-01_masc_d4332740-c512-4c78-8c0f-5e87e5c859dc.jpg",
+  "1750956158411-01_masc.jpg",
+  "1750956158411-01_masc_1fa45ffb-b5f4-4d26-879d-4a29deae6abf.jpg",
+  "1750956158411-01_masc_2314255d-07d1-466b-bd3d-de4cd2b620a7.jpg",
+  "1750956158411-01_masc_8efe0125-a8cc-4ce6-abe7-a3f283414190.jpg",
+  "1750956158411-01_masc_dfe0103b-9fa8-4bdb-ba1e-4f9d440ca513.jpg",
+  "1752686429164-8_frente.jpg",
+  "1752686430113-9_costas.jpg",
+  "1a42261505774a85820f21db66796dc9",
+  "1b32fa89d94d46ac82a8db5f0a9b081b",
+  "1b35d5d1a2e54303bc6065f224a792c3",
+  "1f419c603ecc426b828ee12fce2d45b6",
+  "200845a16d7441d0855fb6329afce98d",
+  "2017048dd2444a01a1dc6c3df73a3957",
+  "2139af2a6d544758920a32a55cdfb30c",
+  "2202db9f16554b568b1c176552a25748",
+  "22b981cd6d8545cebf8381ccb8345083",
+  "2429e08baf0a466bb0750fedf65f3838",
+  "24838a29cc8244ac8664a032f3df232a",
+  "27b94edbeb7c450e98ee8dbc19fb41f9",
+  "2819e7f2c7f64ef4947388c495ea5392",
+  "2920f776fd8e4428929702b9eb8eec45",
+  "2b50f7c907054a5d95898bb0ce0ed105",
+  "2be597f4817a4d9abfd0b8d0af8bea0b",
+  "2bfaabf2469f4b59b6af1a36419f12eb",
+  "2e34835beffb4c6aa34f2899bf5edd91",
+  "2e6e3e83159d4fcf85d1094f4179d73b",
+  "2f20b7136d2a42ceb42cb48b4a7367a3",
+  "2f308d8d89e4447db1eb726596554dc6",
+  "2f5e84430f264a3c9d39062d5b940611",
+  "2fc34f0b0156487fb0ce14ac31bab947",
+  "333ecce931d743d9afc42368942a886a",
+  "33b4b44ea9cf4be0899966e3809c95e9",
+  "341c9efb19a44453a9993015ffb22db1",
+  "360991b7830e440fa55e68926bcdf4b4",
+  "366d55c7ea3e46aaad0d60fcd3d0f9b5",
+  "36901243a1fe4d5bb5654529e78e183f",
+  "3735795d965b439eb86a5b89ed4c590d",
+  "37e780617282406c800fd178a5b61a7f",
+  "388b8179206d4d98852eb1cdbcda1fd6",
+  "39b168f6f7c54e66835cda4f45e6e3db",
+  "3d9adeab42e543acace85e28d34079b5",
+  "3e1b3c9de58943c685da0ead456752a9",
+  "409bce9db3624834af448d3120a63c12",
+  "43b261897af24ba3b4a103bdfc64e788",
+  "46727814b21e45f6883a218a944d0f9a",
+  "4a10d6b747254e1685c0565f2f4867df",
+  "4b01c34c8d6e477eb6a7cdff4d7e6666",
+  "4c2921805fcd4187b1b2039d8bf521d2",
+  "4c510b958cce45718e74cd86389229f1",
+  "4cb5be6dbd2b4618b1e7da8d55c64145",
+  "4d79af9439ab459dbf5413881e64dd6e",
+  "4eda9bfd52894efc9d64796c6ba6b513",
+  "4f7c178c274a4de59c7efa679b0296da",
+  "4f84e2aad02f46efbf1e68ca2a954aad",
+  "4fcdc6f74baf485d8a3b61241e59056b",
+  "53248c610b324174a15c5e29c37b8ae7",
+  "54374e8640964923916a8c79166b6f1e",
+  "5575f62ca4014656ab4fbc7f036a90a9",
+  "5607730a884f4af0a4f2db6ab6e3895e",
+  "56a03f9923464be4b38febd23f085242",
+  "576d2723fe1342c1bfe07d2a303c869d",
+  "59674c7c8efe483084a090c9a02183e9",
+  "599a7fdfed5d4df0a9964f2bec1e0902",
+  "59b85d0331884bbfa63b0103d1a9cb2f",
+  "5c2cf6a5f8ee447d902760c873b81368",
+  "5d33e1fbdcdd436cb9f9a9d87d292005",
+  "5e51f4a3e2ee49ffa871fad9bcaa4fcf",
+  "5fb20ebea1914f3090e46410fdf66b86",
+  "617fa9e526914c898d26e0abe5878dd6",
+  "63a10590d393408dbdc086bd8f1173d6",
+  "644d0ef00c5845db9619b7bc5455d5eb",
+  "663d68eae93847bfaa8622da60651504",
+  "66d05fc41cae4f5ab799cb61b1041102",
+  "67a247e2f67848f5af7543adf8a1fff4",
+  "69cc449c95d148dcb271f7b5127cc57f",
+  "6bd5f20f2f484faea8da46cb2a004485",
+  "6c584b43b17e4708ab5a853661b19184",
+  "6e540ab30fb14ed69b1b73edc500c9f1",
+  "6e691a1ac6e048a7821b8bcf499acd13",
+  "6f5c474f9c594489875f083a0bb177fc",
+  "70873852b5e045e8be6cc8c3e35317d3",
+  "70fdf10f6fd244f4a074997f7aed4cbc",
+  "72b0431e143e4981af6a0e09617b261c",
+  "738c36cd8db64a099a172242b7cdd099",
+  "73f2a135929c42709ab16646a4f8cb8d",
+  "756600c792604ae1ac5d756ff5f77199",
+  "773234af5942435197abf66f209860e1",
+  "78bd16a7c3744d0aac11bda274bd369a",
+  "792d1cd7f1c648859e48a0b77253323f",
+  "792fc6ff6baa495184bfb90eaf9940e1",
+  "7ce3f9c005f34642bdd3f94b7b8b0993",
+  "7d612095efce48e59bc0eba6a988da16",
+  "7fc2b61c8b5c4fd29c3255b3ed8be5a0",
+  "80f2837593b1469fb55b21e73b347566",
+  "81481598901048c4bf7cd4cfc8b61548",
+  "8262dbf88f0549ec95ef6a60e76ceb3e",
+  "82ee07f87b934e0f9a345ba530e57a0b",
+  "83df9409d1c54d3791ac88fe037050e5",
+  "85d1baf420ae40d99ef62a94403c540b",
+  "870ffc7c817d4d879a76ec5e4e0b4525",
+  "87c4e0e271eb4d5cab59cb100346a8b0",
+  "87e0198755514d75a106b4fcceec1870",
+  "880019dbae7c40479a9e7d592d783225",
+  "8b14d4f17c564a1d89b391e38e9b7a93",
+  "8d6f9e9fe5bd48eb9bc408a08162abdb",
+  "8ddd73ca7e054abaab34e962ccd07f2f",
+  "8ef0dbfea2ae4182bcd8b1892a15c238",
+  "8ef33820b0574209b3aec89a81331f56",
+  "8efa6c227fb541c2b48134003438dc6d",
+  "8f3324f3600945f3891f80198ab483a4",
+  "9124809cfc1746f6afb48bfbfd86ef9a",
+  "924d0c66d64041899728ab18771677a0",
+  "964df29bfaf84a0abd2356c784a1d82f",
+  "97065dd51b0f4957bcddb1886e6c461d",
+  "97e753a3c4844448a3dec11c3e1c29c9",
+  "98b58fc3cfaa4ff89a31df2d1323bd48",
+  "9a943601f8f24f66add5fe52dade723d",
+  "9aa15896d03f44f5b4ad94f6fa90af88",
+  "9b8fe3c4edc147d2b31e1e1dcfb8f534",
+  "9bf8e1e957a34492b41485b6a470cd98",
+  "9c0bd95bc2904bd5961ee88314dc5383",
+  "9c1284001d9944608acc2dae4a36c888",
+  "9d8931bd154b40bebe804a1d06c99e34",
+  "9dd8f5d344e54e87bfc2251b6b675d55",
+  "9e42b6851079451e9cb456356529cf52",
+  "9ea61be537964c43be14efb42f20cd9a",
+  "a00f3f91d0024158bcd065ce2025f179",
+  "a085713739a24f92975fa42a48c893c3",
+  "a0ec6f9ce03c401b948a291b7f3c8119",
+  "a1ef49e2e2404cfd96f3462db4ecd911",
+  "a3354d559c064477a566d0399934e3b6",
+  "a3b3db5355344e44b9e5194a46e1af91",
+  "a41e2520f0334d45a52c744412166c0b",
+  "a50e3d52ea2e42b08b6a8307c114e8c9",
+  "a5969d79260840d4859ab293178c5c75",
+  "a5fc231c2ee04fdebede6c7446c8d185",
+  "a957d576889045ad97ce8d6228895e57",
+  "aabc408c343040e1986dc28b382a1b8f",
+  "aba6a317ae514ba7b18e77ac0610deab",
+  "ac5d7aac75c54e239a8ac3541d4a20bf",
+  "ad6c1d776939419395d0d408f843891c",
+  "ad6ebca104e94248b28d2e6f2609cb97",
+  "ae98edd304924309b69af0881c126f89",
+  "b07902021382425e873c07431563bcbc",
+  "b12b03ea038d4cc289191d32487528d9",
+  "b1560d73013547f9ad239a557e9daa80",
+  "b30c206c171f469792b516ba4e3d442a",
+  "b3a155fe185e45c9ab05f66960d09512",
+  "b64e144795e64b258dab792411e8fe17",
+  "b7d9df5733b14850a1fb74862ab74e18",
+  "b847dcad60e4437787f4afebc28a45d1",
+  "b8f5b75cab344afbbbdfd59bcc21a6c0",
+  "b91380e34dfe48a98ec184d66486cb54",
+  "be5534ff14a24ef79cfcd54de1a5b16e",
+  "bf5c9610034f4fc7839736654846ebfa",
+  "bf7493bde73d477f98e254fb15e42025",
+  "bfb14f0ae7dd4addae1d9b091bd50342",
+  "bfd6a01a86a34b91acde28c3d7d6947e",
+  "bff288ad7be84bb4987c10741114419f",
+  "c14f205a2cd646e3aa09b36762639610",
+  "c15674b7eb9941f886f47d82df5305bc",
+  "c15f012455fc4be395e4a98c0bd4e574",
+  "c2376731105c4cfb9b94f2517a4a179e",
+  "c2fe47b2142f4fafa377941743881abe",
+  "c42f922b43f74651859c4d41eec0f097",
+  "c55f50d6bb944f7ba84d6c2c3ca4f2bb",
+  "c6a4654607214347b9d0f8f1df28ae02",
+  "c7f9037243d0404cb134f0b7c3cc47f0",
+  "cab17a0cccca47f2884f25efde8b8e42",
+  "cb2bb07ad82347b5856bdcde10200b86",
+  "cb5b0db3a9e045328e683d0cc1966104",
+  "cf2fc9bf51d94d8b86fd7f035d46d036",
+  "d0ea5ec87f0349f68e70e391d09a8363",
+  "d3920c717c55416794c070500ed224e4",
+  "d492749f64f849b08462595a1eb29f9a",
+  "d5222baad8da454f832a5d3fb0bedda1",
+  "d595a026cb0f41269f49a5ebd5374c1f",
+  "d608c18612e542d8a4eb9ef532ab2bc1",
+  "d79ff16ced6340ef90d4e339bcb6572e",
+  "d930950665cb4b089277345fc4e7f8b5",
+  "da70e9fa00204babb2231735df758f95",
+  "dba7086f487943b29eed3a58da0ef1c1",
+  "dea06687c3dd4a1ca2003ac0dda2a436",
+  "e0ac0b0e251f47538ae061cb0cc01f86",
+  "e1e9b05ce7ab482ea29f16337499084b",
+  "e306d28dd244493b8b38527d66ac3527",
+  "e32e9b28ebda4b09a456e0ba8c0c2524",
+  "e65169c353154aaeb557d806ae1cf296",
+  "ecfc45c9c4cb4d108d9657bc1c1d83db",
+  "ef03305e5d674c4c902f05d58d2682aa",
+  "ef99a23a13544c738802a6be70c0ba0a",
+  "f06206dd58594f51b9472c9acc58d9bf",
+  "f0ca4b7d9883484a8b1bbf70f66d6f51",
+  "f12c325d6ccb415f8bdb6f9c23470d5f",
+  "f256198473974784b27181ba18ff70cd",
+  "f364e233d28f4c0b9fe312316b0f0ec2",
+  "f399744e19924d3f8fdeaf6e50ec2f2b",
+  "f409ce350e5542b180c80390d388edab",
+  "f685a6ebe7e4479ca59d2492b3f59db6",
+  "f7542336b44e468e8c3e57c5e263ac42",
+  "f78f55cb63f64aa3b59a0980b93165e0",
+  "f9ce986a86e543f8b6d288714093825a",
+  "fa6530264a684924a8f261eb8fc73011",
+  "fb17213952f84ecca5ec7b02ec3304be",
+  "fb9def04c9174ae3a29a572694315f4d",
+  "fbb9f22bb404418fb41e242a94b8ae21",
+  "fedcc88e79524f51ae0e6900a6dc7730",
+  "ff03f85c460f4aac930bcfab9e761b7c",
+  "ff854bc26d574957bca986fe0049263f",
+  "whgf96p_7db6902a-a660-49dd-b94f-647a3bf0246a.png"
+]);
+
+function sanitizeAndDedupClientImages(rawSources, archetypeId = "uv_performance", title = "") {
+  if (!rawSources || !Array.isArray(rawSources)) return [];
+  const tLow = String(title || "").toLowerCase();
+  const isMultiColorProduct = ["kit", "combo", "sortid", "cores", "opções", "opcoes"].some(w => tLow.includes(w)) || archetypeId === "fishing_lures";
+
+  // Camada 1: Se vierem objetos da API Shopify com variant_ids, colapsar capas repetidas por tamanho
+  const dictItems = rawSources.filter(x => x && typeof x === "object" && x.src);
+  let filteredSources = rawSources;
+  if (dictItems.length >= 3 && !isMultiColorProduct) {
+    const varImgs = dictItems.filter(x => Array.isArray(x.variant_ids) && x.variant_ids.length > 0);
+    const nonVarImgs = dictItems.filter(x => !Array.isArray(x.variant_ids) || x.variant_ids.length === 0);
+    if (varImgs.length >= 2 && nonVarImgs.length >= 1) {
+      const firstDims = `${varImgs[0].width || 0}x${varImgs[0].height || 0}`;
+      const allSameDims = varImgs.every(x => `${x.width || 0}x${x.height || 0}` === firstDims);
+      if (allSameDims) {
+        filteredSources = [varImgs[0], ...nonVarImgs];
+      }
+    }
+  }
+
+  const uuidRe = /_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\.[a-z0-9]+$)/i;
+  const seenKeys = new Set();
+  const seenPureFrontMockup = new Set();
+  const rawDeduped = [];
+
+  filteredSources.forEach(item => {
+    const u = (item && typeof item === "object") ? item.src : item;
+    if (!u || typeof u !== "string") return;
+    const cleanU = u.trim();
+    if (!cleanU || !cleanU.startsWith("http")) return;
+
+    const uLow = cleanU.toLowerCase();
+    // Camada 2: Bloqueio de tokens secundários 100% idênticos em bytes auditados nas 3 lojas
+    if (rawDeduped.length >= 1 && Array.from(KNOWN_SHOPIFY_DUP_IMAGE_TOKENS).some(tok => uLow.includes(tok))) {
+      return;
+    }
+
+    // Camada 3: Normalização de UUID, sufixos de re-exportação e prefixos de timestamp
+    const fname = cleanU.split("?")[0].split("/").pop().toLowerCase();
+    const fnameNoUuid = fname.replace(uuidRe, "");
+    let stem = fnameNoUuid.replace(/\.(jpg|jpeg|png|webp|gif)$/i, "");
+    stem = stem.replace(/(_-_jpg|_-_png|-reduzido|_reduzido|_copy|-copy)$/i, "");
+    const tsStripped = stem.replace(/^\d{10,14}[-_]/, "");
+    if (tsStripped.length > 2) {
+      stem = tsStripped;
+    }
+
+    if (seenKeys.has(stem)) return;
+
+    const isPureFrontLabel = stem.includes("frente") && !["costa", "verso", "tras", "detalhe", "zoom", "persp", "lateral", "2", "02"].some(k => stem.includes(k));
+    if (isPureFrontLabel) {
+      const audTag = stem.includes("fem") ? "fem" : (stem.includes("inf") ? "inf" : "masc");
+      if (seenPureFrontMockup.has(audTag) && rawDeduped.length >= 1) {
+        return;
+      }
+      seenPureFrontMockup.add(audTag);
+    }
+
+    seenKeys.add(stem);
+    rawDeduped.push(cleanU);
+  });
+
+  // Camada 4: Contingência Estrutural productOnChannel (ERP envia 1ª foto isolada + lote com 1ª foto repetida com UUID)
+  if (rawDeduped.length >= 3 && !isMultiColorProduct) {
+    const pocGroups = rawDeduped.map(u => {
+      const m = u.match(/productOnChannel(?:_2F|\/)images(?:_2F|\/)([^\/_?]+)/i);
+      return m ? m[1].toLowerCase() : null;
+    });
+    if (pocGroups[0] && pocGroups[1] && pocGroups[0] !== pocGroups[1]) {
+      const groupCounts = {};
+      pocGroups.forEach(g => { if (g) groupCounts[g] = (groupCounts[g] || 0) + 1; });
+      if (groupCounts[pocGroups[0]] === 1 && (groupCounts[pocGroups[1]] || 0) >= 2) {
+        const fname1 = rawDeduped[1].split("?")[0].split("/").pop();
+        const fname2 = rawDeduped[2].split("?")[0].split("/").pop();
+        if (uuidRe.test(fname1) && !uuidRe.test(fname2)) {
+          rawDeduped.splice(1, 1);
+        }
+      } else if (groupCounts[pocGroups[0]] === 1 && groupCounts[pocGroups[1]] === 1) {
+        const keep = [rawDeduped[0]];
+        let idx = 1;
+        while (idx < rawDeduped.length && pocGroups[idx] && groupCounts[pocGroups[idx]] === 1) {
+          idx++;
+        }
+        if (idx < rawDeduped.length) {
+          keep.push(...rawDeduped.slice(idx));
+          rawDeduped.length = 0;
+          rawDeduped.push(...keep);
+        }
+      }
+    }
+  }
+
+  const nonBanner = rawDeduped.filter(u => !u.toLowerCase().includes("catalogobrkfishing_iscapremiumemdetalhes"));
+  let images = nonBanner.length >= 3 ? nonBanner : rawDeduped;
+  const bannerTokens = [
+    "capacategoria", "prancheta_1_copiar", "versao3", "diferencialuv",
+    "diferencialtela", "guia-de-tamanhos", "star-feminino", "dfubcro", "mqlxrlf"
+  ];
+  const realPhotos = images.filter(u => !bannerTokens.some(tok => u.toLowerCase().includes(tok)));
+  const infoBanners = images.filter(u => bannerTokens.some(tok => u.toLowerCase().includes(tok)));
+  if (realPhotos.length > 0 && infoBanners.length > 0) {
+    images = [...realPhotos, ...infoBanners];
+  }
+  return images;
+}
+
 function buildClientSchemaJsonLd(liveP) {
   const originInfo = resolveClientOriginAndTitle(liveP);
   const formattedTitle = liveP.formatted_title || originInfo.formattedTitle;
@@ -1416,8 +1762,8 @@ function buildClientSchemaJsonLd(liveP) {
     ? liveP.cdn_images
     : (liveP.gallery && liveP.gallery.length > 0)
       ? liveP.gallery
-      : ((liveP.images || []).map(img => (typeof img === "object" ? img.src : img)));
-  const images = [...new Set(rawImgs.filter(u => typeof u === "string" && u.startsWith("http")))].slice(0, 3);
+      : (liveP.images || []);
+  const images = sanitizeAndDedupClientImages(rawImgs, liveP.archetype_id, liveP.title).slice(0, 3);
 
   const schemaObj = {
     "@context": "https://schema.org/",
@@ -1481,7 +1827,7 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
 
   const titleLow = formattedTitle.toLowerCase();
   const rawImgs = (liveP.cdn_images && liveP.cdn_images.length > 0) ? liveP.cdn_images : (liveP.gallery || liveP.images || []);
-  const galleryUrls = rawImgs.map(img => (typeof img === "object" ? img.src : img)).filter(Boolean);
+  const galleryUrls = sanitizeAndDedupClientImages(rawImgs, archetypeId, formattedTitle);
   const nonPng = galleryUrls.filter(u => !String(u).toLowerCase().split("?")[0].endsWith(".png"));
   const hwPool = nonPng.length >= 4 ? nonPng : (nonPng.length > 0 ? [...nonPng, ...galleryUrls.filter(u => !nonPng.includes(u))] : galleryUrls);
   const img1 = hwPool[0] || "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg";
@@ -2303,37 +2649,13 @@ function getProductModeBHTML(liveP) {
   const themeColor = liveP.theme_color || (liveP.store_key === "brk_agro" ? "#16a34a" : liveP.store_key === "brk_motors" ? "#f97316" : "#0284c7");
   const themeBg = liveP.theme_bg || (liveP.store_key === "brk_agro" ? "#f0fdf4" : liveP.store_key === "brk_motors" ? "#fff7ed" : "#f0f9ff");
 
-  // Coleta oficial e desduplicação estrita de fotos da galeria da Shopify
+  // Coleta oficial e desduplicação em 4 camadas (Contingência Anti-Duplicação da 1ª Foto na Shopify)
   const rawSources = (liveP.cdn_images && liveP.cdn_images.length > 0)
     ? liveP.cdn_images
     : (liveP.gallery && liveP.gallery.length > 0)
       ? liveP.gallery
-      : ((liveP.images || []).map(img => (typeof img === "object" ? img.src : img)));
-
-  const seenRoots = new Set();
-  const rawDeduped = [];
-  const uuidRe = /_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\.[a-z0-9]+$)/i;
-  rawSources.forEach(u => {
-    if (!u || typeof u !== "string") return;
-    const cleanU = u.trim();
-    if (!cleanU) return;
-    const fname = cleanU.split("?")[0].split("/").pop().toLowerCase().replace(uuidRe, "");
-    if (!seenRoots.has(fname)) {
-      seenRoots.add(fname);
-      rawDeduped.push(cleanU);
-    }
-  });
-  const nonBanner = rawDeduped.filter(u => !u.toLowerCase().includes("catalogobrkfishing_iscapremiumemdetalhes"));
-  let images = nonBanner.length >= 3 ? nonBanner : rawDeduped;
-  const bannerTokens = [
-    "capacategoria", "prancheta_1_copiar", "versao3", "diferencialuv",
-    "diferencialtela", "guia-de-tamanhos", "star-feminino", "dfubcro", "mqlxrlf"
-  ];
-  const realPhotos = images.filter(u => !bannerTokens.some(tok => u.toLowerCase().includes(tok)));
-  const infoBanners = images.filter(u => bannerTokens.some(tok => u.toLowerCase().includes(tok)));
-  if (realPhotos.length > 0 && infoBanners.length > 0) {
-    images = [...realPhotos, ...infoBanners];
-  }
+      : (liveP.images || []);
+  const images = sanitizeAndDedupClientImages(rawSources, archetypeId, liveP.title || "");
 
   const isApparel = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work", "pants_cargo_tactical"].includes(archetypeId);
   const isLure = (archetypeId === "fishing_lures");
@@ -3299,15 +3621,4 @@ ${copyrightHtml}
 </div>
 
 ${schemaJsonLd}`;
-
-  // Guarda Final de Segurança: Eliminação rigorosa de qualquer tag <img> com URL raiz repetida
-  const seenImgRoots = new Set();
-  return fullHtml.replace(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi, (match, src) => {
-    const root = src.split("?")[0].toLowerCase();
-    if (seenImgRoots.has(root)) {
-      return "";
-    }
-    seenImgRoots.add(root);
-    return match;
-  });
 }

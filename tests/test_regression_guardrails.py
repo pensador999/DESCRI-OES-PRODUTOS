@@ -1215,6 +1215,66 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         )
         self.assertEqual(cat_wader, "Equipamentos & Iscas")
 
+    def test_phase7_shopify_duplicate_first_photo_contingency(self):
+        """
+        Fase 7 (Contingência Anti-Duplicação da 1ª Foto na Shopify):
+        1. Garante que FUSION197 (e similares onde o ERP envia 1ª foto de capa isolada + lote com 1ª foto repetida)
+           jamais duplica a 1ª foto entre Ato 1 e Ato 2.
+        2. Garante desduplicação por prefixo de timestamp (1743615730371-1_MASC.jpg vs 1_MASC.jpg),
+           sufixos de re-exportação (_-_JPG.jpg vs .png) e múltiplos mockups de frente.
+        3. Garante colapso de capas repetidas por variante de tamanho (RAGLAN306BL / CADV176BL / MT060).
+        """
+        template_engine = TemplateEngine()
+        html_builder = HTMLBuilder()
+
+        # Caso 1: FUSION197 (4 URLs originais da Shopify onde pos 1 e pos 2 eram a mesma foto de capa com 79.109 bytes)
+        fusion197_raw_urls = [
+            "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/https_3A_2F_2Ffile-upload-service-production.s3.amazonaws.com_2FproductOnChannel_2Fimages_2F9dd84323-a39d-4c8f-8b0d-9b3df45e78c8_2F785073fe67084624b010164a4c158a4b.jpg?v=1774636895",
+            "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/https_3A_2F_2Ffile-upload-service-production.s3.amazonaws.com_2FproductOnChannel_2Fimages_2F626a5a68-6ba1-4429-a8df-d8420ca1fc47_2Ffb17213952f84ecca5ec7b02ec3304be_ec8f9a1f-df51-4e78-9d2a-d7db80d4e21b.jpg?v=1774903025",
+            "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/https_3A_2F_2Ffile-upload-service-production.s3.amazonaws.com_2FproductOnChannel_2Fimages_2F626a5a68-6ba1-4429-a8df-d8420ca1fc47_2Fed712d1d226e41c7accf7162507c92a4.jpg?v=1774903028",
+            "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/https_3A_2F_2Ffile-upload-service-production.s3.amazonaws.com_2FproductOnChannel_2Fimages_2F626a5a68-6ba1-4429-a8df-d8420ca1fc47_2Fb7c4a9e674bd4f97bb32e5488b434005.jpg?v=1774903030",
+        ]
+        fusion_prod = {
+            "id": 9183938609217,
+            "sku": "FUSION197",
+            "title": "Camisa FusionX Brk Pescaiaque Azul e Amarelo com Proteção UV50+",
+            "images": fusion197_raw_urls,
+        }
+        enr_f197 = template_engine.generate_narrative_from_template(
+            fusion_prod, "uv_performance", fusion197_raw_urls, store_key="brk_fishing"
+        )
+        html_f197 = html_builder.build_shopify_html(enr_f197)
+        self.assertNotIn("fb17213952f84ecca5ec7b02ec3304be", html_f197)
+        self.assertIn("785073fe67084624b010164a4c158a4b", enr_f197["act1"]["image"])
+        self.assertIn("ed712d1d226e41c7accf7162507c92a4", enr_f197["act2"]["image"])
+        self.assertIn("b7c4a9e674bd4f97bb32e5488b434005", enr_f197["act3"]["image"])
+
+        # Caso 2: Desduplicação por prefixo de timestamp e sufixo _-_JPG
+        ts_urls = [
+            "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/1_MASC.jpg?v=1",
+            "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/1743615730371-1_MASC.jpg?v=2",
+            "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/Mockup_Fem_MASTER_01_FRENTE_-_JPG.jpg?v=3",
+            "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/Mockup_Fem_MASTER_01_FRENTE.png?v=4",
+            "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/2_MASC_COSTAS.jpg?v=5",
+        ]
+        deduped_ts = template_engine._sanitize_and_dedup_images(ts_urls, archetype_id="uv_performance", title="Camisa BRK UV50+")
+        self.assertEqual(len(deduped_ts), 3)
+        self.assertNotIn("https://cdn.shopify.com/s/files/1/0612/8068/2177/files/1743615730371-1_MASC.jpg?v=2", deduped_ts)
+        self.assertNotIn("https://cdn.shopify.com/s/files/1/0612/8068/2177/files/Mockup_Fem_MASTER_01_FRENTE.png?v=4", deduped_ts)
+
+        # Caso 3: Colapso de variant_ids repetidos por tamanho (Camada 1)
+        shopify_img_objs = [
+            {"src": "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/capa_p.jpg", "variant_ids": [101], "width": 1080, "height": 1080},
+            {"src": "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/capa_m.jpg", "variant_ids": [102], "width": 1080, "height": 1080},
+            {"src": "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/capa_g.jpg", "variant_ids": [103], "width": 1080, "height": 1080},
+            {"src": "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/costas.jpg", "variant_ids": [], "width": 1080, "height": 1080},
+            {"src": "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/detalhe.jpg", "variant_ids": [], "width": 1080, "height": 1080},
+        ]
+        deduped_var = template_engine._sanitize_and_dedup_images(shopify_img_objs, archetype_id="uv_performance", title="Camisa Segunda Pele BRK")
+        self.assertEqual(len(deduped_var), 3)
+        self.assertEqual(deduped_var[0], "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/capa_p.jpg")
+        self.assertEqual(deduped_var[1], "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/costas.jpg")
+
 
 def run_tests():
     suite = unittest.TestSuite()
