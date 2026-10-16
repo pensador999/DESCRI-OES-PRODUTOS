@@ -1349,7 +1349,7 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         enr_fus = template_engine.generate_narrative_from_template(fusion_p, "uv_performance", fusion_p["images"], store_key="brk_fishing")
         html_fus = html_builder.build_shopify_html(enr_fus)
         self.assertIn("Camisa UV50+ FusionX (Capuz + Bandana Embutida + Dedeira)", html_fus)
-        self.assertIn("sem contar a altura do capuz e da bandana embutida", html_fus)
+        self.assertIn("sem contar o capuz e a bandana/máscara facial embutida", html_fus)
 
         # 3. Hybrid — Tabela de Medidas com Capuz Anatômico + Punho com Dedeira
         hyb_p = {
@@ -1361,7 +1361,7 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         enr_hyb = template_engine.generate_narrative_from_template(hyb_p, "uv_performance", hyb_p["images"], store_key="brk_fishing")
         html_hyb = html_builder.build_shopify_html(enr_hyb)
         self.assertIn("Camisa UV50+ Hybrid (Capuz Anatômico + Punho com Dedeira)", html_hyb)
-        self.assertIn("sem contar a altura do capuz", html_hyb)
+        self.assertIn("sem contar o capuz", html_hyb)
 
         # 4. ArmorX — Tabela de Medidas com Punho Estendido com Luva Integrada + Ato 3 específico
         cax_p = {
