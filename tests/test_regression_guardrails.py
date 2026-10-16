@@ -1334,7 +1334,7 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         enr_mfk = template_engine.generate_narrative_from_template(faca_mfk, "knives_cutlery", faca_mfk["images"], store_key="brk_fishing")
         html_mfk = html_builder.build_shopify_html(enr_mfk)
         self.assertNotIn("bainha", html_mfk.lower(), "Faca Marine MFK75T não acompanha bainha e jamais deve mencionar bainha!")
-        self.assertIn("Revestimento Teflon &amp; Olhal para Fiel", html_mfk)
+        self.assertIn("Revestimento Teflon & Olhal para Fiel", html_mfk)
         self.assertIn("Acabamento da Lâmina", html_mfk)
 
         # 2. FusionX — Tabela de Medidas com Capuz + Bandana Embutida + Dedeira
