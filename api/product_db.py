@@ -411,7 +411,7 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
     # Verificar se a cor de tema corresponde à loja
     expected_theme_marker = {
         "brk_fishing": ("#0284c7", "#00a8ff"),
-        "brk_agro": ("#15803d", "#22c55e"),
+        "brk_agro": ("#15803d", "#22c55e", "#16a34a"),
         "brk_motors": ("#ea580c", "#f97316"),
     }.get(store_key, ("#0284c7", "#00a8ff"))
 
