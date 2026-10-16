@@ -2093,7 +2093,7 @@ class TemplateEngine:
         Gera os 3 blocos narrativos e especificações prontos para o HTMLBuilder.
         Se sibling_info for fornecido, anota o produto como originário de irmão homólogo do site.
         """
-        template = self.templates.get(archetype_id, self.templates["uv_performance"])
+        template = dict(self.templates.get(archetype_id, self.templates["uv_performance"]))
         title = product.get("title", "Produto BRK")
         sku = product.get("master_sku") or product.get("sku") or ""
         vendor = product.get("vendor", "")
@@ -3536,8 +3536,10 @@ class TemplateEngine:
                     {"label": "Armazenamento", "value": "Estojo organizador em nylon estruturado com elásticos internos e alça de mão"},
                     {"label": "Indicação de Uso", "value": "Churrascos, camping, pescarias, viagens e área gourmet"}
                 ]
+                template["care_tips"] = "Lavar manualmente com água e lado macio da esponja com sabão neutro logo após o uso. Secar imediatamente com pano limpo e macio antes de guardar no estojo organizador."
             # 15.2 Canivetes Táticos Dobráveis Deyu (Cabo Madeira 018355 vs Metálico ZD W84)
             elif "canivete" in t_low:
+                template["care_tips"] = "Limpar a lâmina com pano úmido e sabão neutro após o uso e secar completamente antes de recolher o fio no cabo."
                 if "madeira" in t_low or "018355" in t_low:
                     act1["tag"] = "Lâmina Dobrável Tática"
                     act1["title"] = "AÇO INOXIDÁVEL COM ACABAMENTO ESCURECIDO E CORTE PRECISO"
@@ -3589,6 +3591,7 @@ class TemplateEngine:
                     {"label": "Acabamento da Lâmina", "value": "Teflon preto anticorrosão de fácil limpeza (desliza sem grudar no filé)"},
                     {"label": "Indicação de Uso", "value": "Filetagem de peixes, limpeza de pescado e culinária náutica"}
                 ]
+                template["care_tips"] = "Lavar manualmente com água doce e lado macio da esponja com sabão neutro logo após o uso para preservar o revestimento em Teflon. Secar imediatamente com pano limpo e macio antes de guardar em local seco e protegido."
             # 15.4 Cutelo 6" em Inox BRK (Sem bainha nas fotos; foco em lâmina larga, cabo madeira e corte de carnes/costelas)
             elif "cutelo" in t_low:
                 act1["tag"] = "Lâmina Larga Full Tang de 6\""
@@ -3606,6 +3609,7 @@ class TemplateEngine:
                     {"label": "Acabamento da Lâmina", "value": "Inox escovado acetinado com furo de suspensão e gravação BRK a laser"},
                     {"label": "Indicação de Uso", "value": "Cortes pesados de churrasco, costelas, trinchamento de carnes e cozinha gourmet"}
                 ]
+                template["care_tips"] = "Lavar manualmente com água e lado macio da esponja logo após o uso. Secar imediatamente com pano limpo e macio antes de guardar em local seco e arejado."
             # 15.5 Kit Faca e Chaira Karandá (Bainha com Pelo / Bainha Preta)
             elif ("kit faca" in t_low or "chaira" in t_low) and ("karand" in t_low):
                 bainha_desc = "revestimento frontal em pelo bovino natural legítimo" if "pelo" in t_low else "couro legítimo preto de alta espessura"

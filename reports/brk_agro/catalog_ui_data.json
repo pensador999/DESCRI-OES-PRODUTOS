@@ -24,54 +24,6 @@
       "alert_count": 0,
       "empty_count": 0
     },
-    "Bonés & Chapéus Agro": {
-      "title": "Bonés & Chapéus Agro",
-      "badge": "Coleção",
-      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/Cattleman_choc.png?v=1791221986",
-      "count": 38,
-      "total_skus": 58,
-      "broken_skus": 0,
-      "out_of_standard_skus": 40,
-      "broken_count": 0,
-      "alert_count": 5,
-      "empty_count": 15
-    },
-    "Acessórios Agro & Fazenda": {
-      "title": "Acessórios Agro & Fazenda",
-      "badge": "Coleção",
-      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/1790257537880-1.jpg?v=1790258276",
-      "count": 3,
-      "total_skus": 3,
-      "broken_skus": 0,
-      "out_of_standard_skus": 1,
-      "broken_count": 0,
-      "alert_count": 1,
-      "empty_count": 0
-    },
-    "Bandanas, Luvas & Manguitos": {
-      "title": "Bandanas, Luvas & Manguitos",
-      "badge": "Coleção",
-      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/1788368966964-1.jpg?v=1791982116",
-      "count": 87,
-      "total_skus": 143,
-      "broken_skus": 1,
-      "out_of_standard_skus": 86,
-      "broken_count": 1,
-      "alert_count": 0,
-      "empty_count": 50
-    },
-    "Térmicos & Tereré": {
-      "title": "Térmicos & Tereré",
-      "badge": "Coleção",
-      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/01_31961078-1b05-4c80-acf2-8512dec597d1.webp?v=1775745404",
-      "count": 8,
-      "total_skus": 8,
-      "broken_skus": 0,
-      "out_of_standard_skus": 7,
-      "broken_count": 0,
-      "alert_count": 0,
-      "empty_count": 0
-    },
     "Cutelaria & Facas Campo": {
       "title": "Cutelaria & Facas Campo",
       "badge": "Coleção",
@@ -96,6 +48,18 @@
       "alert_count": 0,
       "empty_count": 49
     },
+    "Óculos Polarizados Agro": {
+      "title": "Óculos Polarizados Agro",
+      "badge": "Coleção",
+      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/1789667588667-1.jpg?v=1789676327",
+      "count": 39,
+      "total_skus": 45,
+      "broken_skus": 0,
+      "out_of_standard_skus": 1,
+      "broken_count": 0,
+      "alert_count": 0,
+      "empty_count": 1
+    },
     "Calças & Vestuário Campo": {
       "title": "Calças & Vestuário Campo",
       "badge": "Coleção",
@@ -108,17 +72,53 @@
       "alert_count": 0,
       "empty_count": 1
     },
-    "Óculos Polarizados Agro": {
-      "title": "Óculos Polarizados Agro",
+    "Térmicos & Tereré": {
+      "title": "Térmicos & Tereré",
       "badge": "Coleção",
-      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/1789667588667-1.jpg?v=1789676327",
-      "count": 39,
-      "total_skus": 45,
+      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/01_31961078-1b05-4c80-acf2-8512dec597d1.webp?v=1775745404",
+      "count": 8,
+      "total_skus": 8,
+      "broken_skus": 0,
+      "out_of_standard_skus": 7,
+      "broken_count": 0,
+      "alert_count": 0,
+      "empty_count": 0
+    },
+    "Bandanas, Luvas & Manguitos": {
+      "title": "Bandanas, Luvas & Manguitos",
+      "badge": "Coleção",
+      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/1788368966964-1.jpg?v=1791982116",
+      "count": 87,
+      "total_skus": 143,
+      "broken_skus": 1,
+      "out_of_standard_skus": 86,
+      "broken_count": 1,
+      "alert_count": 0,
+      "empty_count": 50
+    },
+    "Acessórios Agro & Fazenda": {
+      "title": "Acessórios Agro & Fazenda",
+      "badge": "Coleção",
+      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/1790257537880-1.jpg?v=1790258276",
+      "count": 3,
+      "total_skus": 3,
       "broken_skus": 0,
       "out_of_standard_skus": 1,
       "broken_count": 0,
-      "alert_count": 0,
-      "empty_count": 1
+      "alert_count": 1,
+      "empty_count": 0
+    },
+    "Bonés & Chapéus Agro": {
+      "title": "Bonés & Chapéus Agro",
+      "badge": "Coleção",
+      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/Cattleman_choc.png?v=1791221986",
+      "count": 38,
+      "total_skus": 58,
+      "broken_skus": 0,
+      "out_of_standard_skus": 40,
+      "broken_count": 0,
+      "alert_count": 5,
+      "empty_count": 15
     }
   },
   "products": [
