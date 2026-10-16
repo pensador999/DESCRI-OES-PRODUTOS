@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         BRK Assistente de Descrições Shopify (Conectado ao Banco Real v5.3 Rastreio & Sem Troca Descomplicada)
+// @name         BRK Assistente de Descrições Shopify (Conectado ao Banco Real v5.3.1 Sem Alerta Sair do Site)
 // @namespace    https://1025-ten.vercel.app/
-// @version      5.3.0
-// @description  Automação 100% automática por Coleções Shopify (89/91 Super Ofertas 🔥 + 32 Camisas/Outros Rastreados sem Troca Descomplicada) conectada ao banco de dados oficial BRK. Injeta Modo B v2/v5, clica em Salvar automaticamente e avança sozinho.
+// @version      5.3.1
+// @description  Automação 100% automática por Coleções Shopify (89/91 Super Ofertas 🔥 + 32 Camisas/Outros Rastreados sem Troca Descomplicada) com bloqueador de alerta 'Sair do site?' e confirmação real de salvamento.
 // @author       BRK Group & DeepMind Pair
 // @match        https://admin.shopify.com/store/*/products*
 // @match        https://admin.shopify.com/store/*
@@ -34,7 +34,7 @@
 
   // Configuração da API do Banco de Dados BRK (6.409 produtos auditados nas 3 lojas)
   const API_BASE = "https://1025-ten.vercel.app";
-  const SCRIPT_VERSION = "5.3.0";
+  const SCRIPT_VERSION = "5.3.1";
 
   const STORAGE_KEYS = {
     QUEUE: "BRK_AUTOSYNC_QUEUE",
@@ -387,6 +387,61 @@
     let countdownTimer = null;
     let saveCompletionTimer = null;
     let hasTriggeredSaveForCurrentProduct = false;
+
+    // Neutralizador Definitivo de 'beforeunload' ("Sair do site? É possível que as alterações feitas não sejam salvas.")
+    function disarmBeforeUnload() {
+      try {
+        window.onbeforeunload = null;
+        window.addEventListener("beforeunload", (e) => {
+          e.stopImmediatePropagation();
+        }, true);
+
+        if (!document.getElementById("brk-disarm-beforeunload-script")) {
+          const s = document.createElement("script");
+          s.id = "brk-disarm-beforeunload-script";
+          s.textContent = `
+            (function() {
+              try {
+                window.onbeforeunload = null;
+                Object.defineProperty(window, 'onbeforeunload', {
+                  configurable: true,
+                  get: function() { return null; },
+                  set: function() {}
+                });
+                const origPrevent = Event.prototype.preventDefault;
+                Event.prototype.preventDefault = function() {
+                  if (this && this.type === 'beforeunload') return;
+                  return origPrevent.apply(this, arguments);
+                };
+                const protos = [window.BeforeUnloadEvent && window.BeforeUnloadEvent.prototype, Event.prototype].filter(Boolean);
+                for (const proto of protos) {
+                  const desc = Object.getOwnPropertyDescriptor(proto, 'returnValue');
+                  if (desc && desc.set) {
+                    Object.defineProperty(proto, 'returnValue', {
+                      configurable: true,
+                      get: function() {
+                        if (this && this.type === 'beforeunload') return '';
+                        return desc.get ? desc.get.call(this) : undefined;
+                      },
+                      set: function(val) {
+                        if (this && this.type === 'beforeunload') return;
+                        if (desc.set) desc.set.call(this, val);
+                      }
+                    });
+                  }
+                }
+                window.addEventListener('beforeunload', function(e) {
+                  e.stopImmediatePropagation();
+                }, true);
+              } catch (err) {}
+            })();
+          `;
+          (document.head || document.documentElement).appendChild(s);
+        }
+      } catch (e) {}
+    }
+
+    disarmBeforeUnload();
 
     function parseCurrentRoute() {
       const urlPath = location.pathname;
@@ -798,6 +853,7 @@
     // =========================================================================
     function setReactInputValue(element, value) {
       if (!element) return;
+      element.focus();
       const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value")?.set;
       if (nativeSetter) {
         nativeSetter.call(element, value);
@@ -808,31 +864,87 @@
       element.dispatchEvent(new Event("change", { bubbles: true }));
       element.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true }));
       element.dispatchEvent(new Event("blur", { bubbles: true }));
+      try { element.blur(); } catch (e) {}
+    }
+
+    function collectAllCandidateButtons() {
+      const list = Array.from(document.querySelectorAll("button, [role='button'], ui-save-bar button"));
+      const customBars = Array.from(document.querySelectorAll("ui-save-bar, s-button"));
+      for (const el of customBars) {
+        if (el.shadowRoot) {
+          list.push(...Array.from(el.shadowRoot.querySelectorAll("button, [role='button']")));
+        }
+      }
+      return list;
     }
 
     function findSaveButton() {
-      const buttons = Array.from(document.querySelectorAll("button"));
+      const buttons = collectAllCandidateButtons();
       return buttons.find(b => {
-        if (b.disabled || b.getAttribute("aria-disabled") === "true") return false;
+        if (b.disabled || b.getAttribute("aria-disabled") === "true" || b.getAttribute("aria-busy") === "true") return false;
         const text = (b.innerText || b.textContent || "").trim().toLowerCase();
         const aria = (b.getAttribute("aria-label") || "").trim().toLowerCase();
         return text === "salvar" || text === "save" || aria === "salvar" || aria === "save";
       }) || null;
     }
 
-    // Aguarda a Shopify concluir a requisição de salvamento antes de avançar para o próximo produto
+    function findBusySaveButton() {
+      const buttons = collectAllCandidateButtons();
+      return buttons.find(b => {
+        const text = (b.innerText || b.textContent || "").trim().toLowerCase();
+        const aria = (b.getAttribute("aria-label") || "").trim().toLowerCase();
+        const isSaveLabel = text === "salvar" || text === "save" || aria === "salvar" || aria === "save";
+        const isBusy = b.getAttribute("aria-busy") === "true" || b.className.includes("loading") || b.className.includes("Spinner");
+        return isSaveLabel && isBusy;
+      }) || null;
+    }
+
+    function hasUnsavedChangesBanner() {
+      const bodyText = document.body.innerText || "";
+      return /alterações não salvas|unsaved changes/i.test(bodyText);
+    }
+
+    // Aguarda a Shopify concluir 100% a requisição de salvamento antes de avançar para o próximo produto
     function waitForShopifySaveComplete(onComplete) {
       if (saveCompletionTimer) clearInterval(saveCompletionTimer);
       let checks = 0;
+      let retriedClick = false;
+
       saveCompletionTimer = setInterval(() => {
         checks++;
         const activeSaveBtn = findSaveButton();
+        const busySaveBtn = findBusySaveButton();
+        const unsavedBanner = hasUnsavedChangesBanner();
         const bodyText = document.body.innerText || "";
         const hasToast = /produto salvo|product saved|alterações salvas/i.test(bodyText);
-        // Se o botão Salvar desabilitou/sumiu após o clique ou apareceu o toast da Shopify (ou após 2.4s)
-        if ((!activeSaveBtn && checks >= 2) || hasToast || checks >= 8) {
+
+        // Se após ~1.6s o botão Salvar ainda estiver habilitado (ex: React demorou a sincronizar o blur), clica novamente!
+        if (activeSaveBtn && checks >= 5 && !retriedClick) {
+          retriedClick = true;
+          try {
+            if (document.activeElement && document.activeElement !== document.body) {
+              document.activeElement.blur();
+            }
+            console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] 🔄 Reforçando clique no botão Salvar...`);
+            activeSaveBtn.click();
+          } catch (e) {}
+          return;
+        }
+
+        // Critério real de salvamento concluído:
+        // 1) Apareceu o Toast "Produto salvo" E não há botão em loading (busySaveBtn)
+        // 2) Ou já passaram pelo menos 4 checagens (1.4s) e não há botão Salvar ativo, nem botão ocupando spinner, nem barra "Alterações não salvas"
+        // 3) Timeout máximo de segurança após 22 checagens (~7.7s)
+        const isCleanlySaved = (!activeSaveBtn && !busySaveBtn && !unsavedBanner && checks >= 4);
+        if ((hasToast && !busySaveBtn && checks >= 2) || isCleanlySaved || checks >= 22) {
           clearInterval(saveCompletionTimer);
           saveCompletionTimer = null;
+          disarmBeforeUnload();
+          try {
+            if (document.activeElement && document.activeElement !== document.body) {
+              document.activeElement.blur();
+            }
+          } catch (e) {}
           if (onComplete) onComplete();
         }
       }, 350);
@@ -848,6 +960,7 @@
       const fireOnce = () => {
         if (callbackFired) return;
         callbackFired = true;
+        disarmBeforeUnload();
         if (currentProductId) {
           markProductAsCompliant(currentProductId, activeLoadedProduct?.master_sku);
         }
@@ -876,20 +989,24 @@
             return true;
           }
 
-          // Modo Automático (autoPilot ou autoSave): clica automaticamente em Salvar e aguarda confirmação
+          // Modo Automático (autoPilot ou autoSave): clica automaticamente em Salvar e aguarda confirmação real
           if ((settings.autoPilot || settings.autoSave) && !hasTriggeredSaveForCurrentProduct) {
             hasTriggeredSaveForCurrentProduct = true;
             setTimeout(() => {
+              try {
+                if (document.activeElement && document.activeElement !== document.body) {
+                  document.activeElement.blur();
+                }
+              } catch (e) {}
               const liveSaveBtn = findSaveButton() || saveBtn;
               if (liveSaveBtn && !liveSaveBtn.disabled) {
                 console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] 🤖 Piloto Automático: clicando em Salvar automaticamente!`);
                 liveSaveBtn.click();
                 waitForShopifySaveComplete(fireOnce);
               } else {
-                // Se o botão já foi salvo/desabilitado
                 waitForShopifySaveComplete(fireOnce);
               }
-            }, 700);
+            }, 650);
           }
           return true;
         }
@@ -956,6 +1073,7 @@
         return false;
       }
 
+      disarmBeforeUnload();
       hasTriggeredSaveForCurrentProduct = false;
       const htmlBtn = findShowHtmlButton();
       let textarea = findDescriptionTextarea();
@@ -1007,6 +1125,7 @@
           tiny.body.dispatchEvent(new Event("change", { bubbles: true }));
           tiny.body.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true }));
           tiny.body.dispatchEvent(new Event("blur", { bubbles: true }));
+          try { tiny.body.blur(); } catch (e) {}
           console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] HTML Modo B v5 injetado direto no iframe TinyMCE!`);
 
           highlightSaveButton(() => handleAfterSave());
@@ -1027,6 +1146,8 @@
           editable.innerHTML = htmlContent;
           editable.dispatchEvent(new Event("input", { bubbles: true }));
           editable.dispatchEvent(new Event("change", { bubbles: true }));
+          editable.dispatchEvent(new Event("blur", { bubbles: true }));
+          try { editable.blur(); } catch (e) {}
           highlightSaveButton(() => handleAfterSave());
           renderHudProductMode(
             activeLoadedProduct,
@@ -1064,7 +1185,7 @@
 
     function startCountdownToNext() {
       const settings = getSettings();
-      let count = settings.autoPilot ? Math.min(settings.delaySeconds || 4, 2) : (settings.delaySeconds || 4);
+      let count = settings.autoPilot ? Math.min(settings.delaySeconds || 4, 1) : (settings.delaySeconds || 4);
       const q = getQueue();
       let nextIdx = getQueueIndex() + 1;
 
@@ -1088,6 +1209,12 @@
         if (count <= 0) {
           clearInterval(countdownTimer);
           setQueueIndex(nextIdx);
+          disarmBeforeUnload();
+          try {
+            if (document.activeElement && document.activeElement !== document.body) {
+              document.activeElement.blur();
+            }
+          } catch (e) {}
           const nextUrl = `https://admin.shopify.com/store/${currentShopifySlug}/products/${nextItem.id}`;
           location.href = nextUrl;
         } else {
@@ -1098,7 +1225,7 @@
           );
           count--;
         }
-      }, 900);
+      }, 850);
     }
 
     const injectDescriptionIntoShopify = injectModoBIntoEditor;
