@@ -151,23 +151,23 @@
   },
   {
     "date": "2026-10-16",
-    "timestamp": "2026-10-16 09:07:07",
-    "total_corrections_ready": 981,
+    "timestamp": "2026-10-16 10:12:59",
+    "total_corrections_ready": 961,
     "csv_file": "shopify_correcoes_fishing_quebradas_parte1.csv",
     "stores": {
       "brk_fishing": {
         "name": "BRK Fishing",
-        "total_products": 2147,
-        "total_skus": 11798,
+        "total_products": 2146,
+        "total_skus": 11791,
         "broken_products": 339,
         "broken_skus": 1688,
-        "empty_products": 190,
+        "empty_products": 170,
         "prohibited_links_products": 1076,
         "prohibited_links_total": 2391,
         "orphaned_skus_products": 0,
         "orphaned_variants_total": 0,
         "health_percentage": 85.7,
-        "corrections_generated": 529
+        "corrections_generated": 509
       },
       "brk_agro": {
         "name": "BRK Agro",
@@ -185,8 +185,8 @@
       },
       "brk_motors": {
         "name": "BRK Motors",
-        "total_products": 1446,
-        "total_skus": 9211,
+        "total_products": 1461,
+        "total_skus": 9316,
         "broken_products": 100,
         "broken_skus": 100,
         "empty_products": 196,
