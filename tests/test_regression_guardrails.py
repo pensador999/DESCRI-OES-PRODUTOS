@@ -1361,7 +1361,7 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         enr_hyb = template_engine.generate_narrative_from_template(hyb_p, "uv_performance", hyb_p["images"], store_key="brk_fishing")
         html_hyb = html_builder.build_shopify_html(enr_hyb)
         self.assertIn("Camisa UV50+ Hybrid (Capuz Anatômico + Punho com Dedeira)", html_hyb)
-        self.assertIn("sem contar a altura do capuz", html_hyb)
+        self.assertIn("sem contar o capuz", html_hyb)
 
         # 4. ArmorX — Tabela de Medidas com Punho Estendido com Luva Integrada + Ato 3 específico
         cax_p = {
