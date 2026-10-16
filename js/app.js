@@ -1233,6 +1233,9 @@ function buildQueueItem(p) {
     handle: p.handle,
     master_sku: p.master_sku || p.sku || "",
     title: p.title || "Sem Título",
+    is_mode_b_compliant: !!p.is_mode_b_compliant,
+    guideline_status: p.guideline_status || p.status || "FORA_PADRAO_MODO_B",
+    guideline_reason: p.guideline_reason || "",
     mode_b_html: html || p.body_html || ""
   };
 }
@@ -1244,21 +1247,28 @@ function sendBatchToTampermonkey(limit = 25) {
     return;
   }
 
-  // Prioridade: produtos sem descrição
-  let candidates = storeData.products.filter(p => p.status === "SEM_DESCRICAO");
-  let label = "sem descrição";
-  if (candidates.length === 0) {
-    candidates = storeData.products.filter(p => p.status === "IMAGENS_QUEBRADAS");
-    label = "com fotos quebradas";
+  // Filtrar estritamente apenas produtos fora das diretrizes (excluindo CONFORME_MODO_B)
+  const nonCompliant = storeData.products.filter(p => !p.is_mode_b_compliant);
+  const outdated = nonCompliant.filter(p => p.guideline_status === "MODO_B_DESATUALIZADO");
+  const empty = nonCompliant.filter(p => p.guideline_status === "SEM_DESCRICAO" || p.status === "SEM_DESCRICAO");
+  const broken = nonCompliant.filter(p => p.guideline_status === "IMAGENS_QUEBRADAS" || p.status === "IMAGENS_QUEBRADAS");
+  const legacy = nonCompliant.filter(p => p.guideline_status === "FORA_PADRAO_MODO_B");
+
+  // Ordem prioritária: Violações em Modo B já colado -> Sem Descrição -> Imagens Quebradas -> Legados fora do Modo B
+  const seenIds = new Set();
+  const candidates = [];
+  for (const p of [...outdated, ...empty, ...broken, ...legacy]) {
+    const pid = String(p.id);
+    if (!seenIds.has(pid)) {
+      seenIds.add(pid);
+      candidates.push(p);
+    }
   }
-  if (candidates.length === 0) {
-    candidates = storeData.products;
-    label = "do catálogo";
-  }
+  const label = "fora das diretrizes Modo B v5";
 
   const batch = candidates.slice(0, limit);
   if (batch.length === 0) {
-    alert("Nenhum produto disponível para envio.");
+    alert("✅ Todos os produtos desta loja já estão 100% dentro das diretrizes Modo B v5!");
     return;
   }
 

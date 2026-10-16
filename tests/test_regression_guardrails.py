@@ -1312,6 +1312,85 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         self.assertIn("Tabela de Medidas Feminina - Baby Look (PP ao G2)", html_araras)
         self.assertNotIn("Kit Casal", html_araras)
 
+    def test_phase8_marine_knife_hooded_size_guide_and_guideline_filter(self):
+        """
+        Fase 8:
+        1. Faca Marine Sports Fillet Knife MFK75T 19cm (SKU 79081379076) NÃO menciona bainha (destaca Revestimento Teflon & Olhal para Fiel).
+        2. Camisas com Capuz / Bandana Embutida (FusionX / Hybrid) e Luva Integrada (ArmorX) trazem subtítulo específico e instrução explícita na Tabela de Medidas ("sem contar a altura do capuz e da bandana embutida").
+        3. Avaliador de diretrizes (evaluate_guideline_compliance) filtra 100% os produtos conformes e sinaliza violações em MODO_B_DESATUALIZADO.
+        """
+        from api.product_db import evaluate_guideline_compliance
+        template_engine = TemplateEngine()
+        html_builder = HTMLBuilder()
+
+        # 1. Faca Marine Sports Fillet Knife MFK75T 19cm — sem bainha
+        faca_mfk = {
+            "id": 8370981961794,
+            "master_sku": "79081379076",
+            "title": "Faca Marine Sports Fillet Knife MFK75T 19cm",
+            "vendor": "MARINE SPORTS",
+            "images": ["https://cdn.shopify.com/s/files/1/0628/1445/3826/files/Faca_de_file_marine_sports_teflon_7_5_19cm_mfk75t-1.webp"],
+        }
+        enr_mfk = template_engine.generate_narrative_from_template(faca_mfk, "knives_cutlery", faca_mfk["images"], store_key="brk_fishing")
+        html_mfk = html_builder.build_shopify_html(enr_mfk)
+        self.assertNotIn("bainha", html_mfk.lower(), "Faca Marine MFK75T não acompanha bainha e jamais deve mencionar bainha!")
+        self.assertIn("Revestimento Teflon &amp; Olhal para Fiel", html_mfk)
+        self.assertIn("Acabamento da Lâmina", html_mfk)
+
+        # 2. FusionX — Tabela de Medidas com Capuz + Bandana Embutida + Dedeira
+        fusion_p = {
+            "id": 9183938609217,
+            "master_sku": "FUSION197",
+            "title": "Camisa FusionX Brk Pescaiaque Azul e Amarelo com Proteção UV50+",
+            "images": ["https://cdn.shopify.com/s/files/1/0612/8068/2177/files/f197_1.jpg"],
+        }
+        enr_fus = template_engine.generate_narrative_from_template(fusion_p, "uv_performance", fusion_p["images"], store_key="brk_fishing")
+        html_fus = html_builder.build_shopify_html(enr_fus)
+        self.assertIn("Camisa UV50+ FusionX (Capuz + Bandana Embutida + Dedeira)", html_fus)
+        self.assertIn("sem contar a altura do capuz e da bandana embutida", html_fus)
+
+        # 3. Hybrid — Tabela de Medidas com Capuz Anatômico + Punho com Dedeira
+        hyb_p = {
+            "id": 8417633534018,
+            "master_sku": "HYB092",
+            "title": "Camisa de Pesca Brk Hybrid Verde Musgo UV50+",
+            "images": ["https://cdn.shopify.com/s/files/1/0612/8068/2177/files/hyb092_1.jpg"],
+        }
+        enr_hyb = template_engine.generate_narrative_from_template(hyb_p, "uv_performance", hyb_p["images"], store_key="brk_fishing")
+        html_hyb = html_builder.build_shopify_html(enr_hyb)
+        self.assertIn("Camisa UV50+ Hybrid (Capuz Anatômico + Punho com Dedeira)", html_hyb)
+        self.assertIn("sem contar a altura do capuz", html_hyb)
+
+        # 4. ArmorX — Tabela de Medidas com Punho Estendido com Luva Integrada + Ato 3 específico
+        cax_p = {
+            "id": 8424112226370,
+            "master_sku": "CAX050",
+            "title": "Camisa ArmorX Brk Pescaiaque Chumbo com Listra Amarela e Luva Proteção UV50+",
+            "images": [
+                "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/cax050_1.jpg",
+                "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/cax050_2.jpg",
+                "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/cax050_3.jpg",
+            ],
+        }
+        enr_cax2 = template_engine.generate_narrative_from_template(cax_p, "uv_performance", cax_p["images"], store_key="brk_fishing")
+        html_cax2 = html_builder.build_shopify_html(enr_cax2)
+        self.assertIn("Camisa UV50+ ArmorX (Punho Estendido com Luva Integrada)", html_cax2)
+        self.assertIn("PUNHOS ESTENDIDOS COM LUVA INTEGRADA E COSTURAS REFORÇADAS", html_cax2)
+        self.assertNotIn("Tabela de Medidas de Luvas", html_cax2)
+
+        # 5. Avaliador de conformidade (evaluate_guideline_compliance)
+        faca_mfk["body_html"] = html_mfk
+        faca_mfk["status"] = "SAUDAVEL"
+        is_comp_ok, g_stat_ok, _ = evaluate_guideline_compliance(faca_mfk, "brk_fishing")
+        self.assertTrue(is_comp_ok)
+        self.assertEqual(g_stat_ok, "CONFORME_MODO_B")
+
+        faca_mfk_bad = dict(faca_mfk, body_html=html_mfk + "<p>Acompanha bainha rígida</p>")
+        is_comp_bad, g_stat_bad, g_reason_bad = evaluate_guideline_compliance(faca_mfk_bad, "brk_fishing")
+        self.assertFalse(is_comp_bad)
+        self.assertEqual(g_stat_bad, "MODO_B_DESATUALIZADO")
+        self.assertIn("bainha", g_reason_bad.lower())
+
 
 def run_tests():
     suite = unittest.TestSuite()

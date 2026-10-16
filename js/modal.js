@@ -1229,7 +1229,27 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
     }
   }
 
+  const isFusionSg = isShirt && (tLow.includes("fusion") || skuLow.includes("fusion"));
+  const isHybridSg = isShirt && (tLow.includes("hybrid") || skuLow.startsWith("hyb"));
+  const isArmorxSg = isShirt && (tLow.includes("armorx") || skuLow.startsWith("cax") || tLow.includes("com luva") || tLow.includes("e luva"));
+  const isHoodedSg = isShirt && (tLow.includes("capuz") || isFusionSg || isHybridSg);
+
   let tipText = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | Manga do ombro ao punho). Dica: compare com uma peça sua estendida para escolher o caimento ideal.";
+  if (isFusionSg) {
+    tipText = "<strong>Como medir com precisão (Linha FusionX — Com Capuz & Bandana Embutida):</strong> A grade do tronco (PP ao G2) segue a mesma modelagem base BRK. <strong>Tórax:</strong> medido de axila a axila | <strong>Altura:</strong> medida da costura do ombro até a barra inferior (<u>sem contar o capuz e a bandana/máscara facial embutida</u>) | <strong>Manga:</strong> medida do ombro ao punho (com extensão elástica e abertura para o polegar/dedeira). O capuz e a bandana acoplada possuem elasticidade anatômica XTech Pro® que se ajusta ao rosto sem apertar.";
+  } else if (isHybridSg) {
+    tipText = "<strong>Como medir com precisão (Linha Hybrid — Com Capuz Anatômico & Dedeira):</strong> A grade do tronco (PP ao G2) segue a mesma modelagem base BRK. <strong>Tórax:</strong> medido de axila a axila | <strong>Altura:</strong> medida da costura do ombro até a barra inferior (<u>sem contar a altura do capuz integrado</u>) | <strong>Manga:</strong> medida do ombro ao punho (com extensão elástica e abertura para o polegar/dedeira).";
+  } else if (isArmorxSg) {
+    tipText = "<strong>Como medir com precisão (Linha ArmorX — Com Luva Integrada no Punho):</strong> A grade do tronco (PP ao G2) segue a mesma modelagem base BRK. <strong>Tórax:</strong> medido de axila a axila | <strong>Altura:</strong> medida da costura do ombro até a barra inferior (sem contar a gola alta) | <strong>Manga:</strong> medida do ombro à base do punho (contando com prolongamento anatômico com abertura para o polegar que protege o dorso da mão).";
+  } else if (isHoodedSg) {
+    tipText = "<strong>Como medir com precisão (Modelo com Capuz Integrado):</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura da costura do ombro à barra inferior, <u>desconsiderando o capuz</u> | Manga do ombro ao punho).";
+  }
+
+  let specialShirtPrefix = null;
+  if (isFusionSg) specialShirtPrefix = "Camisa UV50+ FusionX (Capuz + Bandana Embutida + Dedeira)";
+  else if (isHybridSg) specialShirtPrefix = "Camisa UV50+ Hybrid (Capuz Anatômico + Punho com Dedeira)";
+  else if (isArmorxSg) specialShirtPrefix = "Camisa UV50+ ArmorX (Punho Estendido com Luva Integrada)";
+  else if (isHoodedSg) specialShirtPrefix = "Camisa Manga Longa UV50 com Capuz Integrado";
 
   if (isShirt) {
     // 1.1 Camisas de Botão / Utilitárias Work (CMB - Sarja/Algodão corte reto de trabalho)
@@ -1267,7 +1287,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
     // 1.1b Kit Casal (Exibe AMBAS as tabelas: Masculina + Feminina Baby Look)
     else if (tLow.includes("casal") && (tLow.includes("kit") || tLow.includes("combo"))) {
       guideTitle = "Tabela de Medidas Kit Casal - Masculino & Feminino Baby Look (PP ao G2)";
-      const shirtSubPrefix = isShortSleeve ? "Camisa Manga Curta UV50" : "Camisa Manga Longa UV50";
+      const shirtSubPrefix = specialShirtPrefix || (isShortSleeve ? "Camisa Manga Curta UV50" : "Camisa Manga Longa UV50");
       const subtitle = `${shirtSubPrefix} | *As medidas podem variar de 2cm a 3cm`;
       const mRows = [
         ["PP", "49,5 cm", "67 cm", "56 cm"],
@@ -1298,8 +1318,8 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
     ) {
       guideTitle = "Guia de Tamanhos Infantil (1 a 13 Anos)";
       const badgeTitle = "INFANTIL";
-      tipText = "<strong>Escolha por Idade com Referência de Tamanho (PP ao G2):</strong> Na linha Infantil BRK, a seleção é guiada pela faixa de idade (1 a 13 Anos) mantendo a indicação do tamanho equivalente (PP ao G2). Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | Manga do ombro ao punho).";
-      const shirtSubPrefix = archetypeId === "agro_field" ? "Camiseta Algodão Premium" : (isShortSleeve ? "Camisa Manga Curta UV50" : "Camisa Manga Longa UV50");
+      tipText = "<strong>Escolha por Idade com Referência de Tamanho (PP ao G2):</strong> Na linha Infantil BRK, a seleção é guiada pela faixa de idade (1 a 13 Anos) mantendo a indicação do tamanho equivalente (PP ao G2). Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra, sem contar eventual capuz | Manga do ombro ao punho).";
+      const shirtSubPrefix = specialShirtPrefix || (archetypeId === "agro_field" ? "Camiseta Algodão Premium" : (isShortSleeve ? "Camisa Manga Curta UV50" : "Camisa Manga Longa UV50"));
       const subtitle = `${shirtSubPrefix} | *As medidas podem variar de 2cm a 3cm`;
       const rows = [
         ["1 a 2 Anos (PP)", "31 cm", "41 cm", "31 cm"],
@@ -1316,7 +1336,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
     else if (/feminina|feminino|baby look|fem|babylook/i.test(tLow) || skuLow.includes("bl")) {
       guideTitle = "Tabela de Medidas Feminina - Baby Look (PP ao G2)";
       const badgeTitle = "FEMININO";
-      const shirtSubPrefix = archetypeId === "agro_field" ? "Camiseta Algodão Premium" : (isShortSleeve ? "Camisa Manga Curta UV50" : "Camisa Manga Longa UV50");
+      const shirtSubPrefix = specialShirtPrefix || (archetypeId === "agro_field" ? "Camiseta Algodão Premium" : (isShortSleeve ? "Camisa Manga Curta UV50" : "Camisa Manga Longa UV50"));
       const subtitle = `${shirtSubPrefix} | *As medidas podem variar de 2cm a 3cm`;
       const rows = [
         ["Baby Look PP", "33 cm", "51 cm", "53 cm"],
@@ -1333,7 +1353,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
     else {
       guideTitle = "Tabela de Medidas Masculino / Unissex (PP ao G2)";
       const badgeTitle = "MASCULINO";
-      const shirtSubPrefix = archetypeId === "agro_field" ? "Camiseta Algodão Premium" : (isShortSleeve ? "Camisa Manga Curta UV50" : "Camisa Manga Longa UV50");
+      const shirtSubPrefix = specialShirtPrefix || (archetypeId === "agro_field" ? "Camiseta Algodão Premium" : (isShortSleeve ? "Camisa Manga Curta UV50" : "Camisa Manga Longa UV50"));
       const subtitle = `${shirtSubPrefix} | *As medidas podem variar de 2cm a 3cm`;
       const rows = [
         ["PP", "49,5 cm", "67 cm", "56 cm"],
@@ -2793,7 +2813,9 @@ function getProductModeBHTML(liveP) {
         act3Title = "COSTURA REFORÇADA E GOLA REDONDA ANATÔMICA";
         act3Desc = "Acabamento de alto padrão com costuras planas anti-atrito, gola careca canelada reforçada ombro a ombro e caimento confortável para uso prolongado.";
       } else if (isHasGloveModal) {
-        act3Desc = "Acabamento de alto padrão com costuras planas anti-atrito, gola alta anatômica e punhos estendidos com luva integrada para proteção estendida do dorso das mãos.";
+        act3Tag = "Punho com Luva Integrada & Acabamento";
+        act3Title = "PUNHOS ESTENDIDOS COM LUVA INTEGRADA E COSTURAS REFORÇADAS";
+        act3Desc = "Acabamento de alto padrão com costuras planas anti-atrito, gola padre anatômica e punhos estendidos com luva integrada (abertura para o polegar) que garantem proteção solar contínua no dorso das mãos com total liberdade nos dedos.";
       }
 
       if (archetypeId === "uv_performance" && !isKidsModal) {

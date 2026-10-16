@@ -304,7 +304,32 @@ class HTMLBuilder:
             if re.search(non_textile_pattern, title_low):
                 return ""
 
-        tip_text = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | Manga do ombro ao punho). Dica: compare com uma peça sua estendida para escolher o caimento ideal."
+        is_fusion_sg = is_shirt and ("fusion" in title_low or "fusion" in sku_low)
+        is_hybrid_sg = is_shirt and ("hybrid" in title_low or sku_low.startswith("hyb"))
+        is_armorx_sg = is_shirt and ("armorx" in title_low or sku_low.startswith("cax") or "com luva" in title_low or "e luva" in title_low)
+        is_hooded_sg = is_shirt and ("capuz" in title_low or is_fusion_sg or is_hybrid_sg)
+
+        if is_fusion_sg:
+            tip_text = "<strong>Como medir com precisão (Linha FusionX — Com Capuz & Bandana Embutida):</strong> A grade do tronco (PP ao G2) segue a mesma modelagem base BRK. <strong>Tórax:</strong> medido de axila a axila | <strong>Altura:</strong> medida da costura do ombro até a barra inferior (<u>sem contar o capuz e a bandana/máscara facial embutida</u>) | <strong>Manga:</strong> medida do ombro ao punho (com extensão elástica e abertura para o polegar/dedeira). O capuz e a bandana acoplada possuem elasticidade anatômica XTech Pro® que se ajusta ao rosto sem apertar."
+        elif is_hybrid_sg:
+            tip_text = "<strong>Como medir com precisão (Linha Hybrid — Com Capuz Anatômico & Dedeira):</strong> A grade do tronco (PP ao G2) segue a mesma modelagem base BRK. <strong>Tórax:</strong> medido de axila a axila | <strong>Altura:</strong> medida da costura do ombro até a barra inferior (<u>sem contar a altura do capuz integrado</u>) | <strong>Manga:</strong> medida do ombro ao punho (com extensão elástica e abertura para o polegar/dedeira)."
+        elif is_armorx_sg:
+            tip_text = "<strong>Como medir com precisão (Linha ArmorX — Com Luva Integrada no Punho):</strong> A grade do tronco (PP ao G2) segue a mesma modelagem base BRK. <strong>Tórax:</strong> medido de axila a axila | <strong>Altura:</strong> medida da costura do ombro até a barra inferior (sem contar a gola alta) | <strong>Manga:</strong> medida do ombro à base do punho (contando com prolongamento anatômico com abertura para o polegar que protege o dorso da mão)."
+        elif is_hooded_sg:
+            tip_text = "<strong>Como medir com precisão (Modelo com Capuz Integrado):</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura da costura do ombro à barra inferior, <u>desconsiderando o capuz</u> | Manga do ombro ao punho)."
+        else:
+            tip_text = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | Manga do ombro ao punho). Dica: compare com uma peça sua estendida para escolher o caimento ideal."
+
+        if is_fusion_sg:
+            special_shirt_prefix = "Camisa UV50+ FusionX (Capuz + Bandana Embutida + Dedeira)"
+        elif is_hybrid_sg:
+            special_shirt_prefix = "Camisa UV50+ Hybrid (Capuz Anatômico + Punho com Dedeira)"
+        elif is_armorx_sg:
+            special_shirt_prefix = "Camisa UV50+ ArmorX (Punho Estendido com Luva Integrada)"
+        elif is_hooded_sg:
+            special_shirt_prefix = "Camisa Manga Longa UV50 com Capuz Integrado"
+        else:
+            special_shirt_prefix = None
 
         if is_shirt:
             # 1.1 Camisas de Botão / Utilitárias Work (CMB - Sarja/Algodão corte reto de trabalho)
@@ -355,7 +380,7 @@ class HTMLBuilder:
             # 1.1b Kit Casal (Exibe AMBAS as tabelas: Masculina + Feminina Baby Look)
             elif "casal" in title_low and ("kit" in title_low or "combo" in title_low):
                 guide_title = "Tabela de Medidas Kit Casal - Masculino & Feminino Baby Look (PP ao G2)"
-                shirt_sub_prefix = "Camisa Manga Curta UV50" if is_short_sleeve else "Camisa Manga Longa UV50"
+                shirt_sub_prefix = special_shirt_prefix or ("Camisa Manga Curta UV50" if is_short_sleeve else "Camisa Manga Longa UV50")
                 subtitle = f"{shirt_sub_prefix} | *As medidas podem variar de 2cm a 3cm"
                 m_rows = [
                     ("PP", "49,5 cm", "67 cm", "56 cm"),
@@ -423,8 +448,8 @@ class HTMLBuilder:
             ):
                 guide_title = "Guia de Tamanhos Infantil (1 a 13 Anos)"
                 badge_title = "INFANTIL"
-                tip_text = "<strong>Escolha por Idade com Referência de Tamanho (PP ao G2):</strong> Na linha Infantil BRK, a seleção é guiada pela faixa de idade (1 a 13 Anos) mantendo a indicação do tamanho equivalente (PP ao G2). Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | Manga do ombro ao punho)."
-                shirt_sub_prefix = "Camiseta Algodão Premium" if archetype_id == "agro_field" else ("Camisa Manga Curta UV50" if is_short_sleeve else "Camisa Manga Longa UV50")
+                tip_text = "<strong>Escolha por Idade com Referência de Tamanho (PP ao G2):</strong> Na linha Infantil BRK, a seleção é guiada pela faixa de idade (1 a 13 Anos) mantendo a indicação do tamanho equivalente (PP ao G2). Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra, sem contar eventual capuz | Manga do ombro ao punho)."
+                shirt_sub_prefix = special_shirt_prefix or ("Camiseta Algodão Premium" if archetype_id == "agro_field" else ("Camisa Manga Curta UV50" if is_short_sleeve else "Camisa Manga Longa UV50"))
                 subtitle = f"{shirt_sub_prefix} | *As medidas podem variar de 2cm a 3cm"
                 rows = [
                     ("1 a 2 Anos (PP)", "31 cm", "41 cm", "31 cm"),
@@ -457,7 +482,7 @@ class HTMLBuilder:
             elif any(w in title_low for w in ["feminina", "feminino", "baby look", "fem", "babylook"]) or "bl" in sku_low:
                 guide_title = "Tabela de Medidas Feminina - Baby Look (PP ao G2)"
                 badge_title = "FEMININO"
-                shirt_sub_prefix = "Camiseta Algodão Premium" if archetype_id == "agro_field" else ("Camisa Manga Curta UV50" if is_short_sleeve else "Camisa Manga Longa UV50")
+                shirt_sub_prefix = special_shirt_prefix or ("Camiseta Algodão Premium" if archetype_id == "agro_field" else ("Camisa Manga Curta UV50" if is_short_sleeve else "Camisa Manga Longa UV50"))
                 subtitle = f"{shirt_sub_prefix} | *As medidas podem variar de 2cm a 3cm"
                 rows = [
                     ("Baby Look PP", "33 cm", "51 cm", "53 cm"),
@@ -490,7 +515,7 @@ class HTMLBuilder:
             else:
                 guide_title = "Tabela de Medidas Masculino / Unissex (PP ao G2)"
                 badge_title = "MASCULINO"
-                shirt_sub_prefix = "Camiseta Algodão Premium" if archetype_id == "agro_field" else ("Camisa Manga Curta UV50" if is_short_sleeve else "Camisa Manga Longa UV50")
+                shirt_sub_prefix = special_shirt_prefix or ("Camiseta Algodão Premium" if archetype_id == "agro_field" else ("Camisa Manga Curta UV50" if is_short_sleeve else "Camisa Manga Longa UV50"))
                 subtitle = f"{shirt_sub_prefix} | *As medidas podem variar de 2cm a 3cm"
                 rows = [
                     ("PP", "49,5 cm", "67 cm", "56 cm"),

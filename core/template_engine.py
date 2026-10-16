@@ -2363,13 +2363,15 @@ class TemplateEngine:
             act3["title"] = "COSTURA REFORÇADA E GOLA REDONDA ANATÔMICA"
             act3["desc_tmpl"] = "Acabamento de alto padrão com costuras planas anti-atrito, gola careca anatômica reforçada ombro a ombro e caimento confortável para uso prolongado."
 
-        # 6. Adaptação Camisa com Luva Integrada
+        # 6. Adaptação Camisa com Luva Integrada (Linha ArmorX / CAX)
         elif is_has_glove:
-            act3["desc_tmpl"] = "Acabamento de alto padrão com costuras planas anti-atrito, gola alta anatômica e punhos estendidos com luva integrada para proteção estendida do dorso das mãos."
+            act3["tag"] = "Punho com Luva Integrada & Acabamento"
+            act3["title"] = "PUNHOS ESTENDIDOS COM LUVA INTEGRADA E COSTURAS REFORÇADAS"
+            act3["desc_tmpl"] = "Acabamento de alto padrão com costuras planas anti-atrito, gola padre anatômica e punhos estendidos com luva integrada (abertura para o polegar) que garantem proteção solar contínua no dorso das mãos com total liberdade nos dedos."
 
         # 7. Detecção Contextual da Foto 3 (Costas / Painel Traseiro vs. Acabamento Universal)
         is_back_view = self._is_back_view_url(img3, include_03=True)
-        if is_back_view and archetype_id == "uv_performance" and not is_fusion and not is_hybrid and not is_hooded and not is_round_neck:
+        if is_back_view and archetype_id == "uv_performance" and not is_fusion and not is_hybrid and not is_hooded and not is_round_neck and not is_has_glove:
             act3["tag"] = "Design Traseiro & Acabamento"
             act3["title"] = "PAINEL TRASEIRO EM ALTA DEFINIÇÃO E COSTURAS REFORÇADAS"
             act3["desc_tmpl"] = "Painel traseiro com estampa nítida e sublimação de alta resolução que não desbota, estruturado com costuras planas reforçadas nos ombros e dorso para total liberdade de movimentos e resistência ao uso contínuo."
@@ -3570,21 +3572,21 @@ class TemplateEngine:
                         {"label": "Mecanismo", "value": "Dobrável com trava de segurança firme"},
                         {"label": "Aplicação", "value": "Pesca, camping, trilhas e uso diário (EDC)"}
                     ]
-            # 15.3 Faca de Filetar Marine Sports Fillet Knife 19cm (MFK75T)
+            # 15.3 Faca de Filetar Marine Sports Fillet Knife 19cm (MFK75T - Sem Bainha; Lâmina com Teflon e Cabo com Olhal)
             elif "fillet" in t_low or "mfk75t" in t_low:
-                act1["tag"] = "Lâmina Flexível de Filetagem (19 cm)"
+                act1["tag"] = "Lâmina Flexível com Teflon (19 cm)"
                 act1["title"] = "PRECISÃO CIRÚRGICA PARA FILETAR PEIXES COM ZERO DESPERDÍCIO"
-                act1["desc_tmpl"] = "Desenvolvida especialmente para pescadores esportivos e preparo culinário de pescado, a {title} possui lâmina estreita e flexível de 19 cm (7,5\") em aço inox que contorna a espinha com suavidade."
+                act1["desc_tmpl"] = "Desenvolvida especialmente para pescadores esportivos e preparo culinário de pescado, a {title} possui lâmina estreita e flexível de 19 cm (7,5\") em aço inoxidável com revestimento antiaderente que contorna a espinha com suavidade."
                 act2["tag"] = "Empunhadura Antiderrapante"
                 act2["title"] = "CABO EMBORRACHADO TEXTURIZADO COM GUARDA DE SEGURANÇA"
                 act2["desc_tmpl"] = "Empunhadura ergonômica antiderrapante projetada para manter controle total mesmo com as mãos molhadas ou escorregadias, contando com guarda frontal de proteção para os dedos."
-                act3["tag"] = "Bainha Rígida com Afiador"
-                act3["title"] = "ACOMPANHA BAINHA RÍGIDA PROTETORA COM AFIADOR INTEGRADO"
-                act3["desc_tmpl"] = "Equipada com bainha rígida ventilada de polímero resistente, passador de cinto e afiador embutido para manter o fio navalha sempre pronto na beira do rio ou no barco."
+                act3["tag"] = "Revestimento Teflon & Olhal para Fiel"
+                act3["title"] = "PROTEÇÃO ANTICORROSÃO E PASSADOR TRASEIRO PARA CORDÃO DE PULSO"
+                act3["desc_tmpl"] = "O revestimento escuro em Teflon protege o aço contra a oxidação em ambientes de água doce ou salgada e evita que o filé grude na lâmina, enquanto o olhal integrado na extremidade do cabo permite acoplar cordão fiel ou pendurar a faca com praticidade."
                 new_specs = [
-                    {"label": "Material da Lâmina", "value": "Aço Inoxidável flexível de 19 cm (7,5 polegadas) resistente à corrosão"},
-                    {"label": "Empunhadura", "value": "Polímero emborrachado antiderrapante com guarda de proteção"},
-                    {"label": "Bainha Inclusa", "value": "Bainha rígida em polímero com passador de cinto e afiador integrado"},
+                    {"label": "Material da Lâmina", "value": "Aço Inoxidável flexível de 19 cm (7,5 polegadas) com revestimento em Teflon antiaderente"},
+                    {"label": "Empunhadura", "value": "Polímero emborrachado antiderrapante texturizado com guarda de proteção e olhal traseiro"},
+                    {"label": "Acabamento da Lâmina", "value": "Teflon preto anticorrosão de fácil limpeza (desliza sem grudar no filé)"},
                     {"label": "Indicação de Uso", "value": "Filetagem de peixes, limpeza de pescado e culinária náutica"}
                 ]
             # 15.4 Cutelo 6" em Inox BRK (Sem bainha nas fotos; foco em lâmina larga, cabo madeira e corte de carnes/costelas)

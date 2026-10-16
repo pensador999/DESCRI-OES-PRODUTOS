@@ -46,6 +46,63 @@ def get_base_dir():
     # Diretório raiz do projeto (um nível acima de api/)
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+def evaluate_guideline_compliance(p: dict, store_key: str = "brk_fishing") -> tuple:
+    """
+    Avalia se a descrição atual do produto na Shopify (body_html) está 100% dentro das
+    Diretrizes Modo B v5 ou se possui alguma violação de regra.
+    Retorna: (is_mode_b_compliant: bool, guideline_status: str, guideline_reason: str)
+    """
+    orig_html = p.get("body_html") or p.get("original_body_html") or ""
+    title_l = str(p.get("title") or "").lower()
+    sku_l = str(p.get("master_sku") or p.get("sku") or "").lower()
+    status = str(p.get("status") or "")
+
+    plain_text = re.sub(r"<style.*?</style>", " ", orig_html, flags=re.S | re.I)
+    plain_text = re.sub(r"<[^>]+>", " ", plain_text)
+    plain_text = re.sub(r"\s+", " ", plain_text).strip()
+
+    if status == "SEM_DESCRICAO" or len(plain_text) < 20:
+        return (False, "SEM_DESCRICAO", "Sem descrição cadastrada na Shopify")
+    if status == "IMAGENS_QUEBRADAS" or "use-brk-images-s3" in orig_html.lower() or "photobucket" in orig_html.lower():
+        return (False, "IMAGENS_QUEBRADAS", "Contém imagens quebradas (AWS S3 404)")
+
+    has_mode_b_structure = any(m in orig_html for m in ("<!-- BRK-MODO-B", "brk-desc-wrapper", "brk-cap-description"))
+    if not has_mode_b_structure:
+        return (False, "FORA_PADRAO_MODO_B", "Descrição legada fora do padrão oficial Modo B (sem 3 Atos / D2C)")
+
+    expected_colors = {
+        "brk_fishing": ("#0284c7", "#00a8ff"),
+        "brk_agro": ("#15803d", "#22c55e", "#16a34a"),
+        "brk_motors": ("#ea580c", "#f97316"),
+    }.get(store_key, ("#0284c7", "#00a8ff"))
+
+    violations = []
+    if "Tabela de Medidas de Luvas" in orig_html and any(w in title_l or w in sku_l for w in ("camisa", "camiseta", "armorx", "cax", "hyb", "fusion")):
+        violations.append("Camisa com Tabela de Luvas (corrigir para Tabela de Camisa PP ao G2)")
+    if "Tabela de Medidas Adulto (P ao EXG)" in orig_html:
+        violations.append("Tabela Adulto antiga (P ao EXG em vez de PP ao G2)")
+    if ("fillet" in title_l or "mfk75t" in title_l or "79081379076" in sku_l) and "bainha" in orig_html.lower() and "bainha" not in title_l:
+        violations.append("Faca Marine MFK75T com menção indevida a bainha")
+    if ("fusion" in title_l or "fusion" in sku_l or "hybrid" in title_l or sku_l.startswith("hyb")) and re.search(r'\b(zíper|ziper)\b', orig_html, re.I):
+        violations.append("Modelo Fusion/Hybrid com menção indevida a zíper")
+    if ("fusion" in title_l or "fusion" in sku_l or "hybrid" in title_l or sku_l.startswith("hyb")) and "sem contar" not in orig_html.lower():
+        violations.append("Tabela de Medidas sem orientação de Capuz/Bandana Embutida (medir do ombro à barra sem contar o capuz)")
+    if "eQxQuY7.jpg" in orig_html and "ba09" not in sku_l:
+        violations.append("Boné com foto genérica repetida")
+
+    orig_img_srcs = [u.split("?")[0].lower() for u in re.findall(r'<img[^>]+src=["\']([^"\']+)["\']', orig_html, re.I) if not u.split("?")[0].lower().endswith(".svg")]
+    if len(orig_img_srcs) != len(set(orig_img_srcs)):
+        violations.append("Fotos repetidas nos Atos/Cards")
+
+    if not any(c in orig_html.lower() for c in expected_colors) and any(c in orig_html.lower() for c in ("#0284c7", "#15803d", "#ea580c", "#f97316")):
+        violations.append("Cor de outra loja no HTML")
+
+    if violations:
+        return (False, "MODO_B_DESATUALIZADO", "; ".join(violations))
+
+    return (True, "CONFORME_MODO_B", "100% dentro das diretrizes oficiais Modo B")
+
+
 def load_store_database(store_key: str):
     """Carrega e indexa o arquivo de dados da loja com cache em memória"""
     store_norm = STORE_SLUG_MAP.get(store_key, store_key)
@@ -68,18 +125,25 @@ def load_store_database(store_key: str):
 
         products = data.get("products", []) if isinstance(data, dict) else data
 
-        # Criar índices em memória
+        # Criar índices em memória com avaliação estrita de diretrizes
         by_id = {}
         by_handle = {}
         by_sku = {}
+        outdated_mode_b_list = []
         empty_list = []
         broken_list = []
+        legacy_list = []
+        compliant_list = []
 
         for p in products:
             p_id = str(p.get("id", ""))
             p_handle = str(p.get("handle", "")).lower()
             p_sku = str(p.get("master_sku") or p.get("sku") or "").upper()
-            status = p.get("status", "")
+
+            is_comp, g_status, g_reason = evaluate_guideline_compliance(p, store_norm)
+            p["is_mode_b_compliant"] = is_comp
+            p["guideline_status"] = g_status
+            p["guideline_reason"] = g_reason
 
             if p_id:
                 by_id[p_id] = p
@@ -88,18 +152,31 @@ def load_store_database(store_key: str):
             if p_sku:
                 by_sku[p_sku] = p
 
-            if status == "SEM_DESCRICAO":
+            if g_status == "MODO_B_DESATUALIZADO":
+                outdated_mode_b_list.append(p)
+            elif g_status == "SEM_DESCRICAO":
                 empty_list.append(p)
-            elif status == "IMAGENS_QUEBRADAS":
+            elif g_status == "IMAGENS_QUEBRADAS":
                 broken_list.append(p)
+            elif g_status == "FORA_PADRAO_MODO_B":
+                legacy_list.append(p)
+            else:
+                compliant_list.append(p)
+
+        # Fila prioritária de itens fora das diretrizes (exclui 100% os itens já CONFORME_MODO_B)
+        non_compliant_list = outdated_mode_b_list + empty_list + broken_list + legacy_list
 
         store_pack = {
             "products": products,
             "by_id": by_id,
             "by_handle": by_handle,
             "by_sku": by_sku,
+            "outdated_mode_b": outdated_mode_b_list,
             "empty": empty_list,
             "broken": broken_list,
+            "legacy": legacy_list,
+            "compliant": compliant_list,
+            "non_compliant": non_compliant_list,
             "total": len(products)
         }
 
@@ -147,7 +224,7 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
         "brk_motors": ("#ea580c", "#f97316"),
     }.get(store_key, ("#0284c7", "#00a8ff"))
 
-    # Se já tem o formato oficial correspondente e atualizado (Fase 5/6/7), verifica saúde de imagens e reaproveita
+    # Se já tem o formato oficial correspondente e atualizado (Fase 5/6/7/8), verifica saúde de imagens e reaproveita
     engine, builder = get_engine_and_builder()
     if raw_b and len(raw_b.strip()) > 500 and "<!-- BRK-MODO-B" in raw_b and "use-brk-images-s3" not in raw_b:
         img_srcs = re.findall(r'<img[^>]+src=["\']([^"\']+)["\']', raw_b, re.I)
@@ -156,7 +233,9 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
         if not has_dup_imgs and engine and hasattr(engine, "KNOWN_SHOPIFY_DUP_IMAGE_TOKENS"):
             has_dup_imgs = any(tok in u for u in img_roots for tok in engine.KNOWN_SHOPIFY_DUP_IMAGE_TOKENS)
         has_store_color = any(c in raw_b for c in expected_theme_marker)
-        if not has_dup_imgs:
+        sku_low = sku_str.lower()
+        has_mfk75t_violation = ("fillet" in title_l or "mfk75t" in title_l or "79081379076" in sku_low) and "bainha" in raw_b.lower()
+        if not has_dup_imgs and not has_mfk75t_violation:
             if is_cap_or_hat:
                 if "brk-cap-description" in raw_b and has_store_color:
                     return raw_b
@@ -169,11 +248,11 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
                 expected_prazo = "Pronta entrega" if is_ready else "10 dias úteis"
                 has_correct_prazo = expected_prazo in raw_b
 
-                sku_low = sku_str.lower()
                 is_fusion_or_hyb = "fusion" in title_l or "fusion" in sku_low or "hybrid" in title_l or sku_low.startswith("hyb")
                 has_no_zipper_violation = not is_fusion_or_hyb or (not bool(re.search(r'\b(zíper|ziper)\b', raw_b, re.I)))
+                has_hood_sg_note = not is_fusion_or_hyb or ("sem contar" in raw_b.lower())
 
-                if "Detalhes Técnicos" in raw_b and has_new_sg and has_correct_prazo and has_no_zipper_violation and has_store_color:
+                if "Detalhes Técnicos" in raw_b and has_new_sg and has_correct_prazo and has_no_zipper_violation and has_hood_sg_note and has_store_color:
                     return raw_b
 
     engine, builder = get_engine_and_builder()
@@ -236,6 +315,7 @@ def sanitize_product(p: dict, store_key: str = "brk_fishing") -> dict:
     is_cap_layout = "brk-cap-description" in mode_b
     has_size_guide = "brk-size-guide" in mode_b
     delivery_time = "Pronta entrega" if "Pronta entrega" in mode_b else "10 dias úteis"
+    is_comp, g_status, g_reason = evaluate_guideline_compliance(p, store_key)
     return {
         "id": str(p.get("id", "")),
         "handle": p.get("handle", ""),
@@ -243,6 +323,9 @@ def sanitize_product(p: dict, store_key: str = "brk_fishing") -> dict:
         "title": p.get("title", "Sem Título"),
         "category": p.get("category") or "Geral",
         "status": p.get("status", "SAUDAVEL"),
+        "is_mode_b_compliant": is_comp,
+        "guideline_status": g_status,
+        "guideline_reason": g_reason,
         "archetype_id": p.get("archetype_id", "uv_performance"),
         "archetype_name": p.get("archetype_name", "Modo B"),
         "audience_badge": detect_audience_badge(p, mode_b),
@@ -298,24 +381,41 @@ class handler(BaseHTTPRequestHandler):
             })
 
         action = (qs.get("action") or ["product"])[0]
+        exclude_raw = (qs.get("exclude_ids") or [""])[0]
+        excluded_tokens = {tok.strip().upper() for tok in exclude_raw.split(",") if tok.strip()}
 
         # ---------------------------------------------------------------------
         # 1. Consulta de Fila para Automação em Lote (Action = queue)
+        #    Retorna APENAS os produtos que estão FORA DAS DIRETRIZES!
         # ---------------------------------------------------------------------
         if action == "queue":
-            status_filter = (qs.get("status") or ["SEM_DESCRICAO"])[0].upper()
+            status_filter = (qs.get("status") or ["FORA_DIRETRIZES"])[0].upper()
             category_filter = (qs.get("category") or ["ALL"])[0].strip()
             try:
                 limit = int((qs.get("limit") or ["25"])[0])
             except ValueError:
                 limit = 25
 
-            if status_filter == "SEM_DESCRICAO":
+            if status_filter == "MODO_B_DESATUALIZADO":
+                pool = db["outdated_mode_b"]
+            elif status_filter == "SEM_DESCRICAO":
                 pool = db["empty"]
             elif status_filter == "IMAGENS_QUEBRADAS":
                 pool = db["broken"]
+            elif status_filter == "FORA_PADRAO_MODO_B":
+                pool = db["legacy"]
             else:
-                pool = db["products"]
+                # FORA_DIRETRIZES / NAO_CONFORMES / ALL: todos os produtos fora das diretrizes,
+                # ordenados por prioridade (MODO_B_DESATUALIZADO -> SEM_DESCRICAO -> IMAGENS_QUEBRADAS -> FORA_PADRAO_MODO_B)
+                pool = db["non_compliant"]
+
+            # Filtrar estritamente qualquer produto que já esteja 100% conforme ou na lista local de excluídos
+            pool = [
+                p for p in pool
+                if not p.get("is_mode_b_compliant", False)
+                and str(p.get("id", "")).upper() not in excluded_tokens
+                and str(p.get("master_sku") or p.get("sku") or "").upper() not in excluded_tokens
+            ]
 
             if category_filter and category_filter.upper() != "ALL":
                 cat_l = category_filter.lower()
@@ -348,6 +448,16 @@ class handler(BaseHTTPRequestHandler):
 
             batch = pool[:limit]
             sanitized_batch = [sanitize_product(p, store_key) for p in batch]
+            non_compliant_codes = [
+                {
+                    "id": str(p.get("id", "")),
+                    "sku": str(p.get("master_sku") or p.get("sku") or f"ID-{p.get('id', '')}"),
+                    "title": p.get("title", ""),
+                    "guideline_status": p.get("guideline_status", "FORA_PADRAO_MODO_B"),
+                    "guideline_reason": p.get("guideline_reason", "")
+                }
+                for p in pool[:80]
+            ]
 
             return self._respond_json(200, {
                 "success": True,
@@ -355,28 +465,50 @@ class handler(BaseHTTPRequestHandler):
                 "status_filter": status_filter,
                 "category_filter": category_filter,
                 "total_available": len(pool),
+                "compliant_excluded_count": len(db["compliant"]),
                 "count": len(sanitized_batch),
+                "non_compliant_codes": non_compliant_codes,
                 "items": sanitized_batch
-            }, cache_control="public, s-maxage=60")
+            }, cache_control="no-store" if excluded_tokens else "public, s-maxage=60")
 
         # ---------------------------------------------------------------------
-        # 2. Estatísticas do Banco de Dados (Action = stats)
+        # 2. Estatísticas do Banco de Dados e Mapa de Códigos Fora das Diretrizes (Action = stats)
         # ---------------------------------------------------------------------
         if action == "stats":
             cat_counts = {}
             for p in db["products"]:
                 c = p.get("category") or "Geral"
                 cat_counts[c] = cat_counts.get(c, 0) + 1
+            active_non_compliant = [
+                p for p in db["non_compliant"]
+                if str(p.get("id", "")).upper() not in excluded_tokens
+                and str(p.get("master_sku") or p.get("sku") or "").upper() not in excluded_tokens
+            ]
+            non_compliant_codes = [
+                {
+                    "id": str(p.get("id", "")),
+                    "sku": str(p.get("master_sku") or p.get("sku") or f"ID-{p.get('id', '')}"),
+                    "title": p.get("title", ""),
+                    "guideline_status": p.get("guideline_status", "FORA_PADRAO_MODO_B"),
+                    "guideline_reason": p.get("guideline_reason", "")
+                }
+                for p in active_non_compliant[:80]
+            ]
             return self._respond_json(200, {
                 "success": True,
                 "store": store_key,
                 "store_theme": STORE_THEME_METADATA.get(store_key, STORE_THEME_METADATA["brk_fishing"]),
                 "total_products": db["total"],
-                "sem_descricao_count": len(db["empty"]),
-                "imagens_quebradas_count": len(db["broken"]),
+                "compliant_count": len(db["compliant"]) + (len(db["non_compliant"]) - len(active_non_compliant)),
+                "non_compliant_count": len(active_non_compliant),
+                "modo_b_desatualizado_count": len([p for p in db["outdated_mode_b"] if str(p.get("id", "")).upper() not in excluded_tokens]),
+                "sem_descricao_count": len([p for p in db["empty"] if str(p.get("id", "")).upper() not in excluded_tokens]),
+                "imagens_quebradas_count": len([p for p in db["broken"] if str(p.get("id", "")).upper() not in excluded_tokens]),
+                "fora_padrao_modo_b_count": len([p for p in db["legacy"] if str(p.get("id", "")).upper() not in excluded_tokens]),
                 "healthy_count": db["total"] - len(db["empty"]) - len(db["broken"]),
+                "non_compliant_codes": non_compliant_codes,
                 "categories": cat_counts
-            }, cache_control="public, s-maxage=120")
+            }, cache_control="no-store" if excluded_tokens else "public, s-maxage=60")
 
         # ---------------------------------------------------------------------
         # 3. Consulta de Produto Único por ID, SKU ou Handle (Action = product)

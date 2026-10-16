@@ -172,10 +172,63 @@ def build_dist():
                 prohib_regex = re.compile("|".join(prohibited_domains), re.IGNORECASE)
                 prohibited_links = [l for l in re.findall(r'(?:href|src)=["\']([^"\']+)["\']', orig_html) if prohib_regex.search(l)]
 
+            # Mapeamento estrito de conformidade da descrição atual (orig_html) com as Diretrizes Modo B v5
+            t_low_g = title.lower()
+            sku_low_g = str(sku_code or "").lower()
+            has_mode_b_structure = any(m in orig_html for m in ["<!-- BRK-MODO-B", "brk-desc-wrapper", "brk-cap-description"])
+            expected_colors = {
+                "brk_fishing": ("#0284c7", "#00a8ff"),
+                "brk_agro": ("#15803d", "#22c55e", "#16a34a"),
+                "brk_motors": ("#ea580c", "#f97316"),
+            }.get(store_key, ("#0284c7", "#00a8ff"))
+
+            if p.get("status") == "SEM_DESCRICAO":
+                is_mode_b_compliant = False
+                guideline_status = "SEM_DESCRICAO"
+                guideline_reason = "Sem descrição cadastrada na Shopify"
+            elif p.get("status") == "IMAGENS_QUEBRADAS":
+                is_mode_b_compliant = False
+                guideline_status = "IMAGENS_QUEBRADAS"
+                guideline_reason = "Contém imagens quebradas (AWS S3 404)"
+            elif not has_mode_b_structure:
+                is_mode_b_compliant = False
+                guideline_status = "FORA_PADRAO_MODO_B"
+                guideline_reason = "Descrição legada fora do padrão oficial Modo B (sem 3 Atos / D2C)"
+            else:
+                violations = []
+                if "Tabela de Medidas de Luvas" in orig_html and any(w in t_low_g or w in sku_low_g for w in ["camisa", "camiseta", "armorx", "cax", "hyb", "fusion"]):
+                    violations.append("Camisa com Tabela de Luvas (corrigir para Tabela de Camisa PP ao G2)")
+                if "Tabela de Medidas Adulto (P ao EXG)" in orig_html:
+                    violations.append("Tabela Adulto antiga (P ao EXG em vez de PP ao G2)")
+                if ("fillet" in t_low_g or "mfk75t" in t_low_g) and "bainha" in orig_html.lower() and "bainha" not in t_low_g:
+                    violations.append("Faca Marine MFK75T com menção indevida a bainha")
+                if ("fusion" in t_low_g or "fusion" in sku_low_g or "hybrid" in t_low_g or sku_low_g.startswith("hyb")) and re.search(r'\b(zíper|ziper)\b', orig_html, re.I):
+                    violations.append("Modelo Fusion/Hybrid com menção indevida a zíper")
+                if ("fusion" in t_low_g or "fusion" in sku_low_g or "hybrid" in t_low_g or sku_low_g.startswith("hyb")) and "sem contar" not in orig_html.lower():
+                    violations.append("Tabela de Medidas sem orientação de Capuz/Bandana Embutida (medir do ombro à barra sem contar o capuz)")
+                if "eQxQuY7.jpg" in orig_html and "ba09" not in sku_low_g:
+                    violations.append("Boné com foto genérica repetida")
+                orig_img_srcs = [u.split("?")[0].lower() for u in re.findall(r'<img[^>]+src=["\']([^"\']+)["\']', orig_html, re.I) if not u.split("?")[0].lower().endswith(".svg")]
+                if len(orig_img_srcs) != len(set(orig_img_srcs)):
+                    violations.append("Fotos repetidas nos Atos/Cards")
+                if not any(c in orig_html.lower() for c in expected_colors) and any(c in orig_html.lower() for c in ("#0284c7", "#15803d", "#ea580c", "#f97316")):
+                    violations.append("Cor de outra loja no HTML")
+                if violations:
+                    is_mode_b_compliant = False
+                    guideline_status = "MODO_B_DESATUALIZADO"
+                    guideline_reason = "; ".join(violations)
+                else:
+                    is_mode_b_compliant = True
+                    guideline_status = "CONFORME_MODO_B"
+                    guideline_reason = "100% dentro das diretrizes oficiais Modo B"
+
             p_copy = dict(p)
             p_copy.pop("images", None)
             p_copy.pop("original_body_html", None)
             p_copy["body_html"] = orig_html
+            p_copy["is_mode_b_compliant"] = is_mode_b_compliant
+            p_copy["guideline_status"] = guideline_status
+            p_copy["guideline_reason"] = guideline_reason
             p_copy["category"] = canonical_cat
             p_copy["cdn_images"] = images
             p_copy["gallery"] = images

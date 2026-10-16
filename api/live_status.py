@@ -72,7 +72,17 @@ def classify(body_html: str) -> dict:
     elif BROKEN_RE.search(body):
         out["s"] = "IMAGENS_QUEBRADAS"
     elif marker:
-        out["s"] = "COLADO_ATUAL" if marker.group(1) == MODO_B_VERSION else "COLADO_DESATUALIZADO"
+        has_violation = (
+            ("tabela de medidas de luvas" in low and any(w in low for w in ("camisa", "armorx", "sku:cax")))
+            or ("tabela de medidas adulto (p ao exg)" in low)
+            or ("bainha" in low and any(w in low for w in ("mfk75t", "79081379076", "fillet knife")))
+            or (any(w in low for w in ("fusionx", "sku:fusion", "sku:hyb", "brk hybrid")) and "sem contar" not in low)
+            or ("eqxquy7.jpg" in low and "sku:ba09" not in low)
+        )
+        if marker.group(1) != MODO_B_VERSION or has_violation:
+            out["s"] = "COLADO_DESATUALIZADO"
+        else:
+            out["s"] = "COLADO_ATUAL"
     elif "brk-desc-wrapper" in low:
         out["s"] = "COLADO_SEM_MARCADOR"
     else:

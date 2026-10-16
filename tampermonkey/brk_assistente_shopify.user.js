@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         BRK Assistente de Descrições Shopify (Conectado ao Banco Real v4.0 Completo)
+// @name         BRK Assistente de Descrições Shopify (Conectado ao Banco Real v5.0 Piloto Automático)
 // @namespace    https://1025-ten.vercel.app/
-// @version      4.0.0
-// @description  Automação assistida e em lote conectada diretamente ao banco de dados oficial BRK (6.242 produtos auditados nas 3 Lojas: Fishing Azul, Agro Verde, Motors Laranja) para preenchimento e auditoria de descrições Modo B (3 Atos + Molde D2C Bonés/Chapéus + Ficha Técnica + Guias Adulto/Feminino/Infantil 2-13 Anos) no Shopify Admin.
+// @version      5.0.0
+// @description  Automação 100% automática e assistida conectada ao banco de dados oficial BRK (6.408 produtos auditados nas 3 Lojas: Fishing Azul, Agro Verde, Motors Laranja). Filtra e exibe APENAS códigos fora das diretrizes Modo B v5 (3 Atos + Molde D2C Bonés/Chapéus + Ficha Técnica + Tabelas FusionX Capuz/Bandana, Hybrid, ArmorX, Adulto/Feminino/Infantil).
 // @author       BRK Group & DeepMind Pair
 // @match        https://admin.shopify.com/store/*/products*
 // @match        https://1025-ten.vercel.app/*
@@ -26,9 +26,9 @@
 (function() {
   'use strict';
 
-  // Configuração da API do Banco de Dados BRK (6.242 produtos auditados nas 3 lojas)
+  // Configuração da API do Banco de Dados BRK (6.408 produtos auditados nas 3 lojas)
   const API_BASE = "https://1025-ten.vercel.app";
-  const SCRIPT_VERSION = "4.0.0";
+  const SCRIPT_VERSION = "5.0.0";
 
   const STORAGE_KEYS = {
     QUEUE: "BRK_AUTOSYNC_QUEUE",
@@ -36,7 +36,8 @@
     ACTIVE: "BRK_AUTOSYNC_ACTIVE",
     BACKUP: "BRK_AUTOSYNC_BACKUP",
     SETTINGS: "BRK_AUTOSYNC_SETTINGS",
-    LAST_STORE: "BRK_LAST_STORE"
+    LAST_STORE: "BRK_LAST_STORE",
+    COMPLIANT_IDS: "BRK_COMPLIANT_IDS"
   };
 
   const STORE_SLUG_MAP = {
@@ -51,7 +52,7 @@
     "brk_motors": "BRK Motors"
   };
 
-  // Paletas Visuais Oficiais de cada Loja (Fase 5 & 6)
+  // Paletas Visuais Oficiais de cada Loja
   const STORE_THEMES = {
     "brk_fishing": {
       name: "BRK Fishing",
@@ -71,7 +72,7 @@
       light: "#4ade80",
       badgeBg: "#14532d",
       badgeText: "#bbf7d0",
-      markers: ["#15803d", "#22c55e"]
+      markers: ["#15803d", "#22c55e", "#16a34a"]
     },
     "brk_motors": {
       name: "BRK Motors",
@@ -87,11 +88,12 @@
 
   const DEFAULT_SETTINGS = {
     delaySeconds: 4,
-    autoSave: false,             // Se true, clica automaticamente no botão "Salvar" da Shopify após injetar
-    skipAlreadyModeB: true,      // Se true, avança automaticamente quando o produto já está 100% atualizado no Modo B v4
-    upgradeOutdatedModeB: true,  // Se true, atualiza produtos que têm Modo B antigo (S3 quebrado, boné com foto repetida, cor de outra loja, guia infantil antigo)
+    autoPilot: true,             // Modo Automático Total: injeta, clica em Salvar e avança sozinho para o próximo código fora das diretrizes
+    autoSave: true,              // Clica automaticamente no botão "Salvar" da Shopify após injetar
+    skipAlreadyModeB: true,      // Avança automaticamente quando o produto já está 100% conforme as Diretrizes Modo B v5
+    upgradeOutdatedModeB: true,  // Atualiza produtos que têm Modo B com violação (Faca Marine c/ bainha, ArmorX c/ luva, Fusion/Hybrid s/ nota de capuz, P ao EXG)
     batchCategory: "ALL",
-    batchStatus: "SEM_DESCRICAO",
+    batchStatus: "FORA_DIRETRIZES",
     batchLimit: 25
   };
 
@@ -105,6 +107,27 @@
     const merged = { ...getSettings(), ...partial };
     GM_setValue(STORAGE_KEYS.SETTINGS, JSON.stringify(merged));
     return merged;
+  }
+
+  // Registro local de códigos/IDs já conformes (para nunca exibir nem enfileirar itens já dentro das diretrizes)
+  function getCompliantIds() {
+    const raw = GM_getValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
+    try { return JSON.parse(raw) || []; } catch(e) { return []; }
+  }
+
+  function markProductAsCompliant(productId, sku) {
+    const current = new Set(getCompliantIds().map(x => String(x).toUpperCase()));
+    if (productId) current.add(String(productId).trim().toUpperCase());
+    if (sku) current.add(String(sku).trim().toUpperCase());
+    const arr = Array.from(current).slice(-1500);
+    GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, JSON.stringify(arr));
+  }
+
+  function isProductMarkedCompliant(productId, sku) {
+    const set = new Set(getCompliantIds().map(x => String(x).toUpperCase()));
+    if (productId && set.has(String(productId).trim().toUpperCase())) return true;
+    if (sku && set.has(String(sku).trim().toUpperCase())) return true;
+    return false;
   }
 
   function getQueue() {
@@ -211,8 +234,8 @@
       const idx = getQueueIndex();
       const active = isAutomationActive();
       badge.innerHTML = q.length > 0
-        ? `<span>🟢 Tampermonkey v${SCRIPT_VERSION} | Fila: ${idx + 1}/${q.length} (${active ? 'Ativa' : 'Pausada'})</span>`
-        : `<span>🟢 Tampermonkey Conectado ao Banco BRK v${SCRIPT_VERSION} (6.242 itens auditados)</span>`;
+        ? `<span>🤖 Tampermonkey v${SCRIPT_VERSION} | Fila Não-Conformes: ${idx + 1}/${q.length} (${active ? 'Piloto Automático Ativo' : 'Pausada'})</span>`
+        : `<span>🟢 Tampermonkey v${SCRIPT_VERSION} Conectado (Filtro Estrito de Diretrizes + Piloto Automático)</span>`;
     }
     updatePortalBadge();
 
@@ -220,25 +243,28 @@
       const q = getQueue();
       const idx = getQueueIndex();
       const active = isAutomationActive();
-      alert(`[Assistente BRK v${SCRIPT_VERSION} Status]\n\nFila no Tampermonkey: ${q.length} produtos\nÍndice Atual: ${q.length ? (idx + 1) : 0} de ${q.length}\nAutomação Ativa: ${active ? "SIM" : "NÃO"}\n\nFases 5 e 6 Ativas:\n• Fishing (Azul #0284c7) | Agro (Verde #15803d) | Motors (Laranja #ea580c)\n• Bonés e Chapéus com 4 fotos reais da própria galeria + CDN 200 OK\n• Tabelas de Medidas Masculino, Feminino Baby Look e Infantil por Idade (2 a 13 Anos | PP ao G2)`);
+      alert(`[Assistente BRK v${SCRIPT_VERSION} — Piloto Automático & Filtro de Diretrizes]\n\nFila Atual (Apenas Fora das Diretrizes): ${q.length} produtos\nÍndice Atual: ${q.length ? (idx + 1) : 0} de ${q.length}\nPiloto Automático Ativo: ${active ? "SIM" : "NÃO"}\n\nDiretrizes Modo B v5 Ativas:\n• Exibe e enfileira APENAS códigos (SKUs) fora das diretrizes\n• Faca Marine MFK75T sem bainha (revestimento Teflon + olhal para fiel)\n• Tabelas de Medidas com orientação explícita para Camisas com Capuz/Bandana Embutida (FusionX/Hybrid) e Luva Integrada (ArmorX)`);
     };
     document.body.appendChild(badge);
 
-    // Ponte Bidirecional: Receber Fila enviada pelo Portal (Botões "Enviar Lote" / "Enviar Selecionados")
+    // Ponte Bidirecional: Receber Fila enviada pelo Portal (filtrando itens já conformes)
     window.addEventListener("message", (event) => {
       const data = event.data;
       if (!data || data.type !== "BRK_LOAD_QUEUE" || !data.payload) return;
       const { items, storeKey, storeSlug, autoStart } = data.payload;
       if (!Array.isArray(items) || items.length === 0) return;
 
-      setQueue(items);
+      const filteredItems = items.filter(it => !it.is_mode_b_compliant && !isProductMarkedCompliant(it.id, it.master_sku || it.sku));
+      const finalItems = filteredItems.length > 0 ? filteredItems : items;
+
+      setQueue(finalItems);
       setQueueIndex(0);
       setAutomationActive(autoStart !== false);
       if (storeKey) GM_setValue(STORAGE_KEYS.LAST_STORE, storeKey);
       updatePortalBadge();
 
       const slug = storeSlug || (storeKey === "brk_agro" ? "brkagro" : storeKey === "brk_motors" ? "brkmotors25" : "brkfishing");
-      const firstId = items[0].id;
+      const firstId = finalItems[0].id;
       if (firstId && autoStart !== false) {
         const targetUrl = `https://admin.shopify.com/store/${slug}/products/${firstId}`;
         window.open(targetUrl, "_blank");
@@ -259,7 +285,10 @@
     let currentProductId = null;
     let lastObservedPath = "";
     let activeLoadedProduct = null;
+    let cachedNonCompliantCodes = [];
     let countdownTimer = null;
+    let saveCompletionTimer = null;
+    let hasTriggeredSaveForCurrentProduct = false;
 
     function parseCurrentRoute() {
       const urlPath = location.pathname;
@@ -276,7 +305,7 @@
     parseCurrentRoute();
     console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] Shopify Admin | Loja: ${currentStoreName} (${currentShopifySlug}) | Produto ID: ${currentProductId || 'Listagem'}`);
 
-    // Injetar Estilos Visuais do HUD, Modal de Preview e Pulso do Botão Salvar
+    // Injetar Estilos Visuais do HUD, Mapa de Códigos Não-Conformes, Modal de Preview e Pulso do Botão Salvar
     const styleEl = document.createElement("style");
     styleEl.id = "brk-tm-styles";
     styleEl.textContent = `
@@ -294,19 +323,19 @@
       }
       #brk-tm-hud {
         position: fixed;
-        bottom: 20px;
-        right: 20px;
+        bottom: 18px;
+        right: 18px;
         z-index: 999998;
         background: #090d16;
         color: #f1f5f9;
         border: 2px solid #0284c7;
         border-radius: 16px;
-        padding: 15px 18px;
-        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+        padding: 14px 16px;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.75);
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         font-size: 13px;
-        min-width: 390px;
-        max-width: 510px;
+        min-width: 410px;
+        max-width: 530px;
         backdrop-filter: blur(12px);
         transition: border-color 0.25s ease;
       }
@@ -320,6 +349,8 @@
       }
       .brk-badge-empty { background: #991b1b; color: #fee2e2; }
       .brk-badge-broken { background: #b45309; color: #fef3c7; }
+      .brk-badge-outdated { background: #92400e; color: #fde68a; }
+      .brk-badge-legacy { background: #3730a3; color: #e0e7ff; }
       .brk-badge-healthy { background: #166534; color: #dcfce7; }
       .brk-badge-meta {
         font-size: 10px;
@@ -388,13 +419,37 @@
         align-items: center;
         gap: 5px;
         font-size: 11px;
-        color: #94a3b8;
+        color: #cbd5e1;
         cursor: pointer;
         user-select: none;
       }
       .brk-hud-toggle input {
         accent-color: #0284c7;
         cursor: pointer;
+      }
+      .brk-codes-scroll {
+        max-height: 155px;
+        overflow-y: auto;
+        background: #060911;
+        border: 1px solid #1e293b;
+        border-radius: 8px;
+        padding: 6px;
+        margin-top: 6px;
+      }
+      .brk-code-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        padding: 4px 6px;
+        border-bottom: 1px solid #0f172a;
+        font-size: 11px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .brk-code-row:hover {
+        background: #1e293b;
       }
       #brk-tm-preview-modal {
         position: fixed;
@@ -536,26 +591,42 @@
       return "";
     }
 
-    function isAlreadyModeBInEditor() {
-      const currentHtml = getCurrentEditorHtml();
-      return currentHtml.includes("<!-- BRK-MODO-B") || currentHtml.includes("brk-cap-description") || currentHtml.includes("brk-size-guide");
+    // Espera resiliente até o editor da Shopify montar no DOM (essencial para o Piloto Automático)
+    function waitForEditorReady(maxWaitMs = 8000) {
+      return new Promise((resolve) => {
+        const start = Date.now();
+        const check = () => {
+          const hasTa = !!findDescriptionTextarea();
+          const hasTiny = !!findTinyMceBody();
+          const hasHtmlBtn = !!findShowHtmlButton();
+          const hasEditable = !!document.querySelector("[contenteditable='true']");
+          if (hasTa || hasTiny || hasHtmlBtn || hasEditable || (Date.now() - start >= maxWaitMs)) {
+            resolve(true);
+          } else {
+            setTimeout(check, 250);
+          }
+        };
+        check();
+      });
     }
 
-    // Diagnóstico Inteligente Fase 5/6 do HTML atual no editor da Shopify
+    // Diagnóstico Inteligente Fase 8 (Diretrizes Modo B v5) do HTML atual no editor da Shopify
     function inspectEditorHealth(prod) {
       const currentHtml = getCurrentEditorHtml();
+      const titleAndSku = `${prod?.title || ""} ${prod?.master_sku || ""}`.toLowerCase();
+
       if (!currentHtml || currentHtml.trim().length < 30) {
         return { state: "EMPTY", badge: "🔴 SEM DESCRIÇÃO NO EDITOR", reason: "Editor da Shopify está vazio." };
       }
-      const hasModeB = currentHtml.includes("<!-- BRK-MODO-B") || currentHtml.includes("brk-cap-description") || currentHtml.includes("brk-size-guide");
+      const hasModeB = currentHtml.includes("<!-- BRK-MODO-B") || currentHtml.includes("brk-cap-description") || currentHtml.includes("brk-size-guide") || currentHtml.includes("brk-desc-wrapper");
       if (!hasModeB) {
         if (currentHtml.includes("use-brk-images-s3")) {
           return { state: "LEGACY_BROKEN", badge: "🔴 S3 QUEBRADO NO EDITOR", reason: "Descrição antiga com imagens AWS S3 (Erro 404)." };
         }
-        return { state: "LEGACY", badge: "🟡 DESCRIÇÃO LEGADA", reason: "Ainda não possui o padrão oficial Modo B." };
+        return { state: "LEGACY", badge: "🟡 FORA DO PADRÃO MODO B", reason: "Descrição legada fora das diretrizes Modo B (sem 3 Atos / D2C)." };
       }
 
-      // Já tem Modo B, mas vamos verificar se precisa de upgrade da Fase 5/6!
+      // Já tem estrutura Modo B, mas verificamos rigorosamente cada diretriz Modo B v5:
       const reasons = [];
       if (currentHtml.includes("use-brk-images-s3")) {
         reasons.push("Links AWS S3 404 (13-Tags/CAIXA)");
@@ -563,27 +634,35 @@
       if (currentHtml.includes("eQxQuY7.jpg") && prod && prod.mode_b_html && !prod.mode_b_html.includes("eQxQuY7.jpg")) {
         reasons.push("Foto genérica repetida de boné");
       }
-      if (currentHtml.includes("1 a 2 Anos")) {
-        reasons.push("Tabela Infantil antiga (sem idade 2 a 13 Anos)");
-      }
       if (currentHtml.includes("Tabela de Medidas Adulto (P ao EXG)")) {
-        reasons.push("Tabela Adulto antiga (sem distinção PP ao G2 / Baby Look)");
+        reasons.push("Tabela Adulto antiga (P ao EXG em vez de PP ao G2)");
       }
-      if (currentHtml.includes("Tabela de Medidas de Luvas") && prod && /camisa|camiseta|armorx|cax|hyb/i.test(`${prod.title || ""} ${prod.master_sku || ""}`)) {
-        reasons.push("Camisa ArmorX/UV com Tabela de Luvas (corrigido para Tabela de Camisa)");
+      if (currentHtml.includes("Tabela de Medidas de Luvas") && /camisa|camiseta|armorx|cax|hyb|fusion/i.test(titleAndSku)) {
+        reasons.push("Camisa ArmorX/UV com Tabela de Luvas (corrigir para Tabela de Camisa PP ao G2)");
+      }
+      if (/(fillet|mfk75t|79081379076)/i.test(titleAndSku) && /bainha/i.test(currentHtml) && !/bainha/i.test(prod?.title || "")) {
+        reasons.push("Faca Marine MFK75T com menção indevida a bainha (modelo não acompanha bainha)");
+      }
+      if (/(fusion|hyb)/i.test(titleAndSku) && /\b(zíper|ziper)\b/i.test(currentHtml)) {
+        reasons.push("Modelo Fusion/Hybrid com menção indevida a zíper");
+      }
+      if (/(fusion|hyb)/i.test(titleAndSku) && !currentHtml.toLowerCase().includes("sem contar")) {
+        reasons.push("Tabela de Medidas sem orientação de Capuz/Bandana Embutida (medir do ombro à barra sem contar o capuz)");
       }
       if (currentHtml.includes("Bandana Tubular Seamless")) {
         reasons.push("Nomenclatura antiga de Bandana (Seamless)");
       }
       // Contingência Anti-Duplicação da 1ª Foto na Descrição
-      const editorImgMatches = Array.from(currentHtml.matchAll(/<img[^>]+src=["']([^"']+)["']/gi)).map(m => m[1].split("?")[0].toLowerCase());
+      const editorImgMatches = Array.from(currentHtml.matchAll(/<img[^>]+src=["']([^"']+)["']/gi))
+        .map(m => m[1].split("?")[0].toLowerCase())
+        .filter(u => !u.endsWith(".svg"));
       if (editorImgMatches.length > new Set(editorImgMatches).size) {
-        reasons.push("Foto repetida na descrição");
+        reasons.push("Foto repetida nos Atos/Cards da descrição");
       } else if (prod && Array.isArray(prod.cdn_images) && prod.cdn_images.length > 0 && editorImgMatches.length >= 2) {
         const officialRoots = new Set(prod.cdn_images.map(u => String(u).split("?")[0].toLowerCase()));
         const hasPurgedDup = editorImgMatches.some(u => u.includes("productonchannel") && !officialRoots.has(u));
         if (hasPurgedDup) {
-          reasons.push("1ª foto duplicada pela Shopify no Ato 2 (corrigida pelo Modo B)");
+          reasons.push("1ª foto duplicada pela Shopify no Ato 2");
         }
       }
       // Verificar se a cor da loja está correta no HTML do editor
@@ -596,20 +675,25 @@
       if (reasons.length > 0) {
         return {
           state: "OUTDATED_MODE_B",
-          badge: "⚠️ MODO B DESATUALIZADO",
-          reason: `Re-injeção Fase 6 recomendada: ${reasons.join(", ")}.`
+          badge: "⚠️ FORA DAS DIRETRIZES v5",
+          reason: `Correção obrigatória: ${reasons.join(" | ")}.`
         };
+      }
+
+      // Produto está 100% dentro das diretrizes no editor! Marcar como conforme para nunca mais listar como pendente.
+      if (currentProductId) {
+        markProductAsCompliant(currentProductId, prod?.master_sku);
       }
 
       return {
         state: "UP_TO_DATE",
-        badge: "✅ MODO B v4 ATUALIZADO",
-        reason: `Descrição oficial sincronizada (${currentTheme.label}).`
+        badge: "✅ 100% CONFORME DIRETRIZES v5",
+        reason: `Descrição oficial sincronizada e dentro de todas as regras (${currentTheme.label}).`
       };
     }
 
     // =========================================================================
-    // INJEÇÃO COMPATÍVEL COM REACT & TINYMCE NO EDITOR SHOPIFY POLARIS
+    // INJEÇÃO COMPATÍVEL COM REACT & TINYMCE + SALVAMENTO AUTOMÁTICO REFORÇADO
     // =========================================================================
     function setReactInputValue(element, value) {
       if (!element) return;
@@ -635,9 +719,37 @@
       }) || null;
     }
 
+    // Aguarda a Shopify concluir a requisição de salvamento antes de avançar para o próximo produto
+    function waitForShopifySaveComplete(onComplete) {
+      if (saveCompletionTimer) clearInterval(saveCompletionTimer);
+      let checks = 0;
+      saveCompletionTimer = setInterval(() => {
+        checks++;
+        const activeSaveBtn = findSaveButton();
+        const bodyText = document.body.innerText || "";
+        const hasToast = /produto salvo|product saved|alterações salvas/i.test(bodyText);
+        // Se o botão Salvar desabilitou/sumiu após o clique ou apareceu o toast da Shopify (ou após 2.4s)
+        if ((!activeSaveBtn && checks >= 2) || hasToast || checks >= 8) {
+          clearInterval(saveCompletionTimer);
+          saveCompletionTimer = null;
+          if (onComplete) onComplete();
+        }
+      }, 350);
+    }
+
     function highlightSaveButton(onSaveCallback) {
       const settings = getSettings();
       let attempts = 0;
+      let callbackFired = false;
+
+      const fireOnce = () => {
+        if (callbackFired) return;
+        callbackFired = true;
+        if (currentProductId) {
+          markProductAsCompliant(currentProductId, activeLoadedProduct?.master_sku);
+        }
+        if (onSaveCallback) onSaveCallback();
+      };
 
       const tryHighlight = () => {
         const saveBtn = findSaveButton();
@@ -648,24 +760,34 @@
           const handler = () => {
             saveBtn.classList.remove("brk-pulse-save-button");
             saveBtn.removeEventListener("click", handler);
-            if (onSaveCallback) onSaveCallback();
+            waitForShopifySaveComplete(fireOnce);
           };
           saveBtn.addEventListener("click", handler);
 
-          // Se Auto-Salvar estiver ativo nas configurações do HUD, clica automaticamente após 900ms
-          if (settings.autoSave) {
+          // Modo Automático (autoPilot ou autoSave): clica automaticamente em Salvar e aguarda confirmação
+          if ((settings.autoPilot || settings.autoSave) && !hasTriggeredSaveForCurrentProduct) {
+            hasTriggeredSaveForCurrentProduct = true;
             setTimeout(() => {
-              if (!saveBtn.disabled) {
-                console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] Auto-Save ativo: clicando em Salvar automaticamente!`);
-                saveBtn.click();
+              const liveSaveBtn = findSaveButton() || saveBtn;
+              if (liveSaveBtn && !liveSaveBtn.disabled) {
+                console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] 🤖 Piloto Automático: clicando em Salvar automaticamente!`);
+                liveSaveBtn.click();
+                waitForShopifySaveComplete(fireOnce);
+              } else {
+                // Se o botão já foi salvo/desabilitado
+                waitForShopifySaveComplete(fireOnce);
               }
-            }, 900);
+            }, 700);
           }
           return true;
         }
         attempts++;
-        if (attempts < 8) {
-          setTimeout(tryHighlight, 350);
+        if (attempts < 14) {
+          setTimeout(tryHighlight, 300);
+        } else if (settings.autoPilot && isAutomationActive()) {
+          // Se o botão Salvar não habilitou porque o HTML já era idêntico no editor, marca como conforme e avança!
+          console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] 🤖 Botão Salvar permaneceu inativo (HTML já idêntico). Avançando...`);
+          fireOnce();
         }
         return false;
       };
@@ -722,6 +844,7 @@
         return false;
       }
 
+      hasTriggeredSaveForCurrentProduct = false;
       const htmlBtn = findShowHtmlButton();
       let textarea = findDescriptionTextarea();
 
@@ -731,26 +854,34 @@
         htmlBtn.click();
       }
 
-      setTimeout(() => {
+      let pollCount = 0;
+      const tryInject = () => {
+        pollCount++;
         textarea = findDescriptionTextarea();
 
         if (textarea && textarea.offsetParent !== null) {
           appendBackup(currentProductId, location.pathname, textarea.value);
           setReactInputValue(textarea, htmlContent);
-          console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] HTML Modo B injetado com sucesso no Textarea HTML!`);
+          console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] HTML Modo B v5 injetado com sucesso no Textarea HTML!`);
 
           setTimeout(() => {
             highlightSaveButton(() => {
-              console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] Produto salvo!`);
+              console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] Produto salvo com sucesso!`);
               handleAfterSave();
             });
           }, 250);
 
+          const isAuto = getSettings().autoPilot || getSettings().autoSave;
           renderHudProductMode(
             activeLoadedProduct,
-            "✨ Modo B v4 Injetado com Sucesso!",
-            `Inseridos ${(htmlContent.length).toLocaleString('pt-BR')} caracteres (${currentTheme.label}). ${getSettings().autoSave ? 'Salvando automaticamente...' : "Clique em 'Salvar' (verde pulsando)."}`
+            "✨ Modo B v5 Injetado com Sucesso!",
+            `Inseridos ${(htmlContent.length).toLocaleString('pt-BR')} caracteres (${currentTheme.label}). ${isAuto ? '🤖 Salvando e avançando automaticamente...' : "Clique em 'Salvar' (verde pulsando)."}`
           );
+          return;
+        }
+
+        if (pollCount < 6 && htmlBtn) {
+          setTimeout(tryInject, 220);
           return;
         }
 
@@ -764,13 +895,14 @@
           tiny.body.dispatchEvent(new Event("change", { bubbles: true }));
           tiny.body.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true }));
           tiny.body.dispatchEvent(new Event("blur", { bubbles: true }));
-          console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] HTML Modo B injetado direto no iframe TinyMCE!`);
+          console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] HTML Modo B v5 injetado direto no iframe TinyMCE!`);
 
           highlightSaveButton(() => handleAfterSave());
+          const isAuto = getSettings().autoPilot || getSettings().autoSave;
           renderHudProductMode(
             activeLoadedProduct,
             "✨ Injetado no Editor Visual (TinyMCE)!",
-            `Inseridos ${(htmlContent.length).toLocaleString('pt-BR')} caracteres (${currentTheme.label}). ${getSettings().autoSave ? 'Salvando automaticamente...' : "Clique em 'Salvar' no topo."}`
+            `Inseridos ${(htmlContent.length).toLocaleString('pt-BR')} caracteres (${currentTheme.label}). ${isAuto ? '🤖 Salvando e avançando automaticamente...' : "Clique em 'Salvar' no topo."}`
           );
           return;
         }
@@ -787,18 +919,22 @@
           renderHudProductMode(
             activeLoadedProduct,
             "✨ Injetado no Editor Visual!",
-            `Inseridos ${(htmlContent.length).toLocaleString('pt-BR')} caracteres no editor visual. Clique em 'Salvar' no topo.`
+            `Inseridos ${(htmlContent.length).toLocaleString('pt-BR')} caracteres no editor visual.`
           );
         } else {
           try { GM_setClipboard(htmlContent); } catch(e) {}
           alert("O HTML oficial já foi copiado para sua área de transferência! Clique no ícone '<>' do editor da Shopify e pressione Ctrl+V.");
         }
-      }, 650);
+      };
 
+      setTimeout(tryInject, 450);
       return true;
     }
 
     function handleAfterSave() {
+      if (currentProductId) {
+        markProductAsCompliant(currentProductId, activeLoadedProduct?.master_sku);
+      }
       const q = getQueue();
       const idx = getQueueIndex();
       const active = isAutomationActive();
@@ -808,20 +944,29 @@
       } else if (active && q.length > 0 && idx >= q.length - 1) {
         setAutomationActive(false);
         setQueueIndex(0);
-        alert(`🎉 Parabéns! O lote de ${q.length} produtos da ${currentStoreName} foi completamente finalizado com sucesso!`);
-        renderHudListMode();
+        setQueue([]);
+        alert(`🎉 Parabéns! O lote de ${q.length} códigos fora das diretrizes da ${currentStoreName} foi 100% atualizado e salvo!`);
+        renderHudProductMode(activeLoadedProduct, "🎉 Lote 100% Concluído!", "Todos os produtos da fila foram atualizados para o Modo B v5.");
       }
     }
 
     function startCountdownToNext() {
       const settings = getSettings();
-      let count = settings.delaySeconds || 4;
+      let count = settings.autoPilot ? Math.min(settings.delaySeconds || 4, 2) : (settings.delaySeconds || 4);
       const q = getQueue();
-      const nextIdx = getQueueIndex() + 1;
-      const nextItem = q[nextIdx];
+      let nextIdx = getQueueIndex() + 1;
 
+      // Pular quaisquer códigos que já tenham sido marcados como conformes na sessão
+      while (nextIdx < q.length && isProductMarkedCompliant(q[nextIdx].id, q[nextIdx].master_sku)) {
+        nextIdx++;
+      }
+
+      const nextItem = q[nextIdx];
       if (!nextItem) {
         setAutomationActive(false);
+        setQueue([]);
+        setQueueIndex(0);
+        renderHudProductMode(activeLoadedProduct, "🎉 Fila Concluída!", "Todos os códigos fora das diretrizes deste lote foram corrigidos.");
         return;
       }
 
@@ -836,16 +981,68 @@
         } else {
           renderHudProductMode(
             activeLoadedProduct,
-            `⏱️ Salvo! Avançando em ${count}s...`,
-            `Próximo (${nextIdx + 1}/${q.length}): ${nextItem.master_sku || ''} - ${(nextItem.title || '').slice(0, 35)}...`
+            `🤖 Piloto Automático: Avançando em ${count}s...`,
+            `Próximo código fora das diretrizes (${nextIdx + 1}/${q.length}): ${nextItem.master_sku || ''} — ${(nextItem.title || '').slice(0, 35)}...`
           );
           count--;
         }
-      }, 1000);
+      }, 900);
     }
 
     const injectDescriptionIntoShopify = injectModoBIntoEditor;
     const advanceToNextProduct = startCountdownToNext;
+
+    // Renderizador do Mapa de Códigos (SKUs) Fora das Diretrizes (oculta 100% os códigos já conformes)
+    function renderNonCompliantCodesBox(codesList) {
+      const activeCodes = (codesList || []).filter(c => !isProductMarkedCompliant(c.id, c.sku));
+      if (activeCodes.length === 0) {
+        return "";
+      }
+      const rowsHtml = activeCodes.slice(0, 40).map(c => {
+        let badgeCls = "brk-badge-legacy";
+        let badgeLabel = "FORA MODO B";
+        if (c.guideline_status === "MODO_B_DESATUALIZADO") { badgeCls = "brk-badge-outdated"; badgeLabel = "VIOLAÇÃO REGRA"; }
+        else if (c.guideline_status === "SEM_DESCRICAO") { badgeCls = "brk-badge-empty"; badgeLabel = "SEM DESCRIÇÃO"; }
+        else if (c.guideline_status === "IMAGENS_QUEBRADAS") { badgeCls = "brk-badge-broken"; badgeLabel = "S3 QUEBRADO"; }
+
+        return `
+          <div class="brk-code-row" data-prod-id="${c.id}" title="${(c.guideline_reason || c.title || '').replace(/"/g, '&quot;')}">
+            <div style="display:flex;align-items:center;gap:6px;min-width:0;flex:1;">
+              <strong style="color:#38bdf8;font-family:monospace;font-size:11px;flex-shrink:0;">${c.sku || c.id}</strong>
+              <span class="brk-badge-status ${badgeCls}" style="font-size:8.5px;padding:1px 5px;flex-shrink:0;">${badgeLabel}</span>
+              <span style="color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.guideline_reason || c.title}</span>
+            </div>
+            <span style="color:#4ade80;font-weight:700;font-size:10px;flex-shrink:0;">Abrir ➔</span>
+          </div>
+        `;
+      }).join("");
+
+      return `
+        <details style="margin-bottom:10px;background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:6px 10px;">
+          <summary style="cursor:pointer;font-size:11px;font-weight:800;color:#fbbf24;user-select:none;">
+            🎯 Mapa de Códigos Fora das Diretrizes (${activeCodes.length} códigos mapeados — clique para ver)
+          </summary>
+          <div style="font-size:10px;color:#94a3b8;margin-top:4px;">
+            Exibindo <strong>apenas</strong> códigos cujas descrições estão fora das regras Modo B v5 (itens já conformes são ocultados automaticamente):
+          </div>
+          <div class="brk-codes-scroll">
+            ${rowsHtml}
+          </div>
+        </details>
+      `;
+    }
+
+    function bindCodeRowClicks() {
+      const rows = Array.from(hud.querySelectorAll(".brk-code-row[data-prod-id]"));
+      for (const r of rows) {
+        r.onclick = () => {
+          const pid = r.getAttribute("data-prod-id");
+          if (pid) {
+            location.href = `https://admin.shopify.com/store/${currentShopifySlug}/products/${pid}`;
+          }
+        };
+      }
+    }
 
     // =========================================================================
     // RENDERIZAÇÃO DO HUD NA PÁGINA DO PRODUTO (admin.shopify.com/.../products/{id})
@@ -861,8 +1058,11 @@
       hud.style.borderColor = currentTheme.primary;
 
       let statusBadgeClass = "brk-badge-healthy";
-      if (prod?.status === "SEM_DESCRICAO") statusBadgeClass = "brk-badge-empty";
-      else if (prod?.status === "IMAGENS_QUEBRADAS") statusBadgeClass = "brk-badge-broken";
+      const gStatus = prod?.guideline_status || prod?.status || "SAUDAVEL";
+      if (gStatus === "SEM_DESCRICAO") statusBadgeClass = "brk-badge-empty";
+      else if (gStatus === "IMAGENS_QUEBRADAS") statusBadgeClass = "brk-badge-broken";
+      else if (gStatus === "MODO_B_DESATUALIZADO") statusBadgeClass = "brk-badge-outdated";
+      else if (gStatus === "FORA_PADRAO_MODO_B") statusBadgeClass = "brk-badge-legacy";
 
       const imgCount = prod ? (prod.gallery || prod.cdn_images || []).length : 0;
 
@@ -871,10 +1071,20 @@
       else if (editorHealth.state === "OUTDATED_MODE_B") editorBadgeStyle = "background:#92400e;color:#fde68a;";
       else if (editorHealth.state === "EMPTY" || editorHealth.state === "LEGACY_BROKEN") editorBadgeStyle = "background:#7f1d1d;color:#fecaca;";
 
+      const queueCodes = q.length > 0
+        ? q.slice(idx).map(item => ({
+            id: item.id,
+            sku: item.master_sku || item.sku || item.id,
+            title: item.title,
+            guideline_status: item.guideline_status || item.status,
+            guideline_reason: item.guideline_reason || ""
+          }))
+        : cachedNonCompliantCodes;
+
       hud.innerHTML = `
         <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e293b;padding-bottom:8px;margin-bottom:10px;">
           <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
-            <span style="font-size:15px;">🟢</span>
+            <span style="font-size:15px;">${settings.autoPilot ? '🤖' : '🟢'}</span>
             <strong style="color:${currentTheme.light};font-size:13px;">BANCO BRK v${SCRIPT_VERSION}</strong>
             <span style="${editorBadgeStyle}font-size:10px;font-weight:800;padding:2px 7px;border-radius:9999px;">${editorHealth.badge}</span>
           </div>
@@ -885,13 +1095,13 @@
 
         <div style="margin-bottom:10px;">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:wrap;">
-            <span style="font-weight:800;color:#f8fafc;font-size:14px;">${prod ? (prod.master_sku || 'Sem SKU') : 'Carregando...'}</span>
-            ${prod ? `<span class="brk-badge-status ${statusBadgeClass}">${prod.status}</span>` : ''}
+            <span style="font-weight:800;color:#f8fafc;font-size:14px;font-family:monospace;">${prod ? (prod.master_sku || 'Sem SKU') : 'Carregando...'}</span>
+            ${prod ? `<span class="brk-badge-status ${statusBadgeClass}">${gStatus}</span>` : ''}
             ${prod ? `<span class="brk-badge-meta">📂 ${prod.category || 'Geral'}</span>` : ''}
-            ${prod ? `<span class="brk-badge-meta">📸 ${imgCount} fotos CDN</span>` : ''}
+            ${prod ? `<span class="brk-badge-meta">📸 ${imgCount} fotos únicas</span>` : ''}
             ${prod && prod.delivery_time ? `<span class="brk-badge-meta">🚚 ${prod.delivery_time}</span>` : ''}
           </div>
-          <div style="font-size:12px;color:#cbd5e1;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:460px;">
+          <div style="font-size:12px;color:#cbd5e1;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:480px;">
             ${prod ? prod.title : 'Consultando dados reais na API...'}
           </div>
           ${prod ? `
@@ -908,36 +1118,38 @@
           <div style="font-size:11px;color:#94a3b8;line-height:1.4;">${statusSub || editorHealth.reason}</div>
           ${prod && prod.mode_b_html ? `
             <div style="margin-top:6px;font-size:11px;color:#4ade80;font-weight:700;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #1e293b;padding-top:4px;">
-              <span>⭐ Modo B Oficial: ${(prod.mode_b_html.length).toLocaleString('pt-BR')} chars</span>
+              <span>⭐ Modo B v5 Compilado: ${(prod.mode_b_html.length).toLocaleString('pt-BR')} chars</span>
               <span style="color:#94a3b8;font-weight:600;">${prod.archetype_name || '3 Atos + Ficha Técnica'}</span>
             </div>
           ` : ''}
         </div>
 
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 2px;flex-wrap:wrap;gap:6px;">
-          <label class="brk-hud-toggle" title="Clica automaticamente no botão Salvar da Shopify 1s após injetar o Modo B">
+        ${renderNonCompliantCodesBox(queueCodes)}
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:4px 8px;background:#0f172a;border:1px solid #1e293b;border-radius:8px;flex-wrap:wrap;gap:8px;">
+          <label class="brk-hud-toggle" title="Piloto Automático Total: injeta a descrição no editor, clica em Salvar automaticamente e avança sozinho para o próximo código fora das diretrizes">
+            <input type="checkbox" id="brk-chk-autopilot" ${settings.autoPilot ? 'checked' : ''} style="accent-color:#22c55e;" />
+            <strong style="color:#4ade80;">🤖 Piloto Automático</strong>
+          </label>
+          <label class="brk-hud-toggle" title="Clica automaticamente no botão Salvar da Shopify após injetar o Modo B">
             <input type="checkbox" id="brk-chk-autosave" ${settings.autoSave ? 'checked' : ''} style="accent-color:${currentTheme.primary};" />
             <span>Auto-Salvar</span>
           </label>
-          <label class="brk-hud-toggle" title="Durante um lote, pula produtos que já têm Modo B v4 100% atualizado">
+          <label class="brk-hud-toggle" title="Durante um lote, pula produtos que já estão 100% conformes com as diretrizes Modo B v5">
             <input type="checkbox" id="brk-chk-skip-done" ${settings.skipAlreadyModeB ? 'checked' : ''} style="accent-color:${currentTheme.primary};" />
-            <span>Pular v4 OK</span>
-          </label>
-          <label class="brk-hud-toggle" title="Durante um lote, re-injeta automaticamente se detectar Modo B antigo (S3 404, boné repetido, cor errada ou guia infantil antigo)">
-            <input type="checkbox" id="brk-chk-upgrade-legacy" ${settings.upgradeOutdatedModeB ? 'checked' : ''} style="accent-color:${currentTheme.primary};" />
-            <span>Atualizar Antigos</span>
+            <span>Pular Conformes</span>
           </label>
         </div>
 
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-          <button id="brk-btn-inject" class="brk-hud-btn brk-hud-btn-primary" style="background:${currentTheme.primary};border-color:${currentTheme.primaryHover};" title="Injeta a narrativa completa Modo B v4 no editor HTML">
+          <button id="brk-btn-inject" class="brk-hud-btn brk-hud-btn-primary" style="background:${currentTheme.primary};border-color:${currentTheme.primaryHover};" title="Injeta a narrativa completa Modo B v5 no editor HTML e salva se Auto-Salvar estiver ativo">
             ⚡ Injetar Modo B
           </button>
-          <button id="brk-btn-preview" class="brk-hud-btn" title="Abre uma janela visual dentro do Shopify Admin mostrando como a descrição Modo B ficará na loja">
+          <button id="brk-btn-preview" class="brk-hud-btn" title="Abre uma janela visual dentro do Shopify Admin mostrando como a descrição Modo B v5 ficará na loja">
             👁️ Preview
           </button>
           <button id="brk-btn-copy" class="brk-hud-btn" title="Copia o HTML oficial para a área de transferência">
-            📋 Copiar HTML
+            📋 Copiar
           </button>
           <button id="brk-btn-live-sync" class="brk-hud-btn" title="Trocou as fotos agora na Shopify? Clique para buscar as fotos novas ao vivo e recompilar a descrição!">
             🔄 Fotos Live
@@ -955,22 +1167,29 @@
               ⏹️ Parar
             </button>
           ` : `
-            <button id="brk-btn-start-queue-25" class="brk-hud-btn brk-hud-btn-success">
-              ▶️ Lote 25
+            <button id="brk-btn-start-autopilot-25" class="brk-hud-btn brk-hud-btn-success" title="Busca apenas os códigos fora das diretrizes e aplica tudo automaticamente!">
+              🤖 Auto-Lote (Fora Diretrizes)
             </button>
           `}
         </div>
       `;
 
+      bindCodeRowClicks();
+
       // Toggles de configuração
+      const chkAutoPilot = document.getElementById("brk-chk-autopilot");
+      if (chkAutoPilot) {
+        chkAutoPilot.onchange = (e) => {
+          saveSettings({ autoPilot: e.target.checked, autoSave: e.target.checked ? true : getSettings().autoSave });
+          renderHudProductMode(prod, statusTitle, statusSub);
+        };
+      }
+
       const chkAutoSave = document.getElementById("brk-chk-autosave");
       if (chkAutoSave) chkAutoSave.onchange = (e) => saveSettings({ autoSave: e.target.checked });
 
       const chkSkipDone = document.getElementById("brk-chk-skip-done");
       if (chkSkipDone) chkSkipDone.onchange = (e) => saveSettings({ skipAlreadyModeB: e.target.checked });
-
-      const chkUpgradeLegacy = document.getElementById("brk-chk-upgrade-legacy");
-      if (chkUpgradeLegacy) chkUpgradeLegacy.onchange = (e) => saveSettings({ upgradeOutdatedModeB: e.target.checked });
 
       // Eventos dos botões
       const btnInject = document.getElementById("brk-btn-inject");
@@ -991,7 +1210,7 @@
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(html).catch(() => {});
           }
-          renderHudProductMode(prod, "📋 HTML Modo B Copiado!", `Copiados ${(html.length).toLocaleString('pt-BR')} caracteres da narrativa oficial (${currentTheme.label}). Cole com Ctrl+V no campo <> do editor.`);
+          renderHudProductMode(prod, "📋 HTML Modo B v5 Copiado!", `Copiados ${(html.length).toLocaleString('pt-BR')} caracteres da narrativa oficial (${currentTheme.label}).`);
         };
       }
 
@@ -1011,7 +1230,7 @@
               renderHudProductMode(
                 activeLoadedProduct,
                 "✅ Fotos Sincronizadas ao Vivo!",
-                `Galeria atualizada (${newCount} fotos únicas) e Modo B recompilado (${currentTheme.label}). Clique em 'Injetar Modo B'!`
+                `Galeria atualizada (${newCount} fotos únicas) e Modo B v5 recompilado (${currentTheme.label}).`
               );
             }
           } catch(err) {
@@ -1052,13 +1271,16 @@
           setAutomationActive(false);
           setQueue([]);
           setQueueIndex(0);
-          renderHudProductMode(prod, "⏹️ Lote Cancelado", "Fila esvaziada. Você pode operar individualmente.");
+          renderHudProductMode(prod, "⏹️ Lote Pausado", "Fila encerrada. Você pode operar individualmente.");
         };
       }
 
-      const btnStart25 = document.getElementById("brk-btn-start-queue-25");
-      if (btnStart25) {
-        btnStart25.onclick = () => startQueueFromDatabase("SEM_DESCRICAO", 25, "ALL");
+      const btnStartAuto25 = document.getElementById("brk-btn-start-autopilot-25");
+      if (btnStartAuto25) {
+        btnStartAuto25.onclick = () => {
+          saveSettings({ autoPilot: true, autoSave: true });
+          startQueueFromDatabase("FORA_DIRETRIZES", 25, "ALL");
+        };
       }
     }
 
@@ -1072,12 +1294,15 @@
       const settings = getSettings();
 
       hud.style.borderColor = currentTheme.primary;
+      if (stats && Array.isArray(stats.non_compliant_codes)) {
+        cachedNonCompliantCodes = stats.non_compliant_codes;
+      }
 
       hud.innerHTML = `
         <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e293b;padding-bottom:8px;margin-bottom:10px;">
           <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:16px;">🟢</span>
-            <strong style="color:${currentTheme.light};font-size:13px;">BANCO DE DADOS BRK v${SCRIPT_VERSION}</strong>
+            <span style="font-size:16px;">🤖</span>
+            <strong style="color:${currentTheme.light};font-size:13px;">BANCO BRK v${SCRIPT_VERSION} • FILTRO DE DIRETRIZES</strong>
           </div>
           <span style="background:${currentTheme.badgeBg};color:${currentTheme.badgeText};font-size:10px;font-weight:800;padding:2px 8px;border-radius:9999px;">
             ${currentStoreName} • ${currentTheme.label}
@@ -1086,23 +1311,25 @@
 
         <div style="margin-bottom:10px;font-size:12px;color:#cbd5e1;line-height:1.5;">
           ${stats ? `
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
-              <div>📦 Catálogo Loja: <strong>${stats.total_products}</strong></div>
-              <div style="color:#4ade80;">✅ Saudáveis: <strong>${stats.healthy_count}</strong></div>
-              <div style="color:#f87171;">⚠️ Sem Descrição: <strong>${stats.sem_descricao_count}</strong></div>
-              <div style="color:#fbbf24;">🖼️ Fotos Quebradas: <strong>${stats.imagens_quebradas_count}</strong></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;background:#0f172a;padding:8px 10px;border-radius:8px;border:1px solid #1e293b;">
+              <div style="color:#4ade80;">✅ Já Conformes (Ocultos): <strong>${stats.compliant_count || 0}</strong></div>
+              <div style="color:#38bdf8;">🎯 Total Fora Diretrizes: <strong>${stats.non_compliant_count || stats.total_products}</strong></div>
+              <div style="color:#fbbf24;">⚠️ Modo B c/ Violação: <strong>${stats.modo_b_desatualizado_count || 0}</strong></div>
+              <div style="color:#f87171;">🔴 Sem Descrição: <strong>${stats.sem_descricao_count || 0}</strong></div>
             </div>
-          ` : 'Conectando à API oficial Vercel (6.242 produtos auditados)...'}
+          ` : 'Mapeando conformidade de todos os códigos da loja nas diretrizes Modo B v5...'}
         </div>
+
+        ${renderNonCompliantCodesBox(cachedNonCompliantCodes)}
 
         ${q.length > 0 ? `
           <div style="background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:8px 12px;margin-bottom:10px;">
-            <div style="font-weight:700;color:${currentTheme.light};font-size:12px;">Fila Ativa: Item ${idx + 1} de ${q.length}</div>
-            <div style="font-size:11px;color:#94a3b8;">Status: ${active ? 'Em andamento' : 'Pausado'}</div>
+            <div style="font-weight:700;color:${currentTheme.light};font-size:12px;">Fila Não-Conformes Ativa: Código ${idx + 1} de ${q.length} (${q[idx]?.master_sku || ''})</div>
+            <div style="font-size:11px;color:#94a3b8;">Status: ${active ? '🤖 Piloto Automático Ativo' : 'Pausado'}</div>
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-            <button id="brk-btn-resume-queue" class="brk-hud-btn brk-hud-btn-primary" style="background:${currentTheme.primary};border-color:${currentTheme.primaryHover};">
-              ▶️ Continuar Lote (${idx + 1}/${q.length})
+            <button id="brk-btn-resume-queue" class="brk-hud-btn brk-hud-btn-success" style="flex:1;justify-content:center;">
+              🤖 Retomar Piloto Automático (${idx + 1}/${q.length})
             </button>
             <button id="brk-btn-clear-queue" class="brk-hud-btn brk-hud-btn-danger">
               ⏹️ Limpar Fila
@@ -1110,46 +1337,63 @@
           </div>
         ` : `
           <div style="background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:9px 11px;margin-bottom:10px;">
-            <div style="font-weight:700;color:${currentTheme.light};font-size:11px;margin-bottom:6px;">🎯 Seletor de Lote por Coleção & Status (Fase 6)</div>
-            <div style="display:grid;grid-template-columns:1.2fr 1fr 0.6fr;gap:6px;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-weight:700;color:${currentTheme.light};font-size:11px;">🎯 Filtrar Apenas Códigos Fora das Diretrizes</span>
+              <label class="brk-hud-toggle" title="Injeta, clica em Salvar e avança sozinho">
+                <input type="checkbox" id="brk-list-chk-autopilot" ${settings.autoPilot ? 'checked' : ''} style="accent-color:#22c55e;" />
+                <strong style="color:#4ade80;font-size:11px;">🤖 Modo Automático</strong>
+              </label>
+            </div>
+            <div style="display:grid;grid-template-columns:1.1fr 1.1fr 0.6fr;gap:6px;margin-bottom:8px;">
               <select id="brk-sel-category" class="brk-hud-select" title="Filtrar por Coleção/Categoria">
                 <option value="ALL" ${settings.batchCategory === 'ALL' ? 'selected' : ''}>📂 Todas as Coleções</option>
                 <option value="bones_chapeus" ${settings.batchCategory === 'bones_chapeus' ? 'selected' : ''}>🧢 Bonés & Chapéus</option>
-                <option value="camisas" ${settings.batchCategory === 'camisas' ? 'selected' : ''}>👕 Camisas (UV/Algodão/Botão)</option>
+                <option value="camisas" ${settings.batchCategory === 'camisas' ? 'selected' : ''}>👕 Camisas (Fusion/Hybrid/ArmorX/C0)</option>
                 <option value="calcas" ${settings.batchCategory === 'calcas' ? 'selected' : ''}>👖 Calças & Bermudas</option>
                 <option value="corta_vento" ${settings.batchCategory === 'corta_vento' ? 'selected' : ''}>🧥 Corta-Vento & Jaquetas</option>
                 <option value="infantil" ${settings.batchCategory === 'infantil' ? 'selected' : ''}>🧒 Linha Infantil (2 a 13 Anos)</option>
                 <option value="feminino" ${settings.batchCategory === 'feminino' ? 'selected' : ''}>👚 Linha Feminina (Baby Look)</option>
               </select>
-              <select id="brk-sel-status" class="brk-hud-select" title="Filtrar por Status">
-                <option value="SEM_DESCRICAO" ${settings.batchStatus === 'SEM_DESCRICAO' ? 'selected' : ''}>⚠️ Sem Descrição</option>
-                <option value="IMAGENS_QUEBRADAS" ${settings.batchStatus === 'IMAGENS_QUEBRADAS' ? 'selected' : ''}>🖼️ Fotos Quebradas</option>
-                <option value="TODOS" ${settings.batchStatus === 'TODOS' ? 'selected' : ''}>🔄 Todos (Atualizar v4)</option>
+              <select id="brk-sel-status" class="brk-hud-select" title="Filtrar por Tipo de Não-Conformidade">
+                <option value="FORA_DIRETRIZES" ${settings.batchStatus === 'FORA_DIRETRIZES' ? 'selected' : ''}>🎯 Todos Fora das Diretrizes</option>
+                <option value="MODO_B_DESATUALIZADO" ${settings.batchStatus === 'MODO_B_DESATUALIZADO' ? 'selected' : ''}>⚠️ Violação Regra (Faca/ArmorX/Fusion)</option>
+                <option value="SEM_DESCRICAO" ${settings.batchStatus === 'SEM_DESCRICAO' ? 'selected' : ''}>🔴 Sem Descrição</option>
+                <option value="IMAGENS_QUEBRADAS" ${settings.batchStatus === 'IMAGENS_QUEBRADAS' ? 'selected' : ''}>🖼️ Fotos S3 Quebradas</option>
+                <option value="FORA_PADRAO_MODO_B" ${settings.batchStatus === 'FORA_PADRAO_MODO_B' ? 'selected' : ''}>🟡 Legados Sem Modo B</option>
               </select>
               <select id="brk-sel-limit" class="brk-hud-select" title="Quantidade de Produtos no Lote">
-                <option value="25" ${Number(settings.batchLimit) === 25 ? 'selected' : ''}>25 itens</option>
-                <option value="50" ${Number(settings.batchLimit) === 50 ? 'selected' : ''}>50 itens</option>
-                <option value="100" ${Number(settings.batchLimit) === 100 ? 'selected' : ''}>100 itens</option>
+                <option value="25" ${Number(settings.batchLimit) === 25 ? 'selected' : ''}>25 códigos</option>
+                <option value="50" ${Number(settings.batchLimit) === 50 ? 'selected' : ''}>50 códigos</option>
+                <option value="100" ${Number(settings.batchLimit) === 100 ? 'selected' : ''}>100 códigos</option>
               </select>
             </div>
-            <button id="brk-btn-start-custom-batch" class="brk-hud-btn brk-hud-btn-primary" style="width:100%;justify-content:center;background:${currentTheme.primary};border-color:${currentTheme.primaryHover};">
-              🚀 Iniciar Lote Filtrado na ${currentStoreName}
+            <button id="brk-btn-start-custom-batch" class="brk-hud-btn brk-hud-btn-success" style="width:100%;justify-content:center;padding:8px 12px;font-size:12.5px;">
+              🤖 Iniciar Piloto Automático nos Códigos Fora das Diretrizes
             </button>
           </div>
 
           <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+            <button id="brk-btn-fix-violations" class="brk-hud-btn" title="Corrige prioritariamente os códigos colados com violação (Faca Marine MFK75T, ArmorX com Tabela de Luvas, Fusion/Hybrid com nova nota de Capuz/Bandana)">
+              ⚡ Corrigir Violações (${stats?.modo_b_desatualizado_count || 21})
+            </button>
             <button id="brk-btn-fetch-empty-25" class="brk-hud-btn" title="Inicia lote rápido de 25 produtos sem descrição">
               ▶️ Lote 25 (Sem Descrição)
             </button>
-            <button id="brk-btn-fetch-caps-50" class="brk-hud-btn" title="Inicia lote com todos os Bonés e Chapéus para atualizar com as 4 fotos reais da galeria">
-              🧢 Lote Bonés & Chapéus
-            </button>
             <button id="brk-btn-fetch-broken-25" class="brk-hud-btn" title="Inicia lote de 25 produtos com fotos quebradas">
-              🖼️ Lote 25 (Quebradas)
+              🖼️ Lote 25 (S3 Quebradas)
             </button>
           </div>
         `}
       `;
+
+      bindCodeRowClicks();
+
+      const chkListAuto = document.getElementById("brk-list-chk-autopilot");
+      if (chkListAuto) {
+        chkListAuto.onchange = (e) => {
+          saveSettings({ autoPilot: e.target.checked, autoSave: e.target.checked ? true : getSettings().autoSave });
+        };
+      }
 
       const btnResume = document.getElementById("brk-btn-resume-queue");
       if (btnResume) {
@@ -1174,21 +1418,24 @@
       if (btnCustomBatch) {
         btnCustomBatch.onclick = () => {
           const cat = document.getElementById("brk-sel-category")?.value || "ALL";
-          const st = document.getElementById("brk-sel-status")?.value || "SEM_DESCRICAO";
+          const st = document.getElementById("brk-sel-status")?.value || "FORA_DIRETRIZES";
           const lim = parseInt(document.getElementById("brk-sel-limit")?.value || "25", 10);
-          saveSettings({ batchCategory: cat, batchStatus: st, batchLimit: lim });
+          saveSettings({ batchCategory: cat, batchStatus: st, batchLimit: lim, autoPilot: true, autoSave: true });
           startQueueFromDatabase(st, lim, cat);
+        };
+      }
+
+      const btnFixViolations = document.getElementById("brk-btn-fix-violations");
+      if (btnFixViolations) {
+        btnFixViolations.onclick = () => {
+          saveSettings({ autoPilot: true, autoSave: true });
+          startQueueFromDatabase("MODO_B_DESATUALIZADO", 30, "ALL");
         };
       }
 
       const btnFetchEmpty = document.getElementById("brk-btn-fetch-empty-25");
       if (btnFetchEmpty) {
         btnFetchEmpty.onclick = () => startQueueFromDatabase("SEM_DESCRICAO", 25, "ALL");
-      }
-
-      const btnFetchCaps = document.getElementById("brk-btn-fetch-caps-50");
-      if (btnFetchCaps) {
-        btnFetchCaps.onclick = () => startQueueFromDatabase("TODOS", 50, "bones_chapeus");
       }
 
       const btnFetchBroken = document.getElementById("brk-btn-fetch-broken-25");
@@ -1198,44 +1445,51 @@
     }
 
     // =========================================================================
-    // INICIAR FILA REAL BUSCADA DIRETAMENTE DO BANCO DE DADOS
+    // INICIAR FILA REAL BUSCADA DIRETAMENTE DO BANCO (APENAS FORA DAS DIRETRIZES)
     // =========================================================================
-    async function startQueueFromDatabase(statusFilter, limit = 25, categoryFilter = "ALL") {
+    async function startQueueFromDatabase(statusFilter = "FORA_DIRETRIZES", limit = 25, categoryFilter = "ALL") {
       hud.innerHTML = `
         <div style="padding:10px;text-align:center;">
-          <div style="font-size:18px;margin-bottom:8px;">⏳</div>
-          <strong style="color:${currentTheme.light};">Consultando Banco de Dados BRK...</strong>
-          <div style="font-size:11px;color:#94a3b8;margin-top:4px;">Buscando até ${limit} produtos (Status: ${statusFilter} | Coleção: ${categoryFilter}) na loja ${currentStoreName}...</div>
+          <div style="font-size:18px;margin-bottom:8px;">🤖</div>
+          <strong style="color:${currentTheme.light};">Filtrando Códigos Fora das Diretrizes no Banco BRK...</strong>
+          <div style="font-size:11px;color:#94a3b8;margin-top:4px;">Excluindo produtos já conformes e buscando até ${limit} códigos (${statusFilter} | ${categoryFilter}) em ${currentStoreName}...</div>
         </div>
       `;
 
       try {
-        const queryUrl = `/api/product_db?store=${currentStoreKey}&action=queue&status=${encodeURIComponent(statusFilter)}&category=${encodeURIComponent(categoryFilter)}&limit=${limit}`;
+        const excludeParam = encodeURIComponent(getCompliantIds().slice(-300).join(","));
+        const queryUrl = `/api/product_db?store=${currentStoreKey}&action=queue&status=${encodeURIComponent(statusFilter)}&category=${encodeURIComponent(categoryFilter)}&limit=${limit}&exclude_ids=${excludeParam}`;
         const res = await fetchFromBRKDatabase(queryUrl);
-        if (!res.success || !res.items || res.items.length === 0) {
-          alert(`Nenhum produto encontrado para o filtro selecionado (Status: ${statusFilter}, Coleção: ${categoryFilter}) na loja ${currentStoreName}.`);
+        const nonCompliantItems = (res.items || []).filter(it => !it.is_mode_b_compliant && !isProductMarkedCompliant(it.id, it.master_sku));
+
+        if (!res.success || nonCompliantItems.length === 0) {
+          alert(`✅ Todos os produtos para este filtro (${statusFilter} / ${categoryFilter}) na loja ${currentStoreName} já estão dentro das diretrizes!`);
           initAdmin();
           return;
         }
 
-        setQueue(res.items);
+        if (Array.isArray(res.non_compliant_codes)) {
+          cachedNonCompliantCodes = res.non_compliant_codes;
+        }
+
+        setQueue(nonCompliantItems);
         setQueueIndex(0);
         setAutomationActive(true);
 
-        const firstProduct = res.items[0];
-        console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] Lote de ${res.items.length} produtos carregado. Primeiro: ID ${firstProduct.id} (${firstProduct.master_sku})`);
+        const firstProduct = nonCompliantItems[0];
+        console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] Lote de ${nonCompliantItems.length} códigos não-conformes carregado. Primeiro: ID ${firstProduct.id} (${firstProduct.master_sku})`);
 
         hud.innerHTML = `
           <div style="padding:10px;text-align:center;">
             <div style="font-size:18px;margin-bottom:8px;">🚀</div>
-            <strong style="color:#22c55e;">Lote de ${res.items.length} Produtos Carregado!</strong>
-            <div style="font-size:11px;color:#94a3b8;margin-top:4px;">Abrindo primeiro produto: ${firstProduct.master_sku}...</div>
+            <strong style="color:#22c55e;">${nonCompliantItems.length} Códigos Fora das Diretrizes Enfileirados!</strong>
+            <div style="font-size:11px;color:#94a3b8;margin-top:4px;">Iniciando Piloto Automático pelo código: <strong>${firstProduct.master_sku}</strong>...</div>
           </div>
         `;
 
         setTimeout(() => {
           location.href = `https://admin.shopify.com/store/${currentShopifySlug}/products/${firstProduct.id}`;
-        }, 900);
+        }, 750);
 
       } catch(err) {
         alert(`Erro ao buscar lote do banco de dados: ${err.message}`);
@@ -1252,7 +1506,7 @@
 
       // Caso 1: Estamos na página de edição de um produto específico
       if (currentProductId) {
-        renderHudProductMode(null, "Consultando Banco BRK...", `Buscando produto ID ${currentProductId} (${currentStoreName})...`);
+        renderHudProductMode(null, "Consultando Banco BRK...", `Auditando diretrizes do produto ID ${currentProductId} (${currentStoreName})...`);
 
         try {
           const hints = extractPageHints();
@@ -1265,6 +1519,9 @@
             activeLoadedProduct = res.product;
             console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] Produto carregado do banco:`, activeLoadedProduct.master_sku);
 
+            // Aguarda o editor da Shopify montar antes de inspecionar e injetar automaticamente
+            await waitForEditorReady(6500);
+
             const q = getQueue();
             const idx = getQueueIndex();
             const inQueue = q.length > 0 && q[idx] && String(q[idx].id) === String(currentProductId);
@@ -1273,34 +1530,35 @@
             const editorHealth = inspectEditorHealth(activeLoadedProduct);
 
             if (inQueue && active) {
-              // Se o produto já possui Modo B v4 100% atualizado (sem S3 quebrado, sem foto de boné repetida, com a cor certa da loja) e skipAlreadyModeB está ativo, pula!
+              // Se o produto já está 100% dentro das diretrizes Modo B v5 e skipAlreadyModeB está ativo, marca e pula!
               const shouldSkip = settings.skipAlreadyModeB && (
                 editorHealth.state === "UP_TO_DATE" ||
                 (editorHealth.state === "OUTDATED_MODE_B" && !settings.upgradeOutdatedModeB)
               );
 
               if (shouldSkip) {
+                markProductAsCompliant(currentProductId, activeLoadedProduct.master_sku);
                 renderHudProductMode(
                   activeLoadedProduct,
-                  "✅ Produto Já Atualizado no Modo B v4!",
-                  "Pulando automaticamente para o próximo item da fila..."
+                  "✅ Código Já Está 100% Dentro das Diretrizes!",
+                  "Pulando automaticamente para o próximo código não-conforme da fila..."
                 );
-                setTimeout(() => startCountdownToNext(), 800);
+                setTimeout(() => startCountdownToNext(), 650);
                 return;
               }
 
               renderHudProductMode(
                 activeLoadedProduct,
-                editorHealth.state === "OUTDATED_MODE_B" ? "🔄 Atualizando Modo B Antigo para v4..." : "⚡ Modo Assistido Ativo",
-                editorHealth.state === "OUTDATED_MODE_B" ? editorHealth.reason : "Injetando descrição Modo B oficial automaticamente..."
+                editorHealth.state === "OUTDATED_MODE_B" ? "🤖 Piloto Automático: Corrigindo Violação de Diretriz..." : "🤖 Piloto Automático: Aplicando Modo B v5...",
+                editorHealth.state === "OUTDATED_MODE_B" ? editorHealth.reason : "Injetando descrição oficial e salvando automaticamente..."
               );
               setTimeout(() => {
                 injectModoBIntoEditor(activeLoadedProduct.mode_b_html);
-              }, 1100);
+              }, 600);
             } else {
-              let titleMsg = "Produto Identificado no Banco";
-              if (editorHealth.state === "UP_TO_DATE") titleMsg = "✅ Modo B v4 Sincronizado neste Produto";
-              else if (editorHealth.state === "OUTDATED_MODE_B") titleMsg = "⚠️ Atualização Fase 6 Disponível!";
+              let titleMsg = "Produto Auditado no Banco BRK";
+              if (editorHealth.state === "UP_TO_DATE") titleMsg = "✅ Código 100% Dentro das Diretrizes v5";
+              else if (editorHealth.state === "OUTDATED_MODE_B") titleMsg = "⚠️ Código Fora das Diretrizes (Correção Pronta)";
               renderHudProductMode(
                 activeLoadedProduct,
                 titleMsg,
@@ -1320,7 +1578,8 @@
         activeLoadedProduct = null;
         renderHudListMode(null);
         try {
-          const stats = await fetchFromBRKDatabase(`/api/product_db?store=${currentStoreKey}&action=stats`);
+          const excludeParam = encodeURIComponent(getCompliantIds().slice(-300).join(","));
+          const stats = await fetchFromBRKDatabase(`/api/product_db?store=${currentStoreKey}&action=stats&exclude_ids=${excludeParam}`);
           if (stats.success) {
             renderHudListMode(stats);
           }
@@ -1330,17 +1589,18 @@
       }
     }
 
-    // Observador de rota SPA do Shopify Admin (detecta cliques entre produtos sem reload de página)
+    // Observador de rota SPA do Shopify Admin (detecta navegação entre produtos sem reload completo)
     setInterval(() => {
       if (location.pathname !== lastObservedPath) {
         if (countdownTimer) clearInterval(countdownTimer);
+        if (saveCompletionTimer) clearInterval(saveCompletionTimer);
         lastObservedPath = location.pathname;
-        setTimeout(initAdmin, 500);
+        setTimeout(initAdmin, 450);
       }
-    }, 500);
+    }, 450);
 
     // Iniciar após pequeno delay para o DOM do Shopify Admin estabilizar
-    setTimeout(initAdmin, 1000);
+    setTimeout(initAdmin, 800);
   }
 
 })();
