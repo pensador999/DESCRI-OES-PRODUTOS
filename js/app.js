@@ -1447,8 +1447,8 @@ function openTampermonkeyModal(items = null, storeSlug = "brkfishing") {
             ⚡
           </div>
           <div>
-            <h3 class="text-base font-extrabold text-slate-900 font-heading">Assistente Tampermonkey BRK v5.2 (Piloto Automático de Coleções)</h3>
-            <p class="text-xs text-slate-500">Aplicação 100% Automática em Toda a Coleção sem precisar clicar em Salvar manualmente</p>
+            <h3 class="text-base font-extrabold text-slate-900 font-heading">Assistente Tampermonkey BRK v6.0 (Mini-Dashboard Cockpit)</h3>
+            <p class="text-xs text-slate-500">Painel Executivo dentro do Shopify Admin com KPIs, Barra de Progresso, Abas e Piloto Automático</p>
           </div>
         </div>
         <button onclick="closeTampermonkeyModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center transition-all">✕</button>
@@ -1467,27 +1467,30 @@ function openTampermonkeyModal(items = null, storeSlug = "brkfishing") {
           ` : ''}
         </div>
 
-        <div class="p-4 bg-orange-50 rounded-2xl border border-orange-200 space-y-2 text-orange-950">
+        <div class="p-4 bg-red-50 rounded-2xl border border-red-200 space-y-2 text-red-950">
           <h4 class="font-bold flex items-center gap-1.5 text-xs">
-            <span>🔥</span> Lote Automático da Coleção Super Ofertas (91 Produtos):
+            <span>🚨</span> Prioridades de Aplicação Automática (v6.0):
           </h4>
           <div class="flex flex-wrap gap-2 pt-1">
-            <button onclick="sendCollectionToTampermonkey('super_ofertas', 'COLECAO_COMPLETA', 100)" class="px-3.5 py-2 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white rounded-xl text-xs font-extrabold shadow-sm transition-all">
-              🔥 Auto-Aplicar Toda Coleção Super Ofertas (91)
+            <button onclick="sendCollectionToTampermonkey('ALL', 'PRIORIDADE_CRITICA', 50)" class="px-3.5 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs font-extrabold shadow-sm transition-all">
+              🚨 1º Críticos (S3 404 + Sem Descrição)
             </button>
-            <button onclick="sendCollectionToTampermonkey('super_ofertas', 'CRITICOS_FOTOS_CORES', 100)" class="px-3 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all">
-              🚨 Apenas Críticos Foto/Cor
+            <button onclick="sendCollectionToTampermonkey('camisas', 'FORA_DIRETRIZES', 50)" class="px-3 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all">
+              👕 Lote Camisas UV
+            </button>
+            <button onclick="sendCollectionToTampermonkey('bones_chapeus', 'FORA_DIRETRIZES', 50)" class="px-3 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all">
+              🧢 Lote Bonés D2C
             </button>
           </div>
         </div>
 
         <div class="p-4 bg-purple-50 rounded-2xl border border-purple-200 space-y-2 text-purple-900">
           <h4 class="font-bold flex items-center gap-1.5 text-xs text-purple-950">
-            <span>🔌</span> Instalar ou Atualizar Script Tampermonkey v5.2:
+            <span>🎛️</span> Instalar ou Atualizar Mini-Dashboard Tampermonkey v6.0.0:
           </h4>
           <ol class="list-decimal pl-4 space-y-1 text-[11px] text-purple-800">
-            <li>Clique para instalar/atualizar o script v5.2 no seu Tampermonkey: <a href="tampermonkey/brk_assistente_shopify.user.js?v=5.2.0" target="_blank" class="font-bold underline text-purple-700 hover:text-purple-900">Instalar / Atualizar Userscript v5.2.0</a>.</li>
-            <li>Com o <strong>🤖 Piloto Automático</strong> ativo, ele abre o produto na Shopify, injeta a descrição Modo B v5, <strong>clica em Salvar sozinho</strong> e avança automaticamente pelos 91 produtos da coleção!</li>
+            <li>Clique para instalar/atualizar o script v6.0.0 no seu Tampermonkey: <a href="tampermonkey/brk_assistente_shopify.user.js?v=6.0.0" target="_blank" class="font-bold underline text-purple-700 hover:text-purple-900">Instalar / Atualizar Userscript v6.0.0</a>.</li>
+            <li>O novo <strong>Mini-Dashboard Cockpit</strong> traz 4 Cards KPI clicáveis, barra de progresso da loja, busca rápida por SKU e botão <strong>Minimizar (—)</strong>.</li>
           </ol>
         </div>
       </div>

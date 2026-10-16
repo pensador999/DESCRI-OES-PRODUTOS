@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         BRK Assistente de Descrições Shopify (Conectado ao Banco Real v5.3.2 Zero Alerta Sair do Site)
+// @name         BRK Assistente de Descrições Shopify (Mini-Dashboard v6.0.0 Cockpit)
 // @namespace    https://1025-ten.vercel.app/
-// @version      5.3.2
-// @description  Automação 100% automática por Coleções Shopify (89/91 Super Ofertas 🔥 + 32 Camisas/Outros Rastreados sem Troca Descomplicada) com bloqueio via unsafeWindow/CSP de 'Sair do site?' e fechamento automático do modo HTML (<>).
+// @version      6.0.0
+// @description  Mini-Dashboard Profissional in-screen para Shopify Admin com KPIs em tempo real, barra de progresso da loja, prioridades inteligentes (Críticos S3/Vazios + Categorias) e Piloto Automático sem alerta 'Sair do site?'.
 // @author       BRK Group & DeepMind Pair
 // @match        https://admin.shopify.com/store/*/products*
 // @match        https://admin.shopify.com/store/*
@@ -35,7 +35,7 @@
 
   // Configuração da API do Banco de Dados BRK (6.409 produtos auditados nas 3 lojas)
   const API_BASE = "https://1025-ten.vercel.app";
-  const SCRIPT_VERSION = "5.3.2";
+  const SCRIPT_VERSION = "6.0.0";
 
   const STORAGE_KEYS = {
     QUEUE: "BRK_AUTOSYNC_QUEUE",
@@ -98,12 +98,14 @@
     autoPilot: true,             // Modo Automático Total: injeta, clica em Salvar e avança sozinho para o próximo código fora das diretrizes
     autoSave: true,              // Clica automaticamente no botão "Salvar" da Shopify após injetar
     skipAlreadyModeB: true,      // Avança automaticamente quando o produto já está 100% conforme as Diretrizes Modo B v5
-    upgradeOutdatedModeB: true,  // Atualiza produtos que têm Modo B com violação (Faca Marine c/ bainha, ArmorX c/ luva, Fusion/Hybrid s/ nota de capuz, P ao EXG)
+    upgradeOutdatedModeB: true,  // Atualiza produtos que têm Modo B com violação residual
     pauseOnMediaError: false,    // Se true, pausa o Auto-Save quando o produto tiver variante sem foto (image_id=null) ou foto duplicada para ajuste manual
-    batchCategory: "super_ofertas",
-    batchStatus: "FORA_DIRETRIZES",
-    batchLimit: 100,
-    customCollection: ""
+    batchCategory: "ALL",
+    batchStatus: "PRIORIDADE_CRITICA",
+    batchLimit: 50,
+    customCollection: "",
+    minimized: false,
+    activeTab: "priorities"
   };
 
   function getSettings() {
@@ -538,18 +540,158 @@
         bottom: 18px;
         right: 18px;
         z-index: 999998;
-        background: #090d16;
+        background: rgba(9, 13, 22, 0.96);
         color: #f1f5f9;
-        border: 2px solid #0284c7;
+        border: 1.5px solid #0284c7;
         border-radius: 16px;
         padding: 14px 16px;
-        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.75);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        font-size: 13px;
-        min-width: 410px;
-        max-width: 530px;
-        backdrop-filter: blur(12px);
-        transition: border-color 0.25s ease;
+        box-shadow: 0 20px 48px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+        font-size: 12.5px;
+        min-width: 430px;
+        max-width: 520px;
+        backdrop-filter: blur(16px);
+        transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      #brk-tm-hud.brk-hud-minimized {
+        min-width: auto !important;
+        max-width: 390px !important;
+        padding: 8px 13px !important;
+        border-radius: 9999px !important;
+      }
+      .brk-icon-btn {
+        background: #1e293b;
+        color: #cbd5e1;
+        border: 1px solid #334155;
+        border-radius: 7px;
+        width: 24px;
+        height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .brk-icon-btn:hover {
+        background: #334155;
+        color: #ffffff;
+      }
+      .brk-progress-track {
+        width: 100%;
+        height: 6px;
+        background: #1e293b;
+        border-radius: 9999px;
+        overflow: hidden;
+        margin-top: 5px;
+      }
+      .brk-progress-fill {
+        height: 100%;
+        border-radius: 9999px;
+        transition: width 0.4s ease;
+      }
+      .brk-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+      .brk-kpi-card {
+        background: #0f172a;
+        border: 1px solid #1e293b;
+        border-radius: 10px;
+        padding: 7px 8px;
+        cursor: pointer;
+        transition: all 0.16s ease;
+        text-align: left;
+      }
+      .brk-kpi-card:hover {
+        background: #162036;
+        border-color: #475569;
+        transform: translateY(-1px);
+      }
+      .brk-kpi-val {
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 1.15;
+        font-variant-numeric: tabular-nums;
+      }
+      .brk-kpi-lbl {
+        font-size: 9.5px;
+        font-weight: 700;
+        color: #94a3b8;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .brk-tab-bar {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        background: #060911;
+        padding: 4px;
+        border-radius: 10px;
+        border: 1px solid #1e293b;
+        margin-bottom: 10px;
+      }
+      .brk-tab-btn {
+        background: transparent;
+        color: #94a3b8;
+        border: none;
+        border-radius: 7px;
+        padding: 6px 8px;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+      }
+      .brk-tab-btn:hover {
+        color: #e2e8f0;
+      }
+      .brk-tab-btn.active {
+        background: #1e293b;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+      }
+      .brk-priority-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+      .brk-priority-btn {
+        background: #0f172a;
+        border: 1px solid #1e293b;
+        border-radius: 9px;
+        padding: 8px 10px;
+        color: #f1f5f9;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        transition: all 0.16s;
+        text-align: left;
+      }
+      .brk-priority-btn:hover {
+        background: #1e293b;
+        border-color: #475569;
+      }
+      .brk-priority-count {
+        background: #1e293b;
+        color: #cbd5e1;
+        font-size: 10px;
+        font-weight: 800;
+        padding: 1px 6px;
+        border-radius: 9999px;
+        flex-shrink: 0;
       }
       .brk-badge-status {
         font-size: 10px;
@@ -579,7 +721,7 @@
         border: 1px solid #475569;
         border-radius: 8px;
         padding: 6px 11px;
-        font-size: 12px;
+        font-size: 11.5px;
         font-weight: 700;
         cursor: pointer;
         display: inline-flex;
@@ -640,7 +782,7 @@
         cursor: pointer;
       }
       .brk-codes-scroll {
-        max-height: 155px;
+        max-height: 165px;
         overflow-y: auto;
         background: #060911;
         border: 1px solid #1e293b;
@@ -653,7 +795,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 6px;
-        padding: 4px 6px;
+        padding: 5px 7px;
         border-bottom: 1px solid #0f172a;
         font-size: 11px;
         border-radius: 5px;
@@ -1307,53 +1449,98 @@
     const injectDescriptionIntoShopify = injectModoBIntoEditor;
     const advanceToNextProduct = startCountdownToNext;
 
-    // Renderizador do Mapa de Códigos (SKUs) Fora das Diretrizes (oculta 100% os códigos já conformes)
-    function renderNonCompliantCodesBox(codesList) {
+    let currentSearchSkuTerm = "";
+
+    // Renderizador do Mapa de Códigos (SKUs) Fora das Diretrizes com filtro de busca instantânea
+    function renderNonCompliantCodesBox(codesList, alwaysExpanded = false) {
       const activeCodes = (codesList || []).filter(c => !isProductMarkedCompliant(c.id, c.sku));
       if (activeCodes.length === 0) {
-        return "";
+        return `
+          <div style="background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:10px;text-align:center;color:#4ade80;font-size:11.5px;font-weight:700;">
+            🎉 Todos os produtos mapeados nesta visão estão 100% conformes!
+          </div>
+        `;
       }
-      const rowsHtml = activeCodes.slice(0, 40).map(c => {
+      const term = (currentSearchSkuTerm || "").trim().toLowerCase();
+      const filteredCodes = term
+        ? activeCodes.filter(c =>
+            String(c.sku || "").toLowerCase().includes(term) ||
+            String(c.id || "").toLowerCase().includes(term) ||
+            String(c.title || "").toLowerCase().includes(term) ||
+            String(c.guideline_reason || "").toLowerCase().includes(term)
+          )
+        : activeCodes;
+
+      const rowsHtml = filteredCodes.slice(0, 50).map(c => {
         let badgeCls = "brk-badge-legacy";
-        let badgeLabel = "FORA MODO B";
-        if (c.guideline_status === "MODO_B_DESATUALIZADO") { badgeCls = "brk-badge-outdated"; badgeLabel = "VIOLAÇÃO REGRA"; }
-        else if (c.guideline_status === "SEM_DESCRICAO") { badgeCls = "brk-badge-empty"; badgeLabel = "SEM DESCRIÇÃO"; }
-        else if (c.guideline_status === "IMAGENS_QUEBRADAS") { badgeCls = "brk-badge-broken"; badgeLabel = "S3 QUEBRADO"; }
+        let badgeLabel = "ANTIGO";
+        if (c.guideline_status === "MODO_B_DESATUALIZADO") { badgeCls = "brk-badge-outdated"; badgeLabel = "VIOLAÇÃO"; }
+        else if (c.guideline_status === "SEM_DESCRICAO") { badgeCls = "brk-badge-empty"; badgeLabel = "SEM DESC"; }
+        else if (c.guideline_status === "IMAGENS_QUEBRADAS") { badgeCls = "brk-badge-broken"; badgeLabel = "S3 404"; }
 
         return `
           <div class="brk-code-row" data-prod-id="${c.id}" title="${(c.guideline_reason || c.title || '').replace(/"/g, '&quot;')}">
             <div style="display:flex;align-items:center;gap:6px;min-width:0;flex:1;">
               <strong style="color:#38bdf8;font-family:monospace;font-size:11px;flex-shrink:0;">${c.sku || c.id}</strong>
               <span class="brk-badge-status ${badgeCls}" style="font-size:8.5px;padding:1px 5px;flex-shrink:0;">${badgeLabel}</span>
-              <span style="color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.guideline_reason || c.title}</span>
+              <span style="color:#cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.title || c.guideline_reason}</span>
             </div>
             <span style="color:#4ade80;font-weight:700;font-size:10px;flex-shrink:0;">Abrir ➔</span>
           </div>
         `;
       }).join("");
 
+      const innerContent = `
+        <div style="margin-top:4px;margin-bottom:6px;">
+          <input id="brk-inp-sku-search" type="text" value="${(currentSearchSkuTerm || '').replace(/"/g, '&quot;')}" placeholder="🔍 Buscar por SKU, ID ou nome do produto..." style="width:100%;background:#060911;color:#f8fafc;border:1px solid #334155;border-radius:6px;padding:5px 8px;font-size:11px;box-sizing:border-box;outline:none;" />
+        </div>
+        <div class="brk-codes-scroll">
+          ${rowsHtml || '<div style="padding:8px;text-align:center;color:#64748b;font-size:11px;">Nenhum SKU encontrado para esta busca.</div>'}
+        </div>
+      `;
+
+      if (alwaysExpanded) {
+        return `
+          <div style="background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:8px 10px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+              <span style="font-size:11px;font-weight:800;color:#fbbf24;">🎯 Mapa de SKUs Pendentes (${filteredCodes.length}/${activeCodes.length})</span>
+              <span style="font-size:9.5px;color:#64748b;">Clique para abrir</span>
+            </div>
+            ${innerContent}
+          </div>
+        `;
+      }
+
       return `
-        <details style="margin-bottom:10px;background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:6px 10px;">
+        <details style="margin-bottom:8px;background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:6px 10px;">
           <summary style="cursor:pointer;font-size:11px;font-weight:800;color:#fbbf24;user-select:none;">
-            🎯 Mapa de Códigos Fora das Diretrizes (${activeCodes.length} códigos mapeados — clique para ver)
+            🎯 Próximos SKUs da Fila / Pendentes (${activeCodes.length})
           </summary>
-          <div style="font-size:10px;color:#94a3b8;margin-top:4px;">
-            Exibindo <strong>apenas</strong> códigos cujas descrições estão fora das regras Modo B v5 (itens já conformes são ocultados automaticamente):
-          </div>
-          <div class="brk-codes-scroll">
-            ${rowsHtml}
-          </div>
+          ${innerContent}
         </details>
       `;
     }
 
-    function bindCodeRowClicks() {
+    function bindCodeRowClicks(rerenderCallback) {
       const rows = Array.from(hud.querySelectorAll(".brk-code-row[data-prod-id]"));
       for (const r of rows) {
         r.onclick = () => {
           const pid = r.getAttribute("data-prod-id");
           if (pid) {
             location.href = `https://admin.shopify.com/store/${currentShopifySlug}/products/${pid}`;
+          }
+        };
+      }
+      const inpSearch = document.getElementById("brk-inp-sku-search");
+      if (inpSearch && rerenderCallback) {
+        inpSearch.oninput = (e) => {
+          currentSearchSkuTerm = e.target.value || "";
+          const pos = inpSearch.selectionStart || currentSearchSkuTerm.length;
+          rerenderCallback();
+          const newInp = document.getElementById("brk-inp-sku-search");
+          if (newInp) {
+            newInp.focus();
+            try { newInp.setSelectionRange(pos, pos); } catch (err) {}
           }
         };
       }
@@ -1396,7 +1583,7 @@
       return `
         <div style="background:#450a0a;border:1px solid #ef4444;border-radius:8px;padding:8px 10px;margin-bottom:10px;">
           <div style="font-size:11px;font-weight:800;color:#fca5a5;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;">
-            <span>🔍 PENTE FINO DE FOTOS & CORES ${prod.in_super_ofertas ? '(SUPER OFERTAS 🔥)' : ''}</span>
+            <span>🔍 AUDITORIA VISUAL DE FOTOS & CORES</span>
             <span style="background:#991b1b;color:#fff;padding:1px 6px;border-radius:9999px;font-size:9.5px;">AJUSTE VISUAL</span>
           </div>
           ${rows.join("")}
@@ -1416,6 +1603,34 @@
       const hasBackup = !!getLastBackupForProduct(currentProductId);
 
       hud.style.borderColor = currentTheme.primary;
+
+      // Modo Minimizado (Pílula Compacta)
+      if (settings.minimized) {
+        hud.classList.add("brk-hud-minimized");
+        hud.innerHTML = `
+          <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:14px;">${settings.autoPilot ? '🤖' : '🟢'}</span>
+              <strong style="color:${currentTheme.light};font-size:12px;">BRK v${SCRIPT_VERSION}</strong>
+              <span style="color:#f8fafc;font-family:monospace;font-size:11.5px;font-weight:800;">${prod ? (prod.master_sku || 'SKU') : '...'}</span>
+              ${inQueue ? `<span style="background:#065f46;color:#6ee7b7;font-size:10px;font-weight:800;padding:1px 6px;border-radius:9999px;">${idx + 1}/${q.length}</span>` : ''}
+            </div>
+            <div style="display:flex;align-items:center;gap:5px;">
+              <button id="brk-btn-inject-mini" class="brk-hud-btn brk-hud-btn-primary" style="padding:4px 8px;font-size:10.5px;background:${currentTheme.primary};">⚡ Injetar</button>
+              <button id="brk-btn-toggle-min" class="brk-icon-btn" title="Expandir Mini-Dashboard">▢</button>
+            </div>
+          </div>
+        `;
+        const btnInjMini = document.getElementById("brk-btn-inject-mini");
+        if (btnInjMini && prod) btnInjMini.onclick = () => injectModoBIntoEditor(prod.mode_b_html);
+        const btnExp = document.getElementById("brk-btn-toggle-min");
+        if (btnExp) btnExp.onclick = () => {
+          saveSettings({ minimized: false });
+          renderHudProductMode(prod, statusTitle, statusSub);
+        };
+        return;
+      }
+      hud.classList.remove("brk-hud-minimized");
 
       let statusBadgeClass = "brk-badge-healthy";
       const gStatus = prod?.guideline_status || prod?.status || "SAUDAVEL";
@@ -1445,51 +1660,44 @@
         <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e293b;padding-bottom:8px;margin-bottom:10px;">
           <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
             <span style="font-size:15px;">${settings.autoPilot ? '🤖' : '🟢'}</span>
-            <strong style="color:${currentTheme.light};font-size:13px;">BANCO BRK v${SCRIPT_VERSION}</strong>
+            <strong style="color:${currentTheme.light};font-size:12.5px;">BRK COCKPIT v${SCRIPT_VERSION}</strong>
             <span style="${editorBadgeStyle}font-size:10px;font-weight:800;padding:2px 7px;border-radius:9999px;">${editorHealth.badge}</span>
           </div>
-          <span style="background:${currentTheme.badgeBg};color:${currentTheme.badgeText};font-size:10px;font-weight:800;padding:2px 8px;border-radius:9999px;">
-            ${inQueue ? `Fila ${idx + 1}/${q.length} • ${currentStoreName}` : `${currentStoreName} (${currentTheme.label})`}
-          </span>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="background:${currentTheme.badgeBg};color:${currentTheme.badgeText};font-size:10px;font-weight:800;padding:2px 8px;border-radius:9999px;">
+              ${inQueue ? `Fila ${idx + 1}/${q.length}` : currentStoreName}
+            </span>
+            <button id="brk-btn-toggle-min" class="brk-icon-btn" title="Minimizar painel">—</button>
+          </div>
         </div>
 
-        <div style="margin-bottom:10px;">
+        <div style="background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:9px 11px;margin-bottom:9px;">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:wrap;">
             <span style="font-weight:800;color:#f8fafc;font-size:14px;font-family:monospace;">${prod ? (prod.master_sku || 'Sem SKU') : 'Carregando...'}</span>
             ${prod ? `<span class="brk-badge-status ${statusBadgeClass}">${gStatus}</span>` : ''}
-            ${prod && prod.in_super_ofertas ? `<span class="brk-badge-meta" style="background:#7c2d12;color:#fed7aa;">🔥 Super Ofertas</span>` : ''}
             ${prod ? `<span class="brk-badge-meta">📂 ${prod.category || 'Geral'}</span>` : ''}
-            ${prod ? `<span class="brk-badge-meta">📸 ${imgCount} fotos únicas</span>` : ''}
+            ${prod ? `<span class="brk-badge-meta">📸 ${imgCount} fotos</span>` : ''}
             ${prod && prod.delivery_time ? `<span class="brk-badge-meta">🚚 ${prod.delivery_time}</span>` : ''}
           </div>
-          <div style="font-size:12px;color:#cbd5e1;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:480px;">
+          <div style="font-size:12px;color:#e2e8f0;font-weight:600;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:470px;">
             ${prod ? prod.title : 'Consultando dados reais na API...'}
           </div>
           ${prod ? `
-            <div style="display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap;">
-              <span style="font-size:10px;color:${currentTheme.light};font-weight:700;">🧩 ${prod.layout_type || prod.archetype_name || 'Modo B'}</span>
-              <span style="font-size:10px;color:#94a3b8;">•</span>
-              <span style="font-size:10px;color:#e2e8f0;font-weight:700;">👤 ${prod.audience_badge || 'ADULTO'}</span>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding-top:5px;border-top:1px solid #1e293b;font-size:10.5px;">
+              <span style="color:${currentTheme.light};font-weight:700;">🧩 ${prod.layout_type || prod.archetype_name || 'Modo B'} (${prod.audience_badge || 'ADULTO'})</span>
+              ${prod.mode_b_html ? `<span style="color:#4ade80;font-weight:700;">⭐ ${(prod.mode_b_html.length).toLocaleString('pt-BR')} chars</span>` : ''}
             </div>
           ` : ''}
         </div>
 
         ${renderMediaAuditAlertBox(prod)}
 
-        <div style="background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:8px 12px;margin-bottom:10px;">
-          <div style="font-weight:700;color:${currentTheme.light};font-size:12px;">${statusTitle || "Pronto para Injeção"}</div>
-          <div style="font-size:11px;color:#94a3b8;line-height:1.4;">${statusSub || editorHealth.reason}</div>
-          ${prod && prod.mode_b_html ? `
-            <div style="margin-top:6px;font-size:11px;color:#4ade80;font-weight:700;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #1e293b;padding-top:4px;">
-              <span>⭐ Modo B v5 Compilado: ${(prod.mode_b_html.length).toLocaleString('pt-BR')} chars</span>
-              <span style="color:#94a3b8;font-weight:600;">${prod.archetype_name || '3 Atos + Ficha Técnica'}</span>
-            </div>
-          ` : ''}
+        <div style="background:#0b1120;border-left:3px solid ${currentTheme.primary};border-radius:6px;padding:7px 10px;margin-bottom:9px;">
+          <div style="font-weight:700;color:${currentTheme.light};font-size:11.5px;">${statusTitle || "Pronto para Injeção"}</div>
+          <div style="font-size:10.5px;color:#94a3b8;line-height:1.35;">${statusSub || editorHealth.reason}</div>
         </div>
 
-        ${renderNonCompliantCodesBox(queueCodes)}
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:4px 8px;background:#0f172a;border:1px solid #1e293b;border-radius:8px;flex-wrap:wrap;gap:6px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;padding:5px 9px;background:#0f172a;border:1px solid #1e293b;border-radius:8px;flex-wrap:wrap;gap:6px;">
           <label class="brk-hud-toggle" title="Piloto Automático Total: injeta a descrição no editor, clica em Salvar automaticamente e avança sozinho">
             <input type="checkbox" id="brk-chk-autopilot" ${settings.autoPilot ? 'checked' : ''} style="accent-color:#22c55e;" />
             <strong style="color:#4ade80;">🤖 Piloto Automático</strong>
@@ -1500,7 +1708,7 @@
           </label>
           <label class="brk-hud-toggle" title="Pausa antes de clicar em Salvar quando o produto tiver cor sem foto vinculada (image_id=null) ou foto duplicada">
             <input type="checkbox" id="brk-chk-pause-media" ${settings.pauseOnMediaError ? 'checked' : ''} style="accent-color:#f59e0b;" />
-            <span style="color:#fbbf24;">⏸️ Pausar se Cor s/ Foto</span>
+            <span style="color:#fbbf24;">⏸️ Pausar Cor s/ Foto</span>
           </label>
           <label class="brk-hud-toggle" title="Durante um lote, pula produtos que já estão 100% conformes com as diretrizes Modo B v5">
             <input type="checkbox" id="brk-chk-skip-done" ${settings.skipAlreadyModeB ? 'checked' : ''} style="accent-color:${currentTheme.primary};" />
@@ -1508,8 +1716,8 @@
           </label>
         </div>
 
-        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
-          <button id="brk-btn-inject" class="brk-hud-btn brk-hud-btn-primary" style="background:${currentTheme.primary};border-color:${currentTheme.primaryHover};" title="Injeta a narrativa completa Modo B v5 no editor HTML e salva se Auto-Salvar estiver ativo">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:${inQueue ? '8px' : '4px'};">
+          <button id="brk-btn-inject" class="brk-hud-btn brk-hud-btn-primary" style="flex:1;justify-content:center;background:${currentTheme.primary};border-color:${currentTheme.primaryHover};padding:7px 12px;" title="Injeta a narrativa completa Modo B v5 no editor HTML e salva se Auto-Salvar estiver ativo">
             ⚡ Injetar Modo B
           </button>
           <button id="brk-btn-preview" class="brk-hud-btn" title="Abre uma janela visual dentro do Shopify Admin mostrando como a descrição Modo B v5 ficará na loja">
@@ -1526,30 +1734,34 @@
               ↩️ Desfazer
             </button>
           ` : ''}
-          ${inQueue ? `
-            <button id="brk-btn-next-now" class="brk-hud-btn">
-              ⏭️ Próximo (${idx + 1}/${q.length})
-            </button>
-            <button id="brk-btn-pause-queue" class="brk-hud-btn brk-hud-btn-danger">
-              ⏹️ Parar Fila
-            </button>
-          ` : ''}
         </div>
 
-        <div style="background:#17100b;border:1px solid #ea580c;border-radius:10px;padding:7px 9px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
-          <button id="brk-btn-start-super-ofertas" class="brk-hud-btn" style="flex:1;justify-content:center;background:linear-gradient(90deg,#ea580c,#dc2626);border-color:#f97316;color:#fff;font-size:11px;padding:7px 8px;" title="Atualiza automaticamente as 89/91 iscas/itens da Coleção Super Ofertas 🔥 (sem Troca Descomplicada)">
-            🔥 Super Ofertas (91)
-          </button>
-          <button id="brk-btn-start-tracked-32-prod" class="brk-hud-btn" style="flex:1;justify-content:center;background:linear-gradient(90deg,#0284c7,#0369a1);border-color:#38bdf8;color:#fff;font-size:11px;padding:7px 8px;" title="Atualiza automaticamente os 32 produtos (25 Camisas/Bandanas + 2 Facas + 3 Acessórios) rastreados fora da Super Ofertas para retirar 'Troca Descomplicada'">
-            👕 32 Camisas/Outros Rastreados
-          </button>
-          <button id="brk-btn-start-so-criticos-prod" class="brk-hud-btn" style="background:#7c2d12;border-color:#ea580c;color:#ffedd5;font-size:11px;padding:7px 8px;" title="Roda os produtos críticos de Foto/Cor da coleção Super Ofertas">
-            🚨 Críticos Foto/Cor
-          </button>
-        </div>
+        ${inQueue ? `
+          <div style="background:#06130e;border:1px solid #16a34a;border-radius:8px;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-size:11px;font-weight:700;color:#4ade80;">🚀 Lote Ativo: Produto ${idx + 1} de ${q.length}</span>
+            <div style="display:flex;gap:5px;">
+              <button id="brk-btn-next-now" class="brk-hud-btn" style="padding:4px 8px;font-size:10.5px;">
+                ⏭️ Pular (${idx + 1}/${q.length})
+              </button>
+              <button id="brk-btn-pause-queue" class="brk-hud-btn brk-hud-btn-danger" style="padding:4px 8px;font-size:10.5px;">
+                ⏹️ Parar Fila
+              </button>
+            </div>
+          </div>
+        ` : ''}
+
+        ${renderNonCompliantCodesBox(queueCodes, false)}
       `;
 
-      bindCodeRowClicks();
+      bindCodeRowClicks(() => renderHudProductMode(prod, statusTitle, statusSub));
+
+      const btnMin = document.getElementById("brk-btn-toggle-min");
+      if (btnMin) {
+        btnMin.onclick = () => {
+          saveSettings({ minimized: true });
+          renderHudProductMode(prod, statusTitle, statusSub);
+        };
+      }
 
       // Toggles de configuração
       const chkAutoPilot = document.getElementById("brk-chk-autopilot");
@@ -1652,207 +1864,377 @@
           renderHudProductMode(prod, "⏹️ Lote Pausado", "Fila encerrada. Você pode operar individualmente.");
         };
       }
-
-      const btnStartSO = document.getElementById("brk-btn-start-super-ofertas");
-      if (btnStartSO) {
-        btnStartSO.onclick = () => {
-          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
-          saveSettings({
-            batchCategory: "super_ofertas",
-            batchStatus: "COLECAO_COMPLETA",
-            batchLimit: 100,
-            autoPilot: true,
-            autoSave: true,
-            skipAlreadyModeB: false,
-            pauseOnMediaError: false
-          });
-          startQueueFromDatabase("COLECAO_COMPLETA", 100, "super_ofertas", "super-ofertas-🔥");
-        };
-      }
-
-      const btnStartTracked32Prod = document.getElementById("brk-btn-start-tracked-32-prod");
-      if (btnStartTracked32Prod) {
-        btnStartTracked32Prod.onclick = () => {
-          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
-          saveSettings({
-            batchCategory: "rastreados_camisas",
-            batchStatus: "RASTREADOS_TROCA_DESCOMPLICADA",
-            batchLimit: 100,
-            autoPilot: true,
-            autoSave: true,
-            skipAlreadyModeB: false,
-            pauseOnMediaError: false
-          });
-          startQueueFromDatabase("RASTREADOS_TROCA_DESCOMPLICADA", 100, "rastreados_camisas", "");
-        };
-      }
-
-      const btnStartSoCritProd = document.getElementById("brk-btn-start-so-criticos-prod");
-      if (btnStartSoCritProd) {
-        btnStartSoCritProd.onclick = () => {
-          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
-          saveSettings({
-            batchCategory: "super_ofertas",
-            batchStatus: "CRITICOS_FOTOS_CORES",
-            batchLimit: 100,
-            autoPilot: true,
-            autoSave: true,
-            skipAlreadyModeB: false,
-            pauseOnMediaError: true
-          });
-          startQueueFromDatabase("CRITICOS_FOTOS_CORES", 100, "super_ofertas", "super-ofertas-🔥");
-        };
-      }
     }
 
     // =========================================================================
-    // RENDERIZAÇÃO DO HUD NA LISTAGEM DE PRODUTOS E COLEÇÕES (admin.shopify.com/...)
+    // RENDERIZAÇÃO DO MINI-DASHBOARD NA LISTAGEM (admin.shopify.com/.../products)
     // =========================================================================
+    let lastLoadedStats = null;
+
     function renderHudListMode(stats) {
+      if (stats) lastLoadedStats = stats;
+      else stats = lastLoadedStats;
+
       const q = getQueue();
       const idx = getQueueIndex();
       const active = isAutomationActive();
       const settings = getSettings();
-      const soStats = stats?.super_ofertas_stats || { total: 91, needs_media_fix: 83, unlinked_variants: 38, duplicate_images: 26, low_res_images: 75 };
+      const activeTab = settings.activeTab || "priorities";
 
       hud.style.borderColor = currentTheme.primary;
       if (stats && Array.isArray(stats.non_compliant_codes)) {
         cachedNonCompliantCodes = stats.non_compliant_codes;
       }
 
-      hud.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e293b;padding-bottom:8px;margin-bottom:10px;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:16px;">🤖</span>
-            <strong style="color:${currentTheme.light};font-size:13px;">BANCO BRK v${SCRIPT_VERSION} • LOTE & COLEÇÕES</strong>
-          </div>
-          <span style="background:${currentTheme.badgeBg};color:${currentTheme.badgeText};font-size:10px;font-weight:800;padding:2px 8px;border-radius:9999px;">
-            ${currentStoreName} • ${currentTheme.label}
-          </span>
-        </div>
+      const totalProds = stats?.total_products || 2148;
+      const compCount = stats?.compliant_count || 0;
+      const brkCount = stats?.imagens_quebradas_count || 0;
+      const empCount = stats?.sem_descricao_count || 0;
+      const legCount = stats?.fora_padrao_modo_b_count || 0;
+      const outCount = stats?.modo_b_desatualizado_count || 0;
+      const critCount = stats?.criticos_loja_count ?? (brkCount + empCount + outCount);
+      const pct = stats?.progress_pct ?? Math.round((compCount / Math.max(1, totalProds)) * 1000) / 10;
+      const pg = stats?.pending_by_group || {};
 
-        <!-- BOTÕES PRINCIPAIS SEMPRE VISÍVEIS: 89/91 SUPER OFERTAS + 32 CAMISAS/OUTROS RASTREADOS -->
-        <div style="background:linear-gradient(135deg,#431407,#1e1b4b);border:2px solid #ea580c;border-radius:12px;padding:10px 12px;margin-bottom:10px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-            <strong style="color:#fed7aa;font-size:11.5px;">🔄 REMOÇÃO "TROCA DESCOMPLICADA" — RASTREIO 121 PRODUTOS</strong>
-            <span style="background:#ea580c;color:#fff;font-size:9.5px;font-weight:800;padding:1px 7px;border-radius:9999px;">1-CLIQUE</span>
-          </div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
-            <button id="brk-btn-so-all91-direct" class="brk-hud-btn" style="flex:1;justify-content:center;background:linear-gradient(90deg,#ea580c,#dc2626);border-color:#f97316;color:#fff;font-size:11.5px;padding:8px 10px;box-shadow:0 4px 12px rgba(234,88,12,0.4);">
-              🔥 1º Lote: Auto-Atualizar Super Ofertas (91 Iscas/Itens)
-            </button>
-          </div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button id="brk-btn-tracked-32-direct" class="brk-hud-btn" style="flex:1;justify-content:center;background:linear-gradient(90deg,#0284c7,#0369a1);border-color:#38bdf8;color:#fff;font-size:11.5px;padding:8px 10px;box-shadow:0 4px 12px rgba(2,132,199,0.4);">
-              👕 2º Lote: Auto-Atualizar 32 Camisas/Facas/Outros Rastreados
-            </button>
-            <button id="brk-btn-so-criticos" class="brk-hud-btn" style="background:#7c2d12;border-color:#ea580c;color:#ffedd5;font-size:11px;padding:8px 10px;" title="Abre os produtos críticos da coleção Super Ofertas 🔥 (Cores sem foto vinculada + Fotos duplicadas)">
-              🚨 Críticos Cor/Dup
-            </button>
-          </div>
-        </div>
-
-        <div style="margin-bottom:10px;font-size:12px;color:#cbd5e1;line-height:1.5;">
-          ${stats ? `
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;background:#0f172a;padding:8px 10px;border-radius:8px;border:1px solid #1e293b;">
-              <div style="color:#4ade80;">✅ Já Conformes (Ocultos): <strong>${stats.compliant_count || 0}</strong></div>
-              <div style="color:#38bdf8;">🎯 Total Fora Diretrizes: <strong>${stats.non_compliant_count || stats.total_products}</strong></div>
-              <div style="color:#fbbf24;">⚠️ Modo B c/ Violação: <strong>${stats.modo_b_desatualizado_count || 0}</strong></div>
-              <div style="color:#fb923c;">🔥 Super Ofertas Auditados: <strong>${soStats.total} itens (${soStats.needs_media_fix} c/ ajuste)</strong></div>
+      // Modo Minimizado na Listagem
+      if (settings.minimized) {
+        hud.classList.add("brk-hud-minimized");
+        hud.innerHTML = `
+          <div style="display:flex;align-items:center;gap:10px;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:14px;">🎛️</span>
+              <strong style="color:${currentTheme.light};font-size:12px;">BRK v${SCRIPT_VERSION}</strong>
+              <span style="background:#065f46;color:#6ee7b7;font-size:10px;font-weight:800;padding:1px 7px;border-radius:9999px;">✅ ${compCount} (${pct}%)</span>
+              ${q.length > 0 ? `<span style="background:#1e293b;color:#38bdf8;font-size:10px;font-weight:800;padding:1px 7px;border-radius:9999px;">Fila ${idx + 1}/${q.length}</span>` : ''}
             </div>
-          ` : 'Mapeando conformidade de todos os códigos e coleções da loja nas diretrizes Modo B v5...'}
+            <button id="brk-btn-toggle-min-list" class="brk-icon-btn" title="Expandir Mini-Dashboard">▢</button>
+          </div>
+        `;
+        const btnExp = document.getElementById("brk-btn-toggle-min-list");
+        if (btnExp) btnExp.onclick = () => {
+          saveSettings({ minimized: false });
+          renderHudListMode(stats);
+        };
+        return;
+      }
+      hud.classList.remove("brk-hud-minimized");
+
+      // Renderização do Conteúdo da Aba Selecionada
+      let tabContentHtml = "";
+
+      if (activeTab === "priorities") {
+        tabContentHtml = `
+          <!-- PRIORIDADE 1: URGÊNCIAS VISUAIS DA LOJA (S3 404 + SEM DESCRIÇÃO) -->
+          <div style="background:linear-gradient(135deg,rgba(127,29,29,0.35),rgba(15,23,42,0.95));border:1px solid #dc2626;border-radius:11px;padding:9px 11px;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:11px;font-weight:800;color:#fca5a5;">🚨 PRIORIDADE 1 — URGÊNCIAS DA VITRINE</span>
+              <span style="background:#991b1b;color:#fee2e2;font-size:9.5px;font-weight:800;padding:1px 7px;border-radius:9999px;">${critCount} pendentes</span>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button id="brk-prio-criticos-all" class="brk-hud-btn" style="flex:1.3;justify-content:center;background:linear-gradient(90deg,#dc2626,#b91c1c);border-color:#ef4444;color:#fff;padding:7px 10px;">
+                ⚡ Corrigir Críticos (S3 + Vazios)
+              </button>
+              <button id="brk-prio-empty-only" class="brk-hud-btn" style="flex:0.85;justify-content:center;background:#1e293b;border-color:#f59e0b;color:#fde68a;padding:7px 8px;" title="Apenas produtos sem nenhuma descrição (${empCount})">
+                📝 Sem Desc (${empCount})
+              </button>
+              <button id="brk-prio-s3-only" class="brk-hud-btn" style="flex:0.85;justify-content:center;background:#1e293b;border-color:#f97316;color:#fed7aa;padding:7px 8px;" title="Apenas produtos com imagens AWS S3 404 quebradas (${brkCount})">
+                🖼️ S3 404 (${brkCount})
+              </button>
+            </div>
+          </div>
+
+          ${outCount > 0 ? `
+            <div style="background:#2e1905;border:1px solid #d97706;border-radius:9px;padding:6px 10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:11px;color:#fde68a;font-weight:700;">⚠️ ${outCount} produto(s) com versão Modo B v1 restante</span>
+              <button id="brk-prio-outdated" class="brk-hud-btn" style="background:#d97706;border-color:#f59e0b;color:#fff;padding:4px 9px;font-size:10.5px;">
+                ⚡ Finalizar (${outCount})
+              </button>
+            </div>
+          ` : ''}
+
+          <!-- PRIORIDADE 2: LOTES RÁPIDOS POR CATEGORIA COMERCIAL -->
+          <div style="margin-bottom:4px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:10.5px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:0.04em;">📦 Prioridade 2 — Padronizar por Categoria (1-Clique)</span>
+              <label class="brk-hud-toggle" title="Injeta, clica em Salvar e avança sozinho">
+                <input type="checkbox" id="brk-list-chk-autopilot" ${settings.autoPilot ? 'checked' : ''} style="accent-color:#22c55e;" />
+                <strong style="color:#4ade80;font-size:10.5px;">🤖 Auto-Save Ativo</strong>
+              </label>
+            </div>
+            <div class="brk-priority-grid">
+              <button class="brk-priority-btn" data-quick-cat="camisas">
+                <span>👕 Camisas UV & Perf.</span>
+                <span class="brk-priority-count">${pg.camisas ?? '...'}</span>
+              </button>
+              <button class="brk-priority-btn" data-quick-cat="bones_chapeus">
+                <span>🧢 Bonés & Chapéus D2C</span>
+                <span class="brk-priority-count">${pg.bones_chapeus ?? '...'}</span>
+              </button>
+              <button class="brk-priority-btn" data-quick-cat="iscas_artificiais">
+                <span>🎣 Iscas Artificiais</span>
+                <span class="brk-priority-count">${pg.iscas_artificiais ?? '...'}</span>
+              </button>
+              <button class="brk-priority-btn" data-quick-cat="equipamentos_pesca">
+                <span>⚙️ Equipamentos & Caixas</span>
+                <span class="brk-priority-count">${pg.equipamentos_pesca ?? '...'}</span>
+              </button>
+              <button class="brk-priority-btn" data-quick-cat="calcas">
+                <span>👖 Calças & Bermudas</span>
+                <span class="brk-priority-count">${pg.calcas ?? '...'}</span>
+              </button>
+              <button class="brk-priority-btn" data-quick-cat="infantil">
+                <span>🧒 Linha Infantil / Kids</span>
+                <span class="brk-priority-count">${pg.infantil ?? '...'}</span>
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (activeTab === "categories") {
+        tabContentHtml = `
+          <div style="background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:10px 11px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;flex-wrap:wrap;gap:6px;">
+              <span style="font-weight:800;color:${currentTheme.light};font-size:11px;">📂 Construtor de Lote Personalizado / Coleções</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <label class="brk-hud-toggle">
+                  <input type="checkbox" id="brk-list-chk-autopilot" ${settings.autoPilot ? 'checked' : ''} style="accent-color:#22c55e;" />
+                  <strong style="color:#4ade80;font-size:10.5px;">🤖 Auto-Save</strong>
+                </label>
+                <label class="brk-hud-toggle">
+                  <input type="checkbox" id="brk-list-chk-pause-media" ${settings.pauseOnMediaError ? 'checked' : ''} style="accent-color:#f59e0b;" />
+                  <span style="color:#fbbf24;font-size:10.5px;">⏸️ Pausar Cor s/ Foto</span>
+                </label>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1.1fr 1.1fr 0.55fr;gap:6px;margin-bottom:6px;">
+              <select id="brk-sel-category" class="brk-hud-select" title="Filtrar por Categoria ou Coleção">
+                <option value="ALL" ${settings.batchCategory === 'ALL' ? 'selected' : ''}>📂 Todas as Categorias da Loja</option>
+                <option value="camisas" ${settings.batchCategory === 'camisas' ? 'selected' : ''}>👕 Camisas (Fusion/Hybrid/ArmorX/C0)</option>
+                <option value="bones_chapeus" ${settings.batchCategory === 'bones_chapeus' ? 'selected' : ''}>🧢 Bonés & Chapéus (Molde D2C)</option>
+                <option value="iscas_artificiais" ${settings.batchCategory === 'iscas_artificiais' ? 'selected' : ''}>🎣 Iscas Artificiais</option>
+                <option value="equipamentos_pesca" ${settings.batchCategory === 'equipamentos_pesca' ? 'selected' : ''}>⚙️ Varas, Carretilhas, Molinetes & Alicates</option>
+                <option value="linhas_pesca" ${settings.batchCategory === 'linhas_pesca' ? 'selected' : ''}>🧵 Linhas de Pesca</option>
+                <option value="calcas" ${settings.batchCategory === 'calcas' ? 'selected' : ''}>👖 Calças & Bermudas</option>
+                <option value="corta_vento" ${settings.batchCategory === 'corta_vento' ? 'selected' : ''}>🧥 Corta-Vento & Jaquetas</option>
+                <option value="infantil" ${settings.batchCategory === 'infantil' ? 'selected' : ''}>🧒 Linha Infantil (2 a 13 Anos)</option>
+                <option value="feminino" ${settings.batchCategory === 'feminino' ? 'selected' : ''}>👚 Linha Feminina (Baby Look)</option>
+                <option value="super_ofertas" ${settings.batchCategory === 'super_ofertas' ? 'selected' : ''}>🔥 Coleção: Super Ofertas Fishing</option>
+                <option value="CUSTOM_COLLECTION" ${settings.batchCategory === 'CUSTOM_COLLECTION' ? 'selected' : ''}>🔗 Outra Coleção (URL/Handle abaixo)</option>
+              </select>
+              <select id="brk-sel-status" class="brk-hud-select" title="Filtrar por Prioridade ou Status">
+                <option value="PRIORIDADE_CRITICA" ${settings.batchStatus === 'PRIORIDADE_CRITICA' ? 'selected' : ''}>🚨 Prioridade Crítica (S3 404 + Sem Desc)</option>
+                <option value="FORA_DIRETRIZES" ${settings.batchStatus === 'FORA_DIRETRIZES' ? 'selected' : ''}>🎯 Todos Fora do Padrão Modo B v2</option>
+                <option value="SEM_DESCRICAO" ${settings.batchStatus === 'SEM_DESCRICAO' ? 'selected' : ''}>📝 Apenas Sem Descrição</option>
+                <option value="IMAGENS_QUEBRADAS" ${settings.batchStatus === 'IMAGENS_QUEBRADAS' ? 'selected' : ''}>🖼️ Apenas Fotos AWS S3 404</option>
+                <option value="FORA_PADRAO_MODO_B" ${settings.batchStatus === 'FORA_PADRAO_MODO_B' ? 'selected' : ''}>🔄 Apenas Descrição Antiga (Legado)</option>
+                <option value="MODO_B_DESATUALIZADO" ${settings.batchStatus === 'MODO_B_DESATUALIZADO' ? 'selected' : ''}>⚠️ Apenas Violação Residual v1</option>
+                <option value="CRITICOS_FOTOS_CORES" ${settings.batchStatus === 'CRITICOS_FOTOS_CORES' ? 'selected' : ''}>🔍 Auditoria: Cor s/ Foto + Duplicadas</option>
+                <option value="COLECAO_COMPLETA" ${settings.batchStatus === 'COLECAO_COMPLETA' ? 'selected' : ''}>📦 Reaplicar em Toda a Coleção</option>
+              </select>
+              <select id="brk-sel-limit" class="brk-hud-select" title="Quantidade de Produtos no Lote">
+                <option value="25" ${Number(settings.batchLimit) === 25 ? 'selected' : ''}>25 itens</option>
+                <option value="50" ${Number(settings.batchLimit) === 50 ? 'selected' : ''}>50 itens</option>
+                <option value="100" ${Number(settings.batchLimit) === 100 ? 'selected' : ''}>100 itens</option>
+              </select>
+            </div>
+            <div style="margin-bottom:8px;">
+              <input id="brk-inp-collection" type="text" value="${(settings.customCollection || '').replace(/"/g, '&quot;')}" placeholder="Opcional: Cole aqui a URL ou handle de qualquer coleção Shopify (ex: lancamentos ou camisas-uv)" style="width:100%;background:#060911;color:#f8fafc;border:1px solid #334155;border-radius:6px;padding:6px 8px;font-size:11px;box-sizing:border-box;" />
+            </div>
+            <button id="brk-btn-start-custom-batch" class="brk-hud-btn brk-hud-btn-success" style="width:100%;justify-content:center;padding:8px 12px;font-size:12px;">
+              🚀 Iniciar Piloto Automático com Este Filtro
+            </button>
+          </div>
+        `;
+      } else {
+        tabContentHtml = renderNonCompliantCodesBox(cachedNonCompliantCodes, true);
+      }
+
+      hud.innerHTML = `
+        <!-- TOPO DO MINI-DASHBOARD COCKPIT -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:16px;">🎛️</span>
+            <div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <strong style="color:${currentTheme.light};font-size:13px;letter-spacing:0.01em;">BRK MINI-DASHBOARD v${SCRIPT_VERSION}</strong>
+                <span style="background:${currentTheme.badgeBg};color:${currentTheme.badgeText};font-size:9.5px;font-weight:800;padding:1px 7px;border-radius:9999px;">
+                  ${currentStoreName}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;">
+            <button id="brk-btn-refresh-stats" class="brk-icon-btn" title="Atualizar contadores do banco">↻</button>
+            <button id="brk-btn-toggle-min-list" class="brk-icon-btn" title="Minimizar painel para pílula compacta">—</button>
+          </div>
         </div>
 
-        ${renderNonCompliantCodesBox(cachedNonCompliantCodes)}
+        <!-- BARRA DE PROGRESSO DA LOJA -->
+        <div style="background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:7px 10px;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;">
+            <span style="color:#cbd5e1;font-weight:700;">📈 Cobertura Oficial Modo B v2</span>
+            <span style="color:#4ade80;font-weight:800;">${compCount.toLocaleString('pt-BR')} / ${totalProds.toLocaleString('pt-BR')} produtos (${pct}%)</span>
+          </div>
+          <div class="brk-progress-track">
+            <div class="brk-progress-fill" style="width:${Math.min(100, Math.max(2, pct))}%;background:linear-gradient(90deg,${currentTheme.primary},#22c55e);"></div>
+          </div>
+        </div>
 
+        <!-- 4 KPI CARDS EXECUTIVOS (CLICÁVEIS) -->
+        <div class="brk-kpi-grid">
+          <div class="brk-kpi-card" id="brk-kpi-compliant" title="Produtos 100% atualizados com Modo B v2 sem 'Troca Descomplicada'">
+            <div class="brk-kpi-val" style="color:#4ade80;">${stats ? compCount.toLocaleString('pt-BR') : '...'}</div>
+            <div class="brk-kpi-lbl">✅ Conformes</div>
+          </div>
+          <div class="brk-kpi-card" id="brk-kpi-broken" title="Clique para iniciar lote de correção de Imagens AWS S3 Quebradas (404)">
+            <div class="brk-kpi-val" style="color:#f87171;">${stats ? brkCount.toLocaleString('pt-BR') : '...'}</div>
+            <div class="brk-kpi-lbl">🖼️ S3 404 ➔</div>
+          </div>
+          <div class="brk-kpi-card" id="brk-kpi-empty" title="Clique para iniciar lote nos produtos Sem Descrição">
+            <div class="brk-kpi-val" style="color:#fbbf24;">${stats ? empCount.toLocaleString('pt-BR') : '...'}</div>
+            <div class="brk-kpi-lbl">📝 Sem Desc ➔</div>
+          </div>
+          <div class="brk-kpi-card" id="brk-kpi-legacy" title="Clique para atualizar descrições antigas para os 3 Atos Modo B v2">
+            <div class="brk-kpi-val" style="color:#38bdf8;">${stats ? legCount.toLocaleString('pt-BR') : '...'}</div>
+            <div class="brk-kpi-lbl">🔄 Antigos ➔</div>
+          </div>
+        </div>
+
+        <!-- CONTROLE DE FILA EM ANDAMENTO (SEMPRE VISÍVEL QUANDO HÁ FILA) -->
         ${q.length > 0 ? `
-          <div style="background:#0f172a;border:1px solid #22c55e;border-radius:8px;padding:8px 12px;margin-bottom:10px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-              <div>
-                <div style="font-weight:700;color:#4ade80;font-size:12px;">Fila Ativa em Andamento: ${idx + 1} de ${q.length} (${q[idx]?.master_sku || ''})</div>
-                <div style="font-size:10.5px;color:#94a3b8;">Status: ${active ? '🤖 Piloto Automático Ativo' : 'Pausado'}</div>
-              </div>
-              <div style="display:flex;gap:6px;">
-                <button id="brk-btn-resume-queue" class="brk-hud-btn brk-hud-btn-success" style="padding:5px 10px;font-size:11px;">
-                  ▶️ Retomar (${idx + 1}/${q.length})
-                </button>
-                <button id="brk-btn-clear-queue" class="brk-hud-btn brk-hud-btn-danger" style="padding:5px 10px;font-size:11px;">
-                  ⏹️ Limpar
-                </button>
-              </div>
+          <div style="background:#06130e;border:1px solid #22c55e;border-radius:10px;padding:7px 11px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-weight:800;color:#4ade80;font-size:11.5px;">🚀 Fila Ativa: ${idx + 1} de ${q.length} (${q[idx]?.master_sku || ''})</div>
+              <div style="font-size:10px;color:#94a3b8;">${active ? '🤖 Piloto Automático pronto para continuar' : '⏸️ Fila pausada'}</div>
+            </div>
+            <div style="display:flex;gap:5px;">
+              <button id="brk-btn-resume-queue" class="brk-hud-btn brk-hud-btn-success" style="padding:5px 10px;font-size:11px;">
+                ▶️ Retomar (${idx + 1}/${q.length})
+              </button>
+              <button id="brk-btn-clear-queue" class="brk-hud-btn brk-hud-btn-danger" style="padding:5px 8px;font-size:11px;" title="Encerrar e limpar fila atual">
+                ⏹️
+              </button>
             </div>
           </div>
         ` : ''}
 
-        <div style="background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:9px 11px;margin-bottom:8px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:6px;">
-            <span style="font-weight:700;color:${currentTheme.light};font-size:11px;">🎯 Configurar Lote por Coleção ou Categoria</span>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <label class="brk-hud-toggle" title="Injeta, clica em Salvar e avança sozinho">
-                <input type="checkbox" id="brk-list-chk-autopilot" ${settings.autoPilot ? 'checked' : ''} style="accent-color:#22c55e;" />
-                <strong style="color:#4ade80;font-size:10.5px;">🤖 Auto-Save</strong>
-              </label>
-              <label class="brk-hud-toggle" title="Pausa o Auto-Save quando o produto tiver cor sem foto vinculada ou foto duplicada">
-                <input type="checkbox" id="brk-list-chk-pause-media" ${settings.pauseOnMediaError ? 'checked' : ''} style="accent-color:#f59e0b;" />
-                <span style="color:#fbbf24;font-size:10.5px;">⏸️ Pausar em Cor s/ Foto</span>
-              </label>
-            </div>
-          </div>
-          <div style="display:grid;grid-template-columns:1.1fr 1.1fr 0.55fr;gap:6px;margin-bottom:6px;">
-            <select id="brk-sel-category" class="brk-hud-select" title="Filtrar por Coleção/Categoria">
-              <option value="super_ofertas" ${settings.batchCategory === 'super_ofertas' ? 'selected' : ''}>🔥 Coleção: Super Ofertas Fishing (91 itens)</option>
-              <option value="rastreados_camisas" ${settings.batchCategory === 'rastreados_camisas' ? 'selected' : ''}>👕 32 Camisas/Outros Já Aplicados (Fora Super Ofertas)</option>
-              <option value="ALL" ${settings.batchCategory === 'ALL' ? 'selected' : ''}>📂 Todas as Coleções da Loja</option>
-              <option value="iscas_artificiais" ${settings.batchCategory === 'iscas_artificiais' ? 'selected' : ''}>🎣 Iscas Artificiais</option>
-              <option value="equipamentos_pesca" ${settings.batchCategory === 'equipamentos_pesca' ? 'selected' : ''}>⚙️ Varas, Carretilhas, Molinetes & Alicates</option>
-              <option value="linhas_pesca" ${settings.batchCategory === 'linhas_pesca' ? 'selected' : ''}>🧵 Linhas de Pesca</option>
-              <option value="bones_chapeus" ${settings.batchCategory === 'bones_chapeus' ? 'selected' : ''}>🧢 Bonés & Chapéus</option>
-              <option value="camisas" ${settings.batchCategory === 'camisas' ? 'selected' : ''}>👕 Camisas (Fusion/Hybrid/ArmorX/C0)</option>
-              <option value="calcas" ${settings.batchCategory === 'calcas' ? 'selected' : ''}>👖 Calças & Bermudas</option>
-              <option value="corta_vento" ${settings.batchCategory === 'corta_vento' ? 'selected' : ''}>🧥 Corta-Vento & Jaquetas</option>
-              <option value="infantil" ${settings.batchCategory === 'infantil' ? 'selected' : ''}>🧒 Linha Infantil (2 a 13 Anos)</option>
-              <option value="feminino" ${settings.batchCategory === 'feminino' ? 'selected' : ''}>👚 Linha Feminina (Baby Look)</option>
-              <option value="CUSTOM_COLLECTION" ${settings.batchCategory === 'CUSTOM_COLLECTION' ? 'selected' : ''}>🔗 Outra Coleção (Digitar URL/Handle abaixo)</option>
-            </select>
-            <select id="brk-sel-status" class="brk-hud-select" title="Filtrar por Modo de Triagem (Diretrizes Modo B ou Pente Fino de Fotos)">
-              <option value="COLECAO_COMPLETA" ${settings.batchStatus === 'COLECAO_COMPLETA' ? 'selected' : ''}>📦 Coleção Completa (Aplicar em Todos os Itens)</option>
-              <option value="RASTREADOS_TROCA_DESCOMPLICADA" ${settings.batchStatus === 'RASTREADOS_TROCA_DESCOMPLICADA' ? 'selected' : ''}>🔄 Rastreados c/ Troca Descomplicada (32 Camisas/Outros)</option>
-              <option value="FORA_DIRETRIZES" ${settings.batchStatus === 'FORA_DIRETRIZES' ? 'selected' : ''}>🎯 Todos Fora das Diretrizes Modo B</option>
-              <option value="AJUSTE_FOTOS_GERAL" ${settings.batchStatus === 'AJUSTE_FOTOS_GERAL' ? 'selected' : ''}>🔥 Pente Fino: Todos c/ Ajuste de Foto/Cor</option>
-              <option value="CRITICOS_FOTOS_CORES" ${settings.batchStatus === 'CRITICOS_FOTOS_CORES' ? 'selected' : ''}>🚨 Críticos: Cor sem Foto + Fotos Duplicadas</option>
-              <option value="COR_SEM_FOTO" ${settings.batchStatus === 'COR_SEM_FOTO' ? 'selected' : ''}>🧩 Apenas Cores Sem Foto (image_id=null)</option>
-              <option value="FOTOS_DUPLICADAS" ${settings.batchStatus === 'FOTOS_DUPLICADAS' ? 'selected' : ''}>👯 Apenas Fotos Duplicadas na Galeria/Cores</option>
-              <option value="FOTOS_BAIXA_QUALIDADE" ${settings.batchStatus === 'FOTOS_BAIXA_QUALIDADE' ? 'selected' : ''}>📉 Apenas Fotos de Baixa Qualidade (<800px)</option>
-              <option value="MODO_B_DESATUALIZADO" ${settings.batchStatus === 'MODO_B_DESATUALIZADO' ? 'selected' : ''}>⚠️ Violação Regra (Troca Descomplicada/Faca/ArmorX/Fusion)</option>
-              <option value="SEM_DESCRICAO" ${settings.batchStatus === 'SEM_DESCRICAO' ? 'selected' : ''}>🔴 Sem Descrição</option>
-              <option value="IMAGENS_QUEBRADAS" ${settings.batchStatus === 'IMAGENS_QUEBRADAS' ? 'selected' : ''}>🖼️ Fotos S3 Quebradas</option>
-            </select>
-            <select id="brk-sel-limit" class="brk-hud-select" title="Quantidade de Produtos no Lote">
-              <option value="100" ${Number(settings.batchLimit) === 100 ? 'selected' : ''}>100 códigos</option>
-              <option value="50" ${Number(settings.batchLimit) === 50 ? 'selected' : ''}>50 códigos</option>
-              <option value="25" ${Number(settings.batchLimit) === 25 ? 'selected' : ''}>25 códigos</option>
-            </select>
-          </div>
-          <div style="margin-bottom:8px;">
-            <input id="brk-inp-collection" type="text" value="${(settings.customCollection || '').replace(/"/g, '&quot;')}" placeholder="Opcional: Cole aqui a URL ou handle de qualquer coleção Shopify (ex: super-ofertas-🔥 ou iscas-artificiais)" style="width:100%;background:#1e293b;color:#f8fafc;border:1px solid #334155;border-radius:6px;padding:5px 8px;font-size:11px;box-sizing:border-box;" />
-          </div>
-          <button id="brk-btn-start-custom-batch" class="brk-hud-btn brk-hud-btn-success" style="width:100%;justify-content:center;padding:8px 12px;font-size:12.5px;">
-            🚀 Iniciar Lote Automático da Coleção / Categoria Selecionada
+        <!-- BARRA DE NAVEGAÇÃO EM 3 ABAS -->
+        <div class="brk-tab-bar">
+          <button class="brk-tab-btn ${activeTab === 'priorities' ? 'active' : ''}" data-tab="priorities">
+            🚀 Prioridades
+          </button>
+          <button class="brk-tab-btn ${activeTab === 'categories' ? 'active' : ''}" data-tab="categories">
+            📂 Lote & Coleções
+          </button>
+          <button class="brk-tab-btn ${activeTab === 'queue' ? 'active' : ''}" data-tab="queue">
+            🎯 Busca SKU (${cachedNonCompliantCodes.length})
           </button>
         </div>
 
-        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-          <button id="brk-btn-so-all80" class="brk-hud-btn" style="background:#0c4a6e;border-color:#0284c7;color:#bae6fd;flex:1;justify-content:center;" title="Roda o lote nos 83 produtos da coleção Super Ofertas 🔥 que possuem alertas de foto">
-            🔥 Super Ofertas: 83 c/ Alerta Visual
-          </button>
-          <button id="brk-btn-fix-violations" class="brk-hud-btn" title="Corrige prioritariamente os códigos colados com violação (Troca Descomplicada, Faca Marine MFK75T, ArmorX, Fusion/Hybrid)">
-            ⚡ Violações (${stats?.modo_b_desatualizado_count || 121})
-          </button>
-        </div>
+        <!-- CONTEÚDO DA ABA ATIVA -->
+        ${tabContentHtml}
       `;
 
-      bindCodeRowClicks();
+      bindCodeRowClicks(() => renderHudListMode(stats));
 
+      // Minimizar / Atualizar
+      const btnMinList = document.getElementById("brk-btn-toggle-min-list");
+      if (btnMinList) {
+        btnMinList.onclick = () => {
+          saveSettings({ minimized: true });
+          renderHudListMode(stats);
+        };
+      }
+      const btnRefresh = document.getElementById("brk-btn-refresh-stats");
+      if (btnRefresh) {
+        btnRefresh.onclick = async () => {
+          btnRefresh.textContent = "⏳";
+          try {
+            const excludeParam = encodeURIComponent(getCompliantIds().slice(-300).join(","));
+            const fresh = await fetchFromBRKDatabase(`/api/product_db?store=${currentStoreKey}&action=stats&exclude_ids=${excludeParam}`);
+            if (fresh.success) renderHudListMode(fresh);
+          } catch (e) {
+            renderHudListMode(stats);
+          }
+        };
+      }
+
+      // Alternância de Abas
+      for (const tabBtn of Array.from(hud.querySelectorAll(".brk-tab-btn[data-tab]"))) {
+        tabBtn.onclick = () => {
+          saveSettings({ activeTab: tabBtn.getAttribute("data-tab") });
+          renderHudListMode(stats);
+        };
+      }
+
+      // Cliques nos KPI Cards Executivos
+      const kpiBroken = document.getElementById("brk-kpi-broken");
+      if (kpiBroken) {
+        kpiBroken.onclick = () => {
+          saveSettings({ batchCategory: "ALL", batchStatus: "IMAGENS_QUEBRADAS", autoPilot: true, autoSave: true, skipAlreadyModeB: true });
+          startQueueFromDatabase("IMAGENS_QUEBRADAS", 50, "ALL");
+        };
+      }
+      const kpiEmpty = document.getElementById("brk-kpi-empty");
+      if (kpiEmpty) {
+        kpiEmpty.onclick = () => {
+          saveSettings({ batchCategory: "ALL", batchStatus: "SEM_DESCRICAO", autoPilot: true, autoSave: true, skipAlreadyModeB: true });
+          startQueueFromDatabase("SEM_DESCRICAO", 50, "ALL");
+        };
+      }
+      const kpiLegacy = document.getElementById("brk-kpi-legacy");
+      if (kpiLegacy) {
+        kpiLegacy.onclick = () => {
+          saveSettings({ batchCategory: "ALL", batchStatus: "FORA_PADRAO_MODO_B", autoPilot: true, autoSave: true, skipAlreadyModeB: true });
+          startQueueFromDatabase("FORA_PADRAO_MODO_B", 50, "ALL");
+        };
+      }
+
+      // Botões da Aba 1: Prioridades
+      const btnCritAll = document.getElementById("brk-prio-criticos-all");
+      if (btnCritAll) {
+        btnCritAll.onclick = () => {
+          saveSettings({ batchCategory: "ALL", batchStatus: "PRIORIDADE_CRITICA", batchLimit: 50, autoPilot: true, autoSave: true, skipAlreadyModeB: true });
+          startQueueFromDatabase("PRIORIDADE_CRITICA", 50, "ALL");
+        };
+      }
+      const btnEmptyOnly = document.getElementById("brk-prio-empty-only");
+      if (btnEmptyOnly) {
+        btnEmptyOnly.onclick = () => {
+          saveSettings({ batchCategory: "ALL", batchStatus: "SEM_DESCRICAO", batchLimit: 50, autoPilot: true, autoSave: true, skipAlreadyModeB: true });
+          startQueueFromDatabase("SEM_DESCRICAO", 50, "ALL");
+        };
+      }
+      const btnS3Only = document.getElementById("brk-prio-s3-only");
+      if (btnS3Only) {
+        btnS3Only.onclick = () => {
+          saveSettings({ batchCategory: "ALL", batchStatus: "IMAGENS_QUEBRADAS", batchLimit: 50, autoPilot: true, autoSave: true, skipAlreadyModeB: true });
+          startQueueFromDatabase("IMAGENS_QUEBRADAS", 50, "ALL");
+        };
+      }
+      const btnOutdated = document.getElementById("brk-prio-outdated");
+      if (btnOutdated) {
+        btnOutdated.onclick = () => {
+          saveSettings({ batchCategory: "ALL", batchStatus: "MODO_B_DESATUALIZADO", batchLimit: 50, autoPilot: true, autoSave: true, skipAlreadyModeB: false });
+          startQueueFromDatabase("MODO_B_DESATUALIZADO", 50, "ALL");
+        };
+      }
+
+      for (const qBtn of Array.from(hud.querySelectorAll(".brk-priority-btn[data-quick-cat]"))) {
+        qBtn.onclick = () => {
+          const catKey = qBtn.getAttribute("data-quick-cat") || "ALL";
+          saveSettings({
+            batchCategory: catKey,
+            batchStatus: "FORA_DIRETRIZES",
+            batchLimit: 50,
+            autoPilot: true,
+            autoSave: true,
+            skipAlreadyModeB: true
+          });
+          startQueueFromDatabase("FORA_DIRETRIZES", 50, catKey, "");
+        };
+      }
+
+      // Checkboxes e Fila
       const chkListAuto = document.getElementById("brk-list-chk-autopilot");
       if (chkListAuto) {
         chkListAuto.onchange = (e) => {
@@ -1886,51 +2268,15 @@
         };
       }
 
-      const btnSoAll91Direct = document.getElementById("brk-btn-so-all91-direct");
-      if (btnSoAll91Direct) {
-        btnSoAll91Direct.onclick = () => {
-          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
-          saveSettings({
-            batchCategory: "super_ofertas",
-            batchStatus: "COLECAO_COMPLETA",
-            batchLimit: 100,
-            autoPilot: true,
-            autoSave: true,
-            skipAlreadyModeB: false,
-            pauseOnMediaError: false
-          });
-          startQueueFromDatabase("COLECAO_COMPLETA", 100, "super_ofertas", "super-ofertas-🔥");
-        };
-      }
-
-      const btnTracked32Direct = document.getElementById("brk-btn-tracked-32-direct");
-      if (btnTracked32Direct) {
-        btnTracked32Direct.onclick = () => {
-          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
-          saveSettings({
-            batchCategory: "rastreados_camisas",
-            batchStatus: "RASTREADOS_TROCA_DESCOMPLICADA",
-            batchLimit: 100,
-            autoPilot: true,
-            autoSave: true,
-            skipAlreadyModeB: false,
-            pauseOnMediaError: false
-          });
-          startQueueFromDatabase("RASTREADOS_TROCA_DESCOMPLICADA", 100, "rastreados_camisas", "");
-        };
-      }
-
+      // Botão da Aba 2: Construtor de Lote Personalizado
       const btnCustomBatch = document.getElementById("brk-btn-start-custom-batch");
       if (btnCustomBatch) {
         btnCustomBatch.onclick = () => {
           const cat = document.getElementById("brk-sel-category")?.value || "ALL";
-          const st = document.getElementById("brk-sel-status")?.value || "COLECAO_COMPLETA";
-          const lim = parseInt(document.getElementById("brk-sel-limit")?.value || "100", 10);
+          const st = document.getElementById("brk-sel-status")?.value || "PRIORIDADE_CRITICA";
+          const lim = parseInt(document.getElementById("brk-sel-limit")?.value || "50", 10);
           const colInput = (document.getElementById("brk-inp-collection")?.value || "").trim();
           const finalCol = colInput || (cat === "super_ofertas" ? "super-ofertas-🔥" : "");
-          if (st === "COLECAO_COMPLETA" || st === "RASTREADOS_TROCA_DESCOMPLICADA" || cat === "super_ofertas" || cat === "rastreados_camisas") {
-            GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
-          }
           saveSettings({
             batchCategory: cat,
             batchStatus: st,
@@ -1938,71 +2284,39 @@
             customCollection: colInput,
             autoPilot: true,
             autoSave: true,
-            skipAlreadyModeB: st !== "COLECAO_COMPLETA" && st !== "RASTREADOS_TROCA_DESCOMPLICADA"
+            skipAlreadyModeB: st !== "COLECAO_COMPLETA"
           });
           startQueueFromDatabase(st, lim, cat === "CUSTOM_COLLECTION" ? "ALL" : cat, finalCol);
-        };
-      }
-
-      const btnSoCriticos = document.getElementById("brk-btn-so-criticos");
-      if (btnSoCriticos) {
-        btnSoCriticos.onclick = () => {
-          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
-          saveSettings({ batchCategory: "super_ofertas", batchStatus: "CRITICOS_FOTOS_CORES", batchLimit: 100, pauseOnMediaError: true, autoPilot: true, autoSave: true, skipAlreadyModeB: false });
-          startQueueFromDatabase("CRITICOS_FOTOS_CORES", 100, "super_ofertas", "super-ofertas-🔥");
-        };
-      }
-
-      const btnSoAll80 = document.getElementById("brk-btn-so-all80");
-      if (btnSoAll80) {
-        btnSoAll80.onclick = () => {
-          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
-          saveSettings({ batchCategory: "super_ofertas", batchStatus: "AJUSTE_FOTOS_GERAL", batchLimit: 100, autoPilot: true, autoSave: true, skipAlreadyModeB: false, pauseOnMediaError: false });
-          startQueueFromDatabase("AJUSTE_FOTOS_GERAL", 100, "super_ofertas", "super-ofertas-🔥");
-        };
-      }
-
-      const btnFixViolations = document.getElementById("brk-btn-fix-violations");
-      if (btnFixViolations) {
-        btnFixViolations.onclick = () => {
-          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
-          saveSettings({ autoPilot: true, autoSave: true, skipAlreadyModeB: false });
-          startQueueFromDatabase("MODO_B_DESATUALIZADO", 100, "ALL");
         };
       }
     }
 
     // =========================================================================
-    // INICIAR FILA REAL BUSCADA DIRETAMENTE DO BANCO (SUPORTA COLEÇÕES & PENTE FINO)
+    // INICIAR FILA REAL BUSCADA DIRETAMENTE DO BANCO (SUPORTA PRIORIDADES & COLEÇÕES)
     // =========================================================================
-    async function startQueueFromDatabase(statusFilter = "FORA_DIRETRIZES", limit = 25, categoryFilter = "ALL", collectionHandle = "") {
+    async function startQueueFromDatabase(statusFilter = "PRIORIDADE_CRITICA", limit = 50, categoryFilter = "ALL", collectionHandle = "") {
+      hud.classList.remove("brk-hud-minimized");
       hud.innerHTML = `
-        <div style="padding:10px;text-align:center;">
-          <div style="font-size:18px;margin-bottom:8px;">🤖</div>
-          <strong style="color:${currentTheme.light};">Carregando Lote da Coleção / Banco BRK...</strong>
-          <div style="font-size:11px;color:#94a3b8;margin-top:4px;">Buscando até ${limit} produtos (${statusFilter} | ${collectionHandle || categoryFilter}) em ${currentStoreName}...</div>
+        <div style="padding:12px;text-align:center;">
+          <div style="font-size:18px;margin-bottom:8px;">🎛️</div>
+          <strong style="color:${currentTheme.light};">Preparando Lote Inteligente no Banco BRK...</strong>
+          <div style="font-size:11px;color:#94a3b8;margin-top:4px;">Filtrando até ${limit} produtos (${statusFilter} | ${collectionHandle || categoryFilter}) em ${currentStoreName}...</div>
         </div>
       `;
 
       try {
-        const isMediaAuditMode = [
-          "COLECAO_COMPLETA",
-          "RASTREADOS_TROCA_DESCOMPLICADA",
+        const forceReopenAll = statusFilter === "COLECAO_COMPLETA" || [
           "AJUSTE_FOTOS_GERAL",
           "CRITICOS_FOTOS_CORES",
           "COR_SEM_FOTO",
           "FOTOS_DUPLICADAS",
           "FOTOS_BAIXA_QUALIDADE"
-        ].includes(statusFilter) || categoryFilter === "super_ofertas" || categoryFilter === "rastreados_camisas" || Boolean(collectionHandle);
+        ].includes(statusFilter);
 
-        if (isMediaAuditMode) {
-          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
-        }
-
-        const excludeParam = isMediaAuditMode ? "" : encodeURIComponent(getCompliantIds().slice(-300).join(","));
+        const excludeParam = forceReopenAll ? "" : encodeURIComponent(getCompliantIds().slice(-300).join(","));
         const queryUrl = `/api/product_db?store=${currentStoreKey}&action=queue&status=${encodeURIComponent(statusFilter)}&category=${encodeURIComponent(categoryFilter)}&collection=${encodeURIComponent(collectionHandle || "")}&limit=${limit}&exclude_ids=${excludeParam}`;
         const res = await fetchFromBRKDatabase(queryUrl);
-        const queueItems = isMediaAuditMode
+        const queueItems = forceReopenAll
           ? (res.items || [])
           : (res.items || []).filter(it => !it.is_mode_b_compliant && !isProductMarkedCompliant(it.id, it.master_sku));
 
@@ -2024,16 +2338,16 @@
         console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] Lote de ${queueItems.length} produtos carregado. Primeiro: ID ${firstProduct.id} (${firstProduct.master_sku})`);
 
         hud.innerHTML = `
-          <div style="padding:10px;text-align:center;">
+          <div style="padding:12px;text-align:center;">
             <div style="font-size:18px;margin-bottom:8px;">🚀</div>
-            <strong style="color:#22c55e;">${queueItems.length} Produtos da Coleção Enfileirados!</strong>
-            <div style="font-size:11px;color:#94a3b8;margin-top:4px;">Abrindo primeiro produto: <strong>${firstProduct.master_sku || firstProduct.id}</strong>...</div>
+            <strong style="color:#22c55e;">${queueItems.length} Produtos Pendentes Enfileirados!</strong>
+            <div style="font-size:11px;color:#94a3b8;margin-top:4px;">Abrindo 1º produto: <strong>${firstProduct.master_sku || firstProduct.id}</strong>...</div>
           </div>
         `;
 
         setTimeout(() => {
           location.href = `https://admin.shopify.com/store/${currentShopifySlug}/products/${firstProduct.id}`;
-        }, 750);
+        }, 700);
 
       } catch(err) {
         alert(`Erro ao buscar lote do banco de dados: ${err.message}`);

@@ -61,9 +61,9 @@ def evaluate_guideline_compliance(p: dict, store_key: str = "brk_fishing") -> tu
     plain_text = re.sub(r"<[^>]+>", " ", plain_text)
     plain_text = re.sub(r"\s+", " ", plain_text).strip()
 
-    if status == "SEM_DESCRICAO" or len(plain_text) < 20:
+    if len(plain_text) < 20:
         return (False, "SEM_DESCRICAO", "Sem descrição cadastrada na Shopify")
-    if status == "IMAGENS_QUEBRADAS" or "use-brk-images-s3" in orig_html.lower() or "photobucket" in orig_html.lower():
+    if "use-brk-images-s3" in orig_html.lower() or "photobucket" in orig_html.lower():
         return (False, "IMAGENS_QUEBRADAS", "Contém imagens quebradas (AWS S3 404)")
 
     has_mode_b_structure = any(m in orig_html for m in ("<!-- BRK-MODO-B", "brk-desc-wrapper", "brk-cap-description"))
@@ -698,6 +698,8 @@ class handler(BaseHTTPRequestHandler):
                 base_pool = collection_pool
             elif status_filter in media_status_filters:
                 base_pool = db.get("super_ofertas") or db["products"]
+            elif status_filter in ("CRITICOS_LOJA", "PRIORIDADE_CRITICA"):
+                base_pool = db["outdated_mode_b"] + db["empty"] + db["broken"]
             elif status_filter == "MODO_B_DESATUALIZADO":
                 base_pool = db["outdated_mode_b"]
             elif status_filter == "SEM_DESCRICAO":
@@ -734,6 +736,9 @@ class handler(BaseHTTPRequestHandler):
                         pool.append(p)
                 elif status_filter == "FOTOS_BAIXA_QUALIDADE":
                     if ma.get("has_low_res_images"):
+                        pool.append(p)
+                elif status_filter in ("CRITICOS_LOJA", "PRIORIDADE_CRITICA"):
+                    if p.get("guideline_status") in ("MODO_B_DESATUALIZADO", "SEM_DESCRICAO", "IMAGENS_QUEBRADAS") and not p.get("is_mode_b_compliant", False):
                         pool.append(p)
                 elif status_filter in ("MODO_B_DESATUALIZADO", "SEM_DESCRICAO", "IMAGENS_QUEBRADAS", "FORA_PADRAO_MODO_B"):
                     if p.get("guideline_status") == status_filter and not p.get("is_mode_b_compliant", False):
@@ -825,6 +830,37 @@ class handler(BaseHTTPRequestHandler):
                 if str(p.get("id", "")).upper() not in excluded_tokens
                 and str(p.get("master_sku") or p.get("sku") or "").upper() not in excluded_tokens
             ]
+            pending_by_group = {
+                "camisas": 0,
+                "bones_chapeus": 0,
+                "iscas_artificiais": 0,
+                "equipamentos_pesca": 0,
+                "calcas": 0,
+                "corta_vento": 0,
+                "infantil": 0,
+                "feminino": 0
+            }
+            for p in active_non_compliant:
+                p_cat = str(p.get("category") or "").lower()
+                p_arch = str(p.get("archetype_id") or "").lower()
+                p_title = str(p.get("title") or "").lower()
+                if p_arch in ("caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy") or "boné" in p_cat or "chapéu" in p_cat or "boné" in p_title or "chapéu" in p_title:
+                    pending_by_group["bones_chapeus"] += 1
+                if "camisa" in p_cat or p_arch in ("uv_performance", "casual_cotton", "casual_lifestyle", "button_shirts_work"):
+                    pending_by_group["camisas"] += 1
+                if "calça" in p_cat or "bermuda" in p_cat or p_arch == "pants_tactical":
+                    pending_by_group["calcas"] += 1
+                if "corta" in p_cat or "jaqueta" in p_cat or "moletom" in p_cat or p_arch in ("windbreaker_jacket", "hoodie_fleece"):
+                    pending_by_group["corta_vento"] += 1
+                if any(w in p_title for w in ["infantil", "kids", "juvenil", "junior"]):
+                    pending_by_group["infantil"] += 1
+                if any(w in p_title for w in ["feminina", "feminino", "baby look", "babylook"]):
+                    pending_by_group["feminino"] += 1
+                if p_arch == "fishing_lures" or "isca" in p_title or "isca" in p_cat:
+                    pending_by_group["iscas_artificiais"] += 1
+                if p_arch in ("fishing_tackle_gear", "tackle_boxes_storage") or any(w in p_title or w in p_cat for w in ["vara", "carretilha", "molinete", "alicate", "caixa", "estojo", "maleta"]):
+                    pending_by_group["equipamentos_pesca"] += 1
+
             so_list = db.get("super_ofertas") or []
             so_stats = {
                 "total": len(so_list),
@@ -841,20 +877,30 @@ class handler(BaseHTTPRequestHandler):
                     "guideline_status": p.get("guideline_status", "FORA_PADRAO_MODO_B"),
                     "guideline_reason": p.get("guideline_reason", "")
                 }
-                for p in active_non_compliant[:80]
+                for p in active_non_compliant[:120]
             ]
+            comp_cnt = len(db["compliant"]) + (len(db["non_compliant"]) - len(active_non_compliant))
+            out_cnt = len([p for p in db["outdated_mode_b"] if str(p.get("id", "")).upper() not in excluded_tokens])
+            emp_cnt = len([p for p in db["empty"] if str(p.get("id", "")).upper() not in excluded_tokens])
+            brk_cnt = len([p for p in db["broken"] if str(p.get("id", "")).upper() not in excluded_tokens])
+            leg_cnt = len([p for p in db["legacy"] if str(p.get("id", "")).upper() not in excluded_tokens])
+            progress_pct = round((comp_cnt / max(1, db["total"])) * 100, 1)
+
             return self._respond_json(200, {
                 "success": True,
                 "store": store_key,
                 "store_theme": STORE_THEME_METADATA.get(store_key, STORE_THEME_METADATA["brk_fishing"]),
                 "total_products": db["total"],
-                "compliant_count": len(db["compliant"]) + (len(db["non_compliant"]) - len(active_non_compliant)),
+                "compliant_count": comp_cnt,
                 "non_compliant_count": len(active_non_compliant),
-                "modo_b_desatualizado_count": len([p for p in db["outdated_mode_b"] if str(p.get("id", "")).upper() not in excluded_tokens]),
-                "sem_descricao_count": len([p for p in db["empty"] if str(p.get("id", "")).upper() not in excluded_tokens]),
-                "imagens_quebradas_count": len([p for p in db["broken"] if str(p.get("id", "")).upper() not in excluded_tokens]),
-                "fora_padrao_modo_b_count": len([p for p in db["legacy"] if str(p.get("id", "")).upper() not in excluded_tokens]),
+                "progress_pct": progress_pct,
+                "criticos_loja_count": out_cnt + emp_cnt + brk_cnt,
+                "modo_b_desatualizado_count": out_cnt,
+                "sem_descricao_count": emp_cnt,
+                "imagens_quebradas_count": brk_cnt,
+                "fora_padrao_modo_b_count": leg_cnt,
                 "healthy_count": db["total"] - len(db["empty"]) - len(db["broken"]),
+                "pending_by_group": pending_by_group,
                 "super_ofertas_stats": so_stats,
                 "non_compliant_codes": non_compliant_codes,
                 "categories": cat_counts
