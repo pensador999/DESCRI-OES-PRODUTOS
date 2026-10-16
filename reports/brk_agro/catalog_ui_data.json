@@ -12,17 +12,17 @@
     "out_of_standard_prods": 180
   },
   "categories": {
-    "Botinas & Calçados": {
-      "title": "Botinas & Calçados",
+    "Bonés & Chapéus Agro": {
+      "title": "Bonés & Chapéus Agro",
       "badge": "Coleção",
-      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/COSkG8A.jpg?v=1789130501",
-      "count": 14,
-      "total_skus": 100,
-      "broken_skus": 7,
-      "out_of_standard_skus": 23,
-      "broken_count": 1,
-      "alert_count": 0,
-      "empty_count": 0
+      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/Cattleman_choc.png?v=1791221986",
+      "count": 38,
+      "total_skus": 58,
+      "broken_skus": 0,
+      "out_of_standard_skus": 40,
+      "broken_count": 0,
+      "alert_count": 5,
+      "empty_count": 15
     },
     "Cutelaria & Facas Campo": {
       "title": "Cutelaria & Facas Campo",
@@ -39,7 +39,7 @@
     "Camisas Agro & Campo": {
       "title": "Camisas Agro & Campo",
       "badge": "Coleção",
-      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/1785873962487-1.jpg?v=1792075651",
+      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/FRENTE_FEM_257a36b0-d7e0-4706-8979-b54d0a08216c.jpg?v=1792156647",
       "count": 2386,
       "total_skus": 16502,
       "broken_skus": 0,
@@ -47,6 +47,30 @@
       "broken_count": 0,
       "alert_count": 0,
       "empty_count": 49
+    },
+    "Botinas & Calçados": {
+      "title": "Botinas & Calçados",
+      "badge": "Coleção",
+      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/COSkG8A.jpg?v=1789130501",
+      "count": 14,
+      "total_skus": 100,
+      "broken_skus": 7,
+      "out_of_standard_skus": 23,
+      "broken_count": 1,
+      "alert_count": 0,
+      "empty_count": 0
+    },
+    "Térmicos & Tereré": {
+      "title": "Térmicos & Tereré",
+      "badge": "Coleção",
+      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/01_31961078-1b05-4c80-acf2-8512dec597d1.webp?v=1775745404",
+      "count": 8,
+      "total_skus": 8,
+      "broken_skus": 0,
+      "out_of_standard_skus": 7,
+      "broken_count": 0,
+      "alert_count": 0,
+      "empty_count": 0
     },
     "Óculos Polarizados Agro": {
       "title": "Óculos Polarizados Agro",
@@ -60,28 +84,16 @@
       "alert_count": 0,
       "empty_count": 1
     },
-    "Calças & Vestuário Campo": {
-      "title": "Calças & Vestuário Campo",
+    "Acessórios Agro & Fazenda": {
+      "title": "Acessórios Agro & Fazenda",
       "badge": "Coleção",
-      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F184381340_2F850cdba958b74de08c81f18dc0da3e31.jpg?v=1790858117",
-      "count": 8,
-      "total_skus": 48,
+      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/1790257537880-1.jpg?v=1790258276",
+      "count": 3,
+      "total_skus": 3,
       "broken_skus": 0,
-      "out_of_standard_skus": 6,
+      "out_of_standard_skus": 1,
       "broken_count": 0,
-      "alert_count": 0,
-      "empty_count": 1
-    },
-    "Térmicos & Tereré": {
-      "title": "Térmicos & Tereré",
-      "badge": "Coleção",
-      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/01_31961078-1b05-4c80-acf2-8512dec597d1.webp?v=1775745404",
-      "count": 8,
-      "total_skus": 8,
-      "broken_skus": 0,
-      "out_of_standard_skus": 7,
-      "broken_count": 0,
-      "alert_count": 0,
+      "alert_count": 1,
       "empty_count": 0
     },
     "Bandanas, Luvas & Manguitos": {
@@ -96,32 +108,62 @@
       "alert_count": 0,
       "empty_count": 50
     },
-    "Acessórios Agro & Fazenda": {
-      "title": "Acessórios Agro & Fazenda",
+    "Calças & Vestuário Campo": {
+      "title": "Calças & Vestuário Campo",
       "badge": "Coleção",
-      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/1790257537880-1.jpg?v=1790258276",
-      "count": 3,
-      "total_skus": 3,
+      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F184381340_2F850cdba958b74de08c81f18dc0da3e31.jpg?v=1790858117",
+      "count": 8,
+      "total_skus": 48,
       "broken_skus": 0,
-      "out_of_standard_skus": 1,
+      "out_of_standard_skus": 6,
       "broken_count": 0,
-      "alert_count": 1,
-      "empty_count": 0
-    },
-    "Bonés & Chapéus Agro": {
-      "title": "Bonés & Chapéus Agro",
-      "badge": "Coleção",
-      "thumb": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/Cattleman_choc.png?v=1791221986",
-      "count": 38,
-      "total_skus": 58,
-      "broken_skus": 0,
-      "out_of_standard_skus": 40,
-      "broken_count": 0,
-      "alert_count": 5,
-      "empty_count": 15
+      "alert_count": 0,
+      "empty_count": 1
     }
   },
   "products": [
+    {
+      "id": 9957229265193,
+      "title": "Camisa de Pesca Feminina Brk Amazon Onça Azul com Proteção UV50",
+      "handle": "camisa-de-pesca-feminina-brk-amazon-onca-azul-com-protecao-uv50",
+      "url": "https://www.brkagro.com.br/products/camisa-de-pesca-feminina-brk-amazon-onca-azul-com-protecao-uv50",
+      "master_sku": "C02494BL",
+      "variants_skus": [
+        "C02494BLPP",
+        "C02494BLP",
+        "C02494BLM",
+        "C02494BLG",
+        "C02494BLGG",
+        "C02494BLG1",
+        "C02494BLG2"
+      ],
+      "total_skus_count": 7,
+      "affected_skus_count": 7,
+      "is_out_of_standard": true,
+      "standard_violations": [
+        "Produto totalmente sem descrição ou com placeholder/caractere único."
+      ],
+      "category": "Camisas Agro & Campo",
+      "archetype": "LINHAGEM_VESTUARIO",
+      "price": "R$ 159,90",
+      "image": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/FRENTE_FEM_257a36b0-d7e0-4706-8979-b54d0a08216c.jpg?v=1792156647",
+      "gallery": [
+        "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/FRENTE_FEM_257a36b0-d7e0-4706-8979-b54d0a08216c.jpg?v=1792156647",
+        "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/COSTAS_FEM_04a8ead7-4fe8-488c-b08d-c3daf3c6eaf5.jpg?v=1792156647",
+        "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/FRENTEPERSPECTIVA_FEM_4758c25a-7c9a-4943-b3f2-34c6a662106d.jpg?v=1792156647",
+        "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/COSTASPERSPECTIVA_FEM_d5f6c424-46a3-43e5-9268-1023aee49c7a.jpg?v=1792156647"
+      ],
+      "status": "SEM_DESCRICAO",
+      "score": 0,
+      "word_count": 1,
+      "broken_images_count": 0,
+      "broken_urls": [],
+      "issues": [
+        "Produto cadastrado sem nenhuma descrição real."
+      ],
+      "recommendation": "Gerar descrição completa em 3 Atos a partir do arquétipo correspondente.",
+      "body_html": "<p>A</p>"
+    },
     {
       "id": 15406546682153,
       "title": "Camisa ArmorX Brk Nevada com Luva e Proteção UV50+",
@@ -82339,48 +82381,6 @@
       ],
       "recommendation": "Manter no padrão.",
       "body_html": "Camisa BRK Agro com Proteção UV50+\n\nAs Camisas UV50 da BRK Agro foram desenvolvidas para oferecer o máximo de resistência, conforto e proteção para quem vive a rotina do campo. Produzidas com o exclusivo tecido XTech Pro, elas entregam a performance necessária para enfrentar longas jornadas de trabalho e exposição solar.\n\nLeves e de secagem ultrarrápida, são ideais para a lida no campo, manejo agrícola, operação de máquinas e atividades ao ar livre, mantendo o corpo protegido e com sensação térmica agradável mesmo sob sol intenso.\n\nPrincipais características:\n- Proteção UV50+ que bloqueia até 98 por cento dos raios solares, essencial para o dia a dia no campo.\n- Tecnologia Dry que evapora o suor rapidamente, evitando o desconforto e o peso da roupa úmida.\n- Tecido XTech Pro desenvolvido para alta durabilidade e conforto térmico em ambientes externos.\n- Proteção solar permanente que não sai na lavagem.\n- Modelagem anatômica que garante total liberdade de movimentos na lida.\n- Estampas e cores exclusivas com a identidade do agronegócio brasileiro.\n\nCuidados e lavagem:\n- Lavar em água fria utilizando sabão neutro.\n- Secagem rápida à sombra.\n- Não utilizar amaciantes ou alvejantes à base de cloro.\n- Dispensa o uso de ferro de passar.\n\nSeja na lavoura, na pecuária ou no dia a dia da fazenda, a Camisa BRK Agro é a peça indispensável para quem busca proteção, durabilidade e conforto no campo."
-    },
-    {
-      "id": 9957229265193,
-      "title": "Camisa de Pesca Feminina Brk Amazon Onça Azul com Proteção UV50",
-      "handle": "camisa-de-pesca-feminina-brk-amazon-onca-azul-com-protecao-uv50",
-      "url": "https://www.brkagro.com.br/products/camisa-de-pesca-feminina-brk-amazon-onca-azul-com-protecao-uv50",
-      "master_sku": "C02494BL",
-      "variants_skus": [
-        "C02494BLPP",
-        "C02494BLP",
-        "C02494BLM",
-        "C02494BLG",
-        "C02494BLGG",
-        "C02494BLG1",
-        "C02494BLG2"
-      ],
-      "total_skus_count": 7,
-      "affected_skus_count": 7,
-      "is_out_of_standard": true,
-      "standard_violations": [
-        "Produto totalmente sem descrição ou com placeholder/caractere único."
-      ],
-      "category": "Camisas Agro & Campo",
-      "archetype": "LINHAGEM_VESTUARIO",
-      "price": "R$ 169,90",
-      "image": "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/FRENTE_FEM_66b24e2e-ae72-451b-9eaa-6c9736d59a35.jpg?v=1790084814",
-      "gallery": [
-        "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/FRENTE_FEM_66b24e2e-ae72-451b-9eaa-6c9736d59a35.jpg?v=1790084814",
-        "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/COSTAS_FEM_bad7ac2a-1947-487f-8534-b04da35c86eb.jpg?v=1790084814",
-        "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/FRENTEPERSPECTIVA_FEM_9cfaafb4-7676-4803-a838-aa64367e8465.jpg?v=1790084814",
-        "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/COSTASPERSPECTIVA_FEM_597a6347-eff5-461c-8781-79346549b1fb.jpg?v=1790084814"
-      ],
-      "status": "SEM_DESCRICAO",
-      "score": 0,
-      "word_count": 1,
-      "broken_images_count": 0,
-      "broken_urls": [],
-      "issues": [
-        "Produto cadastrado sem nenhuma descrição real."
-      ],
-      "recommendation": "Gerar descrição completa em 3 Atos a partir do arquétipo correspondente.",
-      "body_html": "<p>A</p>"
     },
     {
       "id": 9957229232425,

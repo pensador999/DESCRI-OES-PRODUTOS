@@ -12,6 +12,18 @@
     "out_of_standard_prods": 297
   },
   "categories": {
+    "Bonés & Street Motors": {
+      "title": "Bonés & Street Motors",
+      "badge": "Coleção",
+      "thumb": "https://cdn.shopify.com/s/files/1/0920/4799/9271/files/04_769719a7-62b7-40f0-a196-d9a4b1f8b37a.jpg?v=1753288891",
+      "count": 6,
+      "total_skus": 6,
+      "broken_skus": 0,
+      "out_of_standard_skus": 0,
+      "broken_count": 0,
+      "alert_count": 0,
+      "empty_count": 0
+    },
     "Óculos & Goggles": {
       "title": "Óculos & Goggles",
       "badge": "Coleção",
@@ -36,29 +48,17 @@
       "alert_count": 0,
       "empty_count": 113
     },
-    "Bonés & Street Motors": {
-      "title": "Bonés & Street Motors",
+    "Acessórios & Equipamentos": {
+      "title": "Acessórios & Equipamentos",
       "badge": "Coleção",
-      "thumb": "https://cdn.shopify.com/s/files/1/0920/4799/9271/files/04_769719a7-62b7-40f0-a196-d9a4b1f8b37a.jpg?v=1753288891",
-      "count": 6,
+      "thumb": "https://cdn.shopify.com/s/files/1/0920/4799/9271/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F178211765_2F4664a59fb33a40aea484c3cd2ea26a31.jpg?v=1781800826",
+      "count": 4,
       "total_skus": 6,
       "broken_skus": 0,
       "out_of_standard_skus": 0,
       "broken_count": 0,
       "alert_count": 0,
       "empty_count": 0
-    },
-    "Jerseys & Camisas Motors": {
-      "title": "Jerseys & Camisas Motors",
-      "badge": "Coleção",
-      "thumb": "https://cdn.shopify.com/s/files/1/0920/4799/9271/files/C02893.png?v=1792152432",
-      "count": 884,
-      "total_skus": 6790,
-      "broken_skus": 0,
-      "out_of_standard_skus": 1050,
-      "broken_count": 0,
-      "alert_count": 0,
-      "empty_count": 67
     },
     "Camisas Segunda Pele": {
       "title": "Camisas Segunda Pele",
@@ -72,17 +72,17 @@
       "alert_count": 0,
       "empty_count": 16
     },
-    "Acessórios & Equipamentos": {
-      "title": "Acessórios & Equipamentos",
+    "Jerseys & Camisas Motors": {
+      "title": "Jerseys & Camisas Motors",
       "badge": "Coleção",
-      "thumb": "https://cdn.shopify.com/s/files/1/0920/4799/9271/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F178211765_2F4664a59fb33a40aea484c3cd2ea26a31.jpg?v=1781800826",
-      "count": 4,
-      "total_skus": 6,
+      "thumb": "https://cdn.shopify.com/s/files/1/0920/4799/9271/files/C02893.png?v=1792152432",
+      "count": 884,
+      "total_skus": 6790,
       "broken_skus": 0,
-      "out_of_standard_skus": 0,
+      "out_of_standard_skus": 1050,
       "broken_count": 0,
       "alert_count": 0,
-      "empty_count": 0
+      "empty_count": 67
     }
   },
   "products": [
