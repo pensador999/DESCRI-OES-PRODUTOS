@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         BRK Assistente de Descrições Shopify (Conectado ao Banco Real v5.3.1 Sem Alerta Sair do Site)
+// @name         BRK Assistente de Descrições Shopify (Conectado ao Banco Real v5.3.2 Zero Alerta Sair do Site)
 // @namespace    https://1025-ten.vercel.app/
-// @version      5.3.1
-// @description  Automação 100% automática por Coleções Shopify (89/91 Super Ofertas 🔥 + 32 Camisas/Outros Rastreados sem Troca Descomplicada) com bloqueador de alerta 'Sair do site?' e confirmação real de salvamento.
+// @version      5.3.2
+// @description  Automação 100% automática por Coleções Shopify (89/91 Super Ofertas 🔥 + 32 Camisas/Outros Rastreados sem Troca Descomplicada) com bloqueio via unsafeWindow/CSP de 'Sair do site?' e fechamento automático do modo HTML (<>).
 // @author       BRK Group & DeepMind Pair
 // @match        https://admin.shopify.com/store/*/products*
 // @match        https://admin.shopify.com/store/*
@@ -26,6 +26,7 @@
 // @grant        GM_deleteValue
 // @grant        GM_notification
 // @grant        GM_setClipboard
+// @grant        unsafeWindow
 // @run-at       document-idle
 // ==/UserScript==
 
@@ -34,7 +35,7 @@
 
   // Configuração da API do Banco de Dados BRK (6.409 produtos auditados nas 3 lojas)
   const API_BASE = "https://1025-ten.vercel.app";
-  const SCRIPT_VERSION = "5.3.1";
+  const SCRIPT_VERSION = "5.3.2";
 
   const STORAGE_KEYS = {
     QUEUE: "BRK_AUTOSYNC_QUEUE",
@@ -388,30 +389,96 @@
     let saveCompletionTimer = null;
     let hasTriggeredSaveForCurrentProduct = false;
 
-    // Neutralizador Definitivo de 'beforeunload' ("Sair do site? É possível que as alterações feitas não sejam salvas.")
+    // Neutralizador Definitivo de 'beforeunload' via unsafeWindow + Nonce CSP ("Sair do site? É possível que as alterações feitas não sejam salvas.")
     function disarmBeforeUnload() {
+      const targets = [window];
       try {
-        window.onbeforeunload = null;
-        window.addEventListener("beforeunload", (e) => {
-          e.stopImmediatePropagation();
-        }, true);
+        if (typeof unsafeWindow !== "undefined" && unsafeWindow && unsafeWindow !== window) {
+          targets.push(unsafeWindow);
+        }
+      } catch (e) {}
 
+      for (const w of targets) {
+        try {
+          w.onbeforeunload = null;
+          Object.defineProperty(w, "onbeforeunload", {
+            configurable: true,
+            get: function() { return null; },
+            set: function() {}
+          });
+        } catch (e) {}
+
+        try {
+          w.addEventListener("beforeunload", function(e) {
+            e.stopImmediatePropagation();
+          }, true);
+        } catch (e) {}
+
+        try {
+          if (w.Event && w.Event.prototype && !w.Event.prototype.__brkPatchedBeforeUnload) {
+            const origPrevent = w.Event.prototype.preventDefault;
+            w.Event.prototype.preventDefault = function() {
+              if (this && this.type === "beforeunload") return;
+              return origPrevent.apply(this, arguments);
+            };
+            w.Event.prototype.__brkPatchedBeforeUnload = true;
+          }
+        } catch (e) {}
+
+        try {
+          if (w.EventTarget && w.EventTarget.prototype && !w.EventTarget.prototype.__brkPatchedAddListener) {
+            const origAdd = w.EventTarget.prototype.addEventListener;
+            w.EventTarget.prototype.addEventListener = function(type, listener, options) {
+              if (String(type).toLowerCase() === "beforeunload") return;
+              return origAdd.call(this, type, listener, options);
+            };
+            w.EventTarget.prototype.__brkPatchedAddListener = true;
+          }
+        } catch (e) {}
+
+        try {
+          const protos = [w.BeforeUnloadEvent && w.BeforeUnloadEvent.prototype, w.Event && w.Event.prototype].filter(Boolean);
+          for (const proto of protos) {
+            const desc = Object.getOwnPropertyDescriptor(proto, "returnValue");
+            if (desc && desc.set) {
+              Object.defineProperty(proto, "returnValue", {
+                configurable: true,
+                get: function() {
+                  if (this && this.type === "beforeunload") return "";
+                  return desc.get ? desc.get.call(this) : undefined;
+                },
+                set: function(val) {
+                  if (this && this.type === "beforeunload") return;
+                  if (desc.set) desc.set.call(this, val);
+                }
+              });
+            }
+          }
+        } catch (e) {}
+      }
+
+      try {
         if (!document.getElementById("brk-disarm-beforeunload-script")) {
           const s = document.createElement("script");
           s.id = "brk-disarm-beforeunload-script";
+          const nonceEl = document.querySelector("script[nonce]");
+          if (nonceEl && (nonceEl.nonce || nonceEl.getAttribute("nonce"))) {
+            s.setAttribute("nonce", nonceEl.nonce || nonceEl.getAttribute("nonce"));
+          }
           s.textContent = `
             (function() {
               try {
                 window.onbeforeunload = null;
-                Object.defineProperty(window, 'onbeforeunload', {
-                  configurable: true,
-                  get: function() { return null; },
-                  set: function() {}
-                });
+                Object.defineProperty(window, 'onbeforeunload', { configurable: true, get: function() { return null; }, set: function() {} });
                 const origPrevent = Event.prototype.preventDefault;
                 Event.prototype.preventDefault = function() {
                   if (this && this.type === 'beforeunload') return;
                   return origPrevent.apply(this, arguments);
+                };
+                const origAdd = EventTarget.prototype.addEventListener;
+                EventTarget.prototype.addEventListener = function(type, listener, options) {
+                  if (String(type).toLowerCase() === 'beforeunload') return;
+                  return origAdd.call(this, type, listener, options);
                 };
                 const protos = [window.BeforeUnloadEvent && window.BeforeUnloadEvent.prototype, Event.prototype].filter(Boolean);
                 for (const proto of protos) {
@@ -419,20 +486,12 @@
                   if (desc && desc.set) {
                     Object.defineProperty(proto, 'returnValue', {
                       configurable: true,
-                      get: function() {
-                        if (this && this.type === 'beforeunload') return '';
-                        return desc.get ? desc.get.call(this) : undefined;
-                      },
-                      set: function(val) {
-                        if (this && this.type === 'beforeunload') return;
-                        if (desc.set) desc.set.call(this, val);
-                      }
+                      get: function() { return (this && this.type === 'beforeunload') ? '' : (desc.get ? desc.get.call(this) : undefined); },
+                      set: function(val) { if (this && this.type === 'beforeunload') return; if (desc.set) desc.set.call(this, val); }
                     });
                   }
                 }
-                window.addEventListener('beforeunload', function(e) {
-                  e.stopImmediatePropagation();
-                }, true);
+                window.addEventListener('beforeunload', function(e) { e.stopImmediatePropagation(); }, true);
               } catch (err) {}
             })();
           `;
@@ -1094,12 +1153,20 @@
           setReactInputValue(textarea, htmlContent);
           console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] HTML Modo B v5 injetado com sucesso no Textarea HTML!`);
 
+          // Fecha o modo Código HTML (<>) de volta para o Modo Visual para a Shopify comitar o estado imediatamente
+          setTimeout(() => {
+            const toggleBackBtn = findShowHtmlButton();
+            if (toggleBackBtn && findDescriptionTextarea()?.offsetParent !== null) {
+              try { toggleBackBtn.click(); } catch (e) {}
+            }
+          }, 160);
+
           setTimeout(() => {
             highlightSaveButton(() => {
               console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] Produto salvo com sucesso!`);
               handleAfterSave();
             });
-          }, 250);
+          }, 380);
 
           const isAuto = getSettings().autoPilot || getSettings().autoSave;
           renderHudProductMode(
@@ -1206,6 +1273,15 @@
       if (countdownTimer) clearInterval(countdownTimer);
 
       countdownTimer = setInterval(() => {
+        // Se ainda estiver salvando na Shopify, aguarda mais um ciclo antes de trocar de URL
+        if (findBusySaveButton()) {
+          renderHudProductMode(
+            activeLoadedProduct,
+            `⏳ Concluindo salvamento na Shopify...`,
+            `Aguardando confirmação final para avançar (${nextIdx + 1}/${q.length})...`
+          );
+          return;
+        }
         if (count <= 0) {
           clearInterval(countdownTimer);
           setQueueIndex(nextIdx);
