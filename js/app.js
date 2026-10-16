@@ -1305,6 +1305,85 @@ function sendBatchToTampermonkey(limit = 25) {
   }, 600);
 }
 
+// Dispara lote 100% automático de uma Coleção específica (ex: Super Ofertas 🔥 91 itens) direto da API para o Tampermonkey
+async function sendCollectionToTampermonkey(categoryFilter = "super_ofertas", statusFilter = "COLECAO_COMPLETA", limit = 100, customCollectionUrl = "") {
+  const targetStore = (categoryFilter === "super_ofertas" || (customCollectionUrl && customCollectionUrl.includes("brkfishing")))
+    ? "brk_fishing"
+    : currentStore;
+
+  const storeSlugMap = {
+    "brk_fishing": "brkfishing",
+    "brk_agro": "brkagro",
+    "brk_motors": "brkmotors25"
+  };
+  const storeSlug = storeSlugMap[targetStore] || "brkfishing";
+  const collectionParam = customCollectionUrl || (categoryFilter === "super_ofertas" ? "super-ofertas-🔥" : "");
+
+  showToast(`🔥 Carregando coleção (${collectionParam || categoryFilter}) no Piloto Automático...`);
+
+  try {
+    const apiUrl = `/api/product_db?store=${encodeURIComponent(targetStore)}&action=queue&category=${encodeURIComponent(categoryFilter)}&collection=${encodeURIComponent(collectionParam)}&status=${encodeURIComponent(statusFilter)}&limit=${encodeURIComponent(limit)}`;
+    const resp = await fetch(apiUrl);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+
+    if (!data.success || !Array.isArray(data.items) || data.items.length === 0) {
+      alert(`⚠️ Nenhum produto retornado para o filtro (${statusFilter} / ${collectionParam || categoryFilter}).`);
+      return;
+    }
+
+    // Força is_mode_b_compliant=false no payload de coleção completa para que qualquer versão do Tampermonkey processe todos os itens automaticamente
+    const forceProcessAll = ["COLECAO_COMPLETA", "AJUSTE_FOTOS_GERAL", "CRITICOS_FOTOS_CORES", "COR_SEM_FOTO", "FOTOS_DUPLICADAS", "FOTOS_BAIXA_QUALIDADE"].includes(statusFilter);
+    const items = data.items.map(it => ({
+      ...it,
+      is_mode_b_compliant: forceProcessAll ? false : Boolean(it.is_mode_b_compliant)
+    }));
+
+    window.postMessage({
+      type: "BRK_LOAD_QUEUE",
+      payload: {
+        items: items,
+        storeKey: targetStore,
+        storeSlug: storeSlug,
+        autoStart: true,
+        autoPilot: true,
+        autoSave: true,
+        forceAll: forceProcessAll,
+        collectionName: collectionParam || categoryFilter,
+        statusFilter: statusFilter
+      }
+    }, "*");
+
+    localStorage.setItem("BRK_TM_ACTIVE_QUEUE", JSON.stringify(items));
+    localStorage.setItem("BRK_TM_STORE_SLUG", storeSlug);
+
+    showToast(`🚀 Coleção carregada (${items.length} produtos)! Abrindo Piloto Automático no Shopify Admin...`);
+
+    setTimeout(() => {
+      if (!window.__BRK_TAMPERMONKEY_INSTALLED) {
+        openTampermonkeyModal(items, storeSlug);
+      }
+    }, 600);
+  } catch (err) {
+    console.error("Erro ao carregar lote da coleção:", err);
+    alert(`Erro ao carregar fila da coleção: ${err.message}`);
+  }
+}
+
+function sendCustomCollectionFromPortal() {
+  const selEl = document.getElementById("portal-collection-select");
+  const urlEl = document.getElementById("portal-collection-url");
+  const rawChoice = selEl ? selEl.value : "super_ofertas|COLECAO_COMPLETA";
+  const customUrl = urlEl ? urlEl.value.trim() : "";
+
+  const [cat, st] = rawChoice.split("|");
+  if (customUrl) {
+    sendCollectionToTampermonkey("ALL", st || "COLECAO_COMPLETA", 100, customUrl);
+  } else {
+    sendCollectionToTampermonkey(cat || "super_ofertas", st || "COLECAO_COMPLETA", 100, "");
+  }
+}
+
 function sendSelectedMassToTampermonkey() {
   const storeData = MASTER_PAYLOAD.stores[currentStore];
   if (!storeData || !storeData.products) return;
@@ -1367,8 +1446,8 @@ function openTampermonkeyModal(items = null, storeSlug = "brkfishing") {
             ⚡
           </div>
           <div>
-            <h3 class="text-base font-extrabold text-slate-900 font-heading">Assistente Tampermonkey BRK</h3>
-            <p class="text-xs text-slate-500">Automação Assistida sem necessidade de Token ou API</p>
+            <h3 class="text-base font-extrabold text-slate-900 font-heading">Assistente Tampermonkey BRK v5.2 (Piloto Automático de Coleções)</h3>
+            <p class="text-xs text-slate-500">Aplicação 100% Automática em Toda a Coleção sem precisar clicar em Salvar manualmente</p>
           </div>
         </div>
         <button onclick="closeTampermonkeyModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center transition-all">✕</button>
@@ -1377,23 +1456,37 @@ function openTampermonkeyModal(items = null, storeSlug = "brkfishing") {
       <div class="space-y-3 text-xs leading-relaxed">
         <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
           <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-700">Status da Fila Local:</span>
+            <span class="font-bold text-slate-700">Status da Fila Carregada:</span>
             <span class="font-mono font-extrabold px-2 py-0.5 rounded-full ${count > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}">
               ${count} produtos prontos
             </span>
           </div>
           ${count > 0 ? `
-            <p class="text-slate-600 text-[11px]">Primeiro produto: <strong class="text-slate-900">${activeQueue[0].master_sku || ''}</strong> - ${activeQueue[0].title.slice(0, 45)}...</p>
+            <p class="text-slate-600 text-[11px]">Primeiro produto: <strong class="text-slate-900">${activeQueue[0].master_sku || ''}</strong> - ${(activeQueue[0].title || '').slice(0, 48)}...</p>
           ` : ''}
+        </div>
+
+        <div class="p-4 bg-orange-50 rounded-2xl border border-orange-200 space-y-2 text-orange-950">
+          <h4 class="font-bold flex items-center gap-1.5 text-xs">
+            <span>🔥</span> Lote Automático da Coleção Super Ofertas (91 Produtos):
+          </h4>
+          <div class="flex flex-wrap gap-2 pt-1">
+            <button onclick="sendCollectionToTampermonkey('super_ofertas', 'COLECAO_COMPLETA', 100)" class="px-3.5 py-2 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white rounded-xl text-xs font-extrabold shadow-sm transition-all">
+              🔥 Auto-Aplicar Toda Coleção Super Ofertas (91)
+            </button>
+            <button onclick="sendCollectionToTampermonkey('super_ofertas', 'CRITICOS_FOTOS_CORES', 100)" class="px-3 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all">
+              🚨 Apenas Críticos Foto/Cor
+            </button>
+          </div>
         </div>
 
         <div class="p-4 bg-purple-50 rounded-2xl border border-purple-200 space-y-2 text-purple-900">
           <h4 class="font-bold flex items-center gap-1.5 text-xs text-purple-950">
-            <span>🔌</span> Como funciona em 2 passos:
+            <span>🔌</span> Instalar ou Atualizar Script Tampermonkey v5.2:
           </h4>
           <ol class="list-decimal pl-4 space-y-1 text-[11px] text-purple-800">
-            <li>Instale o script no seu Chrome: <a href="tampermonkey/brk_assistente_shopify.user.js" target="_blank" class="font-bold underline text-purple-700 hover:text-purple-900">Clique aqui para instalar o Userscript</a>.</li>
-            <li>Abra a Shopify: ao abrir o produto, o script preencherá a descrição Modo B e você só clica em <strong>Salvar</strong>! Após 4 segundos, ele avança para o próximo.</li>
+            <li>Clique para instalar/atualizar o script v5.2 no seu Tampermonkey: <a href="tampermonkey/brk_assistente_shopify.user.js?v=5.2.0" target="_blank" class="font-bold underline text-purple-700 hover:text-purple-900">Instalar / Atualizar Userscript v5.2.0</a>.</li>
+            <li>Com o <strong>🤖 Piloto Automático</strong> ativo, ele abre o produto na Shopify, injeta a descrição Modo B v5, <strong>clica em Salvar sozinho</strong> e avança automaticamente pelos 91 produtos da coleção!</li>
           </ol>
         </div>
       </div>
@@ -1408,7 +1501,7 @@ function openTampermonkeyModal(items = null, storeSlug = "brkfishing") {
           </button>
           ${firstId ? `
             <a href="${firstUrl}" target="_blank" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-extrabold shadow-md transition-all flex items-center gap-1.5">
-              <span>🚀 Abrir no Shopify Admin</span>
+              <span>🚀 Abrir 1º Produto no Shopify Admin</span>
             </a>
           ` : ''}
         </div>

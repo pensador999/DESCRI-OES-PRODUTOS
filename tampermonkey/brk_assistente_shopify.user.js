@@ -1,11 +1,15 @@
 // ==UserScript==
-// @name         BRK Assistente de Descrições Shopify (Conectado ao Banco Real v5.1 Coleções & Pente Fino)
+// @name         BRK Assistente de Descrições Shopify (Conectado ao Banco Real v5.2 Auto-Lote Coleções)
 // @namespace    https://1025-ten.vercel.app/
-// @version      5.1.0
-// @description  Automação 100% automática e assistida por Lote e por Coleções Shopify (incluindo Super Ofertas 🔥 BRK Fishing) conectada ao banco de dados oficial BRK (6.408 produtos nas 3 Lojas). Inclui Piloto Automático Modo B v5 e Pente Fino Visual de Variantes sem Foto (image_id=null), Fotos Duplicadas e Fotos de Baixa Resolução.
+// @version      5.2.0
+// @description  Automação 100% automática por Coleções Shopify (incluindo botão dedicado para aplicar em toda a coleção Super Ofertas 🔥 BRK Fishing - 91 produtos) conectada ao banco de dados oficial BRK. Injeta Modo B v5, clica em Salvar automaticamente e avança sozinho.
 // @author       BRK Group & DeepMind Pair
 // @match        https://admin.shopify.com/store/*/products*
+// @match        https://admin.shopify.com/store/*
 // @match        https://1025-ten.vercel.app/*
+// @match        https://www.brkfishing.com.br/collections/*
+// @match        https://www.brkagro.com.br/collections/*
+// @match        https://www.brkmotors.com.br/collections/*
 // @match        http://localhost:*/*
 // @match        http://127.0.0.1:*/*
 // @connect      1025-ten.vercel.app
@@ -28,7 +32,7 @@
 
   // Configuração da API do Banco de Dados BRK (6.408 produtos auditados nas 3 lojas)
   const API_BASE = "https://1025-ten.vercel.app";
-  const SCRIPT_VERSION = "5.1.0";
+  const SCRIPT_VERSION = "5.2.0";
 
   const STORAGE_KEYS = {
     QUEUE: "BRK_AUTOSYNC_QUEUE",
@@ -220,50 +224,132 @@
   }
 
   // =========================================================================
-  // 1. LÓGICA NO PORTAL LOCAL OU VERCEL (1025-ten.vercel.app)
+  // 1. LÓGICA NO PORTAL (1025-ten.vercel.app) E NAS PÁGINAS DE COLEÇÃO DAS LOJAS
   // =========================================================================
-  if (location.hostname === "1025-ten.vercel.app" || location.hostname === "localhost" || location.hostname === "127.0.0.1") {
-    console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] Conectado ao Portal de Descrições BRK.`);
+  const isStorefrontCollection = (
+    location.hostname.includes("brkfishing.com.br") ||
+    location.hostname.includes("brkagro.com.br") ||
+    location.hostname.includes("brkmotors.com.br")
+  ) && location.pathname.includes("/collections/");
+
+  if (location.hostname === "1025-ten.vercel.app" || location.hostname === "localhost" || location.hostname === "127.0.0.1" || isStorefrontCollection) {
+    console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] Conectado ao Portal / Vitrine de Coleções BRK.`);
     window.__BRK_TAMPERMONKEY_INSTALLED = true;
     document.documentElement.setAttribute("data-tampermonkey-active", "true");
 
-    const badge = document.createElement("div");
-    badge.id = "brk-tm-portal-badge";
-    badge.style.cssText = "position:fixed;bottom:16px;left:16px;z-index:99999;background:#0f172a;border:1px solid #0284c7;color:#38bdf8;padding:8px 14px;border-radius:9999px;font-size:12px;font-weight:800;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.4);cursor:pointer;font-family:sans-serif;transition:all 0.2s;";
+    const bar = document.createElement("div");
+    bar.id = "brk-tm-portal-badge";
+    bar.style.cssText = "position:fixed;bottom:16px;left:16px;z-index:999999;background:#090d16;border:2px solid #ea580c;color:#f8fafc;padding:8px 12px;border-radius:14px;font-size:12px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap;box-shadow:0 10px 28px rgba(0,0,0,0.65);font-family:sans-serif;";
 
-    function updatePortalBadge() {
-      const q = getQueue();
-      const idx = getQueueIndex();
-      const active = isAutomationActive();
-      badge.innerHTML = q.length > 0
-        ? `<span>🤖 Tampermonkey v${SCRIPT_VERSION} | Fila Não-Conformes: ${idx + 1}/${q.length} (${active ? 'Piloto Automático Ativo' : 'Pausada'})</span>`
-        : `<span>🟢 Tampermonkey v${SCRIPT_VERSION} Conectado (Filtro Estrito de Diretrizes + Piloto Automático)</span>`;
+    async function launchCollectionDirectlyFromFloatingBar(categoryFilter, statusFilter, collectionHandle) {
+      try {
+        const storeKey = location.hostname.includes("brkagro") ? "brk_agro" : location.hostname.includes("brkmotors") ? "brk_motors" : "brk_fishing";
+        const storeSlug = storeKey === "brk_agro" ? "brkagro" : storeKey === "brk_motors" ? "brkmotors25" : "brkfishing";
+        const statusEl = document.getElementById("brk-tm-bar-status");
+        if (statusEl) statusEl.textContent = "⏳ Carregando 91 produtos da coleção...";
+
+        const queryUrl = `/api/product_db?store=${storeKey}&action=queue&status=${encodeURIComponent(statusFilter)}&category=${encodeURIComponent(categoryFilter)}&collection=${encodeURIComponent(collectionHandle || "")}&limit=100`;
+        const res = await fetchFromBRKDatabase(queryUrl);
+        const items = res.items || [];
+        if (!res.success || items.length === 0) {
+          alert("Nenhum produto encontrado para esta coleção.");
+          renderFloatingBar();
+          return;
+        }
+
+        // Limpa status de conformes anteriores para garantir aplicação em toda a coleção
+        GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
+        saveSettings({
+          autoPilot: true,
+          autoSave: true,
+          skipAlreadyModeB: false,
+          pauseOnMediaError: statusFilter === "CRITICOS_FOTOS_CORES",
+          batchCategory: categoryFilter,
+          batchStatus: statusFilter
+        });
+
+        setQueue(items);
+        setQueueIndex(0);
+        setAutomationActive(true);
+        GM_setValue(STORAGE_KEYS.LAST_STORE, storeKey);
+        renderFloatingBar();
+
+        const firstId = items[0].id;
+        window.open(`https://admin.shopify.com/store/${storeSlug}/products/${firstId}`, "_blank");
+      } catch (err) {
+        alert("Erro ao iniciar coleção automática: " + err.message);
+        renderFloatingBar();
+      }
     }
-    updatePortalBadge();
 
-    badge.onclick = () => {
+    function renderFloatingBar() {
       const q = getQueue();
       const idx = getQueueIndex();
       const active = isAutomationActive();
-      alert(`[Assistente BRK v${SCRIPT_VERSION} — Piloto Automático & Filtro de Diretrizes]\n\nFila Atual (Apenas Fora das Diretrizes): ${q.length} produtos\nÍndice Atual: ${q.length ? (idx + 1) : 0} de ${q.length}\nPiloto Automático Ativo: ${active ? "SIM" : "NÃO"}\n\nDiretrizes Modo B v5 Ativas:\n• Exibe e enfileira APENAS códigos (SKUs) fora das diretrizes\n• Faca Marine MFK75T sem bainha (revestimento Teflon + olhal para fiel)\n• Tabelas de Medidas com orientação explícita para Camisas com Capuz/Bandana Embutida (FusionX/Hybrid) e Luva Integrada (ArmorX)`);
-    };
-    document.body.appendChild(badge);
+      const currentColHandle = isStorefrontCollection ? decodeURIComponent(location.pathname.split("/collections/")[1]?.split("/")[0] || "") : "";
 
-    // Ponte Bidirecional: Receber Fila enviada pelo Portal (filtrando itens já conformes)
+      bar.innerHTML = `
+        <span id="brk-tm-bar-status" style="color:#38bdf8;cursor:pointer;" title="Clique para ver detalhes da fila">
+          ${q.length > 0 ? `🤖 v${SCRIPT_VERSION} | Fila: ${idx + 1}/${q.length} (${active ? 'Ativa' : 'Pausada'})` : `🟢 Tampermonkey v${SCRIPT_VERSION} Ativo`}
+        </span>
+        <button id="brk-tm-float-so-all" style="background:linear-gradient(90deg,#ea580c,#dc2626);color:#fff;border:none;border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:800;cursor:pointer;box-shadow:0 2px 8px rgba(234,88,12,0.4);">
+          🔥 Auto-Aplicar Toda Coleção Super Ofertas (91)
+        </button>
+        ${isStorefrontCollection && currentColHandle ? `
+          <button id="brk-tm-float-this-col" style="background:#0284c7;color:#fff;border:none;border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:800;cursor:pointer;">
+            🚀 Auto-Aplicar Esta Coleção (${currentColHandle})
+          </button>
+        ` : ''}
+      `;
+
+      const statusSpan = document.getElementById("brk-tm-bar-status");
+      if (statusSpan) {
+        statusSpan.onclick = () => {
+          alert(`[Assistente BRK v${SCRIPT_VERSION} — Piloto Automático de Coleções]\n\nFila Atual: ${q.length} produtos\nPosição: ${q.length ? (idx + 1) : 0} de ${q.length}\nPiloto Automático: ${active ? "ATIVO" : "PAUSADO"}\n\nClique no botão laranja '🔥 Auto-Aplicar Toda Coleção Super Ofertas (91)' para iniciar imediatamente a aplicação automática das descrições Modo B v5 no Shopify Admin!`);
+        };
+      }
+
+      const btnSoAll = document.getElementById("brk-tm-float-so-all");
+      if (btnSoAll) {
+        btnSoAll.onclick = () => launchCollectionDirectlyFromFloatingBar("super_ofertas", "COLECAO_COMPLETA", "super-ofertas-🔥");
+      }
+
+      const btnThisCol = document.getElementById("brk-tm-float-this-col");
+      if (btnThisCol) {
+        btnThisCol.onclick = () => launchCollectionDirectlyFromFloatingBar("ALL", "COLECAO_COMPLETA", currentColHandle);
+      }
+    }
+
+    renderFloatingBar();
+    document.body.appendChild(bar);
+
+    // Ponte Bidirecional: Receber Fila enviada pelo Portal
     window.addEventListener("message", (event) => {
       const data = event.data;
       if (!data || data.type !== "BRK_LOAD_QUEUE" || !data.payload) return;
-      const { items, storeKey, storeSlug, autoStart } = data.payload;
+      const { items, storeKey, storeSlug, autoStart, forceAll, statusFilter } = data.payload;
       if (!Array.isArray(items) || items.length === 0) return;
 
-      const filteredItems = items.filter(it => !it.is_mode_b_compliant && !isProductMarkedCompliant(it.id, it.master_sku || it.sku));
-      const finalItems = filteredItems.length > 0 ? filteredItems : items;
+      let finalItems = items;
+      if (forceAll) {
+        GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
+        saveSettings({
+          autoPilot: true,
+          autoSave: true,
+          skipAlreadyModeB: false,
+          pauseOnMediaError: statusFilter === "CRITICOS_FOTOS_CORES"
+        });
+      } else {
+        const filteredItems = items.filter(it => !it.is_mode_b_compliant && !isProductMarkedCompliant(it.id, it.master_sku || it.sku));
+        finalItems = filteredItems.length > 0 ? filteredItems : items;
+        saveSettings({ autoPilot: true, autoSave: true });
+      }
 
       setQueue(finalItems);
       setQueueIndex(0);
       setAutomationActive(autoStart !== false);
       if (storeKey) GM_setValue(STORAGE_KEYS.LAST_STORE, storeKey);
-      updatePortalBadge();
+      renderFloatingBar();
 
       const slug = storeSlug || (storeKey === "brk_agro" ? "brkagro" : storeKey === "brk_motors" ? "brkmotors25" : "brkfishing");
       const firstId = finalItems[0].id;
@@ -277,7 +363,7 @@
   }
 
   // =========================================================================
-  // 2. LÓGICA NO SHOPIFY ADMIN (admin.shopify.com/store/*/products*)
+  // 2. LÓGICA NO SHOPIFY ADMIN (admin.shopify.com/store/*)
   // =========================================================================
   if (location.hostname === "admin.shopify.com") {
     let currentShopifySlug = "";
@@ -1206,7 +1292,7 @@
           </label>
         </div>
 
-        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
           <button id="brk-btn-inject" class="brk-hud-btn brk-hud-btn-primary" style="background:${currentTheme.primary};border-color:${currentTheme.primaryHover};" title="Injeta a narrativa completa Modo B v5 no editor HTML e salva se Auto-Salvar estiver ativo">
             ⚡ Injetar Modo B
           </button>
@@ -1226,19 +1312,24 @@
           ` : ''}
           ${inQueue ? `
             <button id="brk-btn-next-now" class="brk-hud-btn">
-              ⏭️ Próximo
+              ⏭️ Próximo (${idx + 1}/${q.length})
             </button>
             <button id="brk-btn-pause-queue" class="brk-hud-btn brk-hud-btn-danger">
-              ⏹️ Parar
+              ⏹️ Parar Fila
             </button>
-          ` : `
-            <button id="brk-btn-start-super-ofertas" class="brk-hud-btn brk-hud-btn-success" title="Inicia o lote da Coleção Super Ofertas 🔥 (91 itens)">
-              🔥 Lote Super Ofertas
-            </button>
-            <button id="brk-btn-start-autopilot-25" class="brk-hud-btn" title="Busca apenas os códigos fora das diretrizes e aplica tudo automaticamente!">
-              🤖 Auto-Lote Geral
-            </button>
-          `}
+          ` : ''}
+        </div>
+
+        <div style="background:#17100b;border:1px solid #ea580c;border-radius:10px;padding:7px 9px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+          <button id="brk-btn-start-super-ofertas" class="brk-hud-btn" style="flex:1;justify-content:center;background:linear-gradient(90deg,#ea580c,#dc2626);border-color:#f97316;color:#fff;font-size:11.5px;padding:7px 10px;" title="Aplica automaticamente as descrições Modo B v5 em TODOS os 91 produtos da Coleção Super Ofertas 🔥 (injeta, salva e avança sozinho)">
+            🔥 Auto-Aplicar Toda Coleção Super Ofertas (91)
+          </button>
+          <button id="brk-btn-start-so-criticos-prod" class="brk-hud-btn" style="background:#7c2d12;border-color:#ea580c;color:#ffedd5;font-size:11px;padding:7px 8px;" title="Roda os produtos críticos de Foto/Cor da coleção Super Ofertas">
+            🚨 Críticos Foto/Cor
+          </button>
+          <button id="brk-btn-start-autopilot-25" class="brk-hud-btn" style="font-size:11px;padding:7px 8px;" title="Busca códigos fora das diretrizes da loja toda e aplica no automático">
+            🤖 Auto-Lote (25)
+          </button>
         </div>
       `;
 
@@ -1349,22 +1440,48 @@
       const btnStartSO = document.getElementById("brk-btn-start-super-ofertas");
       if (btnStartSO) {
         btnStartSO.onclick = () => {
-          saveSettings({ batchCategory: "super_ofertas", batchStatus: "FORA_DIRETRIZES", batchLimit: 100, autoPilot: true, autoSave: true });
-          startQueueFromDatabase("FORA_DIRETRIZES", 100, "super_ofertas", "super-ofertas-🔥");
+          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
+          saveSettings({
+            batchCategory: "super_ofertas",
+            batchStatus: "COLECAO_COMPLETA",
+            batchLimit: 100,
+            autoPilot: true,
+            autoSave: true,
+            skipAlreadyModeB: false,
+            pauseOnMediaError: false
+          });
+          startQueueFromDatabase("COLECAO_COMPLETA", 100, "super_ofertas", "super-ofertas-🔥");
+        };
+      }
+
+      const btnStartSoCritProd = document.getElementById("brk-btn-start-so-criticos-prod");
+      if (btnStartSoCritProd) {
+        btnStartSoCritProd.onclick = () => {
+          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
+          saveSettings({
+            batchCategory: "super_ofertas",
+            batchStatus: "CRITICOS_FOTOS_CORES",
+            batchLimit: 100,
+            autoPilot: true,
+            autoSave: true,
+            skipAlreadyModeB: false,
+            pauseOnMediaError: true
+          });
+          startQueueFromDatabase("CRITICOS_FOTOS_CORES", 100, "super_ofertas", "super-ofertas-🔥");
         };
       }
 
       const btnStartAuto25 = document.getElementById("brk-btn-start-autopilot-25");
       if (btnStartAuto25) {
         btnStartAuto25.onclick = () => {
-          saveSettings({ autoPilot: true, autoSave: true });
+          saveSettings({ autoPilot: true, autoSave: true, skipAlreadyModeB: true });
           startQueueFromDatabase("FORA_DIRETRIZES", 25, "ALL");
         };
       }
     }
 
     // =========================================================================
-    // RENDERIZAÇÃO DO HUD NA LISTAGEM DE PRODUTOS (admin.shopify.com/.../products)
+    // RENDERIZAÇÃO DO HUD NA LISTAGEM DE PRODUTOS E COLEÇÕES (admin.shopify.com/...)
     // =========================================================================
     function renderHudListMode(stats) {
       const q = getQueue();
@@ -1389,6 +1506,22 @@
           </span>
         </div>
 
+        <!-- BOTÃO PRINCIPAL SEMPRE VISÍVEL PARA AUTO-APLICAR TODA A COLEÇÃO SUPER OFERTAS -->
+        <div style="background:linear-gradient(135deg,#431407,#1e1b4b);border:2px solid #ea580c;border-radius:12px;padding:10px 12px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <strong style="color:#fed7aa;font-size:12px;">🔥 AUTOMAÇÃO TOTAL — COLEÇÃO SUPER OFERTAS (91 ITENS)</strong>
+            <span style="background:#ea580c;color:#fff;font-size:9.5px;font-weight:800;padding:1px 7px;border-radius:9999px;">1-CLIQUE</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button id="brk-btn-so-all91-direct" class="brk-hud-btn" style="flex:1;justify-content:center;background:linear-gradient(90deg,#ea580c,#dc2626);border-color:#f97316;color:#fff;font-size:12px;padding:8px 12px;box-shadow:0 4px 12px rgba(234,88,12,0.4);">
+              🔥 Auto-Aplicar Toda Coleção Super Ofertas (91 Produtos)
+            </button>
+            <button id="brk-btn-so-criticos" class="brk-hud-btn" style="background:#7c2d12;border-color:#ea580c;color:#ffedd5;font-size:11px;padding:8px 10px;" title="Abre os produtos críticos da coleção Super Ofertas 🔥 (Cores sem foto vinculada + Fotos duplicadas)">
+              🚨 Críticos Cor/Duplicada
+            </button>
+          </div>
+        </div>
+
         <div style="margin-bottom:10px;font-size:12px;color:#cbd5e1;line-height:1.5;">
           ${stats ? `
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;background:#0f172a;padding:8px 10px;border-radius:8px;border:1px solid #1e293b;">
@@ -1403,86 +1536,87 @@
         ${renderNonCompliantCodesBox(cachedNonCompliantCodes)}
 
         ${q.length > 0 ? `
-          <div style="background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:8px 12px;margin-bottom:10px;">
-            <div style="font-weight:700;color:${currentTheme.light};font-size:12px;">Fila Ativa: Código ${idx + 1} de ${q.length} (${q[idx]?.master_sku || ''})</div>
-            <div style="font-size:11px;color:#94a3b8;">Status: ${active ? '🤖 Piloto Automático Ativo' : 'Pausado'}</div>
-          </div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-            <button id="brk-btn-resume-queue" class="brk-hud-btn brk-hud-btn-success" style="flex:1;justify-content:center;">
-              🤖 Retomar Piloto Automático (${idx + 1}/${q.length})
-            </button>
-            <button id="brk-btn-clear-queue" class="brk-hud-btn brk-hud-btn-danger">
-              ⏹️ Limpar Fila
-            </button>
-          </div>
-        ` : `
-          <div style="background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:9px 11px;margin-bottom:10px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:6px;">
-              <span style="font-weight:700;color:${currentTheme.light};font-size:11px;">🎯 Configurar Lote por Coleção ou Categoria</span>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <label class="brk-hud-toggle" title="Injeta, clica em Salvar e avança sozinho">
-                  <input type="checkbox" id="brk-list-chk-autopilot" ${settings.autoPilot ? 'checked' : ''} style="accent-color:#22c55e;" />
-                  <strong style="color:#4ade80;font-size:10.5px;">🤖 Auto-Save</strong>
-                </label>
-                <label class="brk-hud-toggle" title="Pausa o Auto-Save quando o produto tiver cor sem foto vinculada ou foto duplicada">
-                  <input type="checkbox" id="brk-list-chk-pause-media" ${settings.pauseOnMediaError ? 'checked' : ''} style="accent-color:#f59e0b;" />
-                  <span style="color:#fbbf24;font-size:10.5px;">⏸️ Pausar em Cor s/ Foto</span>
-                </label>
+          <div style="background:#0f172a;border:1px solid #22c55e;border-radius:8px;padding:8px 12px;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <div>
+                <div style="font-weight:700;color:#4ade80;font-size:12px;">Fila Ativa em Andamento: ${idx + 1} de ${q.length} (${q[idx]?.master_sku || ''})</div>
+                <div style="font-size:10.5px;color:#94a3b8;">Status: ${active ? '🤖 Piloto Automático Ativo' : 'Pausado'}</div>
+              </div>
+              <div style="display:flex;gap:6px;">
+                <button id="brk-btn-resume-queue" class="brk-hud-btn brk-hud-btn-success" style="padding:5px 10px;font-size:11px;">
+                  ▶️ Retomar (${idx + 1}/${q.length})
+                </button>
+                <button id="brk-btn-clear-queue" class="brk-hud-btn brk-hud-btn-danger" style="padding:5px 10px;font-size:11px;">
+                  ⏹️ Limpar
+                </button>
               </div>
             </div>
-            <div style="display:grid;grid-template-columns:1.1fr 1.1fr 0.55fr;gap:6px;margin-bottom:6px;">
-              <select id="brk-sel-category" class="brk-hud-select" title="Filtrar por Coleção/Categoria">
-                <option value="super_ofertas" ${settings.batchCategory === 'super_ofertas' ? 'selected' : ''}>🔥 Coleção: Super Ofertas Fishing (91 itens)</option>
-                <option value="ALL" ${settings.batchCategory === 'ALL' ? 'selected' : ''}>📂 Todas as Coleções da Loja</option>
-                <option value="iscas_artificiais" ${settings.batchCategory === 'iscas_artificiais' ? 'selected' : ''}>🎣 Iscas Artificiais</option>
-                <option value="equipamentos_pesca" ${settings.batchCategory === 'equipamentos_pesca' ? 'selected' : ''}>⚙️ Varas, Carretilhas, Molinetes & Alicates</option>
-                <option value="linhas_pesca" ${settings.batchCategory === 'linhas_pesca' ? 'selected' : ''}>🧵 Linhas de Pesca</option>
-                <option value="bones_chapeus" ${settings.batchCategory === 'bones_chapeus' ? 'selected' : ''}>🧢 Bonés & Chapéus</option>
-                <option value="camisas" ${settings.batchCategory === 'camisas' ? 'selected' : ''}>👕 Camisas (Fusion/Hybrid/ArmorX/C0)</option>
-                <option value="calcas" ${settings.batchCategory === 'calcas' ? 'selected' : ''}>👖 Calças & Bermudas</option>
-                <option value="corta_vento" ${settings.batchCategory === 'corta_vento' ? 'selected' : ''}>🧥 Corta-Vento & Jaquetas</option>
-                <option value="infantil" ${settings.batchCategory === 'infantil' ? 'selected' : ''}>🧒 Linha Infantil (2 a 13 Anos)</option>
-                <option value="feminino" ${settings.batchCategory === 'feminino' ? 'selected' : ''}>👚 Linha Feminina (Baby Look)</option>
-                <option value="CUSTOM_COLLECTION" ${settings.batchCategory === 'CUSTOM_COLLECTION' ? 'selected' : ''}>🔗 Outra Coleção (Digitar URL/Handle abaixo)</option>
-              </select>
-              <select id="brk-sel-status" class="brk-hud-select" title="Filtrar por Modo de Triagem (Diretrizes Modo B ou Pente Fino de Fotos)">
-                <option value="FORA_DIRETRIZES" ${settings.batchStatus === 'FORA_DIRETRIZES' ? 'selected' : ''}>🎯 Todos Fora das Diretrizes Modo B</option>
-                <option value="AJUSTE_FOTOS_GERAL" ${settings.batchStatus === 'AJUSTE_FOTOS_GERAL' ? 'selected' : ''}>🔥 Pente Fino: Todos c/ Ajuste de Foto/Cor</option>
-                <option value="CRITICOS_FOTOS_CORES" ${settings.batchStatus === 'CRITICOS_FOTOS_CORES' ? 'selected' : ''}>🚨 Críticos: Cor sem Foto + Fotos Duplicadas</option>
-                <option value="COR_SEM_FOTO" ${settings.batchStatus === 'COR_SEM_FOTO' ? 'selected' : ''}>🧩 Apenas Cores Sem Foto (image_id=null)</option>
-                <option value="FOTOS_DUPLICADAS" ${settings.batchStatus === 'FOTOS_DUPLICADAS' ? 'selected' : ''}>👯 Apenas Fotos Duplicadas na Galeria/Cores</option>
-                <option value="FOTOS_BAIXA_QUALIDADE" ${settings.batchStatus === 'FOTOS_BAIXA_QUALIDADE' ? 'selected' : ''}>📉 Apenas Fotos de Baixa Qualidade (<800px)</option>
-                <option value="COLECAO_COMPLETA" ${settings.batchStatus === 'COLECAO_COMPLETA' ? 'selected' : ''}>📦 Coleção Completa (Todos os Itens)</option>
-                <option value="MODO_B_DESATUALIZADO" ${settings.batchStatus === 'MODO_B_DESATUALIZADO' ? 'selected' : ''}>⚠️ Violação Regra (Faca/ArmorX/Fusion)</option>
-                <option value="SEM_DESCRICAO" ${settings.batchStatus === 'SEM_DESCRICAO' ? 'selected' : ''}>🔴 Sem Descrição</option>
-                <option value="IMAGENS_QUEBRADAS" ${settings.batchStatus === 'IMAGENS_QUEBRADAS' ? 'selected' : ''}>🖼️ Fotos S3 Quebradas</option>
-              </select>
-              <select id="brk-sel-limit" class="brk-hud-select" title="Quantidade de Produtos no Lote">
-                <option value="25" ${Number(settings.batchLimit) === 25 ? 'selected' : ''}>25 códigos</option>
-                <option value="50" ${Number(settings.batchLimit) === 50 ? 'selected' : ''}>50 códigos</option>
-                <option value="100" ${Number(settings.batchLimit) === 100 ? 'selected' : ''}>100 códigos</option>
-              </select>
-            </div>
-            <div style="margin-bottom:8px;">
-              <input id="brk-inp-collection" type="text" value="${(settings.customCollection || '').replace(/"/g, '&quot;')}" placeholder="Opcional: Cole aqui a URL ou handle de qualquer coleção Shopify (ex: super-ofertas-🔥 ou iscas-artificiais)" style="width:100%;background:#1e293b;color:#f8fafc;border:1px solid #334155;border-radius:6px;padding:5px 8px;font-size:11px;box-sizing:border-box;" />
-            </div>
-            <button id="brk-btn-start-custom-batch" class="brk-hud-btn brk-hud-btn-success" style="width:100%;justify-content:center;padding:8px 12px;font-size:12.5px;">
-              🚀 Iniciar Lote da Coleção / Categoria Selecionada
-            </button>
           </div>
+        ` : ''}
 
-          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-            <button id="brk-btn-so-criticos" class="brk-hud-btn" style="background:#7c2d12;border-color:#ea580c;color:#ffedd5;" title="Abre os produtos críticos da coleção Super Ofertas 🔥 (Cores sem foto vinculada + Fotos duplicadas) pausando para ajuste visual + Modo B">
-              🔥 Super Ofertas: Críticos Cor/Duplicada
-            </button>
-            <button id="brk-btn-so-all80" class="brk-hud-btn" style="background:#0c4a6e;border-color:#0284c7;color:#bae6fd;" title="Roda o lote em todos os produtos da coleção Super Ofertas 🔥 que precisam de ajuste">
-              🔥 Super Ofertas: Lote Completo (${soStats.needs_media_fix || 83})
-            </button>
-            <button id="brk-btn-fix-violations" class="brk-hud-btn" title="Corrige prioritariamente os códigos colados com violação (Faca Marine MFK75T, ArmorX com Tabela de Luvas, Fusion/Hybrid)">
-              ⚡ Violações (${stats?.modo_b_desatualizado_count || 21})
-            </button>
+        <div style="background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:9px 11px;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:6px;">
+            <span style="font-weight:700;color:${currentTheme.light};font-size:11px;">🎯 Configurar Lote por Coleção ou Categoria</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <label class="brk-hud-toggle" title="Injeta, clica em Salvar e avança sozinho">
+                <input type="checkbox" id="brk-list-chk-autopilot" ${settings.autoPilot ? 'checked' : ''} style="accent-color:#22c55e;" />
+                <strong style="color:#4ade80;font-size:10.5px;">🤖 Auto-Save</strong>
+              </label>
+              <label class="brk-hud-toggle" title="Pausa o Auto-Save quando o produto tiver cor sem foto vinculada ou foto duplicada">
+                <input type="checkbox" id="brk-list-chk-pause-media" ${settings.pauseOnMediaError ? 'checked' : ''} style="accent-color:#f59e0b;" />
+                <span style="color:#fbbf24;font-size:10.5px;">⏸️ Pausar em Cor s/ Foto</span>
+              </label>
+            </div>
           </div>
-        `}
+          <div style="display:grid;grid-template-columns:1.1fr 1.1fr 0.55fr;gap:6px;margin-bottom:6px;">
+            <select id="brk-sel-category" class="brk-hud-select" title="Filtrar por Coleção/Categoria">
+              <option value="super_ofertas" ${settings.batchCategory === 'super_ofertas' ? 'selected' : ''}>🔥 Coleção: Super Ofertas Fishing (91 itens)</option>
+              <option value="ALL" ${settings.batchCategory === 'ALL' ? 'selected' : ''}>📂 Todas as Coleções da Loja</option>
+              <option value="iscas_artificiais" ${settings.batchCategory === 'iscas_artificiais' ? 'selected' : ''}>🎣 Iscas Artificiais</option>
+              <option value="equipamentos_pesca" ${settings.batchCategory === 'equipamentos_pesca' ? 'selected' : ''}>⚙️ Varas, Carretilhas, Molinetes & Alicates</option>
+              <option value="linhas_pesca" ${settings.batchCategory === 'linhas_pesca' ? 'selected' : ''}>🧵 Linhas de Pesca</option>
+              <option value="bones_chapeus" ${settings.batchCategory === 'bones_chapeus' ? 'selected' : ''}>🧢 Bonés & Chapéus</option>
+              <option value="camisas" ${settings.batchCategory === 'camisas' ? 'selected' : ''}>👕 Camisas (Fusion/Hybrid/ArmorX/C0)</option>
+              <option value="calcas" ${settings.batchCategory === 'calcas' ? 'selected' : ''}>👖 Calças & Bermudas</option>
+              <option value="corta_vento" ${settings.batchCategory === 'corta_vento' ? 'selected' : ''}>🧥 Corta-Vento & Jaquetas</option>
+              <option value="infantil" ${settings.batchCategory === 'infantil' ? 'selected' : ''}>🧒 Linha Infantil (2 a 13 Anos)</option>
+              <option value="feminino" ${settings.batchCategory === 'feminino' ? 'selected' : ''}>👚 Linha Feminina (Baby Look)</option>
+              <option value="CUSTOM_COLLECTION" ${settings.batchCategory === 'CUSTOM_COLLECTION' ? 'selected' : ''}>🔗 Outra Coleção (Digitar URL/Handle abaixo)</option>
+            </select>
+            <select id="brk-sel-status" class="brk-hud-select" title="Filtrar por Modo de Triagem (Diretrizes Modo B ou Pente Fino de Fotos)">
+              <option value="COLECAO_COMPLETA" ${settings.batchStatus === 'COLECAO_COMPLETA' ? 'selected' : ''}>📦 Coleção Completa (Aplicar em Todos os Itens)</option>
+              <option value="FORA_DIRETRIZES" ${settings.batchStatus === 'FORA_DIRETRIZES' ? 'selected' : ''}>🎯 Todos Fora das Diretrizes Modo B</option>
+              <option value="AJUSTE_FOTOS_GERAL" ${settings.batchStatus === 'AJUSTE_FOTOS_GERAL' ? 'selected' : ''}>🔥 Pente Fino: Todos c/ Ajuste de Foto/Cor</option>
+              <option value="CRITICOS_FOTOS_CORES" ${settings.batchStatus === 'CRITICOS_FOTOS_CORES' ? 'selected' : ''}>🚨 Críticos: Cor sem Foto + Fotos Duplicadas</option>
+              <option value="COR_SEM_FOTO" ${settings.batchStatus === 'COR_SEM_FOTO' ? 'selected' : ''}>🧩 Apenas Cores Sem Foto (image_id=null)</option>
+              <option value="FOTOS_DUPLICADAS" ${settings.batchStatus === 'FOTOS_DUPLICADAS' ? 'selected' : ''}>👯 Apenas Fotos Duplicadas na Galeria/Cores</option>
+              <option value="FOTOS_BAIXA_QUALIDADE" ${settings.batchStatus === 'FOTOS_BAIXA_QUALIDADE' ? 'selected' : ''}>📉 Apenas Fotos de Baixa Qualidade (<800px)</option>
+              <option value="MODO_B_DESATUALIZADO" ${settings.batchStatus === 'MODO_B_DESATUALIZADO' ? 'selected' : ''}>⚠️ Violação Regra (Faca/ArmorX/Fusion)</option>
+              <option value="SEM_DESCRICAO" ${settings.batchStatus === 'SEM_DESCRICAO' ? 'selected' : ''}>🔴 Sem Descrição</option>
+              <option value="IMAGENS_QUEBRADAS" ${settings.batchStatus === 'IMAGENS_QUEBRADAS' ? 'selected' : ''}>🖼️ Fotos S3 Quebradas</option>
+            </select>
+            <select id="brk-sel-limit" class="brk-hud-select" title="Quantidade de Produtos no Lote">
+              <option value="100" ${Number(settings.batchLimit) === 100 ? 'selected' : ''}>100 códigos</option>
+              <option value="50" ${Number(settings.batchLimit) === 50 ? 'selected' : ''}>50 códigos</option>
+              <option value="25" ${Number(settings.batchLimit) === 25 ? 'selected' : ''}>25 códigos</option>
+            </select>
+          </div>
+          <div style="margin-bottom:8px;">
+            <input id="brk-inp-collection" type="text" value="${(settings.customCollection || '').replace(/"/g, '&quot;')}" placeholder="Opcional: Cole aqui a URL ou handle de qualquer coleção Shopify (ex: super-ofertas-🔥 ou iscas-artificiais)" style="width:100%;background:#1e293b;color:#f8fafc;border:1px solid #334155;border-radius:6px;padding:5px 8px;font-size:11px;box-sizing:border-box;" />
+          </div>
+          <button id="brk-btn-start-custom-batch" class="brk-hud-btn brk-hud-btn-success" style="width:100%;justify-content:center;padding:8px 12px;font-size:12.5px;">
+            🚀 Iniciar Lote Automático da Coleção / Categoria Selecionada
+          </button>
+        </div>
+
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <button id="brk-btn-so-all80" class="brk-hud-btn" style="background:#0c4a6e;border-color:#0284c7;color:#bae6fd;flex:1;justify-content:center;" title="Roda o lote nos 83 produtos da coleção Super Ofertas 🔥 que possuem alertas de foto">
+            🔥 Super Ofertas: 83 c/ Alerta Visual
+          </button>
+          <button id="brk-btn-fix-violations" class="brk-hud-btn" title="Corrige prioritariamente os códigos colados com violação (Faca Marine MFK75T, ArmorX com Tabela de Luvas, Fusion/Hybrid)">
+            ⚡ Violações (${stats?.modo_b_desatualizado_count || 21})
+          </button>
+        </div>
       `;
 
       bindCodeRowClicks();
@@ -1520,15 +1654,43 @@
         };
       }
 
+      const btnSoAll91Direct = document.getElementById("brk-btn-so-all91-direct");
+      if (btnSoAll91Direct) {
+        btnSoAll91Direct.onclick = () => {
+          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
+          saveSettings({
+            batchCategory: "super_ofertas",
+            batchStatus: "COLECAO_COMPLETA",
+            batchLimit: 100,
+            autoPilot: true,
+            autoSave: true,
+            skipAlreadyModeB: false,
+            pauseOnMediaError: false
+          });
+          startQueueFromDatabase("COLECAO_COMPLETA", 100, "super_ofertas", "super-ofertas-🔥");
+        };
+      }
+
       const btnCustomBatch = document.getElementById("brk-btn-start-custom-batch");
       if (btnCustomBatch) {
         btnCustomBatch.onclick = () => {
           const cat = document.getElementById("brk-sel-category")?.value || "ALL";
-          const st = document.getElementById("brk-sel-status")?.value || "FORA_DIRETRIZES";
+          const st = document.getElementById("brk-sel-status")?.value || "COLECAO_COMPLETA";
           const lim = parseInt(document.getElementById("brk-sel-limit")?.value || "100", 10);
           const colInput = (document.getElementById("brk-inp-collection")?.value || "").trim();
           const finalCol = colInput || (cat === "super_ofertas" ? "super-ofertas-🔥" : "");
-          saveSettings({ batchCategory: cat, batchStatus: st, batchLimit: lim, customCollection: colInput });
+          if (st === "COLECAO_COMPLETA" || cat === "super_ofertas") {
+            GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
+          }
+          saveSettings({
+            batchCategory: cat,
+            batchStatus: st,
+            batchLimit: lim,
+            customCollection: colInput,
+            autoPilot: true,
+            autoSave: true,
+            skipAlreadyModeB: st !== "COLECAO_COMPLETA"
+          });
           startQueueFromDatabase(st, lim, cat === "CUSTOM_COLLECTION" ? "ALL" : cat, finalCol);
         };
       }
@@ -1536,7 +1698,8 @@
       const btnSoCriticos = document.getElementById("brk-btn-so-criticos");
       if (btnSoCriticos) {
         btnSoCriticos.onclick = () => {
-          saveSettings({ batchCategory: "super_ofertas", batchStatus: "CRITICOS_FOTOS_CORES", batchLimit: 100, pauseOnMediaError: true, autoPilot: true, autoSave: true });
+          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
+          saveSettings({ batchCategory: "super_ofertas", batchStatus: "CRITICOS_FOTOS_CORES", batchLimit: 100, pauseOnMediaError: true, autoPilot: true, autoSave: true, skipAlreadyModeB: false });
           startQueueFromDatabase("CRITICOS_FOTOS_CORES", 100, "super_ofertas", "super-ofertas-🔥");
         };
       }
@@ -1544,7 +1707,8 @@
       const btnSoAll80 = document.getElementById("brk-btn-so-all80");
       if (btnSoAll80) {
         btnSoAll80.onclick = () => {
-          saveSettings({ batchCategory: "super_ofertas", batchStatus: "AJUSTE_FOTOS_GERAL", batchLimit: 100, autoPilot: true, autoSave: true });
+          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
+          saveSettings({ batchCategory: "super_ofertas", batchStatus: "AJUSTE_FOTOS_GERAL", batchLimit: 100, autoPilot: true, autoSave: true, skipAlreadyModeB: false, pauseOnMediaError: false });
           startQueueFromDatabase("AJUSTE_FOTOS_GERAL", 100, "super_ofertas", "super-ofertas-🔥");
         };
       }
@@ -1578,7 +1742,11 @@
           "COR_SEM_FOTO",
           "FOTOS_DUPLICADAS",
           "FOTOS_BAIXA_QUALIDADE"
-        ].includes(statusFilter);
+        ].includes(statusFilter) || categoryFilter === "super_ofertas" || Boolean(collectionHandle);
+
+        if (isMediaAuditMode) {
+          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
+        }
 
         const excludeParam = isMediaAuditMode ? "" : encodeURIComponent(getCompliantIds().slice(-300).join(","));
         const queryUrl = `/api/product_db?store=${currentStoreKey}&action=queue&status=${encodeURIComponent(statusFilter)}&category=${encodeURIComponent(categoryFilter)}&collection=${encodeURIComponent(collectionHandle || "")}&limit=${limit}&exclude_ids=${excludeParam}`;

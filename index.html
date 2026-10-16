@@ -192,15 +192,40 @@
         <button data-filter="colado" class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200" title="Descrições Modo B já coladas e confirmadas na vitrine">🛰️ Colados (<span id="count-colado">0</span>)</button>
         <button data-filter="recolar" class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200" title="Modo B colado desatualizado ou sem marcador de rastreio: cole novamente">🔁 Recolar (<span id="count-recolar">0</span>)</button>
       </div>
-      <div class="w-full flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100">
+      <div class="w-full flex flex-wrap items-center gap-2.5 pt-2 border-t border-slate-100">
         <button id="btn-live-agent" onclick="LiveAgent.refresh(true)" title="Lê a vitrine pública da loja (somente leitura) e atualiza o status real das descrições" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-700 text-white rounded-xl text-[11px] font-extrabold transition-all active:scale-95">🛰️ Verificar descrições ao vivo</button>
         <span id="live-agent-status" class="text-[11px] font-semibold text-slate-500">🛰️ Aguardando verificação da vitrine…</span>
         <div class="h-4 w-[1px] bg-slate-200 hidden sm:block"></div>
-        <button id="btn-tm-queue" onclick="sendBatchToTampermonkey(25)" title="Envia os próximos 25 produtos sem descrição para o Assistente Tampermonkey no Chrome" class="px-3 py-1.5 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white rounded-xl text-[11px] font-extrabold shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
-          <span>⚡ Fila Tampermonkey (25)</span>
+        <button id="btn-tm-super-ofertas" onclick="sendCollectionToTampermonkey('super_ofertas', 'COLECAO_COMPLETA', 100)" title="Aplica automaticamente as descrições Modo B v5 em todos os 91 produtos da Coleção Super Ofertas 🔥" class="px-3.5 py-1.5 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white rounded-xl text-[11px] font-extrabold shadow-md transition-all flex items-center gap-1.5 active:scale-95">
+          <span>🔥 Auto-Aplicar Toda Coleção Super Ofertas (91)</span>
+        </button>
+        <button id="btn-tm-super-ofertas-criticos" onclick="sendCollectionToTampermonkey('super_ofertas', 'CRITICOS_FOTOS_CORES', 100)" title="Enfileira os produtos críticos de Super Ofertas (Cores sem foto + Fotos duplicadas)" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-[11px] font-extrabold shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
+          <span>🚨 Super Ofertas: Críticos Foto/Cor</span>
+        </button>
+        <button id="btn-tm-queue" onclick="sendBatchToTampermonkey(25)" title="Envia os próximos 25 produtos fora das diretrizes para o Assistente Tampermonkey no Chrome" class="px-3 py-1.5 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white rounded-xl text-[11px] font-extrabold shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
+          <span>⚡ Fila Geral (25)</span>
         </button>
         <button id="btn-tm-settings" onclick="openTampermonkeyModal()" title="Instruções e status do Userscript Tampermonkey" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-[11px] font-bold transition-all">
-          <span>⚙️ Script</span>
+          <span>⚙️ Script v5.2</span>
+        </button>
+      </div>
+      <div class="w-full flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+        <span class="text-[11px] font-extrabold text-slate-700">🔗 Automação por Coleção Shopify:</span>
+        <select id="portal-collection-select" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none">
+          <option value="super_ofertas">🔥 Coleção Super Ofertas Fishing (91 produtos)</option>
+          <option value="iscas_artificiais">🎣 Iscas Artificiais</option>
+          <option value="equipamentos_pesca">⚙️ Varas, Carretilhas, Molinetes & Alicates</option>
+          <option value="linhas_pesca">🧵 Linhas de Pesca</option>
+          <option value="camisas">👕 Camisas (Fusion / Hybrid / ArmorX / C0)</option>
+          <option value="bones_chapeus">🧢 Bonés & Chapéus</option>
+          <option value="calcas">👖 Calças & Bermudas</option>
+          <option value="corta_vento">🧥 Corta-Vento & Jaquetas</option>
+          <option value="infantil">🧒 Linha Infantil</option>
+          <option value="feminino">👚 Linha Feminina (Baby Look)</option>
+        </select>
+        <input id="portal-collection-url" type="text" placeholder="Ou cole URL/handle de qualquer coleção (ex: super-ofertas-🔥)" class="flex-1 min-w-[220px] px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none" />
+        <button onclick="sendCustomCollectionFromPortal()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[11px] font-extrabold shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
+          <span>🤖 Rodar Coleção no Piloto Automático</span>
         </button>
       </div>
     </section>
@@ -225,18 +250,16 @@
   <main id="section-mass" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
     <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white p-6 rounded-3xl border border-slate-800 shadow-xl flex flex-wrap items-center justify-between gap-6">
       <div class="space-y-1.5 max-w-2xl">
-        <span class="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-[11px] font-extrabold uppercase tracking-wider border border-amber-500/30">Motor de Correção em Lote</span>
-        <h2 class="text-2xl font-extrabold font-heading">Fila de Geração em Massa por SKU</h2>
+        <span class="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-[11px] font-extrabold uppercase tracking-wider border border-amber-500/30">Motor de Correção em Lote & Coleções</span>
+        <h2 class="text-2xl font-extrabold font-heading">Fila de Geração em Massa por SKU & Coleções</h2>
         <p class="text-xs text-slate-300 leading-relaxed">
-          Gere descrições em lote para todos os produtos sem texto ou com fotos quebradas da AWS S3. 
-          O motor aplica automaticamente o <strong>Molde Mestre da Categoria</strong>, vincula as fotos oficiais do CDN Shopify e envia diretamente para o Assistente Tampermonkey v4.0 no Shopify Admin.
+          Gere e aplique descrições automaticamente para coleções inteiras (como <strong>Super Ofertas 🔥 — 91 produtos</strong>) ou para produtos fora das diretrizes Modo B v5.
         </p>
       </div>
 
       <div class="flex flex-wrap items-center gap-3">
-        <button onclick="executeMassBatch('mode_a_html')" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold shadow-lg transition-all flex items-center gap-2">
-          <span>🛠️ Gerar Lote: Modo A</span>
-          <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">Preservar HTML</span>
+        <button onclick="sendCollectionToTampermonkey('super_ofertas', 'COLECAO_COMPLETA', 100)" class="px-4 py-2.5 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white rounded-xl text-xs font-extrabold shadow-lg transition-all flex items-center gap-2">
+          <span>🔥 Auto-Aplicar Super Ofertas (91)</span>
         </button>
         <button onclick="executeMassBatch('mode_b_html')" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-lg transition-all flex items-center gap-2">
           <span>🚀 Gerar Lote: Modo B</span>

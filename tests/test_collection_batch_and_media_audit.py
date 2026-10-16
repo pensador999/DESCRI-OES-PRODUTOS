@@ -68,13 +68,14 @@ def test_super_ofertas_media_filter_counts():
     assert len(criticos) >= 40
 
 
-def test_tampermonkey_script_v5_1_features():
+def test_tampermonkey_script_v5_2_and_portal_collection_buttons():
     tm_path = os.path.join(BASE_DIR, "tampermonkey", "brk_assistente_shopify.user.js")
     with open(tm_path, "r", encoding="utf-8") as f:
         code = f.read()
 
-    assert 'const SCRIPT_VERSION = "5.1.0";' in code
+    assert 'const SCRIPT_VERSION = "5.2.0";' in code
     assert 'value="super_ofertas"' in code
+    assert 'value="COLECAO_COMPLETA"' in code
     assert 'value="AJUSTE_FOTOS_GERAL"' in code
     assert 'value="CRITICOS_FOTOS_CORES"' in code
     assert 'value="COR_SEM_FOTO"' in code
@@ -83,3 +84,19 @@ def test_tampermonkey_script_v5_1_features():
     assert 'function renderMediaAuditAlertBox(prod)' in code
     assert 'pauseOnMediaError' in code
     assert 'brk-inp-collection' in code
+    assert 'brk-btn-so-all91-direct' in code
+    assert 'brk-tm-float-so-all' in code
+
+    idx_path = os.path.join(BASE_DIR, "index.html")
+    with open(idx_path, "r", encoding="utf-8") as f:
+        idx_html = f.read()
+    assert "sendCollectionToTampermonkey('super_ofertas', 'COLECAO_COMPLETA', 100)" in idx_html
+    assert 'id="btn-tm-super-ofertas"' in idx_html
+    assert 'id="portal-collection-select"' in idx_html
+
+    app_js_path = os.path.join(BASE_DIR, "js", "app.js")
+    with open(app_js_path, "r", encoding="utf-8") as f:
+        app_js = f.read()
+    assert "async function sendCollectionToTampermonkey(" in app_js
+    assert "function sendCustomCollectionFromPortal(" in app_js
+
