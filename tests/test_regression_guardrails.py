@@ -1331,7 +1331,9 @@ class TestBRKStudioVerticalization(unittest.TestCase):
             "vendor": "MARINE SPORTS",
             "images": ["https://cdn.shopify.com/s/files/1/0628/1445/3826/files/Faca_de_file_marine_sports_teflon_7_5_19cm_mfk75t-1.webp"],
         }
-        enr_mfk = template_engine.generate_narrative_from_template(faca_mfk, "knives_cutlery", faca_mfk["images"], store_key="brk_fishing")
+        arch_mfk = template_engine.detect_archetype(faca_mfk["title"], "", [], faca_mfk["vendor"], sku=faca_mfk["master_sku"])
+        self.assertEqual(arch_mfk, "cutlery_unique")
+        enr_mfk = template_engine.generate_narrative_from_template(faca_mfk, arch_mfk, faca_mfk["images"], store_key="brk_fishing")
         html_mfk = html_builder.build_shopify_html(enr_mfk)
         self.assertNotIn("bainha", html_mfk.lower(), "Faca Marine MFK75T não acompanha bainha e jamais deve mencionar bainha!")
         self.assertIn("Revestimento Teflon & Olhal para Fiel", html_mfk)
