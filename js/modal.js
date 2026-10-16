@@ -663,7 +663,6 @@ function buildClientModeBMarkdown(liveP) {
   lines.push(`---`);
   lines.push(`- **Qualidade Oficial BRK:** Matérias-primas nobres testadas`);
   lines.push(`- **Envio Rápido & Seguro:** Rastreamento de ponta a ponta`);
-  lines.push(`- **Troca Descomplicada:** Satisfação garantida ou seu dinheiro de volta`);
 
   if (showCopyright) {
     lines.push(`\n> **Aviso de Propriedade Intelectual:** Nossas estampas são protegidas pela Lei de Direitos Autorais (Lei 9.610/98) a Reprodução não autorizada está sujeita às penalidades legais. Copiar é crime !\n`);
@@ -1134,9 +1133,9 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "sub": "Retrovisor Interno"
     },
     {
-      "icon": "return",
-      "title": "Troca Descomplicada",
-      "sub": "Satisfação Garantida"
+      "icon": "sparkle",
+      "title": "Garantia Oficial BRK",
+      "sub": "Procedência 100% Original"
     }
   ],
   "accessories_general": [
@@ -1156,9 +1155,9 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "sub": "Colecionável Oficial"
     },
     {
-      "icon": "return",
-      "title": "Troca Descomplicada",
-      "sub": "Satisfação Garantida"
+      "icon": "sparkle",
+      "title": "Garantia Oficial BRK",
+      "sub": "Procedência 100% Original"
     }
   ],
   "books_publications": [
@@ -1190,7 +1189,7 @@ function buildClientQuickBadges(themeColor, themeBg, archetypeId, liveP) {
     { icon: "shield", title: "Qualidade Oficial", sub: "Matéria-Prima Selecionada" },
     { icon: "sparkle", title: "Acabamento Premium", sub: "Rigoroso Padrão BRK" },
     { icon: "truck", title: "Envio Rápido & Seguro", sub: "Rastreamento Completo" },
-    { icon: "return", title: "Troca Descomplicada", sub: "Satisfação Garantida" }
+    { icon: "sparkle", title: "Garantia Oficial BRK", sub: "Procedência 100% Original" }
   ];
 
   const itemsHtml = badges.map(b => `    <div class="brk-badge-item">
@@ -1455,7 +1454,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
 }
 
 // Versao do padrao Modo B (espelha core/html_builder.py::MODO_B_VERSION; teste de paridade garante).
-const MODO_B_VERSION = "1";
+const MODO_B_VERSION = "2";
 
 function buildClientTrackingMarker(sku, archetypeId) {
   const clean = (v) => String(v || "").replace(/[^A-Za-z0-9_.\-]/g, "").slice(0, 60).replace(/--/g, "-");
@@ -3553,7 +3552,7 @@ function getProductModeBHTML(liveP) {
     .brk-desc-trust-bar {
       margin-top: 32px;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
       text-align: center;
     }
@@ -3671,13 +3670,6 @@ ${sizeGuideHtml}
       <div>
         <div class="brk-trust-title">Envio Rápido & Seguro</div>
         <div class="brk-trust-desc">Rastreamento de ponta a ponta</div>
-      </div>
-    </div>
-    <div class="brk-trust-item">
-      <span class="brk-trust-svg">${getSvgIcon('return', themeColor, 24)}</span>
-      <div>
-        <div class="brk-trust-title">Troca Descomplicada</div>
-        <div class="brk-trust-desc">Satisfação garantida ou seu dinheiro de volta</div>
       </div>
     </div>
   </div>

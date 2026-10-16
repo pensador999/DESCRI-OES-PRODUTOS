@@ -29,7 +29,7 @@ except ImportError:
 
 # Versao do padrao Modo B. Ao evoluir moldes/layout, incremente: o catalogo ao vivo
 # passa a listar como "Desatualizado" tudo que estiver colado com versao anterior.
-MODO_B_VERSION = "1"
+MODO_B_VERSION = "2"
 
 
 def brk_tracking_marker(sku: str, archetype_id: str) -> str:
@@ -177,13 +177,13 @@ QUICK_BADGES_BY_ARCHETYPE: Dict[str, List[Dict[str, str]]] = {
         {"icon": "sparkle", "title": "Fragrância Contínua", "sub": "Liberação Gradual"},
         {"icon": "care", "title": "Longa Duração", "sub": "Perfume Prolongado"},
         {"icon": "gear", "title": "Suspensão Prática", "sub": "Retrovisor Interno"},
-        {"icon": "return", "title": "Troca Descomplicada", "sub": "Satisfação Garantida"},
+        {"icon": "sparkle", "title": "Garantia Oficial BRK", "sub": "Procedência 100% Original"},
     ],
     "accessories_general": [
         {"icon": "shield", "title": "Resistente à Água", "sub": "E à Exposição Solar"},
         {"icon": "care", "title": "Material Reforçado", "sub": "Alta Resistência"},
         {"icon": "sparkle", "title": "Item Original BRK", "sub": "Colecionável Oficial"},
-        {"icon": "return", "title": "Troca Descomplicada", "sub": "Satisfação Garantida"},
+        {"icon": "sparkle", "title": "Garantia Oficial BRK", "sub": "Procedência 100% Original"},
     ],
     "books_publications": [
         {"icon": "sparkle", "title": "Impressão em Alta Definição", "sub": "Ilustrações Detalhadas"},
@@ -274,7 +274,7 @@ class HTMLBuilder:
             {"icon": "shield", "title": "Qualidade Oficial", "sub": "Matéria-Prima Selecionada"},
             {"icon": "sparkle", "title": "Acabamento Premium", "sub": "Rigoroso Padrão BRK"},
             {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Rastreamento Completo"},
-            {"icon": "return", "title": "Troca Descomplicada", "sub": "Satisfação Garantida"},
+            {"icon": "sparkle", "title": "Garantia Oficial BRK", "sub": "Procedência 100% Original"},
         ]
         return self._render_quick_badges(theme_color, badges)
 
@@ -2183,7 +2183,7 @@ class HTMLBuilder:
     .brk-desc-trust-bar {{
       margin-top: 32px;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
       text-align: center;
     }}
@@ -2303,13 +2303,6 @@ class HTMLBuilder:
       <div>
         <div class="brk-trust-title">Envio Rápido & Seguro</div>
         <div class="brk-trust-desc">Rastreamento de ponta a ponta</div>
-      </div>
-    </div>
-    <div class="brk-trust-item">
-      <span class="brk-trust-svg">{get_svg_icon('return', color=theme_color, size=24)}</span>
-      <div>
-        <div class="brk-trust-title">Troca Descomplicada</div>
-        <div class="brk-trust-desc">Satisfação garantida ou seu dinheiro de volta</div>
       </div>
     </div>
   </div>
@@ -2451,7 +2444,6 @@ class HTMLBuilder:
         md_parts.append("---")
         md_parts.append("- 🛡️ **Qualidade Oficial BRK:** Matérias-primas nobres testadas")
         md_parts.append("- 🚚 **Envio Rápido & Seguro:** Rastreamento de ponta a ponta")
-        md_parts.append("- 🔄 **Troca Descomplicada:** Satisfação garantida ou seu dinheiro de volta")
 
         if show_copyright:
             md_parts.append("\n> **Aviso de Propriedade Intelectual:** Nossas estampas são protegidas pela Lei de Direitos Autorais (Lei 9.610/98) a Reprodução não autorizada está sujeita às penalidades legais. Copiar é crime !\n")

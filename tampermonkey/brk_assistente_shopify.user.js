@@ -1,18 +1,20 @@
 // ==UserScript==
-// @name         BRK Assistente de Descrições Shopify (Conectado ao Banco Real v5.2 Auto-Lote Coleções)
+// @name         BRK Assistente de Descrições Shopify (Conectado ao Banco Real v5.3 Rastreio & Sem Troca Descomplicada)
 // @namespace    https://1025-ten.vercel.app/
-// @version      5.2.0
-// @description  Automação 100% automática por Coleções Shopify (incluindo botão dedicado para aplicar em toda a coleção Super Ofertas 🔥 BRK Fishing - 91 produtos) conectada ao banco de dados oficial BRK. Injeta Modo B v5, clica em Salvar automaticamente e avança sozinho.
+// @version      5.3.0
+// @description  Automação 100% automática por Coleções Shopify (89/91 Super Ofertas 🔥 + 32 Camisas/Outros Rastreados sem Troca Descomplicada) conectada ao banco de dados oficial BRK. Injeta Modo B v2/v5, clica em Salvar automaticamente e avança sozinho.
 // @author       BRK Group & DeepMind Pair
 // @match        https://admin.shopify.com/store/*/products*
 // @match        https://admin.shopify.com/store/*
 // @match        https://1025-ten.vercel.app/*
+// @match        https://descricoes.vercel.app/*
 // @match        https://www.brkfishing.com.br/collections/*
 // @match        https://www.brkagro.com.br/collections/*
 // @match        https://www.brkmotors.com.br/collections/*
 // @match        http://localhost:*/*
 // @match        http://127.0.0.1:*/*
 // @connect      1025-ten.vercel.app
+// @connect      descricoes.vercel.app
 // @connect      www.brkfishing.com.br
 // @connect      www.brkagro.com.br
 // @connect      www.brkmotors.com.br
@@ -30,9 +32,9 @@
 (function() {
   'use strict';
 
-  // Configuração da API do Banco de Dados BRK (6.408 produtos auditados nas 3 lojas)
+  // Configuração da API do Banco de Dados BRK (6.409 produtos auditados nas 3 lojas)
   const API_BASE = "https://1025-ten.vercel.app";
-  const SCRIPT_VERSION = "5.2.0";
+  const SCRIPT_VERSION = "5.3.0";
 
   const STORAGE_KEYS = {
     QUEUE: "BRK_AUTOSYNC_QUEUE",
@@ -293,10 +295,13 @@
           ${q.length > 0 ? `🤖 v${SCRIPT_VERSION} | Fila: ${idx + 1}/${q.length} (${active ? 'Ativa' : 'Pausada'})` : `🟢 Tampermonkey v${SCRIPT_VERSION} Ativo`}
         </span>
         <button id="brk-tm-float-so-all" style="background:linear-gradient(90deg,#ea580c,#dc2626);color:#fff;border:none;border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:800;cursor:pointer;box-shadow:0 2px 8px rgba(234,88,12,0.4);">
-          🔥 Auto-Aplicar Toda Coleção Super Ofertas (91)
+          🔥 Auto-Atualizar Super Ofertas (91)
+        </button>
+        <button id="brk-tm-float-tracked-32" style="background:linear-gradient(90deg,#0284c7,#0369a1);color:#fff;border:none;border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:800;cursor:pointer;box-shadow:0 2px 8px rgba(2,132,199,0.4);">
+          👕 Auto-Atualizar 32 Camisas/Outros Rastreados
         </button>
         ${isStorefrontCollection && currentColHandle ? `
-          <button id="brk-tm-float-this-col" style="background:#0284c7;color:#fff;border:none;border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:800;cursor:pointer;">
+          <button id="brk-tm-float-this-col" style="background:#0f766e;color:#fff;border:none;border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:800;cursor:pointer;">
             🚀 Auto-Aplicar Esta Coleção (${currentColHandle})
           </button>
         ` : ''}
@@ -305,13 +310,18 @@
       const statusSpan = document.getElementById("brk-tm-bar-status");
       if (statusSpan) {
         statusSpan.onclick = () => {
-          alert(`[Assistente BRK v${SCRIPT_VERSION} — Piloto Automático de Coleções]\n\nFila Atual: ${q.length} produtos\nPosição: ${q.length ? (idx + 1) : 0} de ${q.length}\nPiloto Automático: ${active ? "ATIVO" : "PAUSADO"}\n\nClique no botão laranja '🔥 Auto-Aplicar Toda Coleção Super Ofertas (91)' para iniciar imediatamente a aplicação automática das descrições Modo B v5 no Shopify Admin!`);
+          alert(`[Assistente BRK v${SCRIPT_VERSION} — Piloto Automático de Coleções]\n\nFila Atual: ${q.length} produtos\nPosição: ${q.length ? (idx + 1) : 0} de ${q.length}\nPiloto Automático: ${active ? "ATIVO" : "PAUSADO"}\n\n• Clique em '🔥 Auto-Atualizar Super Ofertas (91)' para atualizar todas as iscas/itens da coleção sem Troca Descomplicada.\n• Clique em '👕 Auto-Atualizar 32 Camisas/Outros Rastreados' para atualizar todas as 32 camisas/bandanas/facas já coladas na loja!`);
         };
       }
 
       const btnSoAll = document.getElementById("brk-tm-float-so-all");
       if (btnSoAll) {
         btnSoAll.onclick = () => launchCollectionDirectlyFromFloatingBar("super_ofertas", "COLECAO_COMPLETA", "super-ofertas-🔥");
+      }
+
+      const btnTracked32 = document.getElementById("brk-tm-float-tracked-32");
+      if (btnTracked32) {
+        btnTracked32.onclick = () => launchCollectionDirectlyFromFloatingBar("rastreados_camisas", "RASTREADOS_TROCA_DESCOMPLICADA", "");
       }
 
       const btnThisCol = document.getElementById("brk-tm-float-this-col");
@@ -716,6 +726,9 @@
 
       // Já tem estrutura Modo B, mas verificamos rigorosamente cada diretriz Modo B v5:
       const reasons = [];
+      if (/troca descomplicada|dinheiro de volta/i.test(currentHtml)) {
+        reasons.push("Rodapé antigo com 'Troca Descomplicada / Satisfação garantida ou seu dinheiro de volta'");
+      }
       if (currentHtml.includes("use-brk-images-s3")) {
         reasons.push("Links AWS S3 404 (13-Tags/CAIXA)");
       }
@@ -1321,14 +1334,14 @@
         </div>
 
         <div style="background:#17100b;border:1px solid #ea580c;border-radius:10px;padding:7px 9px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
-          <button id="brk-btn-start-super-ofertas" class="brk-hud-btn" style="flex:1;justify-content:center;background:linear-gradient(90deg,#ea580c,#dc2626);border-color:#f97316;color:#fff;font-size:11.5px;padding:7px 10px;" title="Aplica automaticamente as descrições Modo B v5 em TODOS os 91 produtos da Coleção Super Ofertas 🔥 (injeta, salva e avança sozinho)">
-            🔥 Auto-Aplicar Toda Coleção Super Ofertas (91)
+          <button id="brk-btn-start-super-ofertas" class="brk-hud-btn" style="flex:1;justify-content:center;background:linear-gradient(90deg,#ea580c,#dc2626);border-color:#f97316;color:#fff;font-size:11px;padding:7px 8px;" title="Atualiza automaticamente as 89/91 iscas/itens da Coleção Super Ofertas 🔥 (sem Troca Descomplicada)">
+            🔥 Super Ofertas (91)
+          </button>
+          <button id="brk-btn-start-tracked-32-prod" class="brk-hud-btn" style="flex:1;justify-content:center;background:linear-gradient(90deg,#0284c7,#0369a1);border-color:#38bdf8;color:#fff;font-size:11px;padding:7px 8px;" title="Atualiza automaticamente os 32 produtos (25 Camisas/Bandanas + 2 Facas + 3 Acessórios) rastreados fora da Super Ofertas para retirar 'Troca Descomplicada'">
+            👕 32 Camisas/Outros Rastreados
           </button>
           <button id="brk-btn-start-so-criticos-prod" class="brk-hud-btn" style="background:#7c2d12;border-color:#ea580c;color:#ffedd5;font-size:11px;padding:7px 8px;" title="Roda os produtos críticos de Foto/Cor da coleção Super Ofertas">
             🚨 Críticos Foto/Cor
-          </button>
-          <button id="brk-btn-start-autopilot-25" class="brk-hud-btn" style="font-size:11px;padding:7px 8px;" title="Busca códigos fora das diretrizes da loja toda e aplica no automático">
-            🤖 Auto-Lote (25)
           </button>
         </div>
       `;
@@ -1454,6 +1467,23 @@
         };
       }
 
+      const btnStartTracked32Prod = document.getElementById("brk-btn-start-tracked-32-prod");
+      if (btnStartTracked32Prod) {
+        btnStartTracked32Prod.onclick = () => {
+          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
+          saveSettings({
+            batchCategory: "rastreados_camisas",
+            batchStatus: "RASTREADOS_TROCA_DESCOMPLICADA",
+            batchLimit: 100,
+            autoPilot: true,
+            autoSave: true,
+            skipAlreadyModeB: false,
+            pauseOnMediaError: false
+          });
+          startQueueFromDatabase("RASTREADOS_TROCA_DESCOMPLICADA", 100, "rastreados_camisas", "");
+        };
+      }
+
       const btnStartSoCritProd = document.getElementById("brk-btn-start-so-criticos-prod");
       if (btnStartSoCritProd) {
         btnStartSoCritProd.onclick = () => {
@@ -1468,14 +1498,6 @@
             pauseOnMediaError: true
           });
           startQueueFromDatabase("CRITICOS_FOTOS_CORES", 100, "super_ofertas", "super-ofertas-🔥");
-        };
-      }
-
-      const btnStartAuto25 = document.getElementById("brk-btn-start-autopilot-25");
-      if (btnStartAuto25) {
-        btnStartAuto25.onclick = () => {
-          saveSettings({ autoPilot: true, autoSave: true, skipAlreadyModeB: true });
-          startQueueFromDatabase("FORA_DIRETRIZES", 25, "ALL");
         };
       }
     }
@@ -1506,18 +1528,23 @@
           </span>
         </div>
 
-        <!-- BOTÃO PRINCIPAL SEMPRE VISÍVEL PARA AUTO-APLICAR TODA A COLEÇÃO SUPER OFERTAS -->
+        <!-- BOTÕES PRINCIPAIS SEMPRE VISÍVEIS: 89/91 SUPER OFERTAS + 32 CAMISAS/OUTROS RASTREADOS -->
         <div style="background:linear-gradient(135deg,#431407,#1e1b4b);border:2px solid #ea580c;border-radius:12px;padding:10px 12px;margin-bottom:10px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-            <strong style="color:#fed7aa;font-size:12px;">🔥 AUTOMAÇÃO TOTAL — COLEÇÃO SUPER OFERTAS (91 ITENS)</strong>
+            <strong style="color:#fed7aa;font-size:11.5px;">🔄 REMOÇÃO "TROCA DESCOMPLICADA" — RASTREIO 121 PRODUTOS</strong>
             <span style="background:#ea580c;color:#fff;font-size:9.5px;font-weight:800;padding:1px 7px;border-radius:9999px;">1-CLIQUE</span>
           </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+            <button id="brk-btn-so-all91-direct" class="brk-hud-btn" style="flex:1;justify-content:center;background:linear-gradient(90deg,#ea580c,#dc2626);border-color:#f97316;color:#fff;font-size:11.5px;padding:8px 10px;box-shadow:0 4px 12px rgba(234,88,12,0.4);">
+              🔥 1º Lote: Auto-Atualizar Super Ofertas (91 Iscas/Itens)
+            </button>
+          </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button id="brk-btn-so-all91-direct" class="brk-hud-btn" style="flex:1;justify-content:center;background:linear-gradient(90deg,#ea580c,#dc2626);border-color:#f97316;color:#fff;font-size:12px;padding:8px 12px;box-shadow:0 4px 12px rgba(234,88,12,0.4);">
-              🔥 Auto-Aplicar Toda Coleção Super Ofertas (91 Produtos)
+            <button id="brk-btn-tracked-32-direct" class="brk-hud-btn" style="flex:1;justify-content:center;background:linear-gradient(90deg,#0284c7,#0369a1);border-color:#38bdf8;color:#fff;font-size:11.5px;padding:8px 10px;box-shadow:0 4px 12px rgba(2,132,199,0.4);">
+              👕 2º Lote: Auto-Atualizar 32 Camisas/Facas/Outros Rastreados
             </button>
             <button id="brk-btn-so-criticos" class="brk-hud-btn" style="background:#7c2d12;border-color:#ea580c;color:#ffedd5;font-size:11px;padding:8px 10px;" title="Abre os produtos críticos da coleção Super Ofertas 🔥 (Cores sem foto vinculada + Fotos duplicadas)">
-              🚨 Críticos Cor/Duplicada
+              🚨 Críticos Cor/Dup
             </button>
           </div>
         </div>
@@ -1571,6 +1598,7 @@
           <div style="display:grid;grid-template-columns:1.1fr 1.1fr 0.55fr;gap:6px;margin-bottom:6px;">
             <select id="brk-sel-category" class="brk-hud-select" title="Filtrar por Coleção/Categoria">
               <option value="super_ofertas" ${settings.batchCategory === 'super_ofertas' ? 'selected' : ''}>🔥 Coleção: Super Ofertas Fishing (91 itens)</option>
+              <option value="rastreados_camisas" ${settings.batchCategory === 'rastreados_camisas' ? 'selected' : ''}>👕 32 Camisas/Outros Já Aplicados (Fora Super Ofertas)</option>
               <option value="ALL" ${settings.batchCategory === 'ALL' ? 'selected' : ''}>📂 Todas as Coleções da Loja</option>
               <option value="iscas_artificiais" ${settings.batchCategory === 'iscas_artificiais' ? 'selected' : ''}>🎣 Iscas Artificiais</option>
               <option value="equipamentos_pesca" ${settings.batchCategory === 'equipamentos_pesca' ? 'selected' : ''}>⚙️ Varas, Carretilhas, Molinetes & Alicates</option>
@@ -1585,13 +1613,14 @@
             </select>
             <select id="brk-sel-status" class="brk-hud-select" title="Filtrar por Modo de Triagem (Diretrizes Modo B ou Pente Fino de Fotos)">
               <option value="COLECAO_COMPLETA" ${settings.batchStatus === 'COLECAO_COMPLETA' ? 'selected' : ''}>📦 Coleção Completa (Aplicar em Todos os Itens)</option>
+              <option value="RASTREADOS_TROCA_DESCOMPLICADA" ${settings.batchStatus === 'RASTREADOS_TROCA_DESCOMPLICADA' ? 'selected' : ''}>🔄 Rastreados c/ Troca Descomplicada (32 Camisas/Outros)</option>
               <option value="FORA_DIRETRIZES" ${settings.batchStatus === 'FORA_DIRETRIZES' ? 'selected' : ''}>🎯 Todos Fora das Diretrizes Modo B</option>
               <option value="AJUSTE_FOTOS_GERAL" ${settings.batchStatus === 'AJUSTE_FOTOS_GERAL' ? 'selected' : ''}>🔥 Pente Fino: Todos c/ Ajuste de Foto/Cor</option>
               <option value="CRITICOS_FOTOS_CORES" ${settings.batchStatus === 'CRITICOS_FOTOS_CORES' ? 'selected' : ''}>🚨 Críticos: Cor sem Foto + Fotos Duplicadas</option>
               <option value="COR_SEM_FOTO" ${settings.batchStatus === 'COR_SEM_FOTO' ? 'selected' : ''}>🧩 Apenas Cores Sem Foto (image_id=null)</option>
               <option value="FOTOS_DUPLICADAS" ${settings.batchStatus === 'FOTOS_DUPLICADAS' ? 'selected' : ''}>👯 Apenas Fotos Duplicadas na Galeria/Cores</option>
               <option value="FOTOS_BAIXA_QUALIDADE" ${settings.batchStatus === 'FOTOS_BAIXA_QUALIDADE' ? 'selected' : ''}>📉 Apenas Fotos de Baixa Qualidade (<800px)</option>
-              <option value="MODO_B_DESATUALIZADO" ${settings.batchStatus === 'MODO_B_DESATUALIZADO' ? 'selected' : ''}>⚠️ Violação Regra (Faca/ArmorX/Fusion)</option>
+              <option value="MODO_B_DESATUALIZADO" ${settings.batchStatus === 'MODO_B_DESATUALIZADO' ? 'selected' : ''}>⚠️ Violação Regra (Troca Descomplicada/Faca/ArmorX/Fusion)</option>
               <option value="SEM_DESCRICAO" ${settings.batchStatus === 'SEM_DESCRICAO' ? 'selected' : ''}>🔴 Sem Descrição</option>
               <option value="IMAGENS_QUEBRADAS" ${settings.batchStatus === 'IMAGENS_QUEBRADAS' ? 'selected' : ''}>🖼️ Fotos S3 Quebradas</option>
             </select>
@@ -1613,8 +1642,8 @@
           <button id="brk-btn-so-all80" class="brk-hud-btn" style="background:#0c4a6e;border-color:#0284c7;color:#bae6fd;flex:1;justify-content:center;" title="Roda o lote nos 83 produtos da coleção Super Ofertas 🔥 que possuem alertas de foto">
             🔥 Super Ofertas: 83 c/ Alerta Visual
           </button>
-          <button id="brk-btn-fix-violations" class="brk-hud-btn" title="Corrige prioritariamente os códigos colados com violação (Faca Marine MFK75T, ArmorX com Tabela de Luvas, Fusion/Hybrid)">
-            ⚡ Violações (${stats?.modo_b_desatualizado_count || 21})
+          <button id="brk-btn-fix-violations" class="brk-hud-btn" title="Corrige prioritariamente os códigos colados com violação (Troca Descomplicada, Faca Marine MFK75T, ArmorX, Fusion/Hybrid)">
+            ⚡ Violações (${stats?.modo_b_desatualizado_count || 121})
           </button>
         </div>
       `;
@@ -1671,6 +1700,23 @@
         };
       }
 
+      const btnTracked32Direct = document.getElementById("brk-btn-tracked-32-direct");
+      if (btnTracked32Direct) {
+        btnTracked32Direct.onclick = () => {
+          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
+          saveSettings({
+            batchCategory: "rastreados_camisas",
+            batchStatus: "RASTREADOS_TROCA_DESCOMPLICADA",
+            batchLimit: 100,
+            autoPilot: true,
+            autoSave: true,
+            skipAlreadyModeB: false,
+            pauseOnMediaError: false
+          });
+          startQueueFromDatabase("RASTREADOS_TROCA_DESCOMPLICADA", 100, "rastreados_camisas", "");
+        };
+      }
+
       const btnCustomBatch = document.getElementById("brk-btn-start-custom-batch");
       if (btnCustomBatch) {
         btnCustomBatch.onclick = () => {
@@ -1679,7 +1725,7 @@
           const lim = parseInt(document.getElementById("brk-sel-limit")?.value || "100", 10);
           const colInput = (document.getElementById("brk-inp-collection")?.value || "").trim();
           const finalCol = colInput || (cat === "super_ofertas" ? "super-ofertas-🔥" : "");
-          if (st === "COLECAO_COMPLETA" || cat === "super_ofertas") {
+          if (st === "COLECAO_COMPLETA" || st === "RASTREADOS_TROCA_DESCOMPLICADA" || cat === "super_ofertas" || cat === "rastreados_camisas") {
             GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
           }
           saveSettings({
@@ -1689,7 +1735,7 @@
             customCollection: colInput,
             autoPilot: true,
             autoSave: true,
-            skipAlreadyModeB: st !== "COLECAO_COMPLETA"
+            skipAlreadyModeB: st !== "COLECAO_COMPLETA" && st !== "RASTREADOS_TROCA_DESCOMPLICADA"
           });
           startQueueFromDatabase(st, lim, cat === "CUSTOM_COLLECTION" ? "ALL" : cat, finalCol);
         };
@@ -1716,8 +1762,9 @@
       const btnFixViolations = document.getElementById("brk-btn-fix-violations");
       if (btnFixViolations) {
         btnFixViolations.onclick = () => {
-          saveSettings({ autoPilot: true, autoSave: true });
-          startQueueFromDatabase("MODO_B_DESATUALIZADO", 30, "ALL");
+          GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
+          saveSettings({ autoPilot: true, autoSave: true, skipAlreadyModeB: false });
+          startQueueFromDatabase("MODO_B_DESATUALIZADO", 100, "ALL");
         };
       }
     }
@@ -1737,12 +1784,13 @@
       try {
         const isMediaAuditMode = [
           "COLECAO_COMPLETA",
+          "RASTREADOS_TROCA_DESCOMPLICADA",
           "AJUSTE_FOTOS_GERAL",
           "CRITICOS_FOTOS_CORES",
           "COR_SEM_FOTO",
           "FOTOS_DUPLICADAS",
           "FOTOS_BAIXA_QUALIDADE"
-        ].includes(statusFilter) || categoryFilter === "super_ofertas" || Boolean(collectionHandle);
+        ].includes(statusFilter) || categoryFilter === "super_ofertas" || categoryFilter === "rastreados_camisas" || Boolean(collectionHandle);
 
         if (isMediaAuditMode) {
           GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");

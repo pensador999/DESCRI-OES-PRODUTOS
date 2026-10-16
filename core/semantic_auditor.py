@@ -60,7 +60,7 @@ NEGATED_ZIPPER_RE = re.compile(r"sem\s+z[ií]per(?:es)?", re.IGNORECASE)
 ROD_RE = re.compile(r"\bvaras?\b", re.IGNORECASE)
 BADGE_TITLE_RE = re.compile(r'brk-badge-title">([^<]+)<')
 
-GENERIC_BADGE_TITLES = {"Qualidade Oficial", "Acabamento Premium", "Envio Rápido & Seguro", "Troca Descomplicada"}
+GENERIC_BADGE_TITLES = {"Qualidade Oficial", "Acabamento Premium", "Envio Rápido & Seguro", "Garantia Oficial BRK"}
 
 
 def _first(regex: "re.Pattern", text: str) -> Optional[str]:

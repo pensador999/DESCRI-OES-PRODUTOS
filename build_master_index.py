@@ -1564,7 +1564,7 @@ def build_master():
     .brk-desc-trust-bar {{
       margin-top: 32px;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
       text-align: center;
     }}
@@ -1697,13 +1697,6 @@ def build_master():
         <div class="brk-trust-desc">Rastreamento de ponta a ponta</div>
       </div>
     </div>
-    <div class="brk-trust-item">
-      <span class="brk-trust-emoji">🔄</span>
-      <div>
-        <div class="brk-trust-title">Troca Descomplicada</div>
-        <div class="brk-trust-desc">Satisfação garantida ou seu dinheiro de volta</div>
-      </div>
-    </div>
   </div>
 
 ${{copyrightBox}}
@@ -1751,7 +1744,6 @@ ${{copyrightBox}}
       lines.push(`---`);
       lines.push(`- 🛡️ **Qualidade Oficial BRK:** Matérias-primas nobres testadas`);
       lines.push(`- 🚚 **Envio Rápido & Seguro:** Rastreamento de ponta a ponta`);
-      lines.push(`- 🔄 **Troca Descomplicada:** Satisfação garantida ou seu dinheiro de volta`);
 
       if (showCopyright) {{
         lines.push(`\\n> **Aviso de Propriedade Intelectual:** Nossas estampas são protegidas pela Lei de Direitos Autorais (Lei 9.610/98) a Reprodução não autorizada está sujeita às penalidades legais. Copiar é crime !\\n`);

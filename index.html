@@ -196,8 +196,11 @@
         <button id="btn-live-agent" onclick="LiveAgent.refresh(true)" title="Lê a vitrine pública da loja (somente leitura) e atualiza o status real das descrições" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-700 text-white rounded-xl text-[11px] font-extrabold transition-all active:scale-95">🛰️ Verificar descrições ao vivo</button>
         <span id="live-agent-status" class="text-[11px] font-semibold text-slate-500">🛰️ Aguardando verificação da vitrine…</span>
         <div class="h-4 w-[1px] bg-slate-200 hidden sm:block"></div>
-        <button id="btn-tm-super-ofertas" onclick="sendCollectionToTampermonkey('super_ofertas', 'COLECAO_COMPLETA', 100)" title="Aplica automaticamente as descrições Modo B v5 em todos os 91 produtos da Coleção Super Ofertas 🔥" class="px-3.5 py-1.5 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white rounded-xl text-[11px] font-extrabold shadow-md transition-all flex items-center gap-1.5 active:scale-95">
-          <span>🔥 Auto-Aplicar Toda Coleção Super Ofertas (91)</span>
+        <button id="btn-tm-super-ofertas" onclick="sendCollectionToTampermonkey('super_ofertas', 'COLECAO_COMPLETA', 100)" title="Atualiza automaticamente os 89/91 produtos da Coleção Super Ofertas 🔥 (sem Troca Descomplicada)" class="px-3.5 py-1.5 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white rounded-xl text-[11px] font-extrabold shadow-md transition-all flex items-center gap-1.5 active:scale-95">
+          <span>🔥 1º Lote: Auto-Atualizar Super Ofertas (91)</span>
+        </button>
+        <button id="btn-tm-tracked-32" onclick="sendCollectionToTampermonkey('rastreados_camisas', 'RASTREADOS_TROCA_DESCOMPLICADA', 100)" title="Atualiza automaticamente as 32 Camisas/Facas/Outros já coladas fora da Super Ofertas para retirar 'Troca Descomplicada'" class="px-3.5 py-1.5 bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-500 hover:to-blue-600 text-white rounded-xl text-[11px] font-extrabold shadow-md transition-all flex items-center gap-1.5 active:scale-95">
+          <span>👕 2º Lote: Auto-Atualizar 32 Camisas/Outros Rastreados</span>
         </button>
         <button id="btn-tm-super-ofertas-criticos" onclick="sendCollectionToTampermonkey('super_ofertas', 'CRITICOS_FOTOS_CORES', 100)" title="Enfileira os produtos críticos de Super Ofertas (Cores sem foto + Fotos duplicadas)" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-[11px] font-extrabold shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
           <span>🚨 Super Ofertas: Críticos Foto/Cor</span>
@@ -206,13 +209,14 @@
           <span>⚡ Fila Geral (25)</span>
         </button>
         <button id="btn-tm-settings" onclick="openTampermonkeyModal()" title="Instruções e status do Userscript Tampermonkey" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-[11px] font-bold transition-all">
-          <span>⚙️ Script v5.2</span>
+          <span>⚙️ Script v5.3</span>
         </button>
       </div>
       <div class="w-full flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
         <span class="text-[11px] font-extrabold text-slate-700">🔗 Automação por Coleção Shopify:</span>
         <select id="portal-collection-select" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none">
           <option value="super_ofertas">🔥 Coleção Super Ofertas Fishing (91 produtos)</option>
+          <option value="rastreados_camisas">👕 32 Camisas/Outros Rastreados (Sem Troca Descomplicada)</option>
           <option value="iscas_artificiais">🎣 Iscas Artificiais</option>
           <option value="equipamentos_pesca">⚙️ Varas, Carretilhas, Molinetes & Alicates</option>
           <option value="linhas_pesca">🧵 Linhas de Pesca</option>

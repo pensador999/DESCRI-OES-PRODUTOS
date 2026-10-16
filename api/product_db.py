@@ -77,6 +77,8 @@ def evaluate_guideline_compliance(p: dict, store_key: str = "brk_fishing") -> tu
     }.get(store_key, ("#0284c7", "#00a8ff"))
 
     violations = []
+    if "troca descomplicada" in orig_html.lower() or "dinheiro de volta" in orig_html.lower():
+        violations.append("Rodapé antigo com 'Troca Descomplicada / Satisfação garantida ou seu dinheiro de volta' (retirar conforme nova diretriz)")
     if "Tabela de Medidas de Luvas" in orig_html and any(w in title_l or w in sku_l for w in ("camisa", "camiseta", "armorx", "cax", "hyb", "fusion")):
         violations.append("Camisa com Tabela de Luvas (corrigir para Tabela de Camisa PP ao G2)")
     if "Tabela de Medidas Adulto (P ao EXG)" in orig_html:
@@ -101,6 +103,44 @@ def evaluate_guideline_compliance(p: dict, store_key: str = "brk_fishing") -> tu
         return (False, "MODO_B_DESATUALIZADO", "; ".join(violations))
 
     return (True, "CONFORME_MODO_B", "100% dentro das diretrizes oficiais Modo B")
+
+
+# Os 32 produtos fora da coleção Super Ofertas (Camisas UV, Bandanas, Facas, Girador, Trava Varas, Chinelo)
+# rastreados ao vivo em brkfishing.com.br que foram aplicados com o rodapé antigo "Troca Descomplicada".
+TRACKED_OUTSIDE_SUPER_OFERTAS_IDS = [
+    "8430512537666",  # [01] FUSION260PP - Camisa FusionX Fantasia de Esqueleto Branco com Proteção UV50+
+    "8437007351874",  # [02] T673 - Bandana Halloween Freddy Vermelha UV50+
+    "8437006958658",  # [03] T672 - Bandana Halloween Jason Preta UV50+
+    "8445327114306",  # [04] BP011BLPP - Camiseta Brasil Patriota Feminina Brasil Acima de Tudo Branca
+    "8445323018306",  # [05] BP106PP - Camisa Brasil Patriota Brasil Acima de Todos Amarelo e Verde com UV50+
+    "8445323214914",  # [06] BP105PP - Camisa Brasil Patriota Brasil Acima de Todos Branco e Verde com UV50+
+    "8424113864770",  # [07] HYB092BLPP - Camisa de Pesca Feminina Brk com Capuz Hybrid Pescaiaque Chumbo
+    "8424114126914",  # [08] FUSION197PP - Camisa FusionX Brk Pescaiaque Azul e Amarelo com Proteção UV50+
+    "8424113897538",  # [09] HYB092PP - Camisa de Pesca Brk com Capuz Hybrid Pescaiaque Chumbo
+    "8424114192450",  # [10] CAX050BLPP - Camisa ArmorX Feminina Brk Pescaiaque Chumbo com Listra Amarela
+    "8424113963074",  # [11] HYB091PP - Camisa de Pesca Brk com Capuz Hybrid Pescaiaque Azul
+    "8424113930306",  # [12] HYB091BLPP - Camisa de Pesca Feminina Brk com Capuz Hybrid Pescaiaque Azul
+    "8424114225218",  # [13] CAX050PP - Camisa ArmorX Brk Pescaiaque Chumbo com Listra Amarela
+    "8421653250114",  # [14] CAX049BLPP - Camisa ArmorX Feminina BRK Pescaiaque Azul com Listra e Luva
+    "8421653315650",  # [15] CAX049PP - Camisa ArmorX Brk Pescaiaque Azul com Listra e Luva
+    "8411025539138",  # [16] FACA27 - Faca Brk Pescaria Cabo Madeira e Resina Transparente com Isca Azul
+    "8335319269442",  # [17] CAX040BLPP - Camisa ArmorX Feminina Brk Pinhal com Luva e Proteção UV50+
+    "8379931951170",  # [18] HYB090PP - Camisa de Pesca Brk com Capuz Hybrid Camuflada Verde Militar
+    "8379931918402",  # [19] HYB090BLPP - Camisa de Pesca Feminina Brk com Capuz Hybrid Camuflada Verde Militar
+    "8379931787330",  # [20] CAX048PP - Camisa ArmorX Camuflada Verde Militar com Luva e Proteção UV50
+    "8379931754562",  # [21] CAX048BLPP - Camisa ArmorX Feminina Camuflada Verde Militar com Luva e Proteção UV50
+    "8370981961794",  # [22] 7908137907694 - Faca Marine Sports Fillet Knife MFK75T 19cm
+    "7595719622722",  # [23] C01046BLPP_FULL - Camisa Feminina Brk Basic Cinza Claro com Proteção Solar UV50
+    "8369524146242",  # [24] 7898480922799 - Girador Bss Nickel | 1 Caixa com 50 Unidades
+    "7595720015938",  # [25] C01349P_FULL - Camisa de Pesca BRK Azul Ocean com Proteção UV50+
+    "7595718541378",  # [26] C02363P_FULL - Camisa Brk Clean Bandeira dos EUA com Proteção UV50+
+    "7595720114242",  # [27] C0897P_FULL - Camisa de Pesca Brk Azul e Preta com Uv50
+    "7595719917634",  # [28] C01806P_FULL - Camisa de Pesca Brk Garateia Clean Bandeira Brasil com Proteção UV50
+    "7595719360578",  # [29] C02257P_FULL - Camisa Brk Mescla Preto Cinza com Proteção Solar UV50+
+    "8370981929026",  # [30] TRAVAVARA-ROSA - Trava Varas Premium Aço Inox Fishing
+    "8337841651778",  # [31] CMB06P - Camisa Work Areia com Proteção UV50+
+    "7551701647426",  # [32] COLTAZUL_37_38 - Chinelo Boaonda Conforto Extremo para Pés Sensíveis - Azul
+]
 
 
 _SUPER_OFERTAS_AUDIT = None
@@ -377,7 +417,7 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
 
     # Se já tem o formato oficial correspondente e atualizado (Fase 5/6/7/8), verifica saúde de imagens e reaproveita
     engine, builder = get_engine_and_builder()
-    if raw_b and len(raw_b.strip()) > 500 and "<!-- BRK-MODO-B" in raw_b and "use-brk-images-s3" not in raw_b:
+    if raw_b and len(raw_b.strip()) > 500 and "<!-- BRK-MODO-B" in raw_b and "use-brk-images-s3" not in raw_b and "troca descomplicada" not in raw_b.lower() and "dinheiro de volta" not in raw_b.lower() and "BRK-MODO-B v1" not in raw_b:
         img_srcs = re.findall(r'<img[^>]+src=["\']([^"\']+)["\']', raw_b, re.I)
         img_roots = [u.split("?")[0].lower() for u in img_srcs]
         has_dup_imgs = len(img_roots) != len(set(img_roots))
@@ -425,8 +465,22 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
         except Exception as e:
             print(f"[-] Erro na compilação do Modo B para {p.get('id')}: {e}")
 
-    # Fallback apenas se a compilação falhar
-    return p.get("mode_b_html") or p.get("body_html") or ""
+    # Fallback apenas se a compilação falhar (sempre limpando eventual Troca Descomplicada residual)
+    fb_html = p.get("mode_b_html") or p.get("body_html") or ""
+    if "troca descomplicada" in fb_html.lower() or "dinheiro de volta" in fb_html.lower():
+        fb_html = re.sub(
+            r'\s*<div class="brk-trust-item">\s*<span class="brk-trust-[^"]*">.*?</span>\s*<div>\s*<div class="brk-trust-title">Troca Descomplicada</div>\s*<div class="brk-trust-desc">Satisfação garantida ou seu dinheiro de volta</div>\s*</div>\s*</div>',
+            "",
+            fb_html,
+            flags=re.S | re.I
+        )
+        fb_html = re.sub(
+            r"(\.brk-desc-trust-bar\s*\{[^}]*?)grid-template-columns:\s*repeat\(3,\s*1fr\);",
+            r"\1grid-template-columns: repeat(2, 1fr);",
+            fb_html,
+            flags=re.S
+        )
+    return fb_html
 
 STORE_THEME_METADATA = {
     "brk_fishing": {
@@ -563,9 +617,19 @@ class handler(BaseHTTPRequestHandler):
                 or "super-ofertas" in col_handle_low
                 or "super_ofertas" in col_handle_low
             )
+            is_tracked_outside_so = (
+                category_filter.lower() in ("rastreados_camisas", "rastreados_fora_so")
+                or status_filter == "RASTREADOS_TROCA_DESCOMPLICADA"
+            )
 
             collection_pool = None
-            if is_super_ofertas and store_key == "brk_fishing":
+            if is_tracked_outside_so and store_key == "brk_fishing":
+                collection_pool = []
+                for tid in TRACKED_OUTSIDE_SUPER_OFERTAS_IDS:
+                    tp = db["by_id"].get(tid)
+                    if tp:
+                        collection_pool.append(tp)
+            elif is_super_ofertas and store_key == "brk_fishing":
                 collection_pool = list(db.get("super_ofertas") or [])
             elif col_handle:
                 store_domains_map = {
@@ -622,6 +686,7 @@ class handler(BaseHTTPRequestHandler):
 
             media_status_filters = {
                 "COLECAO_COMPLETA",
+                "RASTREADOS_TROCA_DESCOMPLICADA",
                 "AJUSTE_FOTOS_GERAL",
                 "CRITICOS_FOTOS_CORES",
                 "COR_SEM_FOTO",
@@ -653,7 +718,7 @@ class handler(BaseHTTPRequestHandler):
                     continue
 
                 ma = p.get("media_audit") or {}
-                if status_filter == "COLECAO_COMPLETA":
+                if status_filter in ("COLECAO_COMPLETA", "RASTREADOS_TROCA_DESCOMPLICADA") or is_tracked_outside_so:
                     pool.append(p)
                 elif status_filter == "AJUSTE_FOTOS_GERAL":
                     if ma.get("needs_media_fix"):
@@ -678,8 +743,8 @@ class handler(BaseHTTPRequestHandler):
                     if not p.get("is_mode_b_compliant", False):
                         pool.append(p)
 
-            # Aplicar filtro de categoria (exceto quando category_filter == super_ofertas, já resolvido em collection_pool)
-            if category_filter and category_filter.upper() not in ("ALL", "SUPER_OFERTAS"):
+            # Aplicar filtro de categoria (exceto quando category_filter == super_ofertas ou rastreados_camisas, já resolvido em collection_pool)
+            if category_filter and category_filter.upper() not in ("ALL", "SUPER_OFERTAS", "RASTREADOS_CAMISAS", "RASTREADOS_FORA_SO"):
                 cat_l = category_filter.lower()
                 filtered_pool = []
                 for p in pool:

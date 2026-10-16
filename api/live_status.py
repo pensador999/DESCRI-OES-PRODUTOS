@@ -26,7 +26,7 @@ import re
 import urllib.request
 
 # Deve ser igual a core/html_builder.py::MODO_B_VERSION (um teste garante a paridade).
-MODO_B_VERSION = "1"
+MODO_B_VERSION = "2"
 
 PUBLIC_DOMAINS = {
     "brk_fishing": "www.brkfishing.com.br",
@@ -73,7 +73,8 @@ def classify(body_html: str) -> dict:
         out["s"] = "IMAGENS_QUEBRADAS"
     elif marker:
         has_violation = (
-            ("tabela de medidas de luvas" in low and any(w in low for w in ("camisa", "armorx", "sku:cax")))
+            ("troca descomplicada" in low or "dinheiro de volta" in low)
+            or ("tabela de medidas de luvas" in low and any(w in low for w in ("camisa", "armorx", "sku:cax")))
             or ("tabela de medidas adulto (p ao exg)" in low)
             or ("bainha" in low and any(w in low for w in ("mfk75t", "79081379076", "fillet knife")))
             or (any(w in low for w in ("fusionx", "sku:fusion", "sku:hyb", "brk hybrid")) and "sem contar" not in low)
@@ -84,7 +85,10 @@ def classify(body_html: str) -> dict:
         else:
             out["s"] = "COLADO_ATUAL"
     elif "brk-desc-wrapper" in low:
-        out["s"] = "COLADO_SEM_MARCADOR"
+        if "troca descomplicada" in low or "dinheiro de volta" in low:
+            out["s"] = "COLADO_DESATUALIZADO"
+        else:
+            out["s"] = "COLADO_SEM_MARCADOR"
     else:
         out["s"] = "SAUDAVEL"
     return out

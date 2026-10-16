@@ -1305,9 +1305,9 @@ function sendBatchToTampermonkey(limit = 25) {
   }, 600);
 }
 
-// Dispara lote 100% automático de uma Coleção específica (ex: Super Ofertas 🔥 91 itens) direto da API para o Tampermonkey
+// Dispara lote 100% automático de uma Coleção específica (ex: Super Ofertas 🔥 91 itens ou 32 Camisas/Outros Rastreados) direto da API para o Tampermonkey
 async function sendCollectionToTampermonkey(categoryFilter = "super_ofertas", statusFilter = "COLECAO_COMPLETA", limit = 100, customCollectionUrl = "") {
-  const targetStore = (categoryFilter === "super_ofertas" || (customCollectionUrl && customCollectionUrl.includes("brkfishing")))
+  const targetStore = (categoryFilter === "super_ofertas" || categoryFilter === "rastreados_camisas" || (customCollectionUrl && customCollectionUrl.includes("brkfishing")))
     ? "brk_fishing"
     : currentStore;
 
@@ -1319,7 +1319,7 @@ async function sendCollectionToTampermonkey(categoryFilter = "super_ofertas", st
   const storeSlug = storeSlugMap[targetStore] || "brkfishing";
   const collectionParam = customCollectionUrl || (categoryFilter === "super_ofertas" ? "super-ofertas-🔥" : "");
 
-  showToast(`🔥 Carregando coleção (${collectionParam || categoryFilter}) no Piloto Automático...`);
+  showToast(`🔥 Carregando lote (${collectionParam || categoryFilter}) no Piloto Automático...`);
 
   try {
     const apiUrl = `/api/product_db?store=${encodeURIComponent(targetStore)}&action=queue&category=${encodeURIComponent(categoryFilter)}&collection=${encodeURIComponent(collectionParam)}&status=${encodeURIComponent(statusFilter)}&limit=${encodeURIComponent(limit)}`;
@@ -1332,8 +1332,8 @@ async function sendCollectionToTampermonkey(categoryFilter = "super_ofertas", st
       return;
     }
 
-    // Força is_mode_b_compliant=false no payload de coleção completa para que qualquer versão do Tampermonkey processe todos os itens automaticamente
-    const forceProcessAll = ["COLECAO_COMPLETA", "AJUSTE_FOTOS_GERAL", "CRITICOS_FOTOS_CORES", "COR_SEM_FOTO", "FOTOS_DUPLICADAS", "FOTOS_BAIXA_QUALIDADE"].includes(statusFilter);
+    // Força is_mode_b_compliant=false no payload de coleção completa ou rastreados para que qualquer versão do Tampermonkey processe todos os itens automaticamente
+    const forceProcessAll = ["COLECAO_COMPLETA", "RASTREADOS_TROCA_DESCOMPLICADA", "AJUSTE_FOTOS_GERAL", "CRITICOS_FOTOS_CORES", "COR_SEM_FOTO", "FOTOS_DUPLICADAS", "FOTOS_BAIXA_QUALIDADE"].includes(statusFilter) || categoryFilter === "rastreados_camisas";
     const items = data.items.map(it => ({
       ...it,
       is_mode_b_compliant: forceProcessAll ? false : Boolean(it.is_mode_b_compliant)
@@ -1377,10 +1377,11 @@ function sendCustomCollectionFromPortal() {
   const customUrl = urlEl ? urlEl.value.trim() : "";
 
   const [cat, st] = rawChoice.split("|");
+  const effectiveStatus = st || (cat === "rastreados_camisas" ? "RASTREADOS_TROCA_DESCOMPLICADA" : "COLECAO_COMPLETA");
   if (customUrl) {
-    sendCollectionToTampermonkey("ALL", st || "COLECAO_COMPLETA", 100, customUrl);
+    sendCollectionToTampermonkey("ALL", effectiveStatus, 100, customUrl);
   } else {
-    sendCollectionToTampermonkey(cat || "super_ofertas", st || "COLECAO_COMPLETA", 100, "");
+    sendCollectionToTampermonkey(cat || "super_ofertas", effectiveStatus, 100, "");
   }
 }
 
