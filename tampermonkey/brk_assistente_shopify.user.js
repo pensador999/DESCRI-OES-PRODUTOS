@@ -566,6 +566,15 @@
       if (currentHtml.includes("1 a 2 Anos")) {
         reasons.push("Tabela Infantil antiga (sem idade 2 a 13 Anos)");
       }
+      if (currentHtml.includes("Tabela de Medidas Adulto (P ao EXG)")) {
+        reasons.push("Tabela Adulto antiga (sem distinção PP ao G2 / Baby Look)");
+      }
+      if (currentHtml.includes("Tabela de Medidas de Luvas") && prod && /camisa|camiseta|armorx|cax|hyb/i.test(`${prod.title || ""} ${prod.master_sku || ""}`)) {
+        reasons.push("Camisa ArmorX/UV com Tabela de Luvas (corrigido para Tabela de Camisa)");
+      }
+      if (currentHtml.includes("Bandana Tubular Seamless")) {
+        reasons.push("Nomenclatura antiga de Bandana (Seamless)");
+      }
       // Contingência Anti-Duplicação da 1ª Foto na Descrição
       const editorImgMatches = Array.from(currentHtml.matchAll(/<img[^>]+src=["']([^"']+)["']/gi)).map(m => m[1].split("?")[0].toLowerCase());
       if (editorImgMatches.length > new Set(editorImgMatches).size) {

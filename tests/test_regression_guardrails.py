@@ -1275,6 +1275,43 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         self.assertEqual(deduped_var[0], "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/capa_p.jpg")
         self.assertEqual(deduped_var[1], "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/costas.jpg")
 
+        # Caso 4: Camisa ArmorX "com Luva" deve receber Tabela de Camisa (Masculina/Feminina) e NUNCA Tabela de Luvas
+        cax_fem = {
+            "id": 8424114192450,
+            "sku": "CAX050BL",
+            "title": "Camisa ArmorX Feminina Brk Pescaiaque Chumbo com Listra Amarela e Luva Proteção UV50+",
+            "images": ["https://cdn.shopify.com/s/files/1/0612/8068/2177/files/cax050bl_1.jpg"],
+        }
+        enr_cax = template_engine.generate_narrative_from_template(cax_fem, "uv_performance", cax_fem["images"], store_key="brk_fishing")
+        html_cax = html_builder.build_shopify_html(enr_cax)
+        self.assertIn("Tabela de Medidas Feminina - Baby Look (PP ao G2)", html_cax)
+        self.assertNotIn("Tabela de Medidas de Luvas", html_cax)
+
+        # Caso 5: Kit Camisas Casal exibe ambas as tabelas (MASCULINO + FEMININO BABY LOOK)
+        kit_casal = {
+            "id": 9970013831463,
+            "sku": "C0492PP_C0492BLPP",
+            "title": "Kit Camisas UV50 Casal Bandeira do Brasil",
+            "images": ["https://cdn.shopify.com/s/files/1/0612/8068/2177/files/kit_casal.webp"],
+        }
+        enr_casal = template_engine.generate_narrative_from_template(kit_casal, "uv_performance", kit_casal["images"], store_key="brk_motors")
+        html_casal = html_builder.build_shopify_html(enr_casal)
+        self.assertIn("Tabela de Medidas Kit Casal - Masculino & Feminino Baby Look (PP ao G2)", html_casal)
+        self.assertIn("MASCULINO", html_casal)
+        self.assertIn("FEMININO (BABY LOOK)", html_casal)
+
+        # Caso 6: Camisa Feminina "Casal de Araras" (estampa) recebe apenas Tabela Feminina Baby Look
+        araras_fem = {
+            "id": 80001,
+            "sku": "C02493BL",
+            "title": "Camisa Feminina Brk Amazon Casal de Araras com Proteção UV50",
+            "images": ["https://cdn.shopify.com/s/files/1/0612/8068/2177/files/araras.jpg"],
+        }
+        enr_araras = template_engine.generate_narrative_from_template(araras_fem, "uv_performance", araras_fem["images"], store_key="brk_fishing")
+        html_araras = html_builder.build_shopify_html(enr_araras)
+        self.assertIn("Tabela de Medidas Feminina - Baby Look (PP ao G2)", html_araras)
+        self.assertNotIn("Kit Casal", html_araras)
+
 
 def run_tests():
     suite = unittest.TestSuite()

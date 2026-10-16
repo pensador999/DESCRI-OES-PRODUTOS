@@ -1212,11 +1212,15 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
   const skuLow = (liveP.sku || liveP.master_sku || "").toLowerCase();
 
   // 1. Identificar se o produto é comprovadamente de vestuário superior / camisa
+  // Nota: Camisas ArmorX e Hybrid possuem "com Luva" no título, portanto "luva" não desqualifica quando é camisa/CAX/HYB
+  const hasExplicitShirtMarker = /camisa|camiseta|jersey|baby look|babylook|armorx|fusionx|segunda pele/i.test(tLow) || /^(c0|ci|cadv|adv|hyb|cmb|cbt|raglan|cax|fusion|casual|bp|cf|cm|apc)/i.test(skuLow);
+  const nonShirtRegex = hasExplicitShirtMarker
+    ? /\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|chapéu|chapeu|boné|bone|manguito|manguitos|bandana|tubeneck|buff|balaclava)\b/i
+    : /\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|chapéu|chapeu|boné|bone|luva|luvas|manguito|manguitos|bandana|tubeneck|buff|balaclava)\b/i;
   const isShirt = (
     ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId) ||
-    /camisa|camiseta|jersey|baby look|babylook/i.test(tLow) ||
-    /^(c0|ci|cadv|adv|hyb|cmb|raglan)/i.test(skuLow)
-  ) && !/\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|chapéu|chapeu|boné|bone|luva|luvas|manguito|manguitos|bandana|tubeneck|buff|balaclava)\b/i.test(tLow);
+    hasExplicitShirtMarker
+  ) && !nonShirtRegex.test(tLow);
 
   // 0. Exclusão estrita de itens não-têxteis com UV ou termos ambíguos (apenas se NÃO for camisa)
   if (!isShirt) {
@@ -1231,19 +1235,59 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
     // 1.1 Camisas de Botão / Utilitárias Work (CMB - Sarja/Algodão corte reto de trabalho)
     const isWorkGuide = (archetypeId === "shirts_button_work" || skuLow.includes("cmb") || skuLow.includes("cbt") || (tLow.includes("work") && tLow.includes("camisa") && !tLow.includes("xtech") && !tLow.includes("dry") && !tLow.includes("uv") && !tLow.includes("pesca"))) && !skuLow.startsWith("c0") && !skuLow.startsWith("ci");
     if (isWorkGuide) {
-      guideTitle = "Tabela de Medidas - Camisas Work & Utilitárias de Botão (P ao G2)";
-      tipText = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Comprimento da gola à barra | Manga). Modelagem confortável de trabalho.";
+      const isFemWork = /feminina|feminino|baby look|babylook/i.test(tLow) || skuLow.includes("bl");
       const mHeader = isShortSleeve ? "Manga Curta" : "Manga Longa";
-      const rows = [
-        ["P", "102 cm", "68 cm", isShortSleeve ? "22 cm" : "75 cm"],
-        ["M", "108 cm", "71 cm", isShortSleeve ? "23 cm" : "77 cm"],
-        ["G", "114 cm", "74 cm", isShortSleeve ? "24 cm" : "79 cm"],
-        ["GG", "120 cm", "77 cm", isShortSleeve ? "25 cm" : "81 cm"],
-        ["XG", "126 cm", "80 cm", isShortSleeve ? "26 cm" : "83 cm"],
-        ["EXG (G1)", "132 cm", "83 cm", isShortSleeve ? "27 cm" : "85 cm"],
-        ["G2", "138 cm", "85 cm", isShortSleeve ? "28 cm" : "87 cm"],
-      ];
+      let rows;
+      if (isFemWork) {
+        guideTitle = "Tabela de Medidas Feminina - Camisas Country & Classic de Botão (P ao G2)";
+        tipText = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Busto/Tórax | Comprimento da gola à barra | Manga). Modelagem feminina acinturada.";
+        rows = [
+          ["P (36-38)", "92 cm", "61 cm", isShortSleeve ? "19 cm" : "60 cm"],
+          ["M (40)", "96 cm", "63 cm", isShortSleeve ? "20 cm" : "61 cm"],
+          ["G (42)", "102 cm", "65 cm", isShortSleeve ? "21 cm" : "62 cm"],
+          ["GG (44)", "108 cm", "67 cm", isShortSleeve ? "22 cm" : "63 cm"],
+          ["G1 (46)", "114 cm", "69 cm", isShortSleeve ? "23 cm" : "64 cm"],
+          ["G2 (48)", "120 cm", "71 cm", isShortSleeve ? "24 cm" : "65 cm"],
+        ];
+      } else {
+        guideTitle = "Tabela de Medidas - Camisas Work & Utilitárias de Botão (P ao G2)";
+        tipText = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Comprimento da gola à barra | Manga). Modelagem confortável de trabalho.";
+        rows = [
+          ["P", "102 cm", "68 cm", isShortSleeve ? "22 cm" : "75 cm"],
+          ["M", "108 cm", "71 cm", isShortSleeve ? "23 cm" : "77 cm"],
+          ["G", "114 cm", "74 cm", isShortSleeve ? "24 cm" : "79 cm"],
+          ["GG", "120 cm", "77 cm", isShortSleeve ? "25 cm" : "81 cm"],
+          ["XG", "126 cm", "80 cm", isShortSleeve ? "26 cm" : "83 cm"],
+          ["EXG (G1)", "132 cm", "83 cm", isShortSleeve ? "27 cm" : "85 cm"],
+          ["G2", "138 cm", "85 cm", isShortSleeve ? "28 cm" : "87 cm"],
+        ];
+      }
       tableHtml = `<table class="brk-sg-table"><thead><tr><th>Tamanho</th><th>Tórax / Circunferência</th><th>Comprimento Total</th><th>${mHeader}</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
+    }
+    // 1.1b Kit Casal (Exibe AMBAS as tabelas: Masculina + Feminina Baby Look)
+    else if (tLow.includes("casal") && (tLow.includes("kit") || tLow.includes("combo"))) {
+      guideTitle = "Tabela de Medidas Kit Casal - Masculino & Feminino Baby Look (PP ao G2)";
+      const shirtSubPrefix = isShortSleeve ? "Camisa Manga Curta UV50" : "Camisa Manga Longa UV50";
+      const subtitle = `${shirtSubPrefix} | *As medidas podem variar de 2cm a 3cm`;
+      const mRows = [
+        ["PP", "49,5 cm", "67 cm", "56 cm"],
+        ["P", "51,5 cm", "69 cm", "59,5 cm"],
+        ["M", "54 cm", "71 cm", "62 cm"],
+        ["G", "56 cm", "72 cm", "64 cm"],
+        ["GG", "59 cm", "74 cm", "64 cm"],
+        ["G1", "62 cm", "75 cm", "66 cm"],
+        ["G2", "65 cm", "76,5 cm", "66 cm"],
+      ];
+      const fRows = [
+        ["Baby Look PP", "33 cm", "51 cm", "53 cm"],
+        ["Baby Look P", "37 cm", "54 cm", "55 cm"],
+        ["Baby Look M", "43 cm", "57 cm", "59 cm"],
+        ["Baby Look G", "47 cm", "60 cm", "60 cm"],
+        ["Baby Look GG", "47 cm", "60 cm", "61 cm"],
+        ["Baby Look G1", "50 cm", "62 cm", "61 cm"],
+        ["Baby Look G2", "55 cm", "64 cm", "63 cm"],
+      ];
+      tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">MASCULINO</div><div class="brk-sg-subtitle">${subtitle}</div></div><table class="brk-sg-table" style="margin-bottom: 18px;"><thead><tr class="brk-sg-th-row"><th>TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${mRows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table><div class="brk-sg-card-header"><div class="brk-sg-card-title">FEMININO (BABY LOOK)</div><div class="brk-sg-subtitle">${subtitle}</div></div><table class="brk-sg-table"><thead><tr class="brk-sg-th-row"><th>TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${fRows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table>`;
     }
     // 1.2 Camisas UV C0 Infantil (1 a 13 Anos | PP ao G2)
     else if (
@@ -1831,9 +1875,9 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
   const nonPng = galleryUrls.filter(u => !String(u).toLowerCase().split("?")[0].endsWith(".png"));
   const hwPool = nonPng.length >= 4 ? nonPng : (nonPng.length > 0 ? [...nonPng, ...galleryUrls.filter(u => !nonPng.includes(u))] : galleryUrls);
   const img1 = hwPool[0] || "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg";
-  const img2 = hwPool[1] || (hwPool.length === 0 ? "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/k2bupYT.jpg" : img1);
-  const img3 = hwPool[2] || (hwPool.length === 0 ? "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/BYAO1Oj.jpg" : img1);
-  const img4 = hwPool[3] || (hwPool.length === 0 ? "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/cjeqbhc.jpg" : img2);
+  const img2 = hwPool[1] || (hwPool.length === 0 ? "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/k2bupYT.jpg" : "");
+  const img3 = hwPool[2] || (hwPool.length === 0 ? "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/BYAO1Oj.jpg" : "");
+  const img4 = hwPool[3] || (hwPool.length === 0 ? "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/cjeqbhc.jpg" : "");
 
   if (archetypeId === "caps_trucker_snapback") {
     const is6Gomos = titleLow.includes("6 gomos") || titleLow.includes("seis gomos");
@@ -2107,10 +2151,10 @@ function buildClientCapOrHatHtml(liveP, archetypeId) {
 
   const detailsMarkup = details.map(d => {
     const safeAlt = String(d.alt || "").replace(/"/g, "&quot;");
+    const imgDiv = d.img ? `        <div class="brk-cap-detail-image"><img src="${d.img}" alt="${safeAlt}"></div>\n` : "";
     return `      <!-- ${d.title} -->
       <article class="brk-cap-detail-item">
-        <div class="brk-cap-detail-image"><img src="${d.img}" alt="${safeAlt}"></div>
-        <h3>${d.title}</h3>
+${imgDiv}        <h3>${d.title}</h3>
         <p>${d.desc}</p>
       </article>`;
   }).join("\n");

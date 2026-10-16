@@ -164,7 +164,7 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
                 if has_store_color:
                     return raw_b
             else:
-                has_new_sg = any(term in raw_b for term in ["49,5 cm", "Baby Look", "2 Anos", "1 a 2 Anos", "brk-sg-subtitle"]) and "ALTURA" in raw_b
+                has_new_sg = any(term in raw_b for term in ["49,5 cm", "Baby Look", "2 Anos", "1 a 2 Anos", "brk-sg-subtitle"]) and "ALTURA" in raw_b and "Tabela de Medidas de Luvas" not in raw_b and (not ("casal" in title_l and ("kit" in title_l or "combo" in title_l)) or "Kit Casal" in raw_b)
                 is_ready = engine.is_ready_delivery(p) if engine else False
                 expected_prazo = "Pronta entrega" if is_ready else "10 dias úteis"
                 has_correct_prazo = expected_prazo in raw_b

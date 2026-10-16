@@ -283,11 +283,20 @@ class HTMLBuilder:
         sku_low = (enriched_data.get("sku") or enriched_data.get("master_sku") or "").lower()
 
         # 1. Identificar se o produto é comprovadamente de vestuário superior / camisa
+        # Nota: Camisas ArmorX e Hybrid possuem "com Luva" no título, portanto "luva" não desqualifica quando é explícita camisa/CAX/HYB
+        has_explicit_shirt_marker = (
+            any(w in title_low for w in ["camisa", "camiseta", "jersey", "baby look", "babylook", "armorx", "fusionx", "segunda pele"])
+            or any(sku_low.startswith(pfx) for pfx in ["c0", "ci", "cadv", "adv", "hyb", "cmb", "cbt", "raglan", "cax", "fusion", "casual", "bp", "cf", "cm", "apc"])
+        )
+        non_shirt_exclusions = (
+            r'\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|chapéu|chapeu|boné|bone|manguito|manguitos|bandana|tubeneck|buff|balaclava)\b'
+            if has_explicit_shirt_marker else
+            r'\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|chapéu|chapeu|boné|bone|luva|luvas|manguito|manguitos|bandana|tubeneck|buff|balaclava)\b'
+        )
         is_shirt = (
             archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work")
-            or any(w in title_low for w in ["camisa", "camiseta", "jersey", "baby look", "babylook"])
-            or any(sku_low.startswith(pfx) for pfx in ["c0", "ci", "cadv", "adv", "hyb", "cmb", "raglan"])
-        ) and not bool(re.search(r'\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|chapéu|chapeu|boné|bone|luva|luvas|manguito|manguitos|bandana|tubeneck|buff|balaclava)\b', title_low))
+            or has_explicit_shirt_marker
+        ) and not bool(re.search(non_shirt_exclusions, title_low))
 
         # 0. Exclusão estrita de itens não-têxteis com UV ou termos ambíguos (apenas se NÃO for camisa)
         if not is_shirt:
@@ -304,18 +313,31 @@ class HTMLBuilder:
                 and not sku_low.startswith("c0") and not sku_low.startswith("ci")
             )
             if is_work_guide:
-                guide_title = "Tabela de Medidas - Camisas Work & Utilitárias de Botão (P ao G2)"
-                tip_text = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Comprimento da gola à barra | Manga). Modelagem confortável de trabalho."
+                is_fem_work = any(w in title_low for w in ["feminina", "feminino", "baby look", "babylook"]) or "bl" in sku_low
                 manga_header = "Manga Curta" if is_short_sleeve else "Manga Longa"
-                rows = [
-                    ("P", "102 cm", "68 cm", "22 cm" if is_short_sleeve else "75 cm"),
-                    ("M", "108 cm", "71 cm", "23 cm" if is_short_sleeve else "77 cm"),
-                    ("G", "114 cm", "74 cm", "24 cm" if is_short_sleeve else "79 cm"),
-                    ("GG", "120 cm", "77 cm", "25 cm" if is_short_sleeve else "81 cm"),
-                    ("XG", "126 cm", "80 cm", "26 cm" if is_short_sleeve else "83 cm"),
-                    ("EXG (G1)", "132 cm", "83 cm", "27 cm" if is_short_sleeve else "85 cm"),
-                    ("G2", "138 cm", "85 cm", "28 cm" if is_short_sleeve else "87 cm"),
-                ]
+                if is_fem_work:
+                    guide_title = "Tabela de Medidas Feminina - Camisas Country & Classic de Botão (P ao G2)"
+                    tip_text = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Busto/Tórax | Comprimento da gola à barra | Manga). Modelagem feminina acinturada."
+                    rows = [
+                        ("P (36-38)", "92 cm", "61 cm", "19 cm" if is_short_sleeve else "60 cm"),
+                        ("M (40)", "96 cm", "63 cm", "20 cm" if is_short_sleeve else "61 cm"),
+                        ("G (42)", "102 cm", "65 cm", "21 cm" if is_short_sleeve else "62 cm"),
+                        ("GG (44)", "108 cm", "67 cm", "22 cm" if is_short_sleeve else "63 cm"),
+                        ("G1 (46)", "114 cm", "69 cm", "23 cm" if is_short_sleeve else "64 cm"),
+                        ("G2 (48)", "120 cm", "71 cm", "24 cm" if is_short_sleeve else "65 cm"),
+                    ]
+                else:
+                    guide_title = "Tabela de Medidas - Camisas Work & Utilitárias de Botão (P ao G2)"
+                    tip_text = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Comprimento da gola à barra | Manga). Modelagem confortável de trabalho."
+                    rows = [
+                        ("P", "102 cm", "68 cm", "22 cm" if is_short_sleeve else "75 cm"),
+                        ("M", "108 cm", "71 cm", "23 cm" if is_short_sleeve else "77 cm"),
+                        ("G", "114 cm", "74 cm", "24 cm" if is_short_sleeve else "79 cm"),
+                        ("GG", "120 cm", "77 cm", "25 cm" if is_short_sleeve else "81 cm"),
+                        ("XG", "126 cm", "80 cm", "26 cm" if is_short_sleeve else "83 cm"),
+                        ("EXG (G1)", "132 cm", "83 cm", "27 cm" if is_short_sleeve else "85 cm"),
+                        ("G2", "138 cm", "85 cm", "28 cm" if is_short_sleeve else "87 cm"),
+                    ]
                 rows_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td></tr>\n" for r in rows])
                 table_html = f"""<table class="brk-sg-table">
         <thead>
@@ -328,6 +350,64 @@ class HTMLBuilder:
         </thead>
         <tbody>
 {rows_html}        </tbody>
+      </table>"""
+
+            # 1.1b Kit Casal (Exibe AMBAS as tabelas: Masculina + Feminina Baby Look)
+            elif "casal" in title_low and ("kit" in title_low or "combo" in title_low):
+                guide_title = "Tabela de Medidas Kit Casal - Masculino & Feminino Baby Look (PP ao G2)"
+                shirt_sub_prefix = "Camisa Manga Curta UV50" if is_short_sleeve else "Camisa Manga Longa UV50"
+                subtitle = f"{shirt_sub_prefix} | *As medidas podem variar de 2cm a 3cm"
+                m_rows = [
+                    ("PP", "49,5 cm", "67 cm", "56 cm"),
+                    ("P", "51,5 cm", "69 cm", "59,5 cm"),
+                    ("M", "54 cm", "71 cm", "62 cm"),
+                    ("G", "56 cm", "72 cm", "64 cm"),
+                    ("GG", "59 cm", "74 cm", "64 cm"),
+                    ("G1", "62 cm", "75 cm", "66 cm"),
+                    ("G2", "65 cm", "76,5 cm", "66 cm"),
+                ]
+                f_rows = [
+                    ("Baby Look PP", "33 cm", "51 cm", "53 cm"),
+                    ("Baby Look P", "37 cm", "54 cm", "55 cm"),
+                    ("Baby Look M", "43 cm", "57 cm", "59 cm"),
+                    ("Baby Look G", "47 cm", "60 cm", "60 cm"),
+                    ("Baby Look GG", "47 cm", "60 cm", "61 cm"),
+                    ("Baby Look G1", "50 cm", "62 cm", "61 cm"),
+                    ("Baby Look G2", "55 cm", "64 cm", "63 cm"),
+                ]
+                m_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td></tr>\n" for r in m_rows])
+                f_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td></tr>\n" for r in f_rows])
+                table_html = f"""<div class="brk-sg-card-header">
+        <div class="brk-sg-card-title">MASCULINO</div>
+        <div class="brk-sg-subtitle">{subtitle}</div>
+      </div>
+      <table class="brk-sg-table" style="margin-bottom: 18px;">
+        <thead>
+          <tr class="brk-sg-th-row">
+            <th>TAMANHO</th>
+            <th>TÓRAX</th>
+            <th>ALTURA</th>
+            <th>MANGA</th>
+          </tr>
+        </thead>
+        <tbody>
+{m_html}        </tbody>
+      </table>
+      <div class="brk-sg-card-header">
+        <div class="brk-sg-card-title">FEMININO (BABY LOOK)</div>
+        <div class="brk-sg-subtitle">{subtitle}</div>
+      </div>
+      <table class="brk-sg-table">
+        <thead>
+          <tr class="brk-sg-th-row">
+            <th>TAMANHO</th>
+            <th>TÓRAX</th>
+            <th>ALTURA</th>
+            <th>MANGA</th>
+          </tr>
+        </thead>
+        <tbody>
+{f_html}        </tbody>
       </table>"""
 
             # 1.2 Camisas UV C0 Infantil (1 a 13 Anos | PP ao G2)
@@ -680,7 +760,7 @@ class HTMLBuilder:
 
         formatted_title = enriched_data.get("formatted_title") or enriched_data.get("title", "Produto BRK")
         brand_name = enriched_data.get("brand_name", "BRK")
-        sku = enriched_data.get("sku") or ""
+        sku = str(enriched_data.get("sku") or enriched_data.get("master_sku") or enriched_data.get("id") or "")
         raw_price = str(enriched_data.get("price") or "0.00")
         clean_price = re.sub(r'[^\d,.]', '', raw_price).strip()
         if ',' in clean_price and '.' in clean_price:
@@ -698,7 +778,7 @@ class HTMLBuilder:
                 desc_parts.append(" ".join(clean_d.split()))
         short_desc = " ".join(desc_parts)[:280] if desc_parts else f"{formatted_title} oficial com qualidade e garantia BRK."
 
-        raw_imgs = enriched_data.get("images") or []
+        raw_imgs = enriched_data.get("images") or enriched_data.get("cdn_images") or enriched_data.get("gallery") or []
         imgs = [u for u in raw_imgs if isinstance(u, str) and u.startswith("http")]
 
         schema_obj = {
@@ -763,9 +843,9 @@ class HTMLBuilder:
         non_png = [u for u in gallery_urls if not u.lower().split("?")[0].endswith(".png")]
         hw_pool = non_png if len(non_png) >= 4 else (non_png + [u for u in gallery_urls if u not in non_png] if non_png else gallery_urls)
         img1 = hw_pool[0] if len(hw_pool) > 0 else "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/eQxQuY7.jpg"
-        img2 = hw_pool[1] if len(hw_pool) > 1 else ("https://cdn.shopify.com/s/files/1/0628/1445/3826/files/k2bupYT.jpg" if len(hw_pool) == 0 else img1)
-        img3 = hw_pool[2] if len(hw_pool) > 2 else ("https://cdn.shopify.com/s/files/1/0628/1445/3826/files/BYAO1Oj.jpg" if len(hw_pool) == 0 else img1)
-        img4 = hw_pool[3] if len(hw_pool) > 3 else ("https://cdn.shopify.com/s/files/1/0628/1445/3826/files/cjeqbhc.jpg" if len(hw_pool) == 0 else img2)
+        img2 = hw_pool[1] if len(hw_pool) > 1 else ("https://cdn.shopify.com/s/files/1/0628/1445/3826/files/k2bupYT.jpg" if len(hw_pool) == 0 else "")
+        img3 = hw_pool[2] if len(hw_pool) > 2 else ("https://cdn.shopify.com/s/files/1/0628/1445/3826/files/BYAO1Oj.jpg" if len(hw_pool) == 0 else "")
+        img4 = hw_pool[3] if len(hw_pool) > 3 else ("https://cdn.shopify.com/s/files/1/0628/1445/3826/files/cjeqbhc.jpg" if len(hw_pool) == 0 else "")
 
         if archetype_id == "caps_trucker_snapback":
             item_type_label = "Boné"
@@ -1052,14 +1132,14 @@ class HTMLBuilder:
         else:
             radial_color = "rgba(0, 168, 255, 0.15)"
 
-        # Montagem dos Detalhes em HTML
+        # Montagem dos Detalhes em HTML (omite <img> se o produto tiver menos de 4 fotos na galeria para jamais duplicar URL)
         details_html = []
         for d in details:
             safe_d_alt = str(d['alt']).replace('"', '&quot;')
+            img_div = f'<div class="brk-cap-detail-image"><img src="{d['img']}" alt="{safe_d_alt}"></div>\n' if d.get("img") else ""
             details_html.append(f"""<!-- {d['title']} -->
 <article class="brk-cap-detail-item">
-<div class="brk-cap-detail-image"><img src="{d['img']}" alt="{safe_d_alt}"></div>
-<h3>{d['title']}</h3>
+{img_div}<h3>{d['title']}</h3>
 <p>{d['desc']}</p>
 </article>""")
         details_markup = "\n".join(details_html)
@@ -1637,7 +1717,7 @@ class HTMLBuilder:
   </div>"""
 
         # 5. Template Completo Encapsulado (100% Autônomo e sem Font Awesome)
-        full_html = f"""{brk_tracking_marker(enriched_data.get("sku"), archetype_id)}
+        full_html = f"""{brk_tracking_marker(enriched_data.get("sku") or enriched_data.get("master_sku") or enriched_data.get("id"), archetype_id)}
 <!-- BRK GROUP - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL SHOPIFY) -->
 <div class="brk-desc-wrapper">
   <style>

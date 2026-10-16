@@ -2196,11 +2196,12 @@ class TemplateEngine:
             or (sku_clean_for_flags.startswith(("casual", "bp", "cm", "cadv", "cf")) and not sku_clean_for_flags.startswith(("cmb", "cbt")))
         ) and not any(w in t_low for w in ["manga longa", "manga-longa"]) and not is_segunda_pele
         is_has_glove = is_apparel and (any(w in t_low for w in ["com luva", "e luva", "luva integrada", "armorx"]) or sku_clean_for_flags.startswith("cax"))
+        is_casal = is_apparel and "casal" in t_low and ("kit" in t_low or "combo" in t_low)
         is_female = (
             any(w in t_low for w in ["feminina", "feminino", "baby look", "babylook", "mulher"]) or
             "femin" in tags_low or
             (is_apparel and bool(re.search(r'bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_clean_for_flags)))
-        ) and not is_kids
+        ) and not is_kids and not is_casal
         is_round_neck = (
             is_apparel
             and archetype_id != "shirts_button_work"
@@ -2303,6 +2304,12 @@ class TemplateEngine:
             else:
                 act1["title"] = "CONFORTO TÉRMICO, AJUSTE ANATÔMICO E PROTEÇÃO SOLAR UV50+"
                 act1["desc_tmpl"] = "Projetada para atuar como uma verdadeira segunda pele sob jaquetas, macacões ou no uso direto ao ar livre, a {title} mantém o equilíbrio térmico corporal, reduz o atrito com equipamentos e garante proteção solar FPU 50+ com liberdade total de movimentos."
+
+        # 1.9 Adaptação Kit Casal (1 Camisa Masculina + 1 Camisa Feminina Baby Look)
+        elif is_casal and archetype_id == "uv_performance":
+            act1["tag"] = "Kit Casal Oficial (Masculino + Feminino)"
+            act1["title"] = "KIT CASAL COM MODELAGEM MASCULINA E FEMININA (BABY LOOK)"
+            act1["desc_tmpl"] = "Desenvolvido para casais que compartilham a paixão por estrada, aventura e atividades ao ar livre, o {title} combina a modelagem tradicional Masculina e o corte acinturado Feminino (Baby Look), oferecendo proteção solar FPU 50+, leveza e liberdade total de movimentos."
 
         # 2. Adaptação Feminina (Corte anatômico Baby Look em todas as linhas UV50+, incluindo FusionX, Hybrid e Capuz)
         elif is_female and archetype_id == "uv_performance":
