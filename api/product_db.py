@@ -103,6 +103,117 @@ def evaluate_guideline_compliance(p: dict, store_key: str = "brk_fishing") -> tu
     return (True, "CONFORME_MODO_B", "100% dentro das diretrizes oficiais Modo B")
 
 
+_SUPER_OFERTAS_AUDIT = None
+
+def load_super_ofertas_audit() -> dict:
+    """Carrega os dados homologados do pente fino de 91 produtos / 627 imagens da coleção Super Ofertas Fishing."""
+    global _SUPER_OFERTAS_AUDIT
+    if _SUPER_OFERTAS_AUDIT is not None:
+        return _SUPER_OFERTAS_AUDIT
+    audit_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "super_ofertas_audit_data.json")
+    if os.path.exists(audit_path):
+        try:
+            with open(audit_path, "r", encoding="utf-8") as f:
+                _SUPER_OFERTAS_AUDIT = json.load(f)
+                return _SUPER_OFERTAS_AUDIT
+        except Exception as e:
+            print(f"[-] Erro ao carregar super_ofertas_audit_data.json: {e}")
+    _SUPER_OFERTAS_AUDIT = {}
+    return _SUPER_OFERTAS_AUDIT
+
+
+def audit_live_gallery_and_variants(p: dict) -> dict:
+    """
+    Executa diagnóstico de variantes sem foto vinculada (image_id=null), fotos compartilhadas/duplicadas
+    e imagens de baixa resolução para qualquer produto da Shopify ou da coleção Super Ofertas.
+    """
+    pid = str(p.get("id", ""))
+    so_audit = load_super_ofertas_audit()
+    if pid in so_audit:
+        entry = so_audit[pid]
+        return {
+            "in_super_ofertas": True,
+            "collection_index": entry.get("index", 0),
+            "total_variants": entry.get("total_variants", 1),
+            "total_images": entry.get("total_images", 1),
+            "has_unlinked_variants": bool(entry.get("has_unlinked_variants")),
+            "unlinked_variants": entry.get("unlinked_variants", []),
+            "has_duplicate_images": bool(entry.get("has_duplicate_images")),
+            "duplicate_images": entry.get("duplicate_images", []),
+            "has_low_res_images": bool(entry.get("has_low_res_images")),
+            "low_res_images": entry.get("low_res_images", []),
+            "needs_media_fix": bool(entry.get("needs_media_fix"))
+        }
+
+    # Diagnóstico dinâmico para produtos de outras coleções/lojas
+    variants = p.get("variants") or []
+    images = p.get("images") or []
+    title_l = str(p.get("title") or "").lower()
+    is_line = "linha" in title_l
+    unlinked_vars = []
+    iid_to_vars = {}
+    if len(variants) > 1 and not is_line:
+        for v in variants:
+            if not isinstance(v, dict):
+                continue
+            vtitle = str(v.get("title") or "").strip()
+            if not vtitle or vtitle == "Default Title":
+                continue
+            iid = v.get("image_id")
+            if not iid and isinstance(v.get("featured_image"), dict):
+                iid = v["featured_image"].get("id")
+            if iid is None:
+                unlinked_vars.append(vtitle)
+            else:
+                iid_to_vars.setdefault(str(iid), []).append(vtitle)
+
+    dups = []
+    for iid_k, vlist in iid_to_vars.items():
+        if len(vlist) > 1:
+            dups.append({
+                "pos1": 0,
+                "pos2": 0,
+                "v1": vlist,
+                "v2": [],
+                "type": "SHARED_VARIANT_IMG",
+                "summary": f"Mesma foto vinculada a múltiplas variantes: {', '.join(vlist)}"
+            })
+
+    low_res = []
+    for idx_img, img in enumerate(images, 1):
+        if isinstance(img, dict):
+            w = img.get("width") or 0
+            h = img.get("height") or 0
+            pos = img.get("position") or idx_img
+            if (w and w < 800) or (h and h < 800):
+                low_res.append({
+                    "pos": pos,
+                    "w": w,
+                    "h": h,
+                    "kb": 0,
+                    "variants": [],
+                    "reasons": [f"Baixa resolução ({w}x{h}px)"],
+                    "summary": f"Pos {pos}: {w}x{h}px - Baixa resolução (<800px)"
+                })
+
+    has_null = len(unlinked_vars) > 0
+    has_dup = len(dups) > 0
+    has_low = len(low_res) > 0
+    return {
+        "in_super_ofertas": False,
+        "collection_index": 0,
+        "total_variants": len(variants) if variants else 1,
+        "total_images": len(images) if images else len(p.get("cdn_images") or p.get("gallery") or []),
+        "has_unlinked_variants": has_null,
+        "unlinked_variants": unlinked_vars,
+        "has_duplicate_images": has_dup,
+        "duplicate_images": dups,
+        "has_low_res_images": has_low,
+        "low_res_images": low_res,
+        "needs_media_fix": has_null or has_dup or has_low
+    }
+
+
 def load_store_database(store_key: str):
     """Carrega e indexa o arquivo de dados da loja com cache em memória"""
     store_norm = STORE_SLUG_MAP.get(store_key, store_key)
@@ -125,6 +236,28 @@ def load_store_database(store_key: str):
 
         products = data.get("products", []) if isinstance(data, dict) else data
 
+        # Se for brk_fishing, garantir que todos os 91 produtos da coleção Super Ofertas constem no banco
+        so_audit = load_super_ofertas_audit() if store_norm == "brk_fishing" else {}
+        existing_ids = {str(p.get("id", "")) for p in products}
+        if store_norm == "brk_fishing" and so_audit:
+            for pid, so_entry in so_audit.items():
+                if pid not in existing_ids:
+                    products.append({
+                        "id": int(pid) if pid.isdigit() else pid,
+                        "handle": so_entry.get("handle", ""),
+                        "title": so_entry.get("title", ""),
+                        "vendor": so_entry.get("vendor", "BRK Fishing"),
+                        "category": "Iscas Artificiais" if "isca" in so_entry.get("title", "").lower() else "Equipamentos de Pesca",
+                        "master_sku": so_entry.get("master_sku", f"ID-{pid}"),
+                        "variants_skus": so_entry.get("variants_skus", []),
+                        "cdn_images": so_entry.get("cdn_images", []),
+                        "gallery": so_entry.get("cdn_images", []),
+                        "image": (so_entry.get("cdn_images") or [""])[0],
+                        "body_html": so_entry.get("body_html", ""),
+                        "status": "SAUDAVEL",
+                        "in_super_ofertas": True
+                    })
+
         # Criar índices em memória com avaliação estrita de diretrizes
         by_id = {}
         by_handle = {}
@@ -134,11 +267,26 @@ def load_store_database(store_key: str):
         broken_list = []
         legacy_list = []
         compliant_list = []
+        super_ofertas_list = []
 
         for p in products:
             p_id = str(p.get("id", ""))
             p_handle = str(p.get("handle", "")).lower()
             p_sku = str(p.get("master_sku") or p.get("sku") or "").upper()
+
+            if store_norm == "brk_fishing" and p_id in so_audit:
+                so_entry = so_audit[p_id]
+                p["in_super_ofertas"] = True
+                p["super_ofertas_index"] = so_entry.get("index", 999)
+                if so_entry.get("cdn_images"):
+                    p["cdn_images"] = so_entry["cdn_images"]
+                    p["gallery"] = so_entry["cdn_images"]
+                if so_entry.get("handle"):
+                    p["handle"] = so_entry["handle"]
+                    p_handle = so_entry["handle"].lower()
+                super_ofertas_list.append(p)
+
+            p["media_audit"] = audit_live_gallery_and_variants(p)
 
             is_comp, g_status, g_reason = evaluate_guideline_compliance(p, store_norm)
             p["is_mode_b_compliant"] = is_comp
@@ -163,6 +311,8 @@ def load_store_database(store_key: str):
             else:
                 compliant_list.append(p)
 
+        super_ofertas_list.sort(key=lambda x: x.get("super_ofertas_index", 999))
+
         # Fila prioritária de itens fora das diretrizes (exclui 100% os itens já CONFORME_MODO_B)
         non_compliant_list = outdated_mode_b_list + empty_list + broken_list + legacy_list
 
@@ -177,6 +327,7 @@ def load_store_database(store_key: str):
             "legacy": legacy_list,
             "compliant": compliant_list,
             "non_compliant": non_compliant_list,
+            "super_ofertas": super_ofertas_list,
             "total": len(products)
         }
 
@@ -261,6 +412,8 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
             detected_arch = arch_id or engine.detect_archetype(
                 p.get("title", ""), p.get("category", ""), p.get("tags", []), vendor=p.get("vendor", ""), sku=sku_str
             )
+            p["archetype_id"] = detected_arch
+            p["archetype_name"] = engine.templates.get(detected_arch, {}).get("name", "Modo B")
             raw_images = p.get("images") or p.get("gallery") or p.get("cdn_images") or []
             images = engine._sanitize_and_dedup_images(raw_images, archetype_id=detected_arch, title=p.get("title", ""))
             p["cdn_images"] = images
@@ -301,7 +454,6 @@ STORE_THEME_METADATA = {
 
 def detect_audience_badge(p: dict, mode_b: str) -> str:
     title_l = (p.get("title") or "").lower()
-    sku_u = str(p.get("master_sku") or p.get("sku") or "").upper()
     if "INFANTIL" in mode_b or "2 Anos" in mode_b or any(w in title_l for w in ["infantil", "kids", "juvenil", "junior"]):
         return "INFANTIL (2 a 13 Anos | PP ao G2)"
     if "FEMININO" in mode_b or "Baby Look" in mode_b or any(w in title_l for w in ["feminina", "feminino", "baby look", "babylook", "dama"]):
@@ -313,9 +465,10 @@ def sanitize_product(p: dict, store_key: str = "brk_fishing") -> dict:
     mode_b = ensure_mode_b_html(p, store_key)
     imgs = p.get("cdn_images") or p.get("gallery") or []
     is_cap_layout = "brk-cap-description" in mode_b
-    has_size_guide = "brk-size-guide" in mode_b
+    has_size_guide = '<div class="brk-size-guide">' in mode_b
     delivery_time = "Pronta entrega" if "Pronta entrega" in mode_b else "10 dias úteis"
     is_comp, g_status, g_reason = evaluate_guideline_compliance(p, store_key)
+    media_audit = p.get("media_audit") or audit_live_gallery_and_variants(p)
     return {
         "id": str(p.get("id", "")),
         "handle": p.get("handle", ""),
@@ -337,6 +490,8 @@ def sanitize_product(p: dict, store_key: str = "brk_fishing") -> dict:
         "mode_b_html": mode_b,
         "mode_b_chars": len(mode_b),
         "has_official_mode_b": "<!-- BRK-MODO-B" in mode_b,
+        "in_super_ofertas": bool(p.get("in_super_ofertas") or media_audit.get("in_super_ofertas")),
+        "media_audit": media_audit,
         "updated_at": p.get("updated_at") or p.get("published_at") or ""
     }
 
@@ -386,38 +541,145 @@ class handler(BaseHTTPRequestHandler):
 
         # ---------------------------------------------------------------------
         # 1. Consulta de Fila para Automação em Lote (Action = queue)
-        #    Retorna APENAS os produtos que estão FORA DAS DIRETRIZES!
+        #    Suporta Lote Geral, Categorias e Coleções Específicas (ex: Super Ofertas 🔥)
         # ---------------------------------------------------------------------
         if action == "queue":
             status_filter = (qs.get("status") or ["FORA_DIRETRIZES"])[0].upper()
             category_filter = (qs.get("category") or ["ALL"])[0].strip()
+            collection_raw = (qs.get("collection") or [""])[0].strip()
             try:
                 limit = int((qs.get("limit") or ["25"])[0])
             except ValueError:
                 limit = 25
 
-            if status_filter == "MODO_B_DESATUALIZADO":
-                pool = db["outdated_mode_b"]
+            # Normalizar handle de coleção caso venha URL completa
+            col_handle = collection_raw
+            if "/collections/" in col_handle:
+                col_handle = col_handle.split("/collections/")[-1].split("?")[0].split("/")[0].strip()
+            col_handle_low = urllib.parse.unquote(col_handle).lower() if hasattr(urllib, "parse") else col_handle.lower()
+
+            is_super_ofertas = (
+                category_filter.lower() == "super_ofertas"
+                or "super-ofertas" in col_handle_low
+                or "super_ofertas" in col_handle_low
+            )
+
+            collection_pool = None
+            if is_super_ofertas and store_key == "brk_fishing":
+                collection_pool = list(db.get("super_ofertas") or [])
+            elif col_handle:
+                store_domains_map = {
+                    "brk_fishing": "https://www.brkfishing.com.br",
+                    "brk_agro": "https://www.brkagro.com.br",
+                    "brk_motors": "https://www.brkmotors.com.br"
+                }
+                base_u = store_domains_map.get(store_key, "https://www.brkfishing.com.br")
+                try:
+                    encoded_col = urllib.parse.quote(col_handle, safe="-_%")
+                    req_c = urllib.request.Request(
+                        f"{base_u}/collections/{encoded_col}/products.json?limit=250",
+                        headers={"User-Agent": "Mozilla/5.0"}
+                    )
+                    with urllib.request.urlopen(req_c, timeout=7) as resp_c:
+                        live_col_prods = json.loads(resp_c.read().decode("utf-8")).get("products", [])
+                        collection_pool = []
+                        for lp in live_col_prods:
+                            lp_id = str(lp.get("id", ""))
+                            db_p = db["by_id"].get(lp_id)
+                            if db_p:
+                                db_p["media_audit"] = audit_live_gallery_and_variants(lp if not db_p.get("in_super_ofertas") else db_p)
+                                collection_pool.append(db_p)
+                            else:
+                                variants = lp.get("variants") or []
+                                v_skus = [str(v.get("sku") or "").strip() for v in variants if v.get("sku")]
+                                master_s = v_skus[0].split("-")[0] if v_skus else f"ID-{lp_id}"
+                                dedup_imgs = [img.get("src") if isinstance(img, dict) else img for img in (lp.get("images") or []) if img]
+                                body_h = (lp.get("body_html") or "").strip()
+                                new_p = {
+                                    "id": lp.get("id"),
+                                    "handle": lp.get("handle", ""),
+                                    "title": lp.get("title", ""),
+                                    "vendor": lp.get("vendor", "BRK"),
+                                    "master_sku": master_s,
+                                    "variants_skus": v_skus,
+                                    "body_html": body_h,
+                                    "status": "SEM_DESCRICAO" if len(re.sub(r"<[^>]+>", "", body_h).strip()) < 20 else "SAUDAVEL",
+                                    "cdn_images": dedup_imgs,
+                                    "gallery": dedup_imgs,
+                                    "image": dedup_imgs[0] if dedup_imgs else "",
+                                    "variants": variants,
+                                    "images": lp.get("images") or []
+                                }
+                                is_c, g_st, g_rs = evaluate_guideline_compliance(new_p, store_key)
+                                new_p["is_mode_b_compliant"] = is_c
+                                new_p["guideline_status"] = g_st
+                                new_p["guideline_reason"] = g_rs
+                                new_p["media_audit"] = audit_live_gallery_and_variants(new_p)
+                                collection_pool.append(new_p)
+                except Exception as ex:
+                    print(f"[!] Falha ao buscar coleção ao vivo '{col_handle}': {ex}")
+                    collection_pool = []
+
+            media_status_filters = {
+                "COLECAO_COMPLETA",
+                "AJUSTE_FOTOS_GERAL",
+                "CRITICOS_FOTOS_CORES",
+                "COR_SEM_FOTO",
+                "FOTOS_DUPLICADAS",
+                "FOTOS_BAIXA_QUALIDADE"
+            }
+
+            if collection_pool is not None:
+                base_pool = collection_pool
+            elif status_filter in media_status_filters:
+                base_pool = db.get("super_ofertas") or db["products"]
+            elif status_filter == "MODO_B_DESATUALIZADO":
+                base_pool = db["outdated_mode_b"]
             elif status_filter == "SEM_DESCRICAO":
-                pool = db["empty"]
+                base_pool = db["empty"]
             elif status_filter == "IMAGENS_QUEBRADAS":
-                pool = db["broken"]
+                base_pool = db["broken"]
             elif status_filter == "FORA_PADRAO_MODO_B":
-                pool = db["legacy"]
+                base_pool = db["legacy"]
             else:
-                # FORA_DIRETRIZES / NAO_CONFORMES / ALL: todos os produtos fora das diretrizes,
-                # ordenados por prioridade (MODO_B_DESATUALIZADO -> SEM_DESCRICAO -> IMAGENS_QUEBRADAS -> FORA_PADRAO_MODO_B)
-                pool = db["non_compliant"]
+                base_pool = db["non_compliant"]
 
-            # Filtrar estritamente qualquer produto que já esteja 100% conforme ou na lista local de excluídos
-            pool = [
-                p for p in pool
-                if not p.get("is_mode_b_compliant", False)
-                and str(p.get("id", "")).upper() not in excluded_tokens
-                and str(p.get("master_sku") or p.get("sku") or "").upper() not in excluded_tokens
-            ]
+            # Aplicar filtro de status (Diretrizes Modo B ou Auditoria Visual de Fotos/Variantes)
+            pool = []
+            for p in base_pool:
+                pid_u = str(p.get("id", "")).upper()
+                sku_u = str(p.get("master_sku") or p.get("sku") or "").upper()
+                if pid_u in excluded_tokens or (sku_u and sku_u in excluded_tokens):
+                    continue
 
-            if category_filter and category_filter.upper() != "ALL":
+                ma = p.get("media_audit") or {}
+                if status_filter == "COLECAO_COMPLETA":
+                    pool.append(p)
+                elif status_filter == "AJUSTE_FOTOS_GERAL":
+                    if ma.get("needs_media_fix"):
+                        pool.append(p)
+                elif status_filter == "CRITICOS_FOTOS_CORES":
+                    if ma.get("has_unlinked_variants") or ma.get("has_duplicate_images"):
+                        pool.append(p)
+                elif status_filter == "COR_SEM_FOTO":
+                    if ma.get("has_unlinked_variants"):
+                        pool.append(p)
+                elif status_filter == "FOTOS_DUPLICADAS":
+                    if ma.get("has_duplicate_images"):
+                        pool.append(p)
+                elif status_filter == "FOTOS_BAIXA_QUALIDADE":
+                    if ma.get("has_low_res_images"):
+                        pool.append(p)
+                elif status_filter in ("MODO_B_DESATUALIZADO", "SEM_DESCRICAO", "IMAGENS_QUEBRADAS", "FORA_PADRAO_MODO_B"):
+                    if p.get("guideline_status") == status_filter and not p.get("is_mode_b_compliant", False):
+                        pool.append(p)
+                else:
+                    # FORA_DIRETRIZES: retorna apenas os produtos que não estão 100% conformes com o Modo B v5
+                    if not p.get("is_mode_b_compliant", False):
+                        pool.append(p)
+
+            # Aplicar filtro de categoria (exceto quando category_filter == super_ofertas, já resolvido em collection_pool)
+            if category_filter and category_filter.upper() not in ("ALL", "SUPER_OFERTAS"):
                 cat_l = category_filter.lower()
                 filtered_pool = []
                 for p in pool:
@@ -442,6 +704,15 @@ class handler(BaseHTTPRequestHandler):
                     elif cat_l == "feminino":
                         if any(w in p_title for w in ["feminina", "feminino", "baby look", "babylook"]):
                             filtered_pool.append(p)
+                    elif cat_l == "iscas_artificiais":
+                        if p_arch == "fishing_lures" or "isca" in p_title or "isca" in p_cat:
+                            filtered_pool.append(p)
+                    elif cat_l == "equipamentos_pesca":
+                        if p_arch in ("fishing_tackle_gear", "tackle_boxes_storage") or any(w in p_title or w in p_cat for w in ["vara", "carretilha", "molinete", "alicate", "caixa", "estojo", "maleta"]):
+                            filtered_pool.append(p)
+                    elif cat_l == "linhas_pesca":
+                        if "linha" in p_title or "linha" in p_cat or "multifilamento" in p_title or "monofilamento" in p_title or "fluorcarbono" in p_title:
+                            filtered_pool.append(p)
                     elif cat_l in p_cat or cat_l in p_arch:
                         filtered_pool.append(p)
                 pool = filtered_pool
@@ -454,9 +725,13 @@ class handler(BaseHTTPRequestHandler):
                     "sku": str(p.get("master_sku") or p.get("sku") or f"ID-{p.get('id', '')}"),
                     "title": p.get("title", ""),
                     "guideline_status": p.get("guideline_status", "FORA_PADRAO_MODO_B"),
-                    "guideline_reason": p.get("guideline_reason", "")
+                    "guideline_reason": p.get("guideline_reason", ""),
+                    "needs_media_fix": bool((p.get("media_audit") or {}).get("needs_media_fix")),
+                    "has_unlinked_variants": bool((p.get("media_audit") or {}).get("has_unlinked_variants")),
+                    "has_duplicate_images": bool((p.get("media_audit") or {}).get("has_duplicate_images")),
+                    "has_low_res_images": bool((p.get("media_audit") or {}).get("has_low_res_images"))
                 }
-                for p in pool[:80]
+                for p in pool[:95]
             ]
 
             return self._respond_json(200, {
@@ -464,6 +739,7 @@ class handler(BaseHTTPRequestHandler):
                 "store": store_key,
                 "status_filter": status_filter,
                 "category_filter": category_filter,
+                "collection_filter": col_handle or ("super-ofertas-🔥" if is_super_ofertas else ""),
                 "total_available": len(pool),
                 "compliant_excluded_count": len(db["compliant"]),
                 "count": len(sanitized_batch),
@@ -484,6 +760,14 @@ class handler(BaseHTTPRequestHandler):
                 if str(p.get("id", "")).upper() not in excluded_tokens
                 and str(p.get("master_sku") or p.get("sku") or "").upper() not in excluded_tokens
             ]
+            so_list = db.get("super_ofertas") or []
+            so_stats = {
+                "total": len(so_list),
+                "needs_media_fix": sum(1 for p in so_list if (p.get("media_audit") or {}).get("needs_media_fix")),
+                "unlinked_variants": sum(1 for p in so_list if (p.get("media_audit") or {}).get("has_unlinked_variants")),
+                "duplicate_images": sum(1 for p in so_list if (p.get("media_audit") or {}).get("has_duplicate_images")),
+                "low_res_images": sum(1 for p in so_list if (p.get("media_audit") or {}).get("has_low_res_images")),
+            }
             non_compliant_codes = [
                 {
                     "id": str(p.get("id", "")),
@@ -506,6 +790,7 @@ class handler(BaseHTTPRequestHandler):
                 "imagens_quebradas_count": len([p for p in db["broken"] if str(p.get("id", "")).upper() not in excluded_tokens]),
                 "fora_padrao_modo_b_count": len([p for p in db["legacy"] if str(p.get("id", "")).upper() not in excluded_tokens]),
                 "healthy_count": db["total"] - len(db["empty"]) - len(db["broken"]),
+                "super_ofertas_stats": so_stats,
                 "non_compliant_codes": non_compliant_codes,
                 "categories": cat_counts
             }, cache_control="no-store" if excluded_tokens else "public, s-maxage=60")

@@ -95,6 +95,18 @@ KNOWN_SHOPIFY_DUP_IMAGE_TOKENS = {
     'f9ce986a86e543f8b6d288714093825a', 'fa6530264a684924a8f261eb8fc73011', 'fb17213952f84ecca5ec7b02ec3304be', 'fb9def04c9174ae3a29a572694315f4d',
     'fbb9f22bb404418fb41e242a94b8ae21', 'fedcc88e79524f51ae0e6900a6dc7730', 'ff03f85c460f4aac930bcfab9e761b7c', 'ff854bc26d574957bca986fe0049263f',
     'whgf96p_7db6902a-a660-49dd-b94f-647a3bf0246a.png',
+    '1747241373161-1_26c28b00-27db-4da9-8465-dc316f7886f0.jpg', '1747241373161-1_cc8c87ae-aeed-42ac-9b10-bdb82369d1ec.jpg',
+    '1755280665111-1_3b0361b6-672f-4044-8f71-0911820337c4.jpg', '1755280665111-1_5af80f26-4bae-4242-a3ad-be4c0d5045e7.jpg', '1755280665111-1_e01d7d43-c885-441b-b8fa-043c9dd8cb71.jpg',
+    '1755280683947-3_80d04785-8d46-4bb1-bc46-8a44295b6d31.jpg', '1755280683947-3_a8c3df9c-ad14-4a09-9547-b2e5452869a7.jpg', '1755280683947-3_ad5e5a9c-9510-404a-a7a5-20cb91ef3c0c.jpg', '1755280683947-3_b388179b-8844-461d-a560-059062537b35.jpg',
+    '1755284793848-1_4021911a-3767-4643-8444-34a1afe5cf4e.jpg', '1755284793848-1_60240d1d-1967-4eb3-9c41-d246c26ba3b9.jpg', '1755284793848-1_adb77146-3446-4eb5-a03d-8828daca9720.jpg', '1755284793848-1_bc281fea-5771-4942-9d77-1cc92bd3615c.jpg',
+    '1755636679693-pot65.jpg', '7krczor.jpg', 'rtu1vnr.jpg', 'rqkfmex.jpg', 'w5jqror.jpg', 'tmen4pb.jpg', 'tl9jr33.jpg', 'xt9vq0l.jpg', 'ktvyxmy.jpg', 'p9ppfas.jpg',
+    '4kb8nwd_022211e7-1083-4c11-9578-30954a77b8d3.jpg', '4kb8nwd_2314bf0e-1301-4b17-bee5-545f804ee29e.jpg', '4kb8nwd_a3d3b756-697e-4d2a-847d-0272f6d71109.jpg',
+    'e8wk7re_48fc67d5-74da-4df9-9558-5b8698aa1399.jpg', 'greuip3_47e2aa4f-1ab1-4ba2-ae8c-3a7433f2b029.png',
+    'kgiuj0f_80121748-8cee-4de4-9a6f-6338b35ba416.jpg', 'klzuhmq_dd9122c3-cfe8-437e-ae45-fd0cae28d089.png', 'klzuhmq_e7991a94-4037-4980-a461-d1a53bf92d1e.png',
+    'kt1l6ns_1faf788f-8538-4fe2-a506-79da7ed99af9.png', 'kt1l6ns_6447884f-5824-4cb4-a73a-402386a8aefe.png', 'kt1l6ns_858acd0f-41ba-4a8b-a12c-09839a70d414.png', 'kt1l6ns_b73b6cc5-58f0-4e5b-aeb0-ee4cb22e182f.png',
+    'kzjgobf_d2e54349-0e18-4cf0-87c1-f97cebccb1b4.jpg', 'ocrgtf9_ea874bce-967a-4c06-b13d-ed5f478f5009.png', 'u6vsxm0_d30ba6e8-7e65-4c01-82ce-e529e1ff199c.png',
+    'xhffzmt_4e9fc008-3542-4a5a-ac49-fcd54553cb5a.png', 'xhffzmt_c878cf46-ae8b-4791-8de4-aebcfa2b7b2b.png', 'xhffzmt_ce259353-5bef-424a-a04d-834a6e5f83b6.png',
+    'xvsvhpi_bb1ceb7d-16d9-4e9c-86f8-f0aa35be0b5d.png',
 }
 
 
@@ -2225,11 +2237,17 @@ class TemplateEngine:
 
         # Alocação estrita de imagens exclusivas por ato - ZERO DUPLICAÇÃO
         if has_multiple_variations and (len(cdn_images) >= 4 or len(cdn_images) == 2):
-            split_images = [cdn_images[0], cdn_images[1]]
-            img1 = cdn_images[0]
-            # Se for split no Ato 1, Atos 2 e 3 usam as fotos seguintes para não repetir
-            img2 = cdn_images[2] if len(cdn_images) > 2 else ""
-            img3 = cdn_images[3] if len(cdn_images) > 3 else ""
+            if len(cdn_images) >= 5:
+                split_images = [cdn_images[0], cdn_images[3]]
+                img1 = cdn_images[0]
+                img2 = cdn_images[1]
+                img3 = cdn_images[4]
+            else:
+                split_images = [cdn_images[0], cdn_images[1]]
+                img1 = cdn_images[0]
+                # Se for split no Ato 1, Atos 2 e 3 usam as fotos seguintes para não repetir
+                img2 = cdn_images[2] if len(cdn_images) > 2 else ""
+                img3 = cdn_images[3] if len(cdn_images) > 3 else ""
             variant_titles = [v.get("title") for v in variants if v.get("title") and v.get("title") != "Default Title"]
             if variant_titles:
                 variations_summary = f"Disponível em {len(variant_titles)} opções de cores e modelos no anúncio ({', '.join(variant_titles[:4])}{'...' if len(variant_titles) > 4 else ''})."
