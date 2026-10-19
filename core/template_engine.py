@@ -2724,7 +2724,9 @@ class TemplateEngine:
             split_images, img1, img2, img3 = self._select_lure_act_images(
                 cdn_images, variants=variants, product_id=str(product.get("id", "")), title=title
             )
-            variant_titles = [v.get("title") for v in variants if v.get("title") and v.get("title") != "Default Title"]
+            variant_titles = [v.get("title") for v in variants if isinstance(v, dict) and v.get("title") and v.get("title") != "Default Title"]
+            if not variant_titles and product.get("variants_skus"):
+                variant_titles = [s.split("_")[-1] if "_" in s else s for s in product.get("variants_skus") if s]
             if variant_titles:
                 variations_summary = f"Disponível em {len(variant_titles)} opções de cores e modelos no anúncio ({', '.join(variant_titles[:4])}{'...' if len(variant_titles) > 4 else ''})."
             else:
@@ -2752,7 +2754,9 @@ class TemplateEngine:
             img2 = cdn_images[1] if len(cdn_images) > 1 else ""
             img3 = cdn_images[2] if len(cdn_images) > 2 else ""
             if has_multiple_variations:
-                variant_titles = [v.get("title") for v in variants if v.get("title") and v.get("title") != "Default Title"]
+                variant_titles = [v.get("title") for v in variants if isinstance(v, dict) and v.get("title") and v.get("title") != "Default Title"]
+                if not variant_titles and product.get("variants_skus"):
+                    variant_titles = [s.split("_")[-1] if "_" in s else s for s in product.get("variants_skus") if s]
                 if variant_titles:
                     variations_summary = f"Disponível em {len(variant_titles)} opções de cores e modelos no anúncio ({', '.join(variant_titles[:4])}{'...' if len(variant_titles) > 4 else ''})."
                 else:

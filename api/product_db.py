@@ -1134,6 +1134,7 @@ class handler(BaseHTTPRequestHandler):
                     "tags": raw_tags,
                     "master_sku": master_s,
                     "variants_skus": v_skus,
+                    "variants": variants,
                     "body_html": body_h,
                     "status": "SEM_DESCRICAO" if len(re.sub(r"<[^>]+>", "", body_h).strip()) < 20 else "SAUDAVEL",
                     "cdn_images": dedup_imgs,
@@ -1161,6 +1162,8 @@ class handler(BaseHTTPRequestHandler):
                         if live_data:
                             if live_data.get("title"):
                                 found_product["title"] = live_data["title"]
+                            if live_data.get("variants"):
+                                found_product["variants"] = live_data["variants"]
                             if live_data.get("images"):
                                 engine_inst, _ = get_engine_and_builder()
                                 live_title_str = live_data.get("title") or found_product.get("title", "")
@@ -1182,7 +1185,7 @@ class handler(BaseHTTPRequestHandler):
                                     found_product["image"] = dedup_imgs[0]
                             found_product.pop("split_images", None)
                             found_product.pop("narrative_blocks", None)
-                            found_product["mode_b_html"] = ""  # Forçar regeneração com as fotos e título novos
+                            found_product["mode_b_html"] = ""  # Forçar regeneração com as fotos, variações e título novos
                 except Exception as ex:
                     print(f"[!] Falha ao sincronizar live para {handle}: {ex}")
 
