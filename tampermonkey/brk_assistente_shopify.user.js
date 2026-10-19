@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         BRK Assistente de Descrições Shopify (Mini-Dashboard v6.0.0 Cockpit)
+// @name         BRK Assistente de Descrições Shopify (Mini-Dashboard v6.1.0 Cockpit)
 // @namespace    https://1025-ten.vercel.app/
-// @version      6.0.0
-// @description  Mini-Dashboard Profissional in-screen para Shopify Admin com KPIs em tempo real, barra de progresso da loja, prioridades inteligentes (Críticos S3/Vazios + Categorias) e Piloto Automático sem alerta 'Sair do site?'.
+// @version      6.1.0
+// @description  Mini-Dashboard Profissional in-screen para Shopify Admin com KPIs em tempo real, Capa Humanizada inteligente ([0], [1], [3] sem foto de costas no Ato 3), prioridades e Piloto Automático sem alerta 'Sair do site?'.
 // @author       BRK Group & DeepMind Pair
 // @match        https://admin.shopify.com/store/*/products*
 // @match        https://admin.shopify.com/store/*
@@ -35,7 +35,7 @@
 
   // Configuração da API do Banco de Dados BRK (6.409 produtos auditados nas 3 lojas)
   const API_BASE = "https://1025-ten.vercel.app";
-  const SCRIPT_VERSION = "6.0.0";
+  const SCRIPT_VERSION = "6.1.0";
 
   const STORAGE_KEYS = {
     QUEUE: "BRK_AUTOSYNC_QUEUE",
@@ -1009,7 +1009,7 @@
       if (currentHtml.includes("Bandana Tubular Seamless")) {
         reasons.push("Nomenclatura antiga de Bandana (Seamless)");
       }
-      // Contingência Anti-Duplicação da 1ª Foto na Descrição
+      // Contingência Anti-Duplicação da 1ª Foto na Descrição e Alocação de Capa Humanizada ([0], [1], [3])
       const editorImgMatches = Array.from(currentHtml.matchAll(/<img[^>]+src=["']([^"']+)["']/gi))
         .map(m => m[1].split("?")[0].toLowerCase())
         .filter(u => !u.endsWith(".svg"));
@@ -1022,6 +1022,21 @@
           reasons.push("1ª foto duplicada pela Shopify no Ato 2");
         }
       }
+
+      // Verificar se o Ato 3 está com a Foto 3 (Costas) em galerias de 4+ fotos com Capa Humanizada
+      const isApparelProd = /camisa|camiseta|fusion|hyb|armorx|cax|segunda pele|raglan|cortavento|jaqueta/i.test(titleAndSku);
+      const refGallery = (prod && Array.isArray(prod.cdn_images) && prod.cdn_images.length >= 4)
+        ? prod.cdn_images.map(u => String(u).split("?")[0].toLowerCase())
+        : [];
+      if (isApparelProd && refGallery.length >= 4 && editorImgMatches.length >= 3) {
+        const f3Name = refGallery[3].split("/").pop() || "";
+        const isF3ExplicitBack = /costas|costa|verso|tras|02_|-02\.|02masc|02fem|02inf/i.test(f3Name);
+        const f2Name = refGallery[2].split("/").pop() || "";
+        if (editorImgMatches[2] === refGallery[2] && !isF3ExplicitBack && !f2Name.includes("frente")) {
+          reasons.push("Foto 3 (Costas) no Ato 3 em vez da Foto 4 (3/4 Frontal/Lateral) em galeria com Capa Humanizada");
+        }
+      }
+
       // Verificar se a cor da loja está correta no HTML do editor
       const themeMarkers = currentTheme.markers || ["#0284c7"];
       const hasStoreColor = themeMarkers.some(color => currentHtml.toLowerCase().includes(color.toLowerCase()));
@@ -1268,11 +1283,97 @@
       return null;
     }
 
+    function normalizeShopifyCdnUrl(rawUrl) {
+      if (!rawUrl || typeof rawUrl !== "string") return "";
+      let u = rawUrl.trim();
+      if (u.startsWith("//")) u = "https:" + u;
+      const parts = u.split("?");
+      let base = parts[0];
+      const qs = parts[1] || "";
+      // Remove sufixos de miniatura da Shopify (_200x200, _300x300_crop_center, _small, _compact, etc.)
+      base = base.replace(/_(?:\d+x\d*|\d*x\d+|small|compact|medium|large|grande|thumb|icon|pico)(?:_crop_[a-z]+)?(?=\.[a-z0-9]+$)/i, "");
+      const vMatch = qs.match(/(?:^|&)(v=\d+)/);
+      return vMatch ? `${base}?${vMatch[1]}` : base;
+    }
+
+    function extractLiveShopifyMediaGallery() {
+      try {
+        const imgs = Array.from(document.querySelectorAll("img"));
+        const mediaUrls = [];
+        const seenRoots = new Set();
+
+        for (const img of imgs) {
+          if (
+            img.closest("#brk-tm-hud") ||
+            img.closest("#brk-tm-preview-modal") ||
+            img.closest("[contenteditable='true']") ||
+            img.closest("table") ||
+            img.closest(".Polaris-IndexTable") ||
+            img.closest("[role='grid']") ||
+            img.closest("[role='table']")
+          ) {
+            continue;
+          }
+          const src = img.currentSrc || img.src || "";
+          if (!src.includes("cdn.shopify.com/s/files/") || src.toLowerCase().endsWith(".svg")) continue;
+          const rect = img.getBoundingClientRect();
+          // Miniaturas da seção Mídias têm pelo menos 44px de largura/altura; ícones de variantes têm <= 40px
+          if (rect.width > 0 && rect.width < 44) continue;
+
+          const cleanUrl = normalizeShopifyCdnUrl(src);
+          const root = cleanUrl.split("?")[0].toLowerCase();
+          if (root && !seenRoots.has(root)) {
+            seenRoots.add(root);
+            mediaUrls.push(cleanUrl);
+          }
+        }
+        return mediaUrls;
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function syncModeBImagesWithLiveShopifyGallery(htmlContent, prod) {
+      try {
+        if (!htmlContent || !prod) return htmlContent;
+        const titleAndSku = `${prod.title || ""} ${prod.master_sku || ""}`.toLowerCase();
+        const isApparel = /camisa|camiseta|fusion|hyb|armorx|cax|segunda pele|raglan|cortavento|jaqueta/i.test(titleAndSku);
+        if (!isApparel) return htmlContent;
+
+        const liveGallery = extractLiveShopifyMediaGallery();
+        const dbGallery = Array.isArray(prod.cdn_images) ? prod.cdn_images : [];
+        const gallery = liveGallery.length >= 4 ? liveGallery : (dbGallery.length >= 4 ? dbGallery : liveGallery);
+        if (gallery.length < 4) return htmlContent;
+
+        // Verificar se a 4ª foto ([3]) não é explicitamente de costas
+        const f3Name = (gallery[3].split("?")[0].split("/").pop() || "").toLowerCase();
+        const isF3Back = /costas|costa|verso|tras|02_|-02\.|02masc|02fem|02inf/i.test(f3Name);
+        if (isF3Back) return htmlContent;
+
+        const targetActs = [gallery[0], gallery[1], gallery[3]];
+        let actIdx = 0;
+        return htmlContent.replace(/(<div class="brk-act-media">\s*<img[^>]+src=["'])([^"']+)(["'])/gi, (full, p1, oldSrc, p3) => {
+          if (actIdx < 3 && targetActs[actIdx]) {
+            const replacement = targetActs[actIdx];
+            actIdx++;
+            return `${p1}${replacement}${p3}`;
+          }
+          actIdx++;
+          return full;
+        });
+      } catch (e) {
+        return htmlContent;
+      }
+    }
+
     function injectModoBIntoEditor(htmlContent) {
       if (!htmlContent) {
         alert("Conteúdo Modo B vazio no banco de dados.");
         return false;
       }
+
+      // Sincroniza em tempo real as fotos dos 3 Atos com a galeria "Mídias" atual da Shopify ([0]=Capa Humanizada, [1]=Frente, [3]=3/4 Frontal)
+      htmlContent = syncModeBImagesWithLiveShopifyGallery(htmlContent, activeLoadedProduct);
 
       disarmBeforeUnload();
       hasTriggeredSaveForCurrentProduct = false;

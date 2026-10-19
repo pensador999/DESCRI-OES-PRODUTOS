@@ -96,6 +96,14 @@ def evaluate_guideline_compliance(p: dict, store_key: str = "brk_fishing") -> tu
     if len(orig_img_srcs) != len(set(orig_img_srcs)):
         violations.append("Fotos repetidas nos Atos/Cards")
 
+    cdn_imgs_clean = [str(u).split("?")[0].lower() for u in (p.get("cdn_images") or p.get("gallery") or []) if isinstance(u, str) and u.strip()]
+    is_shirt_item = any(w in title_l or w in sku_l for w in ("camisa", "camiseta", "armorx", "cax", "hyb", "fusion", "segunda pele", "raglan"))
+    if is_shirt_item and len(cdn_imgs_clean) >= 4 and len(orig_img_srcs) >= 3:
+        f3_name = cdn_imgs_clean[3].split("/")[-1]
+        is_f3_explicit_back = any(k in f3_name for k in ("costas", "costa", "verso", "tras", "02_", "-02.", "02masc", "02fem", "02inf"))
+        if orig_img_srcs[2] == cdn_imgs_clean[2] and not is_f3_explicit_back and "frente" not in cdn_imgs_clean[2].split("/")[-1]:
+            violations.append("Foto 3 (Costas) alocada no Ato 3 em vez da Foto 4 (3/4 Frontal/Lateral) em galeria com Capa Humanizada")
+
     if not any(c in orig_html.lower() for c in expected_colors) and any(c in orig_html.lower() for c in ("#0284c7", "#15803d", "#ea580c", "#f97316")):
         violations.append("Cor de outra loja no HTML")
 
@@ -443,7 +451,16 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
                 has_no_zipper_violation = not is_fusion_or_hyb or (not bool(re.search(r'\b(zíper|ziper)\b', raw_b, re.I)))
                 has_hood_sg_note = not is_fusion_or_hyb or ("sem contar" in raw_b.lower())
 
-                if "Detalhes Técnicos" in raw_b and has_new_sg and has_correct_prazo and has_no_zipper_violation and has_hood_sg_note and has_store_color:
+                raw_cdn_clean = [str(u).split("?")[0].lower() for u in (p.get("cdn_images") or p.get("gallery") or []) if isinstance(u, str) and u.strip()]
+                non_svg_roots = [u for u in img_roots if not u.endswith(".svg")]
+                has_act3_back_violation = False
+                if len(raw_cdn_clean) >= 4 and len(non_svg_roots) >= 3:
+                    f3_name = raw_cdn_clean[3].split("/")[-1]
+                    is_f3_explicit_back = any(k in f3_name for k in ("costas", "costa", "verso", "tras", "02_", "-02.", "02masc", "02fem", "02inf"))
+                    if non_svg_roots[2] == raw_cdn_clean[2] and not is_f3_explicit_back and "frente" not in raw_cdn_clean[2].split("/")[-1]:
+                        has_act3_back_violation = True
+
+                if "Detalhes Técnicos" in raw_b and has_new_sg and has_correct_prazo and has_no_zipper_violation and has_hood_sg_note and has_store_color and not has_act3_back_violation:
                     return raw_b
 
     engine, builder = get_engine_and_builder()

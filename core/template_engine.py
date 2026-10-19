@@ -1786,18 +1786,30 @@ class TemplateEngine:
         u_low = url.lower()
         fname = u_low.split("/")[-1].split("?")[0]
         fname_no_ts = re.sub(r'(?:^|[_.\-\s])\d{2}_\d{2}_\d{2}(?=[_.\-\s]|$)', '', fname)
-        if "frente" in fname_no_ts:
+        if "frente" in fname_no_ts or "mkpmaopunho" in fname_no_ts:
             return False
         keywords = [
             "costas", "costa", "back", "traseira", "verso", "tras",
-            "02fem", "02masc", "02inf", "2fem", "2masc", "2inf",
+            "02fem", "02masc", "02inf",
             "02_fem", "02_masc", "02_inf", "2_fem", "2_masc", "2_inf"
         ]
-        if include_03:
-            keywords.extend(["03fem", "03masc", "03inf"])
         if any(w in fname_no_ts for w in keywords):
             return True
         return bool(re.search(r'(?:^|[-_.\s])(2|02|b)(?:[-_.\s]|masc|fem|inf|kids|bl|$)', fname_no_ts))
+
+    def _is_explicit_back_name(self, url: str) -> bool:
+        if not url or not isinstance(url, str):
+            return False
+        fname = url.lower().split("/")[-1].split("?")[0]
+        if "frente" in fname or "mkpmaopunho" in fname:
+            return False
+        return any(
+            w in fname for w in [
+                "costas", "costa", "back", "traseira", "verso", "tras",
+                "02fem", "02masc", "02inf", "02_fem", "02_masc", "02_inf",
+                "02_", "-02."
+            ]
+        )
 
     def _select_apparel_act_images(self, cdn_images: List[str], is_female: bool = False, is_kids: bool = False):
         if not cdn_images:
@@ -1848,60 +1860,112 @@ class TemplateEngine:
                     if not only_fem and not only_inf:
                         compatible.append(u)
 
-            ordered_compatible = preferred + [u for u in compatible if u not in preferred] if preferred else compatible
-            if len(ordered_compatible) >= 3 or len(preferred) >= 1 or is_female or is_kids:
-                if len(ordered_compatible) >= 1:
-                    working_images = ordered_compatible
-            elif len(ordered_compatible) >= 1:
-                working_images = ordered_compatible + [u for u in cdn_images if u not in ordered_compatible]
+            # Se houver mistura real de gêneros incompatíveis na galeria (ex: fotos FEM ou INF em produto MASC),
+            # filtramos para manter apenas as fotos compatíveis, preservando a Capa Humanizada em [0] quando ela é compatível.
+            if len(compatible) < len(cdn_images):
+                ordered_compatible = (
+                    compatible
+                    if (compatible and compatible[0] == cdn_images[0])
+                    else (preferred + [u for u in compatible if u not in preferred] if preferred else compatible)
+                )
+                if len(ordered_compatible) >= 3 or len(preferred) >= 1 or is_female or is_kids:
+                    if len(ordered_compatible) >= 1:
+                        working_images = ordered_compatible
+                elif len(ordered_compatible) >= 1:
+                    working_images = ordered_compatible + [u for u in cdn_images if u not in ordered_compatible]
 
+        if len(working_images) == 1:
+            return working_images[0], "", ""
+        if len(working_images) == 2:
+            return working_images[0], working_images[1], ""
 
+        fnames = [u.lower().split("?")[0].split("/")[-1] for u in working_images]
 
-        # Ato 1 (Hero Frontal): evita foto de costas se houver foto frontal/não-costas disponível
+        # =====================================================================
+        # PILAR 1: GALERIAS COM 4 OU MAIS FOTOS (Padrão Capa Humanizada na Posição 1)
+        # Ordem padrão das lojas BRK com Capa Humanizada:
+        #   [0] = Capa Humanizada (Lifestyle / Modelo)
+        #   [1] = Estúdio Frente
+        #   [2] = Estúdio Costas (PULAR para não entrar no Ato 3 de Capuz/Máscara/Gola/Luva!)
+        #   [3] = Estúdio 3/4 Frontal / Lateral / Close-up de Punho
+        # =====================================================================
+        if len(working_images) >= 4:
+            # Subcaso 1A: Série de 4 fotos numeradas 1..4 (mesmo se subidas fora de ordem, ex: -1, -4, -2, -3)
+            seq_map = {}
+            for idx_u, f in enumerate(fnames[:4]):
+                m_seq = re.search(r'(?:^|\d{10,14}[-_]|[-_])([1234])(?:_[a-z]+)?(?:_[0-9a-f]{8}-[0-9a-f-]{27})?\.[a-z0-9]+$', f)
+                if not m_seq:
+                    m_seq = re.search(r'^(?:c0|casual|adv|cadv|fusion|hyb|cax|raglan)\d+(?:bl|i)?([1234])\.[a-z0-9]+$', f)
+                if m_seq:
+                    seq_map[int(m_seq.group(1))] = working_images[idx_u]
+            if set(seq_map.keys()) == {1, 2, 3, 4}:
+                # 1 = Capa Humanizada, 2 = Frente Estúdio, 3 = Costas (Pular), 4 = 3/4 Frontal/Lateral
+                return seq_map[1], seq_map[2], seq_map[4]
+
+            # Subcaso 1B: 4 fotos de estúdio explicitamente nomeadas sem capa humanizada ([0]=FRENTE, [1]=COSTAS, ...)
+            if "frente" in fnames[0] and self._is_explicit_back_name(working_images[1]):
+                img1 = working_images[0]
+                non_back_rest = [u for u in working_images[1:] if not self._is_explicit_back_name(u)]
+                back_rest = [u for u in working_images[1:] if self._is_explicit_back_name(u)]
+                if len(non_back_rest) >= 2:
+                    return img1, non_back_rest[0], non_back_rest[1]
+                if len(non_back_rest) == 1:
+                    # Ato 3 (Capuz/Máscara/Luva/Gola) recebe obrigatoriamente a foto Frontal/Detalhe (ex: FRENTEPERSPECTIVA ou MKPMAOPUNHO)
+                    img2 = back_rest[-1] if back_rest else working_images[1]
+                    img3 = non_back_rest[0]
+                    return img1, img2, img3
+                return img1, working_images[2], working_images[3]
+
+            # Subcaso 1C: Se a 4ª foto ([3]) for explicitamente nomeada Costas/02_ e a 3ª ([2]) NÃO for Costas (ex: CMB01)
+            if self._is_explicit_back_name(working_images[3]) and not self._is_explicit_back_name(working_images[2]) and not self._is_explicit_back_name(working_images[1]):
+                return working_images[0], working_images[1], working_images[2]
+
+            # Subcaso 1D: Caso Universal de 4+ fotos com Capa Humanizada no [0] (FUSION160, FUSION160BL, productOnChannel, 01/02/03, etc.)
+            # Ato 1 = Foto 1 ([0] Capa Humanizada) | Ato 2 = Foto 2 ([1] Frente Estúdio) | Ato 3 = Foto 4 ([3] 3/4 Frontal/Lateral)
+            return working_images[0], working_images[1], working_images[3]
+
+        # =====================================================================
+        # PILAR 2: GALERIAS COM EXATAMENTE 3 FOTOS (len == 3)
+        # Garante que o Ato 3 (Capuz/Máscara Facial/Dedeira/Luva/Gola) SEMPRE receba
+        # a foto Frontal ou 3/4 Frontal, enquanto o Ato 2 (Tecido UV50+/Dry Fit)
+        # recebe a foto complementar/Costas.
+        # =====================================================================
         img1 = working_images[0]
-        if self._is_back_view_url(img1):
-            pure_front_candidates = [
-                u for u in working_images
-                if not self._is_back_view_url(u)
-                and any(k in u.lower().split("/")[-1] for k in ["frente", "01", "-1", "capa"])
-                and not any(p in u.lower().split("/")[-1] for p in ["persp", "zoom"])
-            ]
-            front_candidates = [
-                u for u in working_images
-                if not self._is_back_view_url(u) and any(k in u.lower().split("/")[-1] for k in ["frente", "01", "-1", "capa"])
-            ]
-            non_back_candidates = [u for u in working_images if not self._is_back_view_url(u)]
-            if pure_front_candidates:
-                img1 = pure_front_candidates[0]
-            elif front_candidates:
-                img1 = front_candidates[0]
-            elif non_back_candidates:
-                img1 = non_back_candidates[0]
+        if self._is_explicit_back_name(img1):
+            non_back = [u for u in working_images if not self._is_explicit_back_name(u)]
+            if non_back:
+                img1 = non_back[0]
 
         rem = [u for u in working_images if u != img1]
-        if not rem:
-            return img1, "", ""
-        if len(rem) == 1:
-            return img1, rem[0], ""
+        if len(rem) < 2:
+            return img1, (rem[0] if rem else ""), ""
 
-        # Ato 2 (Tecnologia / Detalhe) & Ato 3 (Acabamento / Painel Traseiro)
-        if self._is_back_view_url(rem[0]):
-            non_back_after = [u for u in rem[1:] if not self._is_back_view_url(u)]
-            if non_back_after:
-                img2 = non_back_after[0]
-                img3 = rem[0]
-            else:
-                img2 = rem[0]
-                img3 = rem[1]
-        else:
-            img2 = rem[0]
-            if self._is_back_view_url(rem[1]):
-                img3 = rem[1]
-            else:
-                back_after = [u for u in rem[2:] if self._is_back_view_url(u)]
-                img3 = back_after[0] if back_after else rem[1]
+        r0_f = rem[0].lower().split("?")[0].split("/")[-1]
+        r1_f = rem[1].lower().split("?")[0].split("/")[-1]
 
-        return img1, img2, img3
+        # 2A: Se rem[0] é explicitamente Costas (ex: ['01FEM', '02FEM', '03FEM'] ou ['FRENTE', 'COSTAS', 'PERSP']),
+        # Ato 2 fica com Costas (rem[0]) e Ato 3 fica com 3/4 Frontal (rem[1])
+        if self._is_explicit_back_name(rem[0]) and not self._is_explicit_back_name(rem[1]):
+            return img1, rem[0], rem[1]
+
+        # 2B: Se rem[1] é explicitamente Costas e rem[0] é Frente (ex: ['Capa.jpg', '-01.jpg', '-02.jpg']),
+        # Ato 2 fica com Costas (rem[1]) e Ato 3 fica com Frente (rem[0])
+        if self._is_back_view_url(rem[1]) and not self._is_back_view_url(rem[0]):
+            return img1, rem[1], rem[0]
+
+        # 2C: Lotes productOnChannel em galerias de 3 fotos:
+        # Se [0] é de um grupo A (Capa Humanizada isolada) e [1], [2] são do mesmo grupo B ([1]=Frente, [2]=Costas),
+        # coloca [2] (Costas) no Ato 2 e [1] (Frente) no Ato 3!
+        poc_re = re.compile(r'productonchannel_2fimages_2f(\d+)', re.IGNORECASE)
+        g0 = poc_re.search(img1).group(1) if poc_re.search(img1) else None
+        g1 = poc_re.search(rem[0]).group(1) if poc_re.search(rem[0]) else None
+        g2 = poc_re.search(rem[1]).group(1) if poc_re.search(rem[1]) else None
+        if g1 and g2 and g1 == g2 and g0 != g1:
+            return img1, rem[1], rem[0]
+
+        # 2D: Padrão 3 fotos de estúdio na mesma sequência ([0]=Frente, [1]=Costas, [2]=3/4 Frontal):
+        # Ato 2 recebe [1] (Costas) e Ato 3 recebe [2] (3/4 Frontal)
+        return img1, rem[0], rem[1]
 
     def _select_cutlery_act_images(self, cdn_images: List[str], title: str = ""):
         """

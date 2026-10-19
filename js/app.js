@@ -1486,11 +1486,11 @@ function openTampermonkeyModal(items = null, storeSlug = "brkfishing") {
 
         <div class="p-4 bg-purple-50 rounded-2xl border border-purple-200 space-y-2 text-purple-900">
           <h4 class="font-bold flex items-center gap-1.5 text-xs text-purple-950">
-            <span>🎛️</span> Instalar ou Atualizar Mini-Dashboard Tampermonkey v6.0.0:
+            <span>🎛️</span> Instalar ou Atualizar Mini-Dashboard Tampermonkey v6.1.0:
           </h4>
           <ol class="list-decimal pl-4 space-y-1 text-[11px] text-purple-800">
-            <li>Clique para instalar/atualizar o script v6.0.0 no seu Tampermonkey: <a href="tampermonkey/brk_assistente_shopify.user.js?v=6.0.0" target="_blank" class="font-bold underline text-purple-700 hover:text-purple-900">Instalar / Atualizar Userscript v6.0.0</a>.</li>
-            <li>O novo <strong>Mini-Dashboard Cockpit</strong> traz 4 Cards KPI clicáveis, barra de progresso da loja, busca rápida por SKU e botão <strong>Minimizar (—)</strong>.</li>
+            <li>Clique para instalar/atualizar o script v6.1.0 no seu Tampermonkey: <a href="tampermonkey/brk_assistente_shopify.user.js?v=6.1.0" target="_blank" class="font-bold underline text-purple-700 hover:text-purple-900">Instalar / Atualizar Userscript v6.1.0</a>.</li>
+            <li>O novo <strong>Mini-Dashboard Cockpit v6.1.0</strong> traz alocação inteligente de <strong>Capa Humanizada ([0], [1], [3] sem foto de costas no Ato 3)</strong>, 4 Cards KPI clicáveis, barra de progresso, busca rápida por SKU e botão <strong>Minimizar (—)</strong>.</li>
           </ol>
         </div>
       </div>
