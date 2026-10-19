@@ -2455,7 +2455,7 @@
 
         try {
           const hints = extractPageHints();
-          const query = `/api/product_db?store=${currentStoreKey}&id=${currentProductId}` +
+          const query = `/api/product_db?store=${currentStoreKey}&id=${currentProductId}&sync_live=1` +
             (hints.handle ? `&handle=${encodeURIComponent(hints.handle)}` : "") +
             (hints.sku ? `&sku=${encodeURIComponent(hints.sku)}` : "");
 
