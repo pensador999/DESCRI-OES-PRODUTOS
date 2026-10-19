@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         BRK Assistente de Descrições Shopify (Mini-Dashboard v6.3.0 Cockpit)
+// @name         BRK Assistente de Descrições Shopify (Mini-Dashboard v6.4.0 Cockpit)
 // @namespace    https://1025-ten.vercel.app/
-// @version      6.3.0
-// @description  Mini-Dashboard Profissional in-screen para Shopify Admin com KPIs em tempo real, distinção cirúrgica Estúdio 1..4 vs Capa Humanizada (zero foto de costas no Ato 3), sem avisos flutuantes legados e Piloto Automático sem alerta 'Sair do site?'.
+// @version      6.4.0
+// @description  Mini-Dashboard Profissional in-screen para Shopify Admin com KPIs em tempo real, diversidade cromática RGB de iscas artificiais (zero 2-capa ou mesma cor repetida), distinção Estúdio 1..4 vs Capa Humanizada e Piloto Automático sem avisos legados.
 // @author       BRK Group & DeepMind Pair
 // @updateURL    https://1025-ten.vercel.app/tampermonkey/brk_assistente_shopify.user.js
 // @downloadURL  https://1025-ten.vercel.app/tampermonkey/brk_assistente_shopify.user.js
@@ -37,7 +37,7 @@
 
   // Configuração da API do Banco de Dados BRK (6.409 produtos auditados nas 3 lojas)
   const API_BASE = "https://1025-ten.vercel.app";
-  const SCRIPT_VERSION = "6.3.0";
+  const SCRIPT_VERSION = "6.4.0";
 
   const STORAGE_KEYS = {
     QUEUE: "BRK_AUTOSYNC_QUEUE",
@@ -46,7 +46,7 @@
     BACKUP: "BRK_AUTOSYNC_BACKUP",
     SETTINGS: "BRK_AUTOSYNC_SETTINGS",
     LAST_STORE: "BRK_LAST_STORE",
-    COMPLIANT_IDS: "BRK_COMPLIANT_IDS_V63"
+    COMPLIANT_IDS: "BRK_COMPLIANT_IDS_V64"
   };
 
   const STORE_SLUG_MAP = {
@@ -945,6 +945,17 @@
           .filter(u => !u.endsWith(".svg"));
         if (expectedImgs.length >= 3 && editorImgMatches[2] !== expectedImgs[2]) {
           reasons.push("Imagem de Costas/Perspectiva Traseira no Ato 3 (atualizar para imagem 3/4 Frontal oficial)");
+        }
+      }
+
+      // Verificar se a Isca Artificial ou Equipamento está com 2-capa ou variações de cores repetidas em relação ao prod.mode_b_html oficial
+      const isLureOrEquip = /isca|jig|frog|sapinho|vara|caixa de pesca/i.test(titleAndSku) && !/boné|bone|copo|bandana|faca|camisa/i.test(titleAndSku);
+      if (isLureOrEquip && prod && prod.mode_b_html && editorImgMatches.length >= 2) {
+        const expectedImgs = Array.from(prod.mode_b_html.matchAll(/<img[^>]+src=["']([^"']+)["']/gi))
+          .map(m => m[1].split("?")[0].toLowerCase())
+          .filter(u => !u.endsWith(".svg"));
+        if (expectedImgs.length >= 2 && editorImgMatches.slice(0, expectedImgs.length).join("|") !== expectedImgs.join("|")) {
+          reasons.push("Isca/Equipamento com foto da mesma cor repetida (2-capa / variação similar) — atualizar para variações de cores distintas");
         }
       }
 

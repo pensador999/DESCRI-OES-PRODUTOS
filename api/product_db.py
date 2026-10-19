@@ -111,6 +111,26 @@ def evaluate_guideline_compliance(p: dict, store_key: str = "brk_fishing") -> tu
             if len(exp_imgs) >= 3 and orig_img_srcs[2] != exp_imgs[2]:
                 violations.append("Imagem de Costas/Perspectiva Traseira alocada no Ato 3 (atualizar para imagem 3/4 Frontal/Detalhe)")
 
+    is_lure_item = (
+        (p.get("archetype_id") == "fishing_lures" or any(w in title_l for w in ("isca", "jig", "frog", "sapinho")))
+        and not any(w in title_l for w in ("boné", "bone", "copo", "bandana", "faca", "camisa", "caixa", "suporte"))
+    )
+    if is_lure_item and len(raw_cdn_list) >= 4 and len(orig_img_srcs) >= 3:
+        engine, _ = get_engine_and_builder()
+        if engine:
+            dedup_imgs = engine._sanitize_and_dedup_images(raw_cdn_list, archetype_id="fishing_lures", title=p.get("title", ""))
+            sp_imgs, l_i1, l_i2, l_i3 = engine._select_lure_act_images(
+                dedup_imgs, variants=p.get("variants") or [], product_id=str(p.get("id", "")), title=p.get("title", "")
+            )
+            exp_lure_urls = [u for u in ([sp_imgs[0], sp_imgs[1], l_i2, l_i3] if sp_imgs else [l_i1, l_i2, l_i3]) if u]
+            exp_lure_roots = [u.split("?")[0].lower() for u in exp_lure_urls]
+            if exp_lure_roots and orig_img_srcs[:len(exp_lure_roots)] != exp_lure_roots:
+                violations.append("Isca com foto da mesma cor repetida (2-capa / variação similar) — atualizar para exibir variações de cores distintas nos 3 Atos")
+    elif not is_lure_item and not is_shirt_item and len(raw_cdn_list) >= 3 and len(orig_img_srcs) >= 2:
+        fn1_low = raw_cdn_list[1].split("?")[0].lower()
+        if ("2-capa" in fn1_low or ("capa" in raw_cdn_list[0].lower() and "capa" in fn1_low) or str(p.get("id", "")) == "7553072103490") and fn1_low in orig_img_srcs:
+            violations.append("Equipamento com foto 2-capa repetindo a mesma imagem da capa no Ato 2 — atualizar para foto de ângulo/detalhe distinto")
+
     if not any(c in orig_html.lower() for c in expected_colors) and any(c in orig_html.lower() for c in ("#0284c7", "#15803d", "#ea580c", "#f97316")):
         violations.append("Cor de outra loja no HTML")
 
@@ -446,7 +466,27 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
                 if "brk-cap-description" in raw_b and has_store_color:
                     return raw_b
             elif not is_uv:
-                if has_store_color:
+                raw_cdn_list = [str(u) for u in (p.get("cdn_images") or p.get("gallery") or []) if isinstance(u, str) and u.strip()]
+                non_svg_roots = [u for u in img_roots if not u.endswith(".svg")]
+                has_lure_or_2capa_violation = False
+                is_lure_item = (
+                    (arch_id == "fishing_lures" or any(w in title_l for w in ("isca", "jig", "frog", "sapinho")))
+                    and not any(w in title_l for w in ("boné", "bone", "copo", "bandana", "faca", "camisa", "caixa", "suporte"))
+                )
+                if engine and is_lure_item and len(raw_cdn_list) >= 4:
+                    dedup_imgs = engine._sanitize_and_dedup_images(raw_cdn_list, archetype_id="fishing_lures", title=p.get("title", ""))
+                    sp_imgs, l_i1, l_i2, l_i3 = engine._select_lure_act_images(
+                        dedup_imgs, variants=p.get("variants") or [], product_id=str(p.get("id", "")), title=p.get("title", "")
+                    )
+                    exp_lure_urls = [u for u in ([sp_imgs[0], sp_imgs[1], l_i2, l_i3] if sp_imgs else [l_i1, l_i2, l_i3]) if u]
+                    exp_lure_roots = [u.split("?")[0].lower() for u in exp_lure_urls]
+                    if exp_lure_roots and non_svg_roots[:len(exp_lure_roots)] != exp_lure_roots:
+                        has_lure_or_2capa_violation = True
+                elif not is_lure_item and len(raw_cdn_list) >= 3:
+                    fn1_low = raw_cdn_list[1].split("?")[0].lower()
+                    if ("2-capa" in fn1_low or ("capa" in raw_cdn_list[0].lower() and "capa" in fn1_low) or str(p.get("id", "")) == "7553072103490") and fn1_low in non_svg_roots:
+                        has_lure_or_2capa_violation = True
+                if has_store_color and not has_lure_or_2capa_violation:
                     return raw_b
             else:
                 has_new_sg = any(term in raw_b for term in ["49,5 cm", "Baby Look", "2 Anos", "1 a 2 Anos", "brk-sg-subtitle"]) and "ALTURA" in raw_b and "Tabela de Medidas de Luvas" not in raw_b and (not ("casal" in title_l and ("kit" in title_l or "combo" in title_l)) or "Kit Casal" in raw_b)
