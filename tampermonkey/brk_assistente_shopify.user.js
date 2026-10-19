@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         BRK Assistente de Descrições Shopify (Mini-Dashboard v6.4.0 Cockpit)
+// @name         BRK Assistente de Descrições Shopify (Mini-Dashboard v6.5.0 Cockpit)
 // @namespace    https://1025-ten.vercel.app/
-// @version      6.4.0
-// @description  Mini-Dashboard Profissional in-screen para Shopify Admin com KPIs em tempo real, diversidade cromática RGB de iscas artificiais (zero 2-capa ou mesma cor repetida), distinção Estúdio 1..4 vs Capa Humanizada e Piloto Automático sem avisos legados.
+// @version      6.5.0
+// @description  Mini-Dashboard Profissional in-screen para Shopify Admin com KPIs em tempo real, 100% Zero Foto de Costas no Ato 3 (Capuz/Gola/Punho) em todos os 504 padrões de galeria (Capa Humanizada, Capa Combo Frente+Costas e Estúdio), diversidade cromática RGB de iscas artificiais e Piloto Automático sem avisos legados.
 // @author       BRK Group & DeepMind Pair
 // @updateURL    https://1025-ten.vercel.app/tampermonkey/brk_assistente_shopify.user.js
 // @downloadURL  https://1025-ten.vercel.app/tampermonkey/brk_assistente_shopify.user.js
@@ -37,7 +37,7 @@
 
   // Configuração da API do Banco de Dados BRK (6.409 produtos auditados nas 3 lojas)
   const API_BASE = "https://1025-ten.vercel.app";
-  const SCRIPT_VERSION = "6.4.0";
+  const SCRIPT_VERSION = "6.5.0";
 
   const STORAGE_KEYS = {
     QUEUE: "BRK_AUTOSYNC_QUEUE",
@@ -46,7 +46,7 @@
     BACKUP: "BRK_AUTOSYNC_BACKUP",
     SETTINGS: "BRK_AUTOSYNC_SETTINGS",
     LAST_STORE: "BRK_LAST_STORE",
-    COMPLIANT_IDS: "BRK_COMPLIANT_IDS_V64"
+    COMPLIANT_IDS: "BRK_COMPLIANT_IDS_V65"
   };
 
   const STORE_SLUG_MAP = {
@@ -937,14 +937,14 @@
         }
       }
 
-      // Verificar se o Ato 3 está com imagem divergente da seleção oficial compilada em prod.mode_b_html
-      const isApparelProd = /camisa|camiseta|fusion|hyb|armorx|cax|segunda pele|raglan|cortavento|jaqueta/i.test(titleAndSku);
+      // Verificar se o Ato 3 (Capuz/Gola/Punho) ou a sequência de Atos de vestuário está divergente da seleção oficial frontal compilada em prod.mode_b_html
+      const isApparelProd = /camisa|camiseta|blusa|moletom|polo|fusion|hyb|armorx|cax|segunda pele|raglan|cortavento|jaqueta/i.test(titleAndSku);
       if (isApparelProd && prod && prod.mode_b_html && editorImgMatches.length >= 3) {
         const expectedImgs = Array.from(prod.mode_b_html.matchAll(/<img[^>]+src=["']([^"']+)["']/gi))
           .map(m => m[1].split("?")[0].toLowerCase())
           .filter(u => !u.endsWith(".svg"));
         if (expectedImgs.length >= 3 && editorImgMatches[2] !== expectedImgs[2]) {
-          reasons.push("Imagem de Costas/Perspectiva Traseira no Ato 3 (atualizar para imagem 3/4 Frontal oficial)");
+          reasons.push("Imagem de Costas/Perspectiva Traseira no Ato 3 (atualizar para imagem Frontal oficial)");
         }
       }
 

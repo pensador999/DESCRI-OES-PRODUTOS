@@ -99,17 +99,21 @@ def evaluate_guideline_compliance(p: dict, store_key: str = "brk_fishing") -> tu
         violations.append("Fotos repetidas nos Atos/Cards")
 
     raw_cdn_list = [str(u) for u in (p.get("cdn_images") or p.get("gallery") or []) if isinstance(u, str) and u.strip()]
-    is_shirt_item = any(w in title_l or w in sku_l for w in ("camisa", "camiseta", "armorx", "cax", "hyb", "fusion", "segunda pele", "raglan"))
+    is_shirt_item = any(w in title_l or w in sku_l for w in ("camisa", "camiseta", "blusa", "moletom", "jaqueta", "polo", "armorx", "cax", "hyb", "fusion", "segunda pele", "raglan"))
     if is_shirt_item and len(raw_cdn_list) >= 3 and len(orig_img_srcs) >= 3:
         engine, _ = get_engine_and_builder()
         if engine:
-            is_kids_flag = any(w in title_l for w in ["infantil", "kids", "juvenil"]) or sku_l.startswith("ci")
+            is_kids_flag = (
+                any(w in title_l for w in ["infantil", "kids", "juvenil"])
+                or sku_l.startswith("ci")
+                or bool(re.search(r'^(?:c0|ci|cf|cm|casual|adv|cadv|ccpbr|bp|hyb|fusion|cax|raglan)\d+i(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_l))
+            ) and not any(w in title_l for w in ["adulto", "unissex adulto"])
             is_casal_flag = "casal" in title_l and ("kit" in title_l or "combo" in title_l)
-            is_fem_flag = (any(w in title_l for w in ["feminina", "feminino", "baby look", "babylook"]) or bool(re.search(r'bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_l))) and not is_kids_flag and not is_casal_flag
+            is_fem_flag = (any(w in title_l for w in ["feminina", "feminino", "baby look", "babylook", "mulher"]) or bool(re.search(r'bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_l))) and not is_kids_flag and not is_casal_flag
             dedup_imgs = engine._sanitize_and_dedup_images(raw_cdn_list, archetype_id=p.get("archetype_id") or "uv_performance", title=p.get("title", ""))
             exp_imgs = [u.split("?")[0].lower() for u in engine._select_apparel_act_images(dedup_imgs, is_female=is_fem_flag, is_kids=is_kids_flag, sku=sku_l, title=title_l) if u]
             if len(exp_imgs) >= 3 and orig_img_srcs[2] != exp_imgs[2]:
-                violations.append("Imagem de Costas/Perspectiva Traseira alocada no Ato 3 (atualizar para imagem 3/4 Frontal/Detalhe)")
+                violations.append("Imagem de Costas/Perspectiva Traseira alocada no Ato 3 (atualizar para imagem Frontal/Detalhe)")
 
     is_lure_item = (
         (p.get("archetype_id") == "fishing_lures" or any(w in title_l for w in ("isca", "jig", "frog", "sapinho")))
