@@ -1,9 +1,11 @@
 // ==UserScript==
-// @name         BRK Assistente de Descrições Shopify (Mini-Dashboard v6.2.0 Cockpit)
+// @name         BRK Assistente de Descrições Shopify (Mini-Dashboard v6.3.0 Cockpit)
 // @namespace    https://1025-ten.vercel.app/
-// @version      6.2.0
-// @description  Mini-Dashboard Profissional in-screen para Shopify Admin com KPIs em tempo real, distinção cirúrgica Estúdio 1..4 vs Capa Humanizada (zero foto de costas no Ato 3), prioridades e Piloto Automático sem alerta 'Sair do site?'.
+// @version      6.3.0
+// @description  Mini-Dashboard Profissional in-screen para Shopify Admin com KPIs em tempo real, distinção cirúrgica Estúdio 1..4 vs Capa Humanizada (zero foto de costas no Ato 3), sem avisos flutuantes legados e Piloto Automático sem alerta 'Sair do site?'.
 // @author       BRK Group & DeepMind Pair
+// @updateURL    https://1025-ten.vercel.app/tampermonkey/brk_assistente_shopify.user.js
+// @downloadURL  https://1025-ten.vercel.app/tampermonkey/brk_assistente_shopify.user.js
 // @match        https://admin.shopify.com/store/*/products*
 // @match        https://admin.shopify.com/store/*
 // @match        https://1025-ten.vercel.app/*
@@ -35,7 +37,7 @@
 
   // Configuração da API do Banco de Dados BRK (6.409 produtos auditados nas 3 lojas)
   const API_BASE = "https://1025-ten.vercel.app";
-  const SCRIPT_VERSION = "6.2.0";
+  const SCRIPT_VERSION = "6.3.0";
 
   const STORAGE_KEYS = {
     QUEUE: "BRK_AUTOSYNC_QUEUE",
@@ -44,7 +46,7 @@
     BACKUP: "BRK_AUTOSYNC_BACKUP",
     SETTINGS: "BRK_AUTOSYNC_SETTINGS",
     LAST_STORE: "BRK_LAST_STORE",
-    COMPLIANT_IDS: "BRK_COMPLIANT_IDS"
+    COMPLIANT_IDS: "BRK_COMPLIANT_IDS_V63"
   };
 
   const STORE_SLUG_MAP = {
@@ -237,106 +239,16 @@
     location.hostname.includes("brkmotors.com.br")
   ) && location.pathname.includes("/collections/");
 
-  if (location.hostname === "1025-ten.vercel.app" || location.hostname === "localhost" || location.hostname === "127.0.0.1" || isStorefrontCollection) {
-    console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] Conectado ao Portal / Vitrine de Coleções BRK.`);
+  if (location.hostname === "1025-ten.vercel.app" || location.hostname === "descricoes.vercel.app" || location.hostname === "localhost" || location.hostname === "127.0.0.1" || isStorefrontCollection) {
+    console.log(`[BRK-Tampermonkey v${SCRIPT_VERSION}] Conectado silenciosamente ao Portal BRK.`);
     window.__BRK_TAMPERMONKEY_INSTALLED = true;
     document.documentElement.setAttribute("data-tampermonkey-active", "true");
 
-    const bar = document.createElement("div");
-    bar.id = "brk-tm-portal-badge";
-    bar.style.cssText = "position:fixed;bottom:16px;left:16px;z-index:999999;background:#090d16;border:2px solid #ea580c;color:#f8fafc;padding:8px 12px;border-radius:14px;font-size:12px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap;box-shadow:0 10px 28px rgba(0,0,0,0.65);font-family:sans-serif;";
+    // Garante que qualquer aviso flutuante antigo (#brk-tm-portal-badge) seja removido da tela
+    const oldBadge = document.getElementById("brk-tm-portal-badge");
+    if (oldBadge) oldBadge.remove();
 
-    async function launchCollectionDirectlyFromFloatingBar(categoryFilter, statusFilter, collectionHandle) {
-      try {
-        const storeKey = location.hostname.includes("brkagro") ? "brk_agro" : location.hostname.includes("brkmotors") ? "brk_motors" : "brk_fishing";
-        const storeSlug = storeKey === "brk_agro" ? "brkagro" : storeKey === "brk_motors" ? "brkmotors25" : "brkfishing";
-        const statusEl = document.getElementById("brk-tm-bar-status");
-        if (statusEl) statusEl.textContent = "⏳ Carregando 91 produtos da coleção...";
-
-        const queryUrl = `/api/product_db?store=${storeKey}&action=queue&status=${encodeURIComponent(statusFilter)}&category=${encodeURIComponent(categoryFilter)}&collection=${encodeURIComponent(collectionHandle || "")}&limit=100`;
-        const res = await fetchFromBRKDatabase(queryUrl);
-        const items = res.items || [];
-        if (!res.success || items.length === 0) {
-          alert("Nenhum produto encontrado para esta coleção.");
-          renderFloatingBar();
-          return;
-        }
-
-        // Limpa status de conformes anteriores para garantir aplicação em toda a coleção
-        GM_setValue(STORAGE_KEYS.COMPLIANT_IDS, "[]");
-        saveSettings({
-          autoPilot: true,
-          autoSave: true,
-          skipAlreadyModeB: false,
-          pauseOnMediaError: statusFilter === "CRITICOS_FOTOS_CORES",
-          batchCategory: categoryFilter,
-          batchStatus: statusFilter
-        });
-
-        setQueue(items);
-        setQueueIndex(0);
-        setAutomationActive(true);
-        GM_setValue(STORAGE_KEYS.LAST_STORE, storeKey);
-        renderFloatingBar();
-
-        const firstId = items[0].id;
-        window.open(`https://admin.shopify.com/store/${storeSlug}/products/${firstId}`, "_blank");
-      } catch (err) {
-        alert("Erro ao iniciar coleção automática: " + err.message);
-        renderFloatingBar();
-      }
-    }
-
-    function renderFloatingBar() {
-      const q = getQueue();
-      const idx = getQueueIndex();
-      const active = isAutomationActive();
-      const currentColHandle = isStorefrontCollection ? decodeURIComponent(location.pathname.split("/collections/")[1]?.split("/")[0] || "") : "";
-
-      bar.innerHTML = `
-        <span id="brk-tm-bar-status" style="color:#38bdf8;cursor:pointer;" title="Clique para ver detalhes da fila">
-          ${q.length > 0 ? `🤖 v${SCRIPT_VERSION} | Fila: ${idx + 1}/${q.length} (${active ? 'Ativa' : 'Pausada'})` : `🟢 Tampermonkey v${SCRIPT_VERSION} Ativo`}
-        </span>
-        <button id="brk-tm-float-so-all" style="background:linear-gradient(90deg,#ea580c,#dc2626);color:#fff;border:none;border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:800;cursor:pointer;box-shadow:0 2px 8px rgba(234,88,12,0.4);">
-          🔥 Auto-Atualizar Super Ofertas (91)
-        </button>
-        <button id="brk-tm-float-tracked-32" style="background:linear-gradient(90deg,#0284c7,#0369a1);color:#fff;border:none;border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:800;cursor:pointer;box-shadow:0 2px 8px rgba(2,132,199,0.4);">
-          👕 Auto-Atualizar 32 Camisas/Outros Rastreados
-        </button>
-        ${isStorefrontCollection && currentColHandle ? `
-          <button id="brk-tm-float-this-col" style="background:#0f766e;color:#fff;border:none;border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:800;cursor:pointer;">
-            🚀 Auto-Aplicar Esta Coleção (${currentColHandle})
-          </button>
-        ` : ''}
-      `;
-
-      const statusSpan = document.getElementById("brk-tm-bar-status");
-      if (statusSpan) {
-        statusSpan.onclick = () => {
-          alert(`[Assistente BRK v${SCRIPT_VERSION} — Piloto Automático de Coleções]\n\nFila Atual: ${q.length} produtos\nPosição: ${q.length ? (idx + 1) : 0} de ${q.length}\nPiloto Automático: ${active ? "ATIVO" : "PAUSADO"}\n\n• Clique em '🔥 Auto-Atualizar Super Ofertas (91)' para atualizar todas as iscas/itens da coleção sem Troca Descomplicada.\n• Clique em '👕 Auto-Atualizar 32 Camisas/Outros Rastreados' para atualizar todas as 32 camisas/bandanas/facas já coladas na loja!`);
-        };
-      }
-
-      const btnSoAll = document.getElementById("brk-tm-float-so-all");
-      if (btnSoAll) {
-        btnSoAll.onclick = () => launchCollectionDirectlyFromFloatingBar("super_ofertas", "COLECAO_COMPLETA", "super-ofertas-🔥");
-      }
-
-      const btnTracked32 = document.getElementById("brk-tm-float-tracked-32");
-      if (btnTracked32) {
-        btnTracked32.onclick = () => launchCollectionDirectlyFromFloatingBar("rastreados_camisas", "RASTREADOS_TROCA_DESCOMPLICADA", "");
-      }
-
-      const btnThisCol = document.getElementById("brk-tm-float-this-col");
-      if (btnThisCol) {
-        btnThisCol.onclick = () => launchCollectionDirectlyFromFloatingBar("ALL", "COLECAO_COMPLETA", currentColHandle);
-      }
-    }
-
-    renderFloatingBar();
-    document.body.appendChild(bar);
-
-    // Ponte Bidirecional: Receber Fila enviada pelo Portal
+    // Ponte Bidirecional Silenciosa: Receber Fila enviada pelo Portal
     window.addEventListener("message", (event) => {
       const data = event.data;
       if (!data || data.type !== "BRK_LOAD_QUEUE" || !data.payload) return;
@@ -362,7 +274,6 @@
       setQueueIndex(0);
       setAutomationActive(autoStart !== false);
       if (storeKey) GM_setValue(STORAGE_KEYS.LAST_STORE, storeKey);
-      renderFloatingBar();
 
       const slug = storeSlug || (storeKey === "brk_agro" ? "brkagro" : storeKey === "brk_motors" ? "brkmotors25" : "brkfishing");
       const firstId = finalItems[0].id;
@@ -985,6 +896,9 @@
       if (/troca descomplicada|dinheiro de volta/i.test(currentHtml)) {
         reasons.push("Rodapé antigo com 'Troca Descomplicada / Satisfação garantida ou seu dinheiro de volta'");
       }
+      if (/troca fácil/i.test(currentHtml) || currentHtml.includes('<div class="brk-desc-trust-bar"></div>')) {
+        reasons.push("Selo antigo 'Troca Fácil BRK' / barra vazia (atualizar para Qualidade Oficial BRK)");
+      }
       if (currentHtml.includes("use-brk-images-s3")) {
         reasons.push("Links AWS S3 404 (13-Tags/CAIXA)");
       }
@@ -1009,7 +923,7 @@
       if (currentHtml.includes("Bandana Tubular Seamless")) {
         reasons.push("Nomenclatura antiga de Bandana (Seamless)");
       }
-      // Contingência Anti-Duplicação da 1ª Foto na Descrição e Alocação de Capa Humanizada ([0], [1], [3])
+      // Contingência Anti-Duplicação da 1ª Foto na Descrição e Validação Cirúrgica do Ato 3 contra o HTML Oficial
       const editorImgMatches = Array.from(currentHtml.matchAll(/<img[^>]+src=["']([^"']+)["']/gi))
         .map(m => m[1].split("?")[0].toLowerCase())
         .filter(u => !u.endsWith(".svg"));
@@ -1023,17 +937,14 @@
         }
       }
 
-      // Verificar se o Ato 3 está com a Foto 3 (Costas) em galerias de 4+ fotos com Capa Humanizada
+      // Verificar se o Ato 3 está com imagem divergente da seleção oficial compilada em prod.mode_b_html
       const isApparelProd = /camisa|camiseta|fusion|hyb|armorx|cax|segunda pele|raglan|cortavento|jaqueta/i.test(titleAndSku);
-      const refGallery = (prod && Array.isArray(prod.cdn_images) && prod.cdn_images.length >= 4)
-        ? prod.cdn_images.map(u => String(u).split("?")[0].toLowerCase())
-        : [];
-      if (isApparelProd && refGallery.length >= 4 && editorImgMatches.length >= 3) {
-        const f3Name = refGallery[3].split("/").pop() || "";
-        const isF3ExplicitBack = /costas|costa|verso|tras|02_|-02\.|02masc|02fem|02inf/i.test(f3Name);
-        const f2Name = refGallery[2].split("/").pop() || "";
-        if (editorImgMatches[2] === refGallery[2] && !isF3ExplicitBack && !f2Name.includes("frente")) {
-          reasons.push("Foto 3 (Costas) no Ato 3 em vez da Foto 4 (3/4 Frontal/Lateral) em galeria com Capa Humanizada");
+      if (isApparelProd && prod && prod.mode_b_html && editorImgMatches.length >= 3) {
+        const expectedImgs = Array.from(prod.mode_b_html.matchAll(/<img[^>]+src=["']([^"']+)["']/gi))
+          .map(m => m[1].split("?")[0].toLowerCase())
+          .filter(u => !u.endsWith(".svg"));
+        if (expectedImgs.length >= 3 && editorImgMatches[2] !== expectedImgs[2]) {
+          reasons.push("Imagem de Costas/Perspectiva Traseira no Ato 3 (atualizar para imagem 3/4 Frontal oficial)");
         }
       }
 
