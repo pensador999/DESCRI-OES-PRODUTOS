@@ -39,7 +39,7 @@ def brk_tracking_marker(sku: str, archetype_id: str) -> str:
     return f"<!-- BRK-MODO-B v{MODO_B_VERSION} | sku:{clean(sku)} | molde:{clean(archetype_id)} -->"
 
 
-_TROCA = {"icon": "return", "title": "Troca Fácil BRK", "sub": "Satisfação 100% Garantida"}
+_TROCA = {"icon": "sparkle", "title": "Qualidade Oficial BRK", "sub": "Padrão 100% Garantido"}
 
 # Quick Badges por ARQUÉTIPO (fonte única de verdade).
 # REGRA DE OURO: o arquétipo detectado decide os selos; palavras soltas do título
@@ -57,13 +57,13 @@ QUICK_BADGES_BY_ARCHETYPE: Dict[str, List[Dict[str, str]]] = {
         {"icon": "care", "title": "Algodão Premium", "sub": "Toque Nobre Aveludado"},
         {"icon": "sparkle", "title": "Respirabilidade Natural", "sub": "Conforto o Dia Todo"},
         {"icon": "shield", "title": "Costura Dupla Ombro", "sub": "Estrutura Anti-Deformação"},
-        {"icon": "return", "title": "Troca Fácil BRK", "sub": "Procedência Garantida"},
+        {"icon": "sparkle", "title": "Qualidade Oficial BRK", "sub": "Procedência Garantida"},
     ],
     "motors_speed": [
         {"icon": "bolt", "title": "Ventilação Ativa", "sub": "Painéis Microperfurados"},
         {"icon": "gear", "title": "Aerodinâmica Pro", "sub": "Modelagem Anatômica"},
         {"icon": "shield", "title": "Costura Resistente", "sub": "Pronta para Off-Road"},
-        {"icon": "return", "title": "Troca Fácil BRK", "sub": "Garantia Oficial BRK"},
+        {"icon": "sparkle", "title": "Qualidade Oficial BRK", "sub": "Garantia Oficial BRK"},
     ],
     "shirts_button_work": [
         {"icon": "shield", "title": "Abotoamento Reforçado", "sub": "Botões com Costura em X"},
@@ -108,7 +108,7 @@ QUICK_BADGES_BY_ARCHETYPE: Dict[str, List[Dict[str, str]]] = {
         {"icon": "sun", "title": "Proteção Solar FPU 50+", "sub": "Barreira UV Térmica"},
         {"icon": "care", "title": "Tecido Respirável", "sub": "Ilhoses de Respiração"},
         {"icon": "shield", "title": "Ajuste Anatômico", "sub": "Segurança Anti-Vento"},
-        {"icon": "return", "title": "Troca Fácil BRK", "sub": "Satisfação Garantida"},
+        {"icon": "sparkle", "title": "Qualidade Oficial BRK", "sub": "Satisfação Garantida"},
     ],
     "hats_country_cowboy": [
         {"icon": "shield", "title": "Copa Estruturada", "sub": "Aba com Retenção de Formato"},
@@ -133,13 +133,13 @@ QUICK_BADGES_BY_ARCHETYPE: Dict[str, List[Dict[str, str]]] = {
         {"icon": "shoe", "title": "Palmilha Antiestresse", "sub": "Amortecimento Anatômico"},
         {"icon": "shield", "title": "Solado Antiderrapante", "sub": "Aderência em Solo Molhado"},
         {"icon": "care", "title": "Fácil Higienização", "sub": "Material Antibacteriano"},
-        {"icon": "return", "title": "Troca Fácil BRK", "sub": "Ajuste Perfeito Garantido"},
+        {"icon": "sparkle", "title": "Qualidade Oficial BRK", "sub": "Ajuste Perfeito Garantido"},
     ],
     "closed_footwear_sneakers": [
         {"icon": "shoe", "title": "Palmilha Anatômica", "sub": "Espuma de Alta Densidade"},
         {"icon": "shield", "title": "Solado Antiderrapante", "sub": "Borracha de Alta Tração"},
         {"icon": "care", "title": "Cabedal Respirável", "sub": "Reforços Laterais"},
-        {"icon": "return", "title": "Troca Fácil BRK", "sub": "Ajuste Perfeito Garantido"},
+        {"icon": "sparkle", "title": "Qualidade Oficial BRK", "sub": "Ajuste Perfeito Garantido"},
     ],
     # --- Equipamentos de pesca (NUNCA vestuário) ---
     "fishing_tackle_gear": [

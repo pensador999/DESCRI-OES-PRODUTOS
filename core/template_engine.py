@@ -1811,7 +1811,7 @@ class TemplateEngine:
             ]
         )
 
-    def _select_apparel_act_images(self, cdn_images: List[str], is_female: bool = False, is_kids: bool = False):
+    def _select_apparel_act_images(self, cdn_images: List[str], is_female: bool = False, is_kids: bool = False, sku: str = "", title: str = ""):
         if not cdn_images:
             return "", "", ""
         if len(cdn_images) == 1:
@@ -1882,27 +1882,61 @@ class TemplateEngine:
         fnames = [u.lower().split("?")[0].split("/")[-1] for u in working_images]
 
         # =====================================================================
-        # PILAR 1: GALERIAS COM 4 OU MAIS FOTOS (Padrão Capa Humanizada na Posição 1)
-        # Ordem padrão das lojas BRK com Capa Humanizada:
-        #   [0] = Capa Humanizada (Lifestyle / Modelo)
-        #   [1] = Estúdio Frente
-        #   [2] = Estúdio Costas (PULAR para não entrar no Ato 3 de Capuz/Máscara/Gola/Luva!)
-        #   [3] = Estúdio 3/4 Frontal / Lateral / Close-up de Punho
+        # PILAR 1: GALERIAS COM 4 OU MAIS FOTOS
+        # Distingue cirurgicamente entre:
+        #   (A) Série Pura de Estúdio 1, 2, 3, 4 (sem capa humanizada):
+        #       1 = Frente Reta | 2 = Costas Reta | 3 = 3/4 Frontal | 4 = 3/4 Costas (PULAR 4!)
+        #       -> Retorna [1, 2, 3]
+        #   (B) Capa Humanizada na Posição [0] + Renders de Estúdio em [1..3]:
+        #       [0] = Capa Humanizada | [1] = Estúdio Frente (01) | [2] = Estúdio Costas (02 - PULAR!) | [3] = 3/4 Frontal (03)
+        #       -> Retorna [[0], 01, 03] / [[0], [1], [3]]
         # =====================================================================
         if len(working_images) >= 4:
-            # Subcaso 1A: Série de 4 fotos numeradas 1..4 (mesmo se subidas fora de ordem, ex: -1, -4, -2, -3)
+            def _match_explicit_studio_num(fname_str: str):
+                m_st = re.search(
+                    r'(?:^|\d{10,14}[-_]|[-_])0?([1-8])(?:_(?:masc|fem|inf)|masc|fem|inf)?(?:_[0-9a-f]{8}-[0-9a-f-]{27})?\.[a-z0-9]+$',
+                    fname_str
+                )
+                return int(m_st.group(1)) if m_st else None
+
+            # Subcaso 1A: Série de 4 renders puros de estúdio numerados 1..4 (ex: 1_c0a100ee..jpg..4_..jpg, 01MASC..04MASC, 10051613065470-1..-4, C029011..C029014)
             seq_map = {}
             for idx_u, f in enumerate(fnames[:4]):
-                m_seq = re.search(r'(?:^|\d{10,14}[-_]|[-_])([1234])(?:_[a-z]+)?(?:_[0-9a-f]{8}-[0-9a-f-]{27})?\.[a-z0-9]+$', f)
-                if not m_seq:
-                    m_seq = re.search(r'^(?:c0|casual|adv|cadv|fusion|hyb|cax|raglan)\d+(?:bl|i)?([1234])\.[a-z0-9]+$', f)
-                if m_seq:
-                    seq_map[int(m_seq.group(1))] = working_images[idx_u]
+                st_num = _match_explicit_studio_num(f)
+                if st_num in (1, 2, 3, 4):
+                    seq_map[st_num] = working_images[idx_u]
+            if set(seq_map.keys()) != {1, 2, 3, 4}:
+                glued_prefixes = []
+                glued_map = {}
+                for idx_u, f in enumerate(fnames[:4]):
+                    m_gl = re.match(r'^((?:c0|casual|adv|cadv|fusion|hyb|cax|raglan)\d+(?:bl|i)?)([1234])\.[a-z0-9]+$', f)
+                    if m_gl:
+                        glued_prefixes.append(m_gl.group(1))
+                        glued_map[int(m_gl.group(2))] = working_images[idx_u]
+                if len(set(glued_prefixes)) == 1 and set(glued_map.keys()) == {1, 2, 3, 4}:
+                    seq_map = glued_map
             if set(seq_map.keys()) == {1, 2, 3, 4}:
-                # 1 = Capa Humanizada, 2 = Frente Estúdio, 3 = Costas (Pular), 4 = 3/4 Frontal/Lateral
-                return seq_map[1], seq_map[2], seq_map[4]
+                # 1 = Frente Estúdio, 2 = Costas Estúdio, 3 = 3/4 Frontal/Detalhe (Pula 4 = 3/4 Costas!)
+                return seq_map[1], seq_map[2], seq_map[3]
 
-            # Subcaso 1B: 4 fotos de estúdio explicitamente nomeadas sem capa humanizada ([0]=FRENTE, [1]=COSTAS, ...)
+            # Subcaso 1B: Capa Humanizada em [0] + Renders de Estúdio numerados 01/1, 02/2, 03/3 em [1:]
+            # (ex: FUSION161 ['FUSION161.jpg', '01MASC', '02MASC', '03MASC'], C01823 ['C01823.jpg', '1_MASC', '2_MASC', '3_MASC'], RAGLAN286 ['05MASC', '01MASC', '02MASC', '03MASC'])
+            f0_num = _match_explicit_studio_num(fnames[0])
+            if f0_num != 1:
+                rest_seq = {}
+                for idx_u in range(1, len(working_images)):
+                    st_num = _match_explicit_studio_num(fnames[idx_u])
+                    if st_num in (1, 2, 3, 4) and st_num not in rest_seq:
+                        rest_seq[st_num] = working_images[idx_u]
+                if 1 in rest_seq and 3 in rest_seq:
+                    return working_images[0], rest_seq[1], rest_seq[3]
+
+            # Subcaso 1C: Série de estúdio numerada 5..8 ou 4..7 (ex: ADV41BL: 05FEM=Frente, 06FEM=Costas, 07FEM=3/4 Costas, 08FEM=3/4 Frente)
+            nums_first4 = [_match_explicit_studio_num(f) for f in fnames[:4]]
+            if nums_first4 == [5, 6, 7, 8] or nums_first4 == [4, 5, 6, 7]:
+                return working_images[0], working_images[1], working_images[3]
+
+            # Subcaso 1D: 4 fotos de estúdio explicitamente nomeadas ([0]=FRENTE, [1]=COSTAS, ...)
             if "frente" in fnames[0] and self._is_explicit_back_name(working_images[1]):
                 img1 = working_images[0]
                 non_back_rest = [u for u in working_images[1:] if not self._is_explicit_back_name(u)]
@@ -1916,13 +1950,37 @@ class TemplateEngine:
                     return img1, img2, img3
                 return img1, working_images[2], working_images[3]
 
-            # Subcaso 1C: Se a 4ª foto ([3]) for explicitamente nomeada Costas/02_ e a 3ª ([2]) NÃO for Costas (ex: CMB01)
+            # Subcaso 1E: Se a 4ª foto ([3]) for explicitamente nomeada Costas/02_ e a 3ª ([2]) NÃO for Costas (ex: CMB01)
             if self._is_explicit_back_name(working_images[3]) and not self._is_explicit_back_name(working_images[2]) and not self._is_explicit_back_name(working_images[1]):
                 return working_images[0], working_images[1], working_images[2]
 
-            # Subcaso 1D: Caso Universal de 4+ fotos com Capa Humanizada no [0] (FUSION160, FUSION160BL, productOnChannel, 01/02/03, etc.)
-            # Ato 1 = Foto 1 ([0] Capa Humanizada) | Ato 2 = Foto 2 ([1] Frente Estúdio) | Ato 3 = Foto 4 ([3] 3/4 Frontal/Lateral)
-            return working_images[0], working_images[1], working_images[3]
+            # Se a 3ª foto ([2]) for explicitamente nomeada Costas e a 4ª ([3]) NÃO for Costas
+            if self._is_explicit_back_name(working_images[2]) and not self._is_explicit_back_name(working_images[3]):
+                return working_images[0], working_images[1], working_images[3]
+
+            # Subcaso 1F: Galerias productOnChannel de 4+ fotos
+            poc_flags = ["productonchannel" in f for f in fnames[:4]]
+            if not poc_flags[0] and all(poc_flags[1:4]):
+                # [0] é Capa Externa Humanizada (ex: 75422.jpg em FUSION160, FUSION264.jpg em FUSION264) e [1..3] são productOnChannel (Frente, Costas, 3/4 Frontal)
+                # Exceção: Camisas Halloween C02893/C02894 onde [2] é Frente e [3] é Costas
+                if fnames[0].startswith(("c02893", "c02894")):
+                    return working_images[0], working_images[1], working_images[2]
+                return working_images[0], working_images[1], working_images[3]
+
+            if all(poc_flags[:4]):
+                # Todas as 4 fotos são productOnChannel:
+                # Em Camisas Segunda Pele (RAGLAN), [0] é Capa Humanizada (05), [1] é Frente (01), [2] é Costas (02) e [3] é 3/4 Frontal (03)
+                sku_t_low = f"{sku or ''} {title or ''}".lower()
+                if "raglan" in sku_t_low or "segunda pele" in sku_t_low:
+                    return working_images[0], working_images[1], working_images[3]
+                # Nas demais camisas com 4 productOnChannel (ex: FUSION260, C02902BL), são os 4 renders de estúdio (1=Frente, 2=Costas, 3=3/4 Frontal, 4=3/4 Costas)
+                return working_images[0], working_images[1], working_images[2]
+
+            # Subcaso 1G: Fallback para demais galerias de 4+ fotos
+            # Se [0] tem nome explícito de capa/modelo, pula [2] (Costas) e usa [3] no Ato 3; caso contrário usa [0], [1], [2]
+            if any(k in fnames[0] for k in ("capa", "human", "modelo", "lifestyle")):
+                return working_images[0], working_images[1], working_images[3]
+            return working_images[0], working_images[1], working_images[2]
 
         # =====================================================================
         # PILAR 2: GALERIAS COM EXATAMENTE 3 FOTOS (len == 3)
@@ -2318,7 +2376,7 @@ class TemplateEngine:
             else:
                 variations_summary = "Múltiplas variações e opções de cores disponíveis para escolha no anúncio."
         elif is_apparel:
-            img1, img2, img3 = self._select_apparel_act_images(cdn_images, is_female=is_female, is_kids=is_kids)
+            img1, img2, img3 = self._select_apparel_act_images(cdn_images, is_female=is_female, is_kids=is_kids, sku=sku_clean_for_flags, title=title)
         elif archetype_id == "cutlery_unique":
             img1, img2, img3 = self._select_cutlery_act_images(cdn_images, title)
         elif archetype_id == "fishing_tackle_gear" and "trava vara" in title.lower() and len(cdn_images) >= 3:

@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         BRK Assistente de Descrições Shopify (Mini-Dashboard v6.1.0 Cockpit)
+// @name         BRK Assistente de Descrições Shopify (Mini-Dashboard v6.2.0 Cockpit)
 // @namespace    https://1025-ten.vercel.app/
-// @version      6.1.0
-// @description  Mini-Dashboard Profissional in-screen para Shopify Admin com KPIs em tempo real, Capa Humanizada inteligente ([0], [1], [3] sem foto de costas no Ato 3), prioridades e Piloto Automático sem alerta 'Sair do site?'.
+// @version      6.2.0
+// @description  Mini-Dashboard Profissional in-screen para Shopify Admin com KPIs em tempo real, distinção cirúrgica Estúdio 1..4 vs Capa Humanizada (zero foto de costas no Ato 3), prioridades e Piloto Automático sem alerta 'Sair do site?'.
 // @author       BRK Group & DeepMind Pair
 // @match        https://admin.shopify.com/store/*/products*
 // @match        https://admin.shopify.com/store/*
@@ -35,7 +35,7 @@
 
   // Configuração da API do Banco de Dados BRK (6.409 produtos auditados nas 3 lojas)
   const API_BASE = "https://1025-ten.vercel.app";
-  const SCRIPT_VERSION = "6.1.0";
+  const SCRIPT_VERSION = "6.2.0";
 
   const STORAGE_KEYS = {
     QUEUE: "BRK_AUTOSYNC_QUEUE",
@@ -1341,18 +1341,36 @@
         if (!isApparel) return htmlContent;
 
         const liveGallery = extractLiveShopifyMediaGallery();
+        if (liveGallery.length < 4) return htmlContent;
+
         const dbGallery = Array.isArray(prod.cdn_images) ? prod.cdn_images : [];
-        const gallery = liveGallery.length >= 4 ? liveGallery : (dbGallery.length >= 4 ? dbGallery : liveGallery);
-        if (gallery.length < 4) return htmlContent;
+        const liveRoots = liveGallery.slice(0, 4).map(u => u.split("?")[0].toLowerCase());
+        const dbRoots = dbGallery.slice(0, 4).map(u => String(u).split("?")[0].toLowerCase());
 
-        // Verificar se a 4ª foto ([3]) não é explicitamente de costas
-        const f3Name = (gallery[3].split("?")[0].split("/").pop() || "").toLowerCase();
-        const isF3Back = /costas|costa|verso|tras|02_|-02\.|02masc|02fem|02inf/i.test(f3Name);
-        if (isF3Back) return htmlContent;
+        // Se a galeria ao vivo na Shopify for idêntica à do banco, preserva a seleção cirúrgica da API Python
+        if (liveRoots.length === dbRoots.length && liveRoots.every((r, idx) => r === dbRoots[idx])) {
+          return htmlContent;
+        }
 
-        const targetActs = [gallery[0], gallery[1], gallery[3]];
+        const fnames = liveGallery.slice(0, 4).map(u => (u.split("?")[0].split("/").pop() || "").toLowerCase());
+        const matchStudioNum = (fn) => {
+          const m = fn.match(/(?:^|\d{10,14}[-_]|[-_])0?([1234])(?:_(?:masc|fem|inf)|masc|fem|inf)?(?:_[0-9a-f]{8}-[0-9a-f-]{27})?\.[a-z0-9]+$/i);
+          return m ? parseInt(m[1], 10) : null;
+        };
+
+        const studioNums = fnames.map(matchStudioNum);
+        const isPureStudio1to4 = [1, 2, 3, 4].every(n => studioNums.includes(n));
+        const isAllPoc = fnames.every(fn => fn.includes("productonchannel")) && !/raglan|segunda pele/i.test(titleAndSku);
+        const isF3Back = /costas|costa|verso|tras|02_|-02\.|02masc|02fem|02inf/i.test(fnames[3]);
+
+        // Série pura de estúdio (1=Frente, 2=Costas, 3=3/4 Frontal, 4=3/4 Costas) -> usa [0, 1, 2]
+        // Galeria com Capa Humanizada em [0] -> usa [0, 1, 3] (pulando [2]=Costas)
+        const targetActs = (isPureStudio1to4 || isAllPoc || isF3Back)
+          ? [liveGallery[0], liveGallery[1], liveGallery[2]]
+          : [liveGallery[0], liveGallery[1], liveGallery[3]];
+
         let actIdx = 0;
-        return htmlContent.replace(/(<div class="brk-act-media">\s*<img[^>]+src=["'])([^"']+)(["'])/gi, (full, p1, oldSrc, p3) => {
+        return htmlContent.replace(/(<div class="brk-(?:desc|act)-media">\s*<img[^>]+src=["'])([^"']+)(["'])/gi, (full, p1, oldSrc, p3) => {
           if (actIdx < 3 && targetActs[actIdx]) {
             const replacement = targetActs[actIdx];
             actIdx++;

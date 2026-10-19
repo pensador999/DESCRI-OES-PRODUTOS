@@ -79,6 +79,8 @@ def evaluate_guideline_compliance(p: dict, store_key: str = "brk_fishing") -> tu
     violations = []
     if "troca descomplicada" in orig_html.lower() or "dinheiro de volta" in orig_html.lower():
         violations.append("Rodapé antigo com 'Troca Descomplicada / Satisfação garantida ou seu dinheiro de volta' (retirar conforme nova diretriz)")
+    if "troca fácil" in orig_html.lower() or '<div class="brk-desc-trust-bar"></div>' in orig_html:
+        violations.append("Selo antigo 'Troca Fácil BRK' / barra vazia (atualizar para Qualidade Oficial BRK)")
     if "Tabela de Medidas de Luvas" in orig_html and any(w in title_l or w in sku_l for w in ("camisa", "camiseta", "armorx", "cax", "hyb", "fusion")):
         violations.append("Camisa com Tabela de Luvas (corrigir para Tabela de Camisa PP ao G2)")
     if "Tabela de Medidas Adulto (P ao EXG)" in orig_html:
@@ -96,13 +98,18 @@ def evaluate_guideline_compliance(p: dict, store_key: str = "brk_fishing") -> tu
     if len(orig_img_srcs) != len(set(orig_img_srcs)):
         violations.append("Fotos repetidas nos Atos/Cards")
 
-    cdn_imgs_clean = [str(u).split("?")[0].lower() for u in (p.get("cdn_images") or p.get("gallery") or []) if isinstance(u, str) and u.strip()]
+    raw_cdn_list = [str(u) for u in (p.get("cdn_images") or p.get("gallery") or []) if isinstance(u, str) and u.strip()]
     is_shirt_item = any(w in title_l or w in sku_l for w in ("camisa", "camiseta", "armorx", "cax", "hyb", "fusion", "segunda pele", "raglan"))
-    if is_shirt_item and len(cdn_imgs_clean) >= 4 and len(orig_img_srcs) >= 3:
-        f3_name = cdn_imgs_clean[3].split("/")[-1]
-        is_f3_explicit_back = any(k in f3_name for k in ("costas", "costa", "verso", "tras", "02_", "-02.", "02masc", "02fem", "02inf"))
-        if orig_img_srcs[2] == cdn_imgs_clean[2] and not is_f3_explicit_back and "frente" not in cdn_imgs_clean[2].split("/")[-1]:
-            violations.append("Foto 3 (Costas) alocada no Ato 3 em vez da Foto 4 (3/4 Frontal/Lateral) em galeria com Capa Humanizada")
+    if is_shirt_item and len(raw_cdn_list) >= 3 and len(orig_img_srcs) >= 3:
+        engine, _ = get_engine_and_builder()
+        if engine:
+            is_kids_flag = any(w in title_l for w in ["infantil", "kids", "juvenil"]) or sku_l.startswith("ci")
+            is_casal_flag = "casal" in title_l and ("kit" in title_l or "combo" in title_l)
+            is_fem_flag = (any(w in title_l for w in ["feminina", "feminino", "baby look", "babylook"]) or bool(re.search(r'bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_l))) and not is_kids_flag and not is_casal_flag
+            dedup_imgs = engine._sanitize_and_dedup_images(raw_cdn_list, archetype_id=p.get("archetype_id") or "uv_performance", title=p.get("title", ""))
+            exp_imgs = [u.split("?")[0].lower() for u in engine._select_apparel_act_images(dedup_imgs, is_female=is_fem_flag, is_kids=is_kids_flag, sku=sku_l, title=title_l) if u]
+            if len(exp_imgs) >= 3 and orig_img_srcs[2] != exp_imgs[2]:
+                violations.append("Imagem de Costas/Perspectiva Traseira alocada no Ato 3 (atualizar para imagem 3/4 Frontal/Detalhe)")
 
     if not any(c in orig_html.lower() for c in expected_colors) and any(c in orig_html.lower() for c in ("#0284c7", "#15803d", "#ea580c", "#f97316")):
         violations.append("Cor de outra loja no HTML")
@@ -425,7 +432,7 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
 
     # Se já tem o formato oficial correspondente e atualizado (Fase 5/6/7/8), verifica saúde de imagens e reaproveita
     engine, builder = get_engine_and_builder()
-    if raw_b and len(raw_b.strip()) > 500 and "<!-- BRK-MODO-B" in raw_b and "use-brk-images-s3" not in raw_b and "troca descomplicada" not in raw_b.lower() and "dinheiro de volta" not in raw_b.lower() and "BRK-MODO-B v1" not in raw_b:
+    if raw_b and len(raw_b.strip()) > 500 and "<!-- BRK-MODO-B" in raw_b and "use-brk-images-s3" not in raw_b and "troca descomplicada" not in raw_b.lower() and "troca fácil" not in raw_b.lower() and '<div class="brk-desc-trust-bar"></div>' not in raw_b and "dinheiro de volta" not in raw_b.lower() and "BRK-MODO-B v1" not in raw_b:
         img_srcs = re.findall(r'<img[^>]+src=["\']([^"\']+)["\']', raw_b, re.I)
         img_roots = [u.split("?")[0].lower() for u in img_srcs]
         has_dup_imgs = len(img_roots) != len(set(img_roots))
@@ -459,7 +466,7 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
                     is_casal_flag = "casal" in title_l and ("kit" in title_l or "combo" in title_l)
                     is_fem_flag = (any(w in title_l for w in ["feminina", "feminino", "baby look", "babylook"]) or bool(re.search(r'bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_low))) and not is_kids_flag and not is_casal_flag
                     dedup_imgs = engine._sanitize_and_dedup_images(raw_cdn_list, archetype_id=arch_id or "uv_performance", title=p.get("title", ""))
-                    exp_imgs = [u.split("?")[0].lower() for u in engine._select_apparel_act_images(dedup_imgs, is_female=is_fem_flag, is_kids=is_kids_flag) if u]
+                    exp_imgs = [u.split("?")[0].lower() for u in engine._select_apparel_act_images(dedup_imgs, is_female=is_fem_flag, is_kids=is_kids_flag, sku=sku_low, title=title_l) if u]
                     if exp_imgs and non_svg_roots[:len(exp_imgs)] != exp_imgs:
                         has_act3_back_violation = True
 
