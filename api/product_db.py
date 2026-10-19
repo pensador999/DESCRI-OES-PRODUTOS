@@ -81,15 +81,20 @@ def evaluate_guideline_compliance(p: dict, store_key: str = "brk_fishing") -> tu
         violations.append("Rodapé antigo com 'Troca Descomplicada / Satisfação garantida ou seu dinheiro de volta' (retirar conforme nova diretriz)")
     if "troca fácil" in orig_html.lower() or '<div class="brk-desc-trust-bar"></div>' in orig_html:
         violations.append("Selo antigo 'Troca Fácil BRK' / barra vazia (atualizar para Qualidade Oficial BRK)")
-    if "Tabela de Medidas de Luvas" in orig_html and any(w in title_l or w in sku_l for w in ("camisa", "camiseta", "armorx", "cax", "hyb", "fusion")):
+    is_lure_item = (
+        (p.get("archetype_id") == "fishing_lures" or any(w in title_l for w in ("isca", "jig", "frog", "sapinho")))
+        and not any(w in title_l for w in ("boné", "bone", "copo", "bandana", "faca", "camisa", "camiseta", "caixa", "suporte"))
+    )
+
+    if "Tabela de Medidas de Luvas" in orig_html and not is_lure_item and any(w in title_l or w in sku_l for w in ("camisa", "camiseta", "armorx", "cax", "hyb", "fusion")):
         violations.append("Camisa com Tabela de Luvas (corrigir para Tabela de Camisa PP ao G2)")
     if "Tabela de Medidas Adulto (P ao EXG)" in orig_html:
         violations.append("Tabela Adulto antiga (P ao EXG em vez de PP ao G2)")
     if ("fillet" in title_l or "mfk75t" in title_l or "79081379076" in sku_l) and "bainha" in orig_html.lower() and "bainha" not in title_l:
         violations.append("Faca Marine MFK75T com menção indevida a bainha")
-    if ("fusion" in title_l or "fusion" in sku_l or "hybrid" in title_l or sku_l.startswith("hyb")) and re.search(r'\b(zíper|ziper)\b', orig_html, re.I):
+    if not is_lure_item and ("fusion" in title_l or "fusion" in sku_l or "hybrid" in title_l or sku_l.startswith("hyb")) and re.search(r'\b(zíper|ziper)\b', orig_html, re.I):
         violations.append("Modelo Fusion/Hybrid com menção indevida a zíper")
-    if ("fusion" in title_l or "fusion" in sku_l or "hybrid" in title_l or sku_l.startswith("hyb")) and "sem contar" not in orig_html.lower():
+    if not is_lure_item and ("fusion" in title_l or "fusion" in sku_l or "hybrid" in title_l or sku_l.startswith("hyb")) and "sem contar" not in orig_html.lower():
         violations.append("Tabela de Medidas sem orientação de Capuz/Bandana Embutida (medir do ombro à barra sem contar o capuz)")
     if "eQxQuY7.jpg" in orig_html and "ba09" not in sku_l:
         violations.append("Boné com foto genérica repetida")
@@ -99,7 +104,7 @@ def evaluate_guideline_compliance(p: dict, store_key: str = "brk_fishing") -> tu
         violations.append("Fotos repetidas nos Atos/Cards")
 
     raw_cdn_list = [str(u) for u in (p.get("cdn_images") or p.get("gallery") or []) if isinstance(u, str) and u.strip()]
-    is_shirt_item = any(w in title_l or w in sku_l for w in ("camisa", "camiseta", "blusa", "moletom", "jaqueta", "polo", "armorx", "cax", "hyb", "fusion", "segunda pele", "raglan"))
+    is_shirt_item = (not is_lure_item) and any(w in title_l or w in sku_l for w in ("camisa", "camiseta", "blusa", "moletom", "jaqueta", "polo", "armorx", "cax", "hyb", "fusion", "segunda pele", "raglan"))
     if is_shirt_item and len(raw_cdn_list) >= 3 and len(orig_img_srcs) >= 3:
         engine, _ = get_engine_and_builder()
         if engine:
@@ -115,13 +120,12 @@ def evaluate_guideline_compliance(p: dict, store_key: str = "brk_fishing") -> tu
             if len(exp_imgs) >= 3 and orig_img_srcs[2] != exp_imgs[2]:
                 violations.append("Imagem de Costas/Perspectiva Traseira alocada no Ato 3 (atualizar para imagem Frontal/Detalhe)")
 
-    is_lure_item = (
-        (p.get("archetype_id") == "fishing_lures" or any(w in title_l for w in ("isca", "jig", "frog", "sapinho")))
-        and not any(w in title_l for w in ("boné", "bone", "copo", "bandana", "faca", "camisa", "camiseta", "caixa", "suporte"))
-    )
     if is_lure_item and len(raw_cdn_list) >= 2 and len(orig_img_srcs) >= 1:
         engine, _ = get_engine_and_builder()
         if engine:
+            raw_cdn_roots = {u.split("?")[0].lower() for u in raw_cdn_list}
+            if any(u not in raw_cdn_roots for u in orig_img_srcs):
+                violations.append("Isca com foto antiga já removida da galeria da Shopify — atualizar descrição com as fotos novas")
             if any(engine._is_hookless_lure_image(u) for u in orig_img_srcs):
                 violations.append("Isca com foto de catálogo sem garatéia nos Atos — atualizar para fotos reais com garatéias")
             dedup_imgs = engine._sanitize_and_dedup_images(raw_cdn_list, archetype_id="fishing_lures", title=p.get("title", ""))
@@ -131,7 +135,7 @@ def evaluate_guideline_compliance(p: dict, store_key: str = "brk_fishing") -> tu
             exp_lure_urls = [u for u in ([sp_imgs[0], sp_imgs[1], l_i2, l_i3] if sp_imgs else [l_i1, l_i2, l_i3]) if u]
             exp_lure_roots = [u.split("?")[0].lower() for u in exp_lure_urls]
             if exp_lure_roots and orig_img_srcs[:len(exp_lure_roots)] != exp_lure_roots:
-                violations.append("Isca com foto da mesma cor repetida (2-capa / variação similar) — atualizar para exibir variações de cores distintas nos 3 Atos")
+                violations.append("Isca com foto da mesma cor repetida (2-capa / variação similar) ou fotos novas na galeria — atualizar para exibir variações de cores distintas com garatéias nos 3 Atos")
     elif not is_lure_item and not is_shirt_item and len(raw_cdn_list) >= 3 and len(orig_img_srcs) >= 2:
         fn1_low = raw_cdn_list[1].split("?")[0].lower()
         if ("2-capa" in fn1_low or ("capa" in raw_cdn_list[0].lower() and "capa" in fn1_low) or str(p.get("id", "")) == "7553072103490") and fn1_low in orig_img_srcs:
@@ -145,6 +149,54 @@ def evaluate_guideline_compliance(p: dict, store_key: str = "brk_fishing") -> tu
 
     return (True, "CONFORME_MODO_B", "100% dentro das diretrizes oficiais Modo B")
 
+
+# Os 42 produtos de Iscas Artificiais (todas as 39 iscas da coleção /collections/iscas-artificiais
+# + Invader MR 110F, Kisu e Sumax Fusion Shad 75), ordenados com prioridade máxima nas iscas
+# que tiveram fotos novas subidas na galeria ou fotos sem garatéia / repetidas corrigidas.
+PRIORITY_ISCAS_IDS = [
+    "7539624837186",  # [01] Predator SR 115S Meia-Água (Galeria nova com garatéias)
+    "7540011466818",  # [02] Yara Encrenca 9cm 29g Meia-Água (Galeria nova com garatéias)
+    "7539328122946",  # [03] Jackall Bonnie 95 Silent Superfície (Galeria nova com garatéias)
+    "7872313327682",  # [04] Albatroz Jig Dragon 35g (Galeria nova com garatéias)
+    "7872155385922",  # [05] Albatroz Jig Dragon 21g (Galeria nova com garatéias)
+    "7860235796546",  # [06] Albatroz Bonny - 5cm 5.1g (Galeria nova com garatéias)
+    "7873393885250",  # [07] Marine Sports Iron Head 70 - 7cm 20g (Galeria nova)
+    "8369524047938",  # [08] Soft Albatroz Criatura AF 10,5cm 5 Und (Galeria atualizada)
+    "7539626180674",  # [09] Marine Sports Brava 90 Superfície (Foto nova c/ garatéia)
+    "7539964706882",  # [10] Rapala XRAP XRD Meia-Água (Filtro anti-sem-garatéia)
+    "7872731906114",  # [11] Inna 90 9cm 16g Meia Água (Filtro anti-sem-garatéia + cores distintas)
+    "7539316817986",  # [12] CCM Stick Letal 90 Superfície (Filtro anti-sem-garatéia + cores distintas)
+    "7539965132866",  # [13] Rapala Precision Xtreme Pencil 107 Superfície (Filtro anti-sem-garatéia + cores distintas)
+    "7539625001026",  # [14] Marine Sports Savage 85 Superfície (Filtro anti-sem-garatéia + cores distintas)
+    "7539625918530",  # [15] Marine Sports Savage 95 Superfície (Filtro anti-sem-garatéia + cores distintas)
+    "7539624902722",  # [16] Marine Sports Invader MR 110F Meia-Água (Filtro anti-sem-garatéia)
+    "7539624935490",  # [17] Marine Sports Kisu Meia-Água (Filtro anti-sem-garatéia)
+    "7539949600834",  # [18] Moriah Voraz Plus Meia-Água (Sem Modo B na vitrine)
+    "7874566258754",  # [19] Sumax Fusion Shad 75 Fs-7.5 - 7,5cm 10g (Galeria atualizada + Modo B)
+    "7874413068354",  # [20] Sumax Vision Shad 75 Svs-75 - 7,5cm 9,9g (Galeria nova PNG)
+    "7860235501634",  # [21] Albatroz Barbelão 62 - 6,2cm 6,2g (Galeria atualizada)
+    "7872703594562",  # [22] Deyu Minnow Floating - 9cm 8g (Galeria atualizada + cores distintas)
+    "7538279055426",  # [23] CCM Akipega 10 Meia Água (Galeria atualizada + cores distintas)
+    "7538360778818",  # [24] CCM Letalzão Superfície (Galeria atualizada + cores distintas)
+    "7539625132098",  # [25] Marine Sports Brava Grand 100 Meia-Água (Cores distintas nos 3 Atos)
+    "7539965100098",  # [26] Rapala Precision Xtreme Pencil EXO 107 Superfície (Cores distintas nos 3 Atos)
+    "7539624771650",  # [27] Marine Sports Vulcan 80 Superfície (Cores distintas nos 3 Atos)
+    "7873697644610",  # [28] Deyu Popper 11 CM / 14.5G (Cores distintas nos 3 Atos)
+    "7539606519874",  # [29] Nelson Nakamura Sogra 9cm 12g Superfície (Cores distintas nos 3 Atos)
+    "7539328090178",  # [30] Jackall Squad Minnow 80SP Meia-água (Cores distintas nos 3 Atos)
+    "7539964870722",  # [31] Rapala Shallow Shad Rap Meia-Água (Cores distintas nos 3 Atos)
+    "7539606749250",  # [32] Nelson Nakamura Jumping Stick 9,5cm 11,5g (Cores distintas nos 3 Atos)
+    "7873835860034",  # [33] Sapinho Sapo Frog Rã 5cm-8g Deyu (Cores distintas nos 3 Atos)
+    "7539607175234",  # [34] Nelson Nakamura Ipon 6,5cm 7g Superfície (Cores distintas nos 3 Atos)
+    "7539626082370",  # [35] Marine Sports Z-Top 86 Superfície (Cores distintas nos 3 Atos)
+    "7539607142466",  # [36] Nelson Nakamura Ipon 80 8cm 9g Superfície (Cores distintas nos 3 Atos)
+    "7540011925570",  # [37] Yara Crayfish Fundo (Cores distintas nos 3 Atos)
+    "7539316883522",  # [38] CCM Popper Big Bang 65 Superfície (Cores distintas nos 3 Atos)
+    "7874266136642",  # [39] Sumax Shad Crank Ssc-80 - 8cm 10g (Cores distintas nos 3 Atos)
+    "7539965198402",  # [40] Rapala OTT'S Garage OG SLIM Meia-Água (Cores distintas nos 3 Atos)
+    "7539625263170",  # [41] Marine Sports Hammer 85 Superfície (Cores distintas nos 3 Atos)
+    "7539606716482",  # [42] Nelson Nakamura Jumping Stick 8,5cm 9g Superfície (Cores distintas nos 3 Atos)
+]
 
 # Os 32 produtos fora da coleção Super Ofertas (Camisas UV, Bandanas, Facas, Girador, Trava Varas, Chinelo)
 # rastreados ao vivo em brkfishing.com.br que foram aplicados com o rodapé antigo "Troca Descomplicada".
@@ -370,6 +422,9 @@ def load_store_database(store_key: str):
             p["media_audit"] = audit_live_gallery_and_variants(p)
 
             is_comp, g_status, g_reason = evaluate_guideline_compliance(p, store_norm)
+            if store_norm == "brk_fishing" and p_id in PRIORITY_ISCAS_IDS and not is_comp and g_status == "FORA_PADRAO_MODO_B":
+                g_status = "MODO_B_DESATUALIZADO"
+                g_reason = "Isca artificial da coleção com fotos atualizadas — aplicar Modo B com garatéias nos 3 Atos"
             p["is_mode_b_compliant"] = is_comp
             p["guideline_status"] = g_status
             p["guideline_reason"] = g_reason
@@ -391,6 +446,10 @@ def load_store_database(store_key: str):
                 legacy_list.append(p)
             else:
                 compliant_list.append(p)
+
+        if store_norm == "brk_fishing":
+            iscas_rank = {pid: idx for idx, pid in enumerate(PRIORITY_ISCAS_IDS)}
+            outdated_mode_b_list.sort(key=lambda x: iscas_rank.get(str(x.get("id", "")), 9999))
 
         super_ofertas_list.sort(key=lambda x: x.get("super_ofertas_index", 999))
 
@@ -700,9 +759,20 @@ class handler(BaseHTTPRequestHandler):
                 category_filter.lower() in ("rastreados_camisas", "rastreados_fora_so")
                 or status_filter == "RASTREADOS_TROCA_DESCOMPLICADA"
             )
+            is_priority_iscas = (
+                category_filter.lower() in ("iscas_prioridade", "foco_iscas")
+                or status_filter == "FOCO_ISCAS"
+                or col_handle_low in ("iscas-artificiais", "iscas_artificiais")
+            )
 
             collection_pool = None
-            if is_tracked_outside_so and store_key == "brk_fishing":
+            if is_priority_iscas and store_key == "brk_fishing":
+                collection_pool = []
+                for lid in PRIORITY_ISCAS_IDS:
+                    lp_obj = db["by_id"].get(lid)
+                    if lp_obj:
+                        collection_pool.append(lp_obj)
+            elif is_tracked_outside_so and store_key == "brk_fishing":
                 collection_pool = []
                 for tid in TRACKED_OUTSIDE_SUPER_OFERTAS_IDS:
                     tp = db["by_id"].get(tid)
@@ -730,6 +800,21 @@ class handler(BaseHTTPRequestHandler):
                             lp_id = str(lp.get("id", ""))
                             db_p = db["by_id"].get(lp_id)
                             if db_p:
+                                live_imgs = [img.get("src") if isinstance(img, dict) else img for img in (lp.get("images") or []) if img]
+                                if live_imgs:
+                                    db_p["cdn_images"] = live_imgs
+                                    db_p["gallery"] = live_imgs
+                                    db_p["image"] = live_imgs[0]
+                                    db_p["images"] = lp.get("images") or []
+                                if lp.get("variants"):
+                                    db_p["variants"] = lp["variants"]
+                                if "body_html" in lp and lp["body_html"] is not None:
+                                    db_p["body_html"] = lp["body_html"]
+                                db_p.pop("mode_b_html", None)
+                                is_c, g_st, g_rs = evaluate_guideline_compliance(db_p, store_key)
+                                db_p["is_mode_b_compliant"] = is_c
+                                db_p["guideline_status"] = g_st
+                                db_p["guideline_reason"] = g_rs
                                 db_p["media_audit"] = audit_live_gallery_and_variants(lp if not db_p.get("in_super_ofertas") else db_p)
                                 collection_pool.append(db_p)
                             else:
@@ -765,6 +850,7 @@ class handler(BaseHTTPRequestHandler):
 
             media_status_filters = {
                 "COLECAO_COMPLETA",
+                "FOCO_ISCAS",
                 "RASTREADOS_TROCA_DESCOMPLICADA",
                 "AJUSTE_FOTOS_GERAL",
                 "CRITICOS_FOTOS_CORES",
@@ -799,7 +885,7 @@ class handler(BaseHTTPRequestHandler):
                     continue
 
                 ma = p.get("media_audit") or {}
-                if status_filter in ("COLECAO_COMPLETA", "RASTREADOS_TROCA_DESCOMPLICADA") or is_tracked_outside_so:
+                if status_filter in ("COLECAO_COMPLETA", "FOCO_ISCAS", "RASTREADOS_TROCA_DESCOMPLICADA") or is_tracked_outside_so or is_priority_iscas:
                     pool.append(p)
                 elif status_filter == "AJUSTE_FOTOS_GERAL":
                     if ma.get("needs_media_fix"):
@@ -827,8 +913,8 @@ class handler(BaseHTTPRequestHandler):
                     if not p.get("is_mode_b_compliant", False):
                         pool.append(p)
 
-            # Aplicar filtro de categoria (exceto quando category_filter == super_ofertas ou rastreados_camisas, já resolvido em collection_pool)
-            if category_filter and category_filter.upper() not in ("ALL", "SUPER_OFERTAS", "RASTREADOS_CAMISAS", "RASTREADOS_FORA_SO"):
+            # Aplicar filtro de categoria (exceto quando category_filter == super_ofertas ou rastreados_camisas ou iscas_prioridade, já resolvido em collection_pool)
+            if category_filter and category_filter.upper() not in ("ALL", "SUPER_OFERTAS", "RASTREADOS_CAMISAS", "RASTREADOS_FORA_SO", "ISCAS_PRIORIDADE", "FOCO_ISCAS"):
                 cat_l = category_filter.lower()
                 filtered_pool = []
                 for p in pool:

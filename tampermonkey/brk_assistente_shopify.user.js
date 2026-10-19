@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         BRK Assistente de Descrições Shopify (Mini-Dashboard v6.5.1 Cockpit)
+// @name         BRK Assistente de Descrições Shopify (Mini-Dashboard v6.5.2 Cockpit)
 // @namespace    https://1025-ten.vercel.app/
-// @version      6.5.1
-// @description  Mini-Dashboard Profissional in-screen para Shopify Admin com KPIs em tempo real, 100% Zero Foto de Costas no Ato 3 (Capuz/Gola/Punho) em todos os 504 padrões de galeria, filtro anti-iscas sem garatéias + sincronização ao vivo de novas fotos de iscas na Shopify e Piloto Automático sem avisos legados.
+// @version      6.5.2
+// @description  Mini-Dashboard Profissional in-screen para Shopify Admin com foco em atualização em massa de Iscas Artificiais (42 iscas com galerias novas sincronizadas ao vivo, 100% com garatéias e cores distintas nos 3 Atos), Zero Foto de Costas no Ato 3 e Piloto Automático 1-clique.
 // @author       BRK Group & DeepMind Pair
 // @updateURL    https://1025-ten.vercel.app/tampermonkey/brk_assistente_shopify.user.js
 // @downloadURL  https://1025-ten.vercel.app/tampermonkey/brk_assistente_shopify.user.js
@@ -37,7 +37,7 @@
 
   // Configuração da API do Banco de Dados BRK (6.409 produtos auditados nas 3 lojas)
   const API_BASE = "https://1025-ten.vercel.app";
-  const SCRIPT_VERSION = "6.5.1";
+  const SCRIPT_VERSION = "6.5.2";
 
   const STORAGE_KEYS = {
     QUEUE: "BRK_AUTOSYNC_QUEUE",
@@ -46,7 +46,7 @@
     BACKUP: "BRK_AUTOSYNC_BACKUP",
     SETTINGS: "BRK_AUTOSYNC_SETTINGS",
     LAST_STORE: "BRK_LAST_STORE",
-    COMPLIANT_IDS: "BRK_COMPLIANT_IDS_V651"
+    COMPLIANT_IDS: "BRK_COMPLIANT_IDS_V652"
   };
 
   const STORE_SLUG_MAP = {
@@ -102,10 +102,10 @@
     skipAlreadyModeB: true,      // Avança automaticamente quando o produto já está 100% conforme as Diretrizes Modo B v5
     upgradeOutdatedModeB: true,  // Atualiza produtos que têm Modo B com violação residual
     pauseOnMediaError: false,    // Se true, pausa o Auto-Save quando o produto tiver variante sem foto (image_id=null) ou foto duplicada para ajuste manual
-    batchCategory: "ALL",
-    batchStatus: "PRIORIDADE_CRITICA",
+    batchCategory: "iscas_prioridade",
+    batchStatus: "FOCO_ISCAS",
     batchLimit: 50,
-    customCollection: "",
+    customCollection: "iscas-artificiais",
     minimized: false,
     activeTab: "priorities"
   };
@@ -908,16 +908,17 @@
       if (currentHtml.includes("Tabela de Medidas Adulto (P ao EXG)")) {
         reasons.push("Tabela Adulto antiga (P ao EXG em vez de PP ao G2)");
       }
-      if (currentHtml.includes("Tabela de Medidas de Luvas") && /camisa|camiseta|armorx|cax|hyb|fusion/i.test(titleAndSku)) {
+      const isLureOrEquip = /isca|jig|frog|sapinho|vara|caixa de pesca/i.test(titleAndSku) && !/boné|bone|copo|bandana|faca|camisa|camiseta/i.test(titleAndSku);
+      if (currentHtml.includes("Tabela de Medidas de Luvas") && !isLureOrEquip && /camisa|camiseta|armorx|cax|hyb|fusion/i.test(titleAndSku)) {
         reasons.push("Camisa ArmorX/UV com Tabela de Luvas (corrigir para Tabela de Camisa PP ao G2)");
       }
       if (/(fillet|mfk75t|79081379076)/i.test(titleAndSku) && /bainha/i.test(currentHtml) && !/bainha/i.test(prod?.title || "")) {
         reasons.push("Faca Marine MFK75T com menção indevida a bainha (modelo não acompanha bainha)");
       }
-      if (/(fusion|hyb)/i.test(titleAndSku) && /\b(zíper|ziper)\b/i.test(currentHtml)) {
+      if (!isLureOrEquip && /(fusion|hyb)/i.test(titleAndSku) && /\b(zíper|ziper)\b/i.test(currentHtml)) {
         reasons.push("Modelo Fusion/Hybrid com menção indevida a zíper");
       }
-      if (/(fusion|hyb)/i.test(titleAndSku) && !currentHtml.toLowerCase().includes("sem contar")) {
+      if (!isLureOrEquip && /(fusion|hyb)/i.test(titleAndSku) && !currentHtml.toLowerCase().includes("sem contar")) {
         reasons.push("Tabela de Medidas sem orientação de Capuz/Bandana Embutida (medir do ombro à barra sem contar o capuz)");
       }
       if (currentHtml.includes("Bandana Tubular Seamless")) {
@@ -929,16 +930,20 @@
         .filter(u => !u.endsWith(".svg"));
       if (editorImgMatches.length > new Set(editorImgMatches).size) {
         reasons.push("Foto repetida nos Atos/Cards da descrição");
-      } else if (prod && Array.isArray(prod.cdn_images) && prod.cdn_images.length > 0 && editorImgMatches.length >= 2) {
+      } else if (prod && Array.isArray(prod.cdn_images) && prod.cdn_images.length > 0 && editorImgMatches.length >= 1) {
         const officialRoots = new Set(prod.cdn_images.map(u => String(u).split("?")[0].toLowerCase()));
         const hasPurgedDup = editorImgMatches.some(u => u.includes("productonchannel") && !officialRoots.has(u));
         if (hasPurgedDup) {
           reasons.push("1ª foto duplicada pela Shopify no Ato 2");
         }
+        const hasDeletedGalleryImg = editorImgMatches.some(u => !officialRoots.has(u));
+        if (hasDeletedGalleryImg) {
+          reasons.push("Imagem antiga/removida da galeria ainda presente na descrição (sincronizar fotos novas)");
+        }
       }
 
       // Verificar se o Ato 3 (Capuz/Gola/Punho) ou a sequência de Atos de vestuário está divergente da seleção oficial frontal compilada em prod.mode_b_html
-      const isApparelProd = /camisa|camiseta|blusa|moletom|polo|fusion|hyb|armorx|cax|segunda pele|raglan|cortavento|jaqueta/i.test(titleAndSku);
+      const isApparelProd = !isLureOrEquip && /camisa|camiseta|blusa|moletom|polo|fusion|hyb|armorx|cax|segunda pele|raglan|cortavento|jaqueta/i.test(titleAndSku);
       if (isApparelProd && prod && prod.mode_b_html && editorImgMatches.length >= 3) {
         const expectedImgs = Array.from(prod.mode_b_html.matchAll(/<img[^>]+src=["']([^"']+)["']/gi))
           .map(m => m[1].split("?")[0].toLowerCase())
@@ -949,8 +954,7 @@
       }
 
       // Verificar se a Isca Artificial ou Equipamento está com foto sem garatéia, 2-capa ou variações de cores repetidas em relação ao prod.mode_b_html oficial
-      const isLureOrEquip = /isca|jig|frog|sapinho|vara|caixa de pesca/i.test(titleAndSku) && !/boné|bone|copo|bandana|faca|camisa|camiseta/i.test(titleAndSku);
-      const hooklessRe = /17556320|17556324[4-9]|175563255|17556365|17556366|17556370|17556390|17556913|17556915|175630609|175630611|17563904|17563913|175640425|htaipoi|trrcouw|ngmpqqt|4p1iqiy|8yy2b7x|qngeftb|wlc1umo|buuvmhx|lesihbz/i;
+      const hooklessRe = /17556320|17556324[4-9]|175563255|17556365|17556366|17556370|17556390|17556913|17556915|175630609|175630611|17563904|17563913|175640425|htaipoi|trrcouw|ngmpqqt|4p1iqiy|8yy2b7x|qngeftb|wlc1umo|buuvmhx|lesihbz|iscapredatormarineflutuante_1|iscamarinesports1|iscadepescaverdecomolhovermelho|iscadepescacomanzoltriplo_09702|b9e70e81|1755639619773/i;
       if (isLureOrEquip && editorImgMatches.some(u => hooklessRe.test(u))) {
         reasons.push("Isca com foto de catálogo sem garatéia nos Atos — atualizar para fotos reais com garatéias");
       }
@@ -959,7 +963,7 @@
           .map(m => m[1].split("?")[0].toLowerCase())
           .filter(u => !u.endsWith(".svg"));
         if (expectedImgs.length >= 1 && editorImgMatches.slice(0, expectedImgs.length).join("|") !== expectedImgs.join("|")) {
-          reasons.push("Isca/Equipamento com foto da mesma cor repetida (2-capa / variação similar) — atualizar para variações de cores distintas");
+          reasons.push("Isca/Equipamento com fotos antigas ou mesma cor repetida — atualizar para fotos novas com garatéias e cores distintas");
         }
       }
 
@@ -2010,7 +2014,22 @@
       let tabContentHtml = "";
 
       if (activeTab === "priorities") {
+        const iscasCount = pg.iscas_prioridade ?? pg.iscas_artificiais ?? 42;
         tabContentHtml = `
+          <!-- PRIORIDADE 0: ATUALIZAÇÃO EM MASSA DAS ISCAS ARTIFICIAIS (FOTOS NOVAS C/ GARATÉIAS + CORES DISTINTAS) -->
+          <div style="background:linear-gradient(135deg,rgba(2,132,199,0.38),rgba(15,23,42,0.96));border:1.5px solid #38bdf8;border-radius:11px;padding:9px 11px;margin-bottom:8px;box-shadow:0 4px 14px rgba(2,132,199,0.22);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:11px;font-weight:800;color:#7dd3fc;">🎣 PRIORIDADE 0 — FOCO ISCAS ARTIFICIAIS (FOTOS NOVAS)</span>
+              <span style="background:#0369a1;color:#e0f2fe;font-size:9.5px;font-weight:800;padding:1px 7px;border-radius:9999px;">${iscasCount} iscas mapeadas</span>
+            </div>
+            <div style="font-size:10px;color:#cbd5e1;margin-bottom:7px;line-height:1.35;">
+              Sincroniza as novas fotos com garatéias e variações distintas da coleção <strong>iscas-artificiais</strong> + Super Ofertas e atualiza em massa.
+            </div>
+            <button id="brk-prio-iscas-batch" class="brk-hud-btn" style="width:100%;justify-content:center;background:linear-gradient(90deg,#0284c7,#16a34a);border-color:#38bdf8;color:#fff;padding:8px 12px;font-size:11.5px;font-weight:800;">
+              🚀 Atualizar Todas as Iscas em Massa (${iscasCount} Iscas)
+            </button>
+          </div>
+
           <!-- PRIORIDADE 1: URGÊNCIAS VISUAIS DA LOJA (S3 404 + SEM DESCRIÇÃO) -->
           <div style="background:linear-gradient(135deg,rgba(127,29,29,0.35),rgba(15,23,42,0.95));border:1px solid #dc2626;border-radius:11px;padding:9px 11px;margin-bottom:8px;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
@@ -2032,7 +2051,7 @@
 
           ${outCount > 0 ? `
             <div style="background:#2e1905;border:1px solid #d97706;border-radius:9px;padding:6px 10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
-              <span style="font-size:11px;color:#fde68a;font-weight:700;">⚠️ ${outCount} produto(s) com versão Modo B v1 restante</span>
+              <span style="font-size:11px;color:#fde68a;font-weight:700;">⚠️ ${outCount} produto(s) com fotos/versão desatualizada</span>
               <button id="brk-prio-outdated" class="brk-hud-btn" style="background:#d97706;border-color:#f59e0b;color:#fff;padding:4px 9px;font-size:10.5px;">
                 ⚡ Finalizar (${outCount})
               </button>
@@ -2049,6 +2068,10 @@
               </label>
             </div>
             <div class="brk-priority-grid">
+              <button class="brk-priority-btn" data-quick-cat="iscas_artificiais" style="border-color:#0284c7;background:rgba(2,132,199,0.16);">
+                <span>🎣 Iscas Artificiais</span>
+                <span class="brk-priority-count">${pg.iscas_prioridade ?? pg.iscas_artificiais ?? '...'}</span>
+              </button>
               <button class="brk-priority-btn" data-quick-cat="camisas">
                 <span>👕 Camisas UV & Perf.</span>
                 <span class="brk-priority-count">${pg.camisas ?? '...'}</span>
@@ -2056,10 +2079,6 @@
               <button class="brk-priority-btn" data-quick-cat="bones_chapeus">
                 <span>🧢 Bonés & Chapéus D2C</span>
                 <span class="brk-priority-count">${pg.bones_chapeus ?? '...'}</span>
-              </button>
-              <button class="brk-priority-btn" data-quick-cat="iscas_artificiais">
-                <span>🎣 Iscas Artificiais</span>
-                <span class="brk-priority-count">${pg.iscas_artificiais ?? '...'}</span>
               </button>
               <button class="brk-priority-btn" data-quick-cat="equipamentos_pesca">
                 <span>⚙️ Equipamentos & Caixas</span>
@@ -2094,10 +2113,11 @@
             </div>
             <div style="display:grid;grid-template-columns:1.1fr 1.1fr 0.55fr;gap:6px;margin-bottom:6px;">
               <select id="brk-sel-category" class="brk-hud-select" title="Filtrar por Categoria ou Coleção">
+                <option value="iscas_prioridade" ${settings.batchCategory === 'iscas_prioridade' ? 'selected' : ''}>🎣 Foco: Iscas Artificiais (42 Mapeadas)</option>
+                <option value="iscas_artificiais" ${settings.batchCategory === 'iscas_artificiais' ? 'selected' : ''}>🎣 Todas as Iscas Artificiais</option>
                 <option value="ALL" ${settings.batchCategory === 'ALL' ? 'selected' : ''}>📂 Todas as Categorias da Loja</option>
                 <option value="camisas" ${settings.batchCategory === 'camisas' ? 'selected' : ''}>👕 Camisas (Fusion/Hybrid/ArmorX/C0)</option>
                 <option value="bones_chapeus" ${settings.batchCategory === 'bones_chapeus' ? 'selected' : ''}>🧢 Bonés & Chapéus (Molde D2C)</option>
-                <option value="iscas_artificiais" ${settings.batchCategory === 'iscas_artificiais' ? 'selected' : ''}>🎣 Iscas Artificiais</option>
                 <option value="equipamentos_pesca" ${settings.batchCategory === 'equipamentos_pesca' ? 'selected' : ''}>⚙️ Varas, Carretilhas, Molinetes & Alicates</option>
                 <option value="linhas_pesca" ${settings.batchCategory === 'linhas_pesca' ? 'selected' : ''}>🧵 Linhas de Pesca</option>
                 <option value="calcas" ${settings.batchCategory === 'calcas' ? 'selected' : ''}>👖 Calças & Bermudas</option>
@@ -2108,6 +2128,7 @@
                 <option value="CUSTOM_COLLECTION" ${settings.batchCategory === 'CUSTOM_COLLECTION' ? 'selected' : ''}>🔗 Outra Coleção (URL/Handle abaixo)</option>
               </select>
               <select id="brk-sel-status" class="brk-hud-select" title="Filtrar por Prioridade ou Status">
+                <option value="FOCO_ISCAS" ${settings.batchStatus === 'FOCO_ISCAS' ? 'selected' : ''}>🎣 Foco Iscas: Fotos Novas c/ Garatéia (42)</option>
                 <option value="PRIORIDADE_CRITICA" ${settings.batchStatus === 'PRIORIDADE_CRITICA' ? 'selected' : ''}>🚨 Prioridade Crítica (S3 404 + Sem Desc)</option>
                 <option value="FORA_DIRETRIZES" ${settings.batchStatus === 'FORA_DIRETRIZES' ? 'selected' : ''}>🎯 Todos Fora do Padrão Modo B v2</option>
                 <option value="SEM_DESCRICAO" ${settings.batchStatus === 'SEM_DESCRICAO' ? 'selected' : ''}>📝 Apenas Sem Descrição</option>
@@ -2277,6 +2298,21 @@
       }
 
       // Botões da Aba 1: Prioridades
+      const btnIscasBatch = document.getElementById("brk-prio-iscas-batch");
+      if (btnIscasBatch) {
+        btnIscasBatch.onclick = () => {
+          saveSettings({
+            batchCategory: "iscas_prioridade",
+            batchStatus: "FOCO_ISCAS",
+            batchLimit: 50,
+            customCollection: "iscas-artificiais",
+            autoPilot: true,
+            autoSave: true,
+            skipAlreadyModeB: false
+          });
+          startQueueFromDatabase("FOCO_ISCAS", 50, "iscas_prioridade", "iscas-artificiais");
+        };
+      }
       const btnCritAll = document.getElementById("brk-prio-criticos-all");
       if (btnCritAll) {
         btnCritAll.onclick = () => {
@@ -2309,15 +2345,22 @@
       for (const qBtn of Array.from(hud.querySelectorAll(".brk-priority-btn[data-quick-cat]"))) {
         qBtn.onclick = () => {
           const catKey = qBtn.getAttribute("data-quick-cat") || "ALL";
+          const isIscaQuick = catKey === "iscas_artificiais" || catKey === "iscas_prioridade";
           saveSettings({
-            batchCategory: catKey,
-            batchStatus: "FORA_DIRETRIZES",
+            batchCategory: isIscaQuick ? "iscas_prioridade" : catKey,
+            batchStatus: isIscaQuick ? "FOCO_ISCAS" : "FORA_DIRETRIZES",
             batchLimit: 50,
+            customCollection: isIscaQuick ? "iscas-artificiais" : "",
             autoPilot: true,
             autoSave: true,
-            skipAlreadyModeB: true
+            skipAlreadyModeB: !isIscaQuick
           });
-          startQueueFromDatabase("FORA_DIRETRIZES", 50, catKey, "");
+          startQueueFromDatabase(
+            isIscaQuick ? "FOCO_ISCAS" : "FORA_DIRETRIZES",
+            50,
+            isIscaQuick ? "iscas_prioridade" : catKey,
+            isIscaQuick ? "iscas-artificiais" : ""
+          );
         };
       }
 
@@ -2363,7 +2406,7 @@
           const st = document.getElementById("brk-sel-status")?.value || "PRIORIDADE_CRITICA";
           const lim = parseInt(document.getElementById("brk-sel-limit")?.value || "50", 10);
           const colInput = (document.getElementById("brk-inp-collection")?.value || "").trim();
-          const finalCol = colInput || (cat === "super_ofertas" ? "super-ofertas-🔥" : "");
+          const finalCol = colInput || (cat === "super_ofertas" ? "super-ofertas-🔥" : (cat === "iscas_prioridade" ? "iscas-artificiais" : ""));
           saveSettings({
             batchCategory: cat,
             batchStatus: st,
@@ -2371,7 +2414,7 @@
             customCollection: colInput,
             autoPilot: true,
             autoSave: true,
-            skipAlreadyModeB: st !== "COLECAO_COMPLETA"
+            skipAlreadyModeB: st !== "COLECAO_COMPLETA" && st !== "FOCO_ISCAS"
           });
           startQueueFromDatabase(st, lim, cat === "CUSTOM_COLLECTION" ? "ALL" : cat, finalCol);
         };
