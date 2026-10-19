@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         BRK Assistente de Descrições Shopify (Mini-Dashboard v6.5.0 Cockpit)
+// @name         BRK Assistente de Descrições Shopify (Mini-Dashboard v6.5.1 Cockpit)
 // @namespace    https://1025-ten.vercel.app/
-// @version      6.5.0
-// @description  Mini-Dashboard Profissional in-screen para Shopify Admin com KPIs em tempo real, 100% Zero Foto de Costas no Ato 3 (Capuz/Gola/Punho) em todos os 504 padrões de galeria (Capa Humanizada, Capa Combo Frente+Costas e Estúdio), diversidade cromática RGB de iscas artificiais e Piloto Automático sem avisos legados.
+// @version      6.5.1
+// @description  Mini-Dashboard Profissional in-screen para Shopify Admin com KPIs em tempo real, 100% Zero Foto de Costas no Ato 3 (Capuz/Gola/Punho) em todos os 504 padrões de galeria, filtro anti-iscas sem garatéias + sincronização ao vivo de novas fotos de iscas na Shopify e Piloto Automático sem avisos legados.
 // @author       BRK Group & DeepMind Pair
 // @updateURL    https://1025-ten.vercel.app/tampermonkey/brk_assistente_shopify.user.js
 // @downloadURL  https://1025-ten.vercel.app/tampermonkey/brk_assistente_shopify.user.js
@@ -37,7 +37,7 @@
 
   // Configuração da API do Banco de Dados BRK (6.409 produtos auditados nas 3 lojas)
   const API_BASE = "https://1025-ten.vercel.app";
-  const SCRIPT_VERSION = "6.5.0";
+  const SCRIPT_VERSION = "6.5.1";
 
   const STORAGE_KEYS = {
     QUEUE: "BRK_AUTOSYNC_QUEUE",
@@ -46,7 +46,7 @@
     BACKUP: "BRK_AUTOSYNC_BACKUP",
     SETTINGS: "BRK_AUTOSYNC_SETTINGS",
     LAST_STORE: "BRK_LAST_STORE",
-    COMPLIANT_IDS: "BRK_COMPLIANT_IDS_V65"
+    COMPLIANT_IDS: "BRK_COMPLIANT_IDS_V651"
   };
 
   const STORE_SLUG_MAP = {
@@ -948,13 +948,17 @@
         }
       }
 
-      // Verificar se a Isca Artificial ou Equipamento está com 2-capa ou variações de cores repetidas em relação ao prod.mode_b_html oficial
-      const isLureOrEquip = /isca|jig|frog|sapinho|vara|caixa de pesca/i.test(titleAndSku) && !/boné|bone|copo|bandana|faca|camisa/i.test(titleAndSku);
-      if (isLureOrEquip && prod && prod.mode_b_html && editorImgMatches.length >= 2) {
+      // Verificar se a Isca Artificial ou Equipamento está com foto sem garatéia, 2-capa ou variações de cores repetidas em relação ao prod.mode_b_html oficial
+      const isLureOrEquip = /isca|jig|frog|sapinho|vara|caixa de pesca/i.test(titleAndSku) && !/boné|bone|copo|bandana|faca|camisa|camiseta/i.test(titleAndSku);
+      const hooklessRe = /17556320|17556324[4-9]|175563255|17556365|17556366|17556370|17556390|17556913|17556915|175630609|175630611|17563904|17563913|175640425|htaipoi|trrcouw|ngmpqqt|4p1iqiy|8yy2b7x|qngeftb|wlc1umo|buuvmhx|lesihbz/i;
+      if (isLureOrEquip && editorImgMatches.some(u => hooklessRe.test(u))) {
+        reasons.push("Isca com foto de catálogo sem garatéia nos Atos — atualizar para fotos reais com garatéias");
+      }
+      if (isLureOrEquip && prod && prod.mode_b_html && editorImgMatches.length >= 1) {
         const expectedImgs = Array.from(prod.mode_b_html.matchAll(/<img[^>]+src=["']([^"']+)["']/gi))
           .map(m => m[1].split("?")[0].toLowerCase())
           .filter(u => !u.endsWith(".svg"));
-        if (expectedImgs.length >= 2 && editorImgMatches.slice(0, expectedImgs.length).join("|") !== expectedImgs.join("|")) {
+        if (expectedImgs.length >= 1 && editorImgMatches.slice(0, expectedImgs.length).join("|") !== expectedImgs.join("|")) {
           reasons.push("Isca/Equipamento com foto da mesma cor repetida (2-capa / variação similar) — atualizar para variações de cores distintas");
         }
       }
@@ -1259,10 +1263,52 @@
       try {
         if (!htmlContent || !prod) return htmlContent;
         const titleAndSku = `${prod.title || ""} ${prod.master_sku || ""}`.toLowerCase();
-        const isApparel = /camisa|camiseta|fusion|hyb|armorx|cax|segunda pele|raglan|cortavento|jaqueta/i.test(titleAndSku);
-        if (!isApparel) return htmlContent;
+        const isApparel = /camisa|camiseta|blusa|moletom|polo|fusion|hyb|armorx|cax|segunda pele|raglan|cortavento|jaqueta/i.test(titleAndSku);
+        const isLure = /isca|jig|frog|sapinho/i.test(titleAndSku) && !/boné|bone|copo|bandana|faca|camisa|camiseta|caixa|suporte/i.test(titleAndSku);
+        if (!isApparel && !isLure) return htmlContent;
 
         const liveGallery = extractLiveShopifyMediaGallery();
+        if (isLure) {
+          if (liveGallery.length < 3) return htmlContent;
+          const dbGallery = Array.isArray(prod.cdn_images) ? prod.cdn_images : [];
+          const liveRootsAll = liveGallery.map(u => u.split("?")[0].toLowerCase());
+          const dbRootsAll = dbGallery.map(u => String(u).split("?")[0].toLowerCase());
+          // Se a galeria ao vivo na Shopify for idêntica à do banco, preserva a seleção cirúrgica da API Python
+          if (liveRootsAll.length === dbRootsAll.length && liveRootsAll.every((r, idx) => r === dbRootsAll[idx])) {
+            return htmlContent;
+          }
+          // Se o usuário subiu novas imagens na galeria da Shopify para a isca, filtra 2-capa, banners e fotos sem garatéia
+          const hooklessRe = /17556320|17556324[4-9]|175563255|17556365|17556366|17556370|17556390|17556913|17556915|175630609|175630611|17563904|17563913|175640425|htaipoi|trrcouw|ngmpqqt|4p1iqiy|8yy2b7x|qngeftb|wlc1umo|buuvmhx|lesihbz/i;
+          const img1 = liveGallery[0];
+          const validRest = liveGallery.slice(1).filter(u => {
+            const fn = (u.split("?")[0].split("/").pop() || "").toLowerCase();
+            if (/catalogobrkfishing|chatgpt|capacategoria|prancheta/i.test(fn)) return false;
+            if (/2-capa|2_capa|capa-2|capa_2|capa-90-2|^2[-_]/i.test(fn)) return false;
+            if (hooklessRe.test(fn)) return false;
+            return true;
+          });
+          if (validRest.length >= 2) {
+            const cands = validRest.length >= 4 ? validRest.slice(1) : validRest;
+            const v1 = cands[0];
+            const v2 = cands[Math.floor(cands.length / 2)];
+            const v3 = cands[cands.length - 1];
+            const hasSplit = /brk-desc-media-split/i.test(htmlContent);
+            const targetImgs = hasSplit && cands.length >= 3 ? [img1, v1, v2, v3] : [img1, v1, v3];
+            let imgIdx = 0;
+            return htmlContent.replace(/(<img[^>]+src=["'])([^"']+)(["'])/gi, (full, p1, oldSrc, p3) => {
+              if (oldSrc.toLowerCase().endsWith(".svg")) return full;
+              if (imgIdx < targetImgs.length && targetImgs[imgIdx]) {
+                const rep = targetImgs[imgIdx];
+                imgIdx++;
+                return `${p1}${rep}${p3}`;
+              }
+              imgIdx++;
+              return full;
+            });
+          }
+          return htmlContent;
+        }
+
         if (liveGallery.length < 4) return htmlContent;
 
         const dbGallery = Array.isArray(prod.cdn_images) ? prod.cdn_images : [];

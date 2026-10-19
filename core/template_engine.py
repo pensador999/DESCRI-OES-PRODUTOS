@@ -2279,8 +2279,44 @@ class TemplateEngine:
         # 8. Canivetes Táticos e demais itens de cutelaria
         return cdn_images[0], cdn_images[1], cdn_images[2]
 
-    # Mapa homologado por distância cromática RGB (maximin) + deduplicação de prefixo de cor
-    # Garante que cada isca exiba variações de cores 100% distintas nos 3 Atos (nunca repetindo a isca da capa / 2-capa)
+    # Tokens de fotos de catálogo de fornecedor onde a isca está SEM garatéias (apenas o corpo/pitões sem anzol).
+    # NUNCA devem ser exibidas nos Atos (especialmente no Ato 3 "Garatéias de Alta Resistência").
+    HOOKLESS_LURE_IMAGE_TOKENS = (
+        "1755631990951",  # Kisu 01 tem garatéia, então filtramos apenas 17556320* abaixo!
+    )
+    HOOKLESS_LURE_SUBSTRINGS = (
+        "17556320",   # Marine Sports Kisu (02, 24, 31, 38-G sem garatéia)
+        "175563244",  # Marine Sports Invader MR 110F (14 sem garatéia)
+        "175563245",  # Marine Sports Invader MR 110F (24 sem garatéia)
+        "175563246",  # Marine Sports Invader MR 110F (BCT66, BOT61 sem garatéia)
+        "175563247",  # Marine Sports Invader MR 110F (CTT70 sem garatéia)
+        "175563248",  # Marine Sports Invader MR 110F (N4 sem garatéia)
+        "175563249",  # Marine Sports Invader MR 110F (WOS74 sem garatéia)
+        "175563255",  # Marine Sports Invader MR 110F (PYOT73 sem garatéia)
+        "17556365",   # Marine Sports Predator SR 115S (14, 24, 24MG sem garatéia)
+        "17556366",   # Marine Sports Predator SR 115S (BCT66..WOS74 sem garatéia)
+        "17556370",   # Marine Sports Predator SR 115S (N4, SHT63 sem garatéia)
+        "17556390",   # Marine Sports Savage 95 (BGO sem garatéia)
+        "17556913",   # Marine Sports Inna 90 (38G, 104, 108, WOT sem garatéia)
+        "17556915",   # Marine Sports Savage 85 (BGO sem garatéia)
+        "175630609",  # Rapala XRAP XRD (HS sem garatéia)
+        "175630611",  # Rapala XRAP XRD (OG, S sem garatéia)
+        "17563904",   # Marine Sports Brava 90 (110 sem garatéia) e Savage 95 (BGO sem garatéia)
+        "17563913",   # Rapala Precision Xtreme Pencil 107 (FHC sem garatéia)
+        "175640425",  # CCM Stick Letal 90 (16 sem garatéia)
+        "htaipoi",    # Marine Sports Inna 90 (sem garatéia)
+        "trrcouw",    # CCM Stick Letal 90 (sem garatéia)
+        "ngmpqqt",    # CCM Stick Letal 90 (sem garatéia)
+        "4p1iqiy",    # Yara Encrenca 9cm (sem garatéia)
+        "8yy2b7x",    # Yara Encrenca 9cm (sem garatéia)
+        "qngeftb",    # Yara Encrenca 9cm (sem garatéia)
+        "wlc1umo",    # Yara Encrenca 9cm (sem garatéia)
+        "buuvmhx",    # Yara Encrenca 9cm (sem garatéia)
+        "lesihbz",    # Yara Encrenca 9cm (sem garatéia)
+    )
+
+    # Mapa homologado por distância cromática RGB (maximin) + deduplicação de prefixo de cor + 100% COM GARATÉIAS
+    # Garante que cada isca exiba variações de cores 100% distintas e armadas com garatéias nos 3 Atos
     LURE_DIVERSE_IMAGE_PICKS = {
         "7539624771650": ["1-capa-80.jpg", "vxlBXlr_c8a16eea-cb0e-4526-adee-a2317eb1e117.jpg", "VXDSa7Z_a9bd0781-d15c-4d7a-924a-9b3a0197a2d6.jpg", "1755031950521-N11_3fabac3f-2bb9-481e-97ec-dae0805a4533.jpg"],
         "7872731906114": ["mwfv6pS.jpg", "dG8SXB6.jpg", "suMM8DG.jpg", "QIqUILH.jpg"],
@@ -2290,9 +2326,8 @@ class TemplateEngine:
             "isca_artificial_nelson_nakamura_lucky_sogra_9cm_12g_36080_1_ffc3977d12d9145d7039abb891b09a6f_2c982f95-462b-4036-9963-819b97391586.jpg",
             "isca_artificial_nelson_nakamura_lucky_sogra_9cm_12g_36080_4_37cc76b697ede7e7580d134f201fe7e3.jpg",
         ],
-        "7539964706882": ["1-capa_39d76067-e8b4-4b90-9df1-0495ff342f04.jpg", "1756306110031-OG.jpg", "1756306119404-S.jpg"],
         "7539625263170": ["1-capa-8-5.jpg", "rlReMCy.jpg", "FVZ1UA0.jpg", "zw7ZLwH.jpg"],
-        "7539965132866": ["1-capa_2b8c1727-287e-42a9-b434-3d50b1fe632c.jpg", "6I36Gw4.jpg", "IZntQpk.jpg", "1756391347269-FHC.jpg"],
+        "7539965132866": ["1-capa_2b8c1727-287e-42a9-b434-3d50b1fe632c.jpg", "6I36Gw4.jpg", "IZntQpk.jpg", "aJtuCBg.jpg"],
         "7539965100098": ["1-capa_fc37e5ae-98ed-44b0-a4e5-57fd0ff74953.jpg", "4pZfPPC.jpg", "U6f9YYe.jpg", "aJd3xbK.jpg"],
         "7539965198402": ["capa-1_b4ed0f33-008b-4088-afb6-64fdb687e4f8.jpg", "pUHgJWp.jpg", "BUz9MHU.jpg", "VmlZnNK.jpg"],
         "8369524047938": ["EMfYTYA_b512e97b-9cd7-4395-bb16-1d8ffa962f2e.jpg", "9NlUFZD_e852724e-1f31-4566-95c0-b1b9db733bc4.jpg", "ca0p2HE_c9ca1351-b460-486f-9fce-de7a14a0796d.jpg", "M0Z6489_1acbf535-62a7-4693-93df-69d2f7fc97fe.jpg"],
@@ -2301,12 +2336,9 @@ class TemplateEngine:
         "7860235796546": ["aa3b94d3-a88c-41f6-b823-dd35972d1b06.png", "29.png", "H87g4Qi.png", "30.png"],
         "7874266136642": ["UXR6ec0.jpg", "j6AxVhs.jpg", "CWd0bMX.jpg", "MMdtVQE.jpg"],
         "7874413068354": ["24.png", "3182bddb-7ede-46e2-9596-0bc66144cd58.png", "26.png", "45.png"],
-        "7872610828354": ["FSvorM8.jpg", "YMmQ3RA.jpg", "uEYkYIO.jpg", "tsYV59E.jpg"],
-        "7540011466818": ["1-capa_0d5834e8-4b3a-4a88-b3ed-1edc4f7f00b9.jpg", "QNgEFTb.jpg", "WLC1uMo.jpg", "leSIHBZ.jpg"],
+        "7872610828354": ["FSvorM8.jpg", "tsYV59E.jpg", "uX8YWv2.jpg", "DEneCgk.jpg"],
         "7539328122946": ["1-capa_96cf9845-5c1b-43db-846d-a08af81136b9.jpg", "MXlsni8.jpg", "87EmjtE.jpg", "1756404140708-LIGHT-BLUE-BACK.jpg"],
-        "7539624902722": ["1-capa-110_701886df-26a9-44e6-a4ac-f34d49a915c4.jpg", "1755632444257-14.jpg", "1755632453301-24.jpg", "1755632462138-BCT66.jpg"],
         "7539328090178": ["1-capa_ec07ad6a-ae1b-4467-bbcc-3dcc37d8d9b9.jpg", "GXNFeNc.jpg", "JuvocWR.jpg", "1756307030216-CHARTREUSE-WH.jpg"],
-        "7539624935490": ["1-capa-11-5.jpg", "1755631990951-01.jpg", "1755632028996-02.jpg"],
         "7874566258754": ["2XRQjuy.jpg", "Q8FXdbJ.jpg", "gy9mxN9.jpg", "epsipeF.jpg"],
         "7540011925570": ["1-capa_805f1121-8f55-4512-ac93-112893f39c88.jpg", "1756306148800-80.jpg", "1756306155383-81.jpg", "1756306173116-83.jpg"],
         "7873835860034": ["B0t7VtY.jpg", "UoZboWr.jpg", "acy5nZE.jpg", "eZ8GqTz.jpg"],
@@ -2320,11 +2352,10 @@ class TemplateEngine:
         "7539625918530": ["1-capa_5b81291d-f33e-4bde-89f6-f5af920d463a.jpg", "YQVNSch.jpg", "fe1S4a6.jpg", "xW4FItG.jpg"],
         "7539607142466": ["1-capa-ipon-80.jpg", "N3z4plS.jpg", "Svke56p.jpg", "82VEssQ.jpg"],
         "7539607175234": ["1-capa_afa556c1-9857-40cc-93a4-6aab388853c4.jpg", "1756214711581-108.jpg", "1756214720696-201.jpg", "1756214735165-202.jpg"],
-        "7539624837186": ["1-capa_45dd7fa4-dda6-4f23-9c19-7604a72afa40.jpg", "1755636583932-24.jpg", "1755636618590-BKGO71.jpg", "1755637083579-N4.jpg"],
         "7539606749250": ["1-capa_e1bced8c-c452-4471-ba47-cd87239738c8.jpg", "EaB1Gec.jpg", "bfmgjKJ.jpg", "9xiH8tS.jpg"],
         "7539606716482": ["1-capa-8-5cm.jpg", "bTBY4hE.jpg", "mvWRNFj.jpg", "wbmDDaR.jpg"],
         "7539625001026": ["1-capa-85.jpg", "5FKfm4Q.jpg", "cnznqYX.jpg", "YFm4XlE.jpg"],
-        "7539316817986": ["capa-90-1.jpg", "ZO8uYGY.jpg", "PMqZokI.jpg", "1756404256994-16.jpg"],
+        "7539316817986": ["capa-90-1.jpg", "ZO8uYGY.jpg", "PMqZokI.jpg", "S7hZsPI.jpg"],
         "7538279055426": ["1-capa_b63d1445-1eea-4e9d-aedf-ba0c90aed018.jpg", "RR4UqEg.jpg", "4UW2vJf.jpg", "sKpK01i_6b7a3445-415f-4b15-a5d4-818d50e7bd24.jpg"],
         "7539316883522": ["1-capa_742aa0c7-dc1b-4573-9bb3-247507d0639f.jpg", "qSY7Knx.jpg", "Atony3C.jpg", "YyjN4Xo.jpg"],
         "7538360778818": ["1-capa_ea35434c-f231-4ce0-86e4-6f2130e63c35.jpg", "nVb8YQm.jpg", "69Z32EA.jpg", "cbA2bif.jpg"],
@@ -2332,10 +2363,17 @@ class TemplateEngine:
         "7873393885250": ["Soml0zX.jpg", "ac2cb4ef-d970-4417-806c-dc1e7a7a6bc9.png", "p2BBsGV.jpg", "SDuySHA.jpg"],
     }
 
+    def _is_hookless_lure_image(self, url: str) -> bool:
+        if not url or not isinstance(url, str):
+            return False
+        fn = url.lower().split("?")[0].split("/")[-1]
+        return any(tok in fn for tok in self.HOOKLESS_LURE_SUBSTRINGS)
+
     def _select_lure_act_images(self, cdn_images: List[str], variants: List[Any] = None, product_id: str = "", title: str = "") -> Tuple[Optional[List[str]], str, str, str]:
         """
-        Seleciona imagens de variações de iscas 100% distintas para os 3 Atos:
+        Seleciona imagens de variações de iscas 100% distintas e COM GARATÉIAS para os 3 Atos:
         - NUNCA seleciona `2-capa` (cdn_images[1], que repete a mesma isca da capa sem texto).
+        - NUNCA seleciona fotos de catálogo sem garatéia (`HOOKLESS_LURE_SUBSTRINGS`).
         - Evita a foto de fundo branco da mesma cor da capa (geralmente em cdn_images[2]) e códigos de mesma família cromática (ex: 24 e 24MG).
         - Para iscas de apenas 3 cores no total (5 fotos sendo 3 da cor da capa), aloca 1 cor distinta por Ato sem Split Media.
         """
@@ -2354,13 +2392,29 @@ class TemplateEngine:
 
         img1 = cdn_images[0]
         banner_toks = ("catalogobrkfishing", "chatgpt", "capacategoria", "prancheta")
-        clean_rest = [u for u in cdn_images[1:] if not any(t in u.lower() for t in banner_toks)]
-        pool_all = [img1] + (clean_rest if len(clean_rest) >= 3 else cdn_images[1:])
+        clean_rest = [
+            u for u in cdn_images[1:]
+            if not any(t in u.lower() for t in banner_toks)
+            and not self._is_hookless_lure_image(u)
+        ]
+        has_any_hookless = any(self._is_hookless_lure_image(u) for u in cdn_images[1:])
+        if has_any_hookless:
+            # Se a galeria tinha fotos sem garatéia que foram filtradas, remove também 2-capa para usar apenas fotos válidas com garatéia
+            valid_hooked_rest = [
+                u for u in clean_rest
+                if not any(
+                    k in u.split("?")[0].split("/")[-1].lower()
+                    for k in ("2-capa", "2_capa", "capa-2", "capa_2", "capa-90-2")
+                )
+            ]
+            pool_all = [img1] + valid_hooked_rest
+        else:
+            pool_all = [img1] + (clean_rest if len(clean_rest) >= 3 else cdn_images[1:])
         n = len(pool_all)
         var_len = len(variants) if variants else 0
 
         if n >= 6:
-            raw_cands = pool_all[3:]
+            raw_cands = pool_all[1:] if has_any_hookless else pool_all[3:]
             dedup_cands = []
             seen_roots = set()
             for u in raw_cands:
@@ -2380,6 +2434,8 @@ class TemplateEngine:
         elif n == 5:
             if var_len and var_len <= 3:
                 return None, img1, pool_all[3], pool_all[4]
+            if has_any_hookless:
+                return [img1, pool_all[1]], img1, pool_all[2], pool_all[4]
             return [img1, pool_all[3]], img1, pool_all[2], pool_all[4]
         elif n == 4:
             fn1 = pool_all[1].split("?")[0].split("/")[-1].lower()
@@ -2390,12 +2446,12 @@ class TemplateEngine:
             fn1 = pool_all[1].split("?")[0].split("/")[-1].lower()
             if "capa" in fn1 or fn1.startswith("2_") or fn1.startswith("2-"):
                 return None, img1, pool_all[2], ""
-            return [img1, pool_all[1]], img1, pool_all[2], ""
+            return None, img1, pool_all[1], pool_all[2]
         elif n == 2:
             fn1 = pool_all[1].split("?")[0].split("/")[-1].lower()
             if "capa" in fn1 or fn1.startswith("2_") or fn1.startswith("2-"):
                 return None, img1, "", ""
-            return [img1, pool_all[1]], img1, "", ""
+            return None, img1, pool_all[1], ""
         return None, img1, "", ""
 
     def _sanitize_and_dedup_images(self, cdn_images: List[Any], archetype_id: str = "", title: str = "") -> List[str]:

@@ -117,11 +117,13 @@ def evaluate_guideline_compliance(p: dict, store_key: str = "brk_fishing") -> tu
 
     is_lure_item = (
         (p.get("archetype_id") == "fishing_lures" or any(w in title_l for w in ("isca", "jig", "frog", "sapinho")))
-        and not any(w in title_l for w in ("boné", "bone", "copo", "bandana", "faca", "camisa", "caixa", "suporte"))
+        and not any(w in title_l for w in ("boné", "bone", "copo", "bandana", "faca", "camisa", "camiseta", "caixa", "suporte"))
     )
-    if is_lure_item and len(raw_cdn_list) >= 4 and len(orig_img_srcs) >= 3:
+    if is_lure_item and len(raw_cdn_list) >= 2 and len(orig_img_srcs) >= 1:
         engine, _ = get_engine_and_builder()
         if engine:
+            if any(engine._is_hookless_lure_image(u) for u in orig_img_srcs):
+                violations.append("Isca com foto de catálogo sem garatéia nos Atos — atualizar para fotos reais com garatéias")
             dedup_imgs = engine._sanitize_and_dedup_images(raw_cdn_list, archetype_id="fishing_lures", title=p.get("title", ""))
             sp_imgs, l_i1, l_i2, l_i3 = engine._select_lure_act_images(
                 dedup_imgs, variants=p.get("variants") or [], product_id=str(p.get("id", "")), title=p.get("title", "")
@@ -475,9 +477,11 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
                 has_lure_or_2capa_violation = False
                 is_lure_item = (
                     (arch_id == "fishing_lures" or any(w in title_l for w in ("isca", "jig", "frog", "sapinho")))
-                    and not any(w in title_l for w in ("boné", "bone", "copo", "bandana", "faca", "camisa", "caixa", "suporte"))
+                    and not any(w in title_l for w in ("boné", "bone", "copo", "bandana", "faca", "camisa", "camiseta", "caixa", "suporte"))
                 )
-                if engine and is_lure_item and len(raw_cdn_list) >= 4:
+                if engine and is_lure_item and len(raw_cdn_list) >= 2:
+                    if any(engine._is_hookless_lure_image(u) for u in non_svg_roots):
+                        has_lure_or_2capa_violation = True
                     dedup_imgs = engine._sanitize_and_dedup_images(raw_cdn_list, archetype_id="fishing_lures", title=p.get("title", ""))
                     sp_imgs, l_i1, l_i2, l_i3 = engine._select_lure_act_images(
                         dedup_imgs, variants=p.get("variants") or [], product_id=str(p.get("id", "")), title=p.get("title", "")
@@ -506,9 +510,13 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
                 non_svg_roots = [u for u in img_roots if not u.endswith(".svg")]
                 has_act3_back_violation = False
                 if engine and raw_cdn_list:
-                    is_kids_flag = any(w in title_l for w in ["infantil", "kids", "juvenil"]) or sku_low.startswith("ci")
+                    is_kids_flag = (
+                        any(w in title_l for w in ["infantil", "kids", "juvenil"])
+                        or sku_low.startswith("ci")
+                        or bool(re.search(r'^(?:c0|ci|cf|cm|casual|adv|cadv|ccpbr|bp|hyb|fusion|cax|raglan)\d+i(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_low))
+                    ) and not any(w in title_l for w in ["adulto", "unissex adulto"])
                     is_casal_flag = "casal" in title_l and ("kit" in title_l or "combo" in title_l)
-                    is_fem_flag = (any(w in title_l for w in ["feminina", "feminino", "baby look", "babylook"]) or bool(re.search(r'bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_low))) and not is_kids_flag and not is_casal_flag
+                    is_fem_flag = (any(w in title_l for w in ["feminina", "feminino", "baby look", "babylook", "mulher"]) or bool(re.search(r'bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_low))) and not is_kids_flag and not is_casal_flag
                     dedup_imgs = engine._sanitize_and_dedup_images(raw_cdn_list, archetype_id=arch_id or "uv_performance", title=p.get("title", ""))
                     exp_imgs = [u.split("?")[0].lower() for u in engine._select_apparel_act_images(dedup_imgs, is_female=is_fem_flag, is_kids=is_kids_flag, sku=sku_low, title=title_l) if u]
                     if exp_imgs and non_svg_roots[:len(exp_imgs)] != exp_imgs:
@@ -1069,11 +1077,15 @@ class handler(BaseHTTPRequestHandler):
                                 found_product["title"] = live_data["title"]
                             if live_data.get("images"):
                                 engine_inst, _ = get_engine_and_builder()
+                                live_title_str = live_data.get("title") or found_product.get("title", "")
+                                live_t_low = live_title_str.lower()
+                                is_lure_live = any(w in live_t_low for w in ("isca", "jig", "frog", "sapinho")) and not any(w in live_t_low for w in ("boné", "bone", "copo", "bandana", "faca", "camisa", "camiseta", "caixa", "suporte"))
+                                arch_live = "fishing_lures" if is_lure_live else (found_product.get("archetype_id") or "uv_performance")
                                 if engine_inst:
                                     dedup_imgs = engine_inst._sanitize_and_dedup_images(
                                         live_data["images"],
-                                        archetype_id=found_product.get("archetype_id", "uv_performance"),
-                                        title=live_data.get("title") or found_product.get("title", "")
+                                        archetype_id=arch_live,
+                                        title=live_title_str
                                     )
                                 else:
                                     dedup_imgs = [img.get("src") if isinstance(img, dict) else img for img in live_data["images"] if img]
