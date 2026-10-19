@@ -451,13 +451,16 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
                 has_no_zipper_violation = not is_fusion_or_hyb or (not bool(re.search(r'\b(zíper|ziper)\b', raw_b, re.I)))
                 has_hood_sg_note = not is_fusion_or_hyb or ("sem contar" in raw_b.lower())
 
-                raw_cdn_clean = [str(u).split("?")[0].lower() for u in (p.get("cdn_images") or p.get("gallery") or []) if isinstance(u, str) and u.strip()]
+                raw_cdn_list = [str(u) for u in (p.get("cdn_images") or p.get("gallery") or []) if isinstance(u, str) and u.strip()]
                 non_svg_roots = [u for u in img_roots if not u.endswith(".svg")]
                 has_act3_back_violation = False
-                if len(raw_cdn_clean) >= 4 and len(non_svg_roots) >= 3:
-                    f3_name = raw_cdn_clean[3].split("/")[-1]
-                    is_f3_explicit_back = any(k in f3_name for k in ("costas", "costa", "verso", "tras", "02_", "-02.", "02masc", "02fem", "02inf"))
-                    if non_svg_roots[2] == raw_cdn_clean[2] and not is_f3_explicit_back and "frente" not in raw_cdn_clean[2].split("/")[-1]:
+                if engine and raw_cdn_list:
+                    is_kids_flag = any(w in title_l for w in ["infantil", "kids", "juvenil"]) or sku_low.startswith("ci")
+                    is_casal_flag = "casal" in title_l and ("kit" in title_l or "combo" in title_l)
+                    is_fem_flag = (any(w in title_l for w in ["feminina", "feminino", "baby look", "babylook"]) or bool(re.search(r'bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_low))) and not is_kids_flag and not is_casal_flag
+                    dedup_imgs = engine._sanitize_and_dedup_images(raw_cdn_list, archetype_id=arch_id or "uv_performance", title=p.get("title", ""))
+                    exp_imgs = [u.split("?")[0].lower() for u in engine._select_apparel_act_images(dedup_imgs, is_female=is_fem_flag, is_kids=is_kids_flag) if u]
+                    if exp_imgs and non_svg_roots[:len(exp_imgs)] != exp_imgs:
                         has_act3_back_violation = True
 
                 if "Detalhes Técnicos" in raw_b and has_new_sg and has_correct_prazo and has_no_zipper_violation and has_hood_sg_note and has_store_color and not has_act3_back_violation:
