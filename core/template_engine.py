@@ -1209,27 +1209,27 @@ class TemplateEngine:
         is_upper_body = any(w in t for w in ["camisa", "camisas", "camiseta", "camisetas", "baby look", "babylook", "regata", "t-shirt", "polo", "jersey", "segunda pele"]) or is_c0_or_uv_sku or is_work_sku
 
         if is_upper_body:
-            # 10.1 Se for camisa com código C0, CI, CADV, ADV, HYB, RAGLAN ou com menção explícita a proteção UV / XTech
-            is_uv_shirt = (
-                is_c0_or_uv_sku or
-                any(w in t for w in ["uv", "uv50", "fpu", "fps", "xtech", "solar", "segunda pele", "fusionx", "armorx", "hybrid"]) or
-                any(w in tags_str for w in ["uv50", "uv", "protecao solar", "xtech"])
-            )
-            if is_uv_shirt and not is_work_sku and not any(w in t for w in ["algodao puro", "100% algodao", "camisa de botao", "camisa work"]):
-                return "uv_performance"
-
-            # 10.2 Camisas Work / Botão / Sarja / Lisas / Xadrez (Sem zíper, com botões e bolsos utilitários)
+            # 10.1 Camisas Work / Botão / Sarja / Lisas / Xadrez (Sem zíper, com botões e bolsos utilitários)
             is_button_work = (
                 is_work_sku or
-                any(w in t for w in ["camisa work", "safari sarja", "camisa sarja", "camisa de botao", "camisa botao", "manga longa sarja", "manga curta sarja", "xadrez"]) or
-                (("operacional" in t or "sarja" in t or "de botao" in t) and not any(w in t for w in ["ziper"])) or
+                any(w in t for w in ["camisa work", "safari sarja", "camisa sarja", "camisa de botao", "camisa botao", "trabalho botao", "manga longa sarja", "manga curta sarja", "xadrez"]) or
+                (("operacional" in t or "sarja" in t or "de botao" in t or "botao" in t) and not any(w in t for w in ["ziper"])) or
                 (("lisa" in t or "sem estampa" in t) and any(w in t for w in ["classic", "manga curta", "manga longa"]) and not any(w in t for w in ["uv", "uv50", "dry", "xtech", "segunda pele"]))
             )
             if is_button_work and not any(w in t for w in ["ziper"]):
                 return "shirts_button_work"
 
+            # 10.2 Se for camisa com código C0, CI, CADV, ADV, HYB, RAGLAN ou com menção explícita a proteção UV / XTech / Térmica / Kit Camisa
+            is_uv_shirt = (
+                is_c0_or_uv_sku or
+                any(w in t for w in ["uv", "uv50", "fpu", "fps", "xtech", "solar", "segunda pele", "termica", "térmica", "fusionx", "armorx", "hybrid", "kit camisa", "camisa agro"]) or
+                any(w in tags_str for w in ["uv50", "uv", "protecao solar", "xtech"])
+            )
+            if is_uv_shirt and not is_work_sku and not any(w in t for w in ["algodao puro", "100% algodao", "camisa de botao", "camisa work", "botao"]):
+                return "uv_performance"
+
             # 10.3 Camisetas casuais de algodão (Agro / Campo / Lifestyle)
-            if any(w in t for w in ["algodao", "campo", "agro", "fazenda", "trator"]):
+            if any(w in t for w in ["algodao", "cotton"]) or ("camiseta" in t and any(w in t for w in ["campo", "agro", "fazenda", "trator"])):
                 return "agro_field"
 
             # 10.4 Jerseis de motocross sem proteção UV
@@ -1800,7 +1800,7 @@ class TemplateEngine:
         "45264908", "13105c88", "fd83706b", "8c080972", "f216f901", "4d2d6d08", "c252c71d",
         "46527a54", "690bc78c", "04573785", "e38b5b7a", "36f55c3f", "8ab61efc", "a5d85d3f",
         "99eac446", "9441361f", "467d8be4", "f6ac2d2f", "0613bce8", "0f246755", "b572fc99",
-        "918533a9", "7207f2f3", "6c7ea73a", "a0deafd1", "857b9ee5", "79bc00df", "9ea038aa",
+        "918533a9", "7207f2f3", "6c7ea73a", "a0deafd1", "79bc00df", "9ea038aa",
         "0171fd65", "9d69cd2a", "6cf52d17", "74ff3b1b", "84c0fd2a", "50927e47", "d53188b6",
         "f9272d9d", "b4e6b115", "6ae27aba", "da70f47a", "26162728", "3695e90e", "2aba8948",
         "28b07dbe", "477731fa", "d1fa0698", "b3c85297", "c11b6e73", "50cfe677", "ff755646",
@@ -1816,7 +1816,7 @@ class TemplateEngine:
         "b56a2aed", "521f0869", "388fa6af", "6d9cbfb8", "b8d9699c", "c17c1302", "2bf64b3f",
         "61500b8b", "e530b68e", "c5b54f10", "2b6c194f", "02781a5e", "9ba59d31", "603df378",
         "eb6064ae", "1a8c7ea9", "93250732", "d3cacd5c", "4f445b35", "bce437e5", "f4a005bc",
-        "77850713", "08e156f1", "91b565a3", "c39e65b5", "da63c015", "b277f79c", "0e6cf2c0",
+        "77850713", "91b565a3", "c39e65b5", "da63c015", "b277f79c", "0e6cf2c0",
         "ba878fcc", "71a54be9", "abc2a560", "1aac96a2", "d6035923", "03dbed6f", "11fcc517",
         "81ccd5ac", "4f96b46d", "d670dece", "bc78e78c", "e2774c44", "6a833563", "f1e47bff",
         "d2d1d19a", "32a3d776", "dc2a5969", "53dca2d0", "8212ed55", "13ba8a69", "bc98ee7b",
@@ -2753,9 +2753,21 @@ class TemplateEngine:
             url = (product.get("url") or "").lower()
             vendor_str = (product.get("vendor") or "").lower()
             category = (product.get("category") or "").lower()
-            if "agro" in url or "agro" in vendor_str or "agro" in category or archetype_id == "agro_field":
+            t_low_store = title.lower()
+            imgs_str_store = " ".join(str(u) for u in cdn_images).lower()
+            if (
+                "agro" in url or "agro" in vendor_str or "agro" in category
+                or archetype_id == "agro_field"
+                or "0887/2083/4857" in imgs_str_store
+                or "0798/6462/7495" in imgs_str_store
+                or any(w in t_low_store for w in ["agro", "botina", "fazenda", "pecuaria", "pecuária", "nelore"])
+            ):
                 store_key = "brk_agro"
-            elif "motors" in url or "motors" in vendor_str or "motors" in category or archetype_id == "motors_speed":
+            elif (
+                "motors" in url or "motors" in vendor_str or "motors" in category
+                or archetype_id == "motors_speed"
+                or "0714/9853/1081" in imgs_str_store
+            ):
                 store_key = "brk_motors"
             else:
                 store_key = "brk_fishing"
@@ -2824,7 +2836,11 @@ class TemplateEngine:
         )
         if any(w in t_low for w in ["adulto", "unissex adulto"]):
             is_kids = False
-        is_segunda_pele = is_apparel and ("segunda pele" in t_low or sku_clean_for_flags.startswith("raglan"))
+        is_segunda_pele = is_apparel and (
+            any(w in t_low for w in ["segunda pele", "camisa térmica", "camisa termica", "blusa térmica", "blusa termica"])
+            or sku_clean_for_flags.startswith("raglan")
+        )
+        is_kit_shirt_boot = is_apparel and any(w in t_low for w in ["camisa", "camiseta", "blusa", "segunda pele"]) and bool(re.search(r'\b(botina|bota|coturno)\b', t_low))
         is_short_sleeve = is_apparel and (
             any(w in t_low for w in ["manga curta", "manga-curta", "camiseta"])
             or ("curta" in t_low and "manga" in t_low)
@@ -2875,6 +2891,12 @@ class TemplateEngine:
                 variations_summary = f"Disponível em {len(variant_titles)} opções de cores e modelos no anúncio ({', '.join(variant_titles[:4])}{'...' if len(variant_titles) > 4 else ''})."
             else:
                 variations_summary = "Múltiplas variações e opções de cores disponíveis para escolha no anúncio."
+        elif is_kit_shirt_boot:
+            img1 = cdn_images[0] if len(cdn_images) > 0 else ""
+            img2 = cdn_images[1] if len(cdn_images) > 1 else ""
+            img3 = cdn_images[2] if len(cdn_images) > 2 else ""
+            back_360_img = ""
+            is_back_cover_360 = False
         elif is_apparel:
             img1, img2, img3, back_360_img, is_back_cover_360 = self._resolve_apparel_act_and_360_images(
                 cdn_images, is_female=is_female, is_kids=is_kids, sku=sku_clean_for_flags, title=title
@@ -3147,10 +3169,50 @@ class TemplateEngine:
         if archetype_id == "uv_performance" and not is_kids:
             if store_key == "brk_agro" or any(w in t_low for w in ["agro", "campo", "rural", "trator", "fazenda", "pecuaria", "pecuária"]):
                 if "pescadores" in act1.get("desc_tmpl", ""):
-                    act1["desc_tmpl"] = act1["desc_tmpl"].replace("pescadores e entusiastas do ar livre", "o homem e a mulher do campo e entusiastas do ar livre").replace("arremessos e manobras", "a rotina intensa no campo e manobras")
+                    act1["desc_tmpl"] = (
+                        act1["desc_tmpl"]
+                        .replace("pescadores e entusiastas do ar livre", "o homem e a mulher do campo e entusiastas do ar livre")
+                        .replace("os arremessos e manobras", "a rotina intensa no campo e manobras")
+                        .replace("arremessos e manobras", "a rotina intensa no campo e manobras")
+                    )
             elif store_key == "brk_motors" or any(w in t_low for w in ["moto", "trail", "cross", "velocidade", "motors", "pista"]):
                 if "pescadores" in act1.get("desc_tmpl", ""):
-                    act1["desc_tmpl"] = act1["desc_tmpl"].replace("pescadores e entusiastas do ar livre", "pilotos, motociclistas e aventureiros").replace("arremessos e manobras", "a pilotagem e manobras")
+                    act1["desc_tmpl"] = (
+                        act1["desc_tmpl"]
+                        .replace("pescadores e entusiastas do ar livre", "pilotos, motociclistas e aventureiros")
+                        .replace("os arremessos e manobras", "a pilotagem e manobras")
+                        .replace("arremessos e manobras", "a pilotagem e manobras")
+                    )
+
+        # 7.9 Adaptação Especializada para Kit Multi-Produtos: Camisa + Botina em Couro Legítimo
+        if is_kit_shirt_boot:
+            if is_segunda_pele:
+                act1["tag"] = "Item 01 do Kit: Segunda Pele Térmica UV50+"
+                act1["fa_icon"] = "fa-solid fa-shirt"
+                act1["title"] = "CAMISA TÉRMICA DE TOQUE FRIO, MODELAGEM RAGLAN E PROTEÇÃO SOLAR FPU 50+"
+                act1["desc_tmpl"] = "O primeiro item do {title} é a Camisa Térmica BRK com fator FPU 50+ homologado, mangas de corte raglan esportivo e costuras planas anti-atrito que mantêm o equilíbrio térmico corporal e dissipam o suor rapidamente sob o sol ou sob outras peças."
+            else:
+                act1["tag"] = "Item 01 do Kit: Camisa Técnica BRK UV50+"
+                act1["fa_icon"] = "fa-solid fa-shirt"
+                act1["title"] = "TECNOLOGIA XTECH PRO COM PROTEÇÃO SOLAR FPU 50+ E SECAGEM ULTRA RÁPIDA"
+                act1["desc_tmpl"] = "O primeiro item do {title} é a Camisa Técnica BRK confeccionada em malha tecnológica leve e respirável com bloqueio permanente de até 98% dos raios UVA e UVB (FPU 50+), garantindo frescor, proteção solar e liberdade de movimentos na lida do campo."
+            act2["tag"] = "Item 02 do Kit: Botina em Couro Legítimo"
+            act2["fa_icon"] = "fa-solid fa-shoe-prints"
+            act2["title"] = "BOTINA EM COURO BOVINO LEGÍTIMO COM SOLADO ANTIDERRAPANTE E CALCE FÁCIL"
+            act2["desc_tmpl"] = "Complementando o conjunto na segunda imagem, a Botina Country em Couro Bovino Legítimo Chocolate conta com elásticos laterais cobertos para calce rápido, puxador reforçado, palmilha anatômica macia de absorção de impacto e solado de borracha tratorado antiderrapante com acabamento blaqueado lateral para máxima firmeza e durabilidade."
+            act3["tag"] = "Conjunto Completo Campo & Dia a Dia"
+            act3["fa_icon"] = "fa-solid fa-shield-halved"
+            act3["title"] = "PROTEÇÃO DA CABEÇA AOS PÉS: A COMBINAÇÃO DEFINITIVA PARA A LIDA E O LAZER"
+            act3["desc_tmpl"] = "Pensado para quem exige desempenho, resistência e apresentação impecável na fazenda, manejo rural, cavalgadas ou rotina diária, este kit reúne proteção solar superior no tronco e segurança robusta nos pés em uma única compra."
+            new_specs = [
+                {"label": "Itens Inclusos no Kit", "value": "1 Camisa Técnica BRK UV50+ + 1 Par de Botinas em Couro Legítimo Chocolate"},
+                {"label": "Item 01 — Tecido da Camisa", "value": "Malha tecnológica XTech Pro® com proteção solar FPU 50+ permanente e secagem rápida (Dry)"},
+                {"label": "Item 01 — Modelagem da Camisa", "value": "Segunda pele térmica com mangas raglan e gola redonda anatômica" if is_segunda_pele else "Manga longa anatômica com gola padre e zíper frontal com trava"},
+                {"label": "Item 02 — Cabedal da Botina", "value": "Couro Bovino Legítimo selecionado na cor Chocolate com elásticos laterais de calce fácil"},
+                {"label": "Item 02 — Solado & Palmilha", "value": "Borracha antiderrapante de alta tração blaqueada + Palmilha anatômica anti-impacto"},
+                {"label": "Indicação de Uso", "value": "Lida no campo, agronegócio, fazenda, cavalgadas, rodeios e uso diário"}
+            ]
+            template["care_tips"] = "Camisa: lavar à mão ou em ciclo suave com sabão neutro e secar à sombra. Botina em Couro: limpar com pano levemente úmido, secar à sombra longe de fontes de calor e hidratar periodicamente com pasta ou condicionador para couro legítimo."
 
         # 8. Adaptação 360° para Camisetas de Algodão em BRK Motors (Lifestyle Duas Rodas vs Agro)
         if archetype_id == "agro_field":
@@ -4568,6 +4630,16 @@ class TemplateEngine:
         source_type = "sibling_template" if sibling_info else "archetype_specialized"
         source_label = f"Molde Homólogo do Site ({sibling_info['sibling_title']})" if sibling_info else f"Arquétipo Especializado ({template['name']})"
 
+        crop_sleeve_detail = bool(is_apparel and not is_kit_shirt_boot and img3 and self._is_explicit_back_name(img3))
+        if crop_sleeve_detail:
+            act3["tag"] = "Detalhe Lateral: Mangas, Punhos & Costura"
+            if not is_fusion and not is_hybrid and not is_hooded:
+                act3["title"] = (
+                    "MANGAS CURTAS COM BARRA REFORÇADA E COSTURAS PLANAS ANTI-ATRITO"
+                    if is_short_sleeve else
+                    "MANGAS ANATÔMICAS, PUNHOS FIRMES E COSTURAS PLANAS ANTI-ATRITO"
+                )
+
         act1_dict = {
             "tag": act1["tag"],
             "fa_icon": act1.get("fa_icon", template.get("fa_icon", "fa-solid fa-check")),
@@ -4591,7 +4663,8 @@ class TemplateEngine:
             "fa_icon": act3.get("fa_icon", "fa-solid fa-shield-halved"),
             "title": act3["title"],
             "description": act3["desc_tmpl"].format(title=formatted_title),
-            "image": img3
+            "image": img3,
+            "crop_sleeve_detail": crop_sleeve_detail
         }
 
         sku = str(product.get("sku") or product.get("master_sku") or product.get("id") or "")

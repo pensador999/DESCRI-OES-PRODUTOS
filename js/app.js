@@ -252,10 +252,10 @@ function detectClientArchetype(title, category, tags) {
     if (/\b(work|safari sarja|manga longa sarja|manga curta sarja|sarja|militar|operacional|botao|botão|de botao|de botão|lisa|sem estampa)\b/i.test(t) && !/\b(ziper|zíper)\b/i.test(t)) {
       return { id: "shirts_button_work", name: "Camisas Work, Botão & Sarja Utilitária" };
     }
-    if (/\b(agro|campo|fazenda|trator|algodao|algodão)\b/i.test(t)) {
+    if (/\b(algodao|algodão|cotton)\b/i.test(t) || (/\bcamiseta\b/i.test(t) && /\b(agro|campo|fazenda|trator)\b/i.test(t))) {
       return { id: "agro_field", name: "Força, Campo & Tradição" };
     }
-    if (/\b(jersey|moto|cross|off-road|trilha|speed|motors)\b/i.test(t)) {
+    if (/\b(jersey|moto|cross|off-road|trilha|speed|motors)\b/i.test(t) && !/\b(uv|uv50|fpu|xtech|segunda pele|termica|térmica)\b/i.test(t)) {
       return { id: "motors_speed", name: "Trilha, Velocidade & Off-Road" };
     }
     return { id: "uv_performance", name: "Camisas UV50+ Performance & Pesca" };
@@ -372,6 +372,7 @@ function createEnrichedFromLiveProduct(liveP, storeKey) {
     id: liveP.id,
     title: title,
     handle: liveP.handle || "",
+    store_key: storeKey || "brk_fishing",
     vendor: liveP.vendor || (storeKey === "brk_agro" ? "BRK Agro" : storeKey === "brk_motors" ? "BRK Motors" : "BRK Fishing"),
     category: category,
     tags: tags,

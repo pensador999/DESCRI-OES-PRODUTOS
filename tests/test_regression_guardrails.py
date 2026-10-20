@@ -1439,6 +1439,50 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         self.assertEqual(len(all_4_2894), 4)
         self.assertEqual(len(set(all_4_2894)), 4, "As 4 fotos visuais (Ato 1 Face 1, Ato 1 Face 2, Ato 2 e Ato 3) devem ser 100% distintas!")
 
+        # 8. Camisas com Capa Humanizada de Costas e apenas 1 Frente + 2 Costas (ex: C02895): Close-up Lateral em Mangas/Punhos no Ato 3
+        c02895 = {
+            "id": 9974610952519,
+            "master_sku": "C02895",
+            "title": "BRK Camisa Halloween Freddy Ride Or Die Com Proteção Solar UV50+",
+            "images": [
+                "https://cdn.shopify.com/s/files/1/0920/4799/9271/files/a588a417-2055-4337-aa46-5738eb7cf201.png?v=1776186259",
+                "https://cdn.shopify.com/s/files/1/0920/4799/9271/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F187989331_2Fc2e7849ff97e46c2a8dc9652315f3fc4.jpg?v=1774011350",
+                "https://cdn.shopify.com/s/files/1/0920/4799/9271/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F187989331_2F59c6e4c0949c4b00bf3c8ba658c588e1.jpg?v=1774011353",
+                "https://cdn.shopify.com/s/files/1/0920/4799/9271/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F187989331_2F9170d7b1e7b84122a406150ec0250427.jpg?v=1774011355",
+            ],
+        }
+        enr_2895 = template_engine.generate_narrative_from_template(c02895, "uv_performance", c02895["images"], store_key="brk_motors")
+        html_2895 = html_builder.build_shopify_html(enr_2895)
+        self.assertTrue(enr_2895["act3"].get("crop_sleeve_detail"))
+        self.assertIn("brk-crop-sleeve-detail", html_2895)
+        self.assertIn("Detalhe Lateral: Mangas, Punhos & Costura", html_2895)
+        self.assertIn("MANGAS ANATÔMICAS, PUNHOS FIRMES E COSTURAS PLANAS ANTI-ATRITO", html_2895)
+        self.assertNotIn("Foco Frontal:", html_2895)
+
+        # 9. Kits Multi-Produtos (Camisa + Botina em Couro Legítimo): Tema Verde Agro, Ato 1 Camisa, Ato 2 Botina e Guia de Medidas Duplo
+        kit_agro = {
+            "id": 15412614168873,
+            "sku": "15412614168873",
+            "title": "Kit Camisa Agro Brk Camuflada Bandeira do Brasil + Botina Couro Legítimo Chocolate",
+            "images": [
+                "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/C02546_1.png?v=1761233389",
+                "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/botina-couro-legitimo-chocolate-1.jpg?v=1761233391",
+            ],
+        }
+        arch_kit = template_engine.detect_archetype(kit_agro["title"], "", [], "BRK", sku=kit_agro["sku"])
+        self.assertEqual(arch_kit, "uv_performance")
+        enr_kit = template_engine.generate_narrative_from_template(kit_agro, arch_kit, kit_agro["images"])
+        self.assertEqual(enr_kit["store_key"], "brk_agro")
+        self.assertEqual(enr_kit["theme_color"], "#16a34a")
+        html_kit = html_builder.build_shopify_html(enr_kit)
+        self.assertIn("Item 01 do Kit: Camisa Técnica BRK UV50+", html_kit)
+        self.assertIn("Item 02 do Kit: Botina em Couro Bovino Legítimo", html_kit)
+        self.assertIn("BOTINA EM COURO BOVINO LEGÍTIMO COM SOLADO ANTIDERRAPANTE E CALCE FÁCIL", html_kit)
+        self.assertIn("ITEM 01 — TABELA DE MEDIDAS DA CAMISA (PP AO G2)", html_kit)
+        self.assertIn("ITEM 02 — GUIA DE TAMANHOS DA BOTINA / CALÇADO (34 AO 45)", html_kit)
+        self.assertIn("Kit Completo 2 em 1", html_kit)
+        self.assertNotIn("durante os a ", html_kit.lower())
+
 
 def run_tests():
     suite = unittest.TestSuite()

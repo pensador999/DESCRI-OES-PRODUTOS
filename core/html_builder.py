@@ -265,11 +265,24 @@ class HTMLBuilder:
 
     def _build_quick_badges(self, theme_color: str, archetype_id: str, enriched_data: Dict[str, Any]) -> str:
         """
-        Seleciona os 4 selos EXCLUSIVAMENTE pelo arquétipo detectado.
+        Seleciona os 4 selos EXCLUSIVAMENTE pelo arquétipo detectado (ou Kit Híbrido Camisa + Botina).
         Nunca usa palavras soltas do título (ex.: "pesca" em "Vara de Pesca"),
         pois isso contaminava equipamentos com selos de camisa UV (FPU 50+, Dry Fit).
         Arquétipo desconhecido -> selos genéricos e seguros.
         """
+        t_low = str(enriched_data.get("formatted_title") or enriched_data.get("title") or "").lower()
+        is_kit_shirt_boot = any(w in t_low for w in ["camisa", "camiseta", "blusa", "segunda pele"]) and bool(
+            re.search(r'\b(botina|bota|coturno)\b', t_low)
+        )
+        if is_kit_shirt_boot:
+            badges = [
+                {"icon": "box", "title": "Kit Completo 2 em 1", "sub": "Camisa BRK + Botina Couro"},
+                {"icon": "sun", "title": "Camisa FPU 50+ Dry", "sub": "Proteção Solar & Frescor"},
+                {"icon": "shield", "title": "Couro Bovino Legítimo", "sub": "Botina de Alta Resistência"},
+                {"icon": "bolt", "title": "Solado Antiderrapante", "sub": "Tração Firme no Campo"},
+            ]
+            return self._render_quick_badges(theme_color, badges)
+
         badges = QUICK_BADGES_BY_ARCHETYPE.get(archetype_id) or [
             {"icon": "shield", "title": "Qualidade Oficial", "sub": "Matéria-Prima Selecionada"},
             {"icon": "sparkle", "title": "Acabamento Premium", "sub": "Rigoroso Padrão BRK"},
@@ -288,6 +301,9 @@ class HTMLBuilder:
             any(w in title_low for w in ["camisa", "camiseta", "jersey", "baby look", "babylook", "armorx", "fusionx", "segunda pele"])
             or any(sku_low.startswith(pfx) for pfx in ["c0", "ci", "cadv", "adv", "hyb", "cmb", "cbt", "raglan", "cax", "fusion", "casual", "bp", "cf", "cm", "apc"])
         )
+        is_kit_shirt_boot_sg = has_explicit_shirt_marker and bool(
+            re.search(r'\b(bota|botina|coturno|tênis|tenis|sapato)\b', title_low)
+        )
         non_shirt_exclusions = (
             r'\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|chapéu|chapeu|boné|bone|manguito|manguitos|bandana|tubeneck|buff|balaclava)\b'
             if has_explicit_shirt_marker else
@@ -298,8 +314,8 @@ class HTMLBuilder:
             or has_explicit_shirt_marker
         ) and not bool(re.search(non_shirt_exclusions, title_low))
 
-        # 0. Exclusão estrita de itens não-têxteis com UV ou termos ambíguos (apenas se NÃO for camisa)
-        if not is_shirt:
+        # 0. Exclusão estrita de itens não-têxteis com UV ou termos ambíguos (apenas se NÃO for camisa nem Kit Camisa+Calçado)
+        if not is_shirt and not is_kit_shirt_boot_sg:
             non_textile_pattern = r'\b(óculos|oculos|faca|facas|canivete|alicate|vara|varas|molinete|carretilha|isca|iscas|linha|linhas|anzol|anzois|anzóis|estojo|garrafa|copo|chaveiro|adesivo|carteira|protetor solar)\b'
             if re.search(non_textile_pattern, title_low):
                 return ""
@@ -331,7 +347,60 @@ class HTMLBuilder:
         else:
             special_shirt_prefix = None
 
-        if is_shirt:
+        if is_kit_shirt_boot_sg:
+            guide_title = "Guia de Medidas do Kit — Camisa (PP ao G2) & Botina (34 ao 45)"
+            tip_text = "<strong>Como conferir as medidas dos 2 itens do Kit:</strong> Para a <strong>Camisa</strong>, compare Tórax (axila a axila), Altura (ombro à barra) e Manga com uma peça sua estendida. Para a <strong>Botina em Couro Legítimo</strong>, meça o comprimento da palmilha interna de um calçado confortável do calcanhar até a ponta do dedão."
+            shirt_sub_prefix = "Segunda Pele Térmica UV50+" if any(w in title_low for w in ["térmica", "termica", "segunda pele"]) else ("Camisa Manga Curta UV50+" if is_short_sleeve else "Camisa Manga Longa UV50+")
+            subtitle_shirt = f"{shirt_sub_prefix} | *As medidas podem variar de 2cm a 3cm"
+            s_rows = [
+                ("PP", "49,5 cm", "67 cm", "56 cm"),
+                ("P", "51,5 cm", "69 cm", "59,5 cm"),
+                ("M", "54 cm", "71 cm", "62 cm"),
+                ("G", "56 cm", "72 cm", "64 cm"),
+                ("GG", "59 cm", "74 cm", "64 cm"),
+                ("G1", "62 cm", "75 cm", "66 cm"),
+                ("G2", "65 cm", "76,5 cm", "66 cm"),
+            ]
+            b_rows = [
+                ("34", "23,0 cm"), ("35", "23,7 cm"), ("36", "24,3 cm"),
+                ("37", "25,0 cm"), ("38", "25,7 cm"), ("39", "26,3 cm"),
+                ("40", "27,0 cm"), ("41", "27,7 cm"), ("42", "28,3 cm"),
+                ("43", "29,0 cm"), ("44", "29,7 cm"), ("45", "30,3 cm"),
+            ]
+            s_rows_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td></tr>\n" for r in s_rows])
+            b_rows_html = "".join([f"          <tr><td><strong>{r[0]}</strong></td><td>{r[1]}</td></tr>\n" for r in b_rows])
+            table_html = f"""<div class="brk-sg-card-header">
+        <div class="brk-sg-card-title">ITEM 01 — TABELA DE MEDIDAS DA CAMISA (PP AO G2)</div>
+        <div class="brk-sg-subtitle">{subtitle_shirt}</div>
+      </div>
+      <table class="brk-sg-table" style="margin-bottom: 18px;">
+        <thead>
+          <tr class="brk-sg-th-row">
+            <th>TAMANHO</th>
+            <th>TÓRAX</th>
+            <th>ALTURA</th>
+            <th>MANGA</th>
+          </tr>
+        </thead>
+        <tbody>
+{s_rows_html}        </tbody>
+      </table>
+      <div class="brk-sg-card-header">
+        <div class="brk-sg-card-title">ITEM 02 — GUIA DE TAMANHOS DA BOTINA / CALÇADO (34 AO 45)</div>
+        <div class="brk-sg-subtitle">Botina Country em Couro Bovino Legítimo | Medida da Palmilha Interna</div>
+      </div>
+      <table class="brk-sg-table">
+        <thead>
+          <tr class="brk-sg-th-row">
+            <th>NUMERAÇÃO BR</th>
+            <th>COMPRIMENTO DA PALMILHA (CM)</th>
+          </tr>
+        </thead>
+        <tbody>
+{b_rows_html}        </tbody>
+      </table>"""
+
+        elif is_shirt:
             # 1.1 Camisas de Botão / Utilitárias Work (CMB - Sarja/Algodão corte reto de trabalho)
             is_work_guide = (
                 (archetype_id == "shirts_button_work" or "cmb" in sku_low or "cbt" in sku_low or ("work" in title_low and "camisa" in title_low and not any(w in title_low for w in ["xtech", "dry", "uv", "uv50", "pesca"])))
@@ -1564,6 +1633,34 @@ class HTMLBuilder:
             any(w in t_low or w in tags_low for w in ["algodão", "algodao", "cotton", "100% algod"])
             or (archetype_id == "agro_field" and not has_uv and "camiseta" in t_low)
         )
+        is_kit_shirt_boot = any(w in t_low for w in ["camisa", "camiseta", "blusa", "segunda pele"]) and bool(
+            re.search(r'\b(botina|bota|coturno)\b', t_low)
+        )
+
+        if is_kit_shirt_boot:
+            if idx == 0:
+                return {
+                    "view_tag": "ITEM 01 DO KIT • ATO 01",
+                    "icon": "sun",
+                    "label": "Item 01 do Kit: Camisa Técnica BRK UV50+",
+                    "pill": "Conforto & Proteção",
+                    "zoom_act3": False,
+                }
+            if idx == 1:
+                return {
+                    "view_tag": "ITEM 02 DO KIT • ATO 02",
+                    "icon": "shield",
+                    "label": "Item 02 do Kit: Botina em Couro Bovino Legítimo",
+                    "pill": "Solado Antiderrapante",
+                    "zoom_act3": False,
+                }
+            return {
+                "view_tag": "CONJUNTO COMPLETO • ATO 03",
+                "icon": "sparkle",
+                "label": "Conjunto Completo: Proteção do Tronco aos Pés",
+                "pill": "Kit 2 em 1",
+                "zoom_act3": False,
+            }
 
         if idx == 0:
             if is_split:
@@ -1858,8 +1955,12 @@ class HTMLBuilder:
       </div>"""
             elif img_src:
                 info_meta = self._get_media_infographic_meta(idx, archetype_id, enriched_data, is_split=False)
+                is_crop_sleeve = bool(block.get("crop_sleeve_detail"))
+                if is_crop_sleeve:
+                    info_meta["label"] = "Detalhe Lateral: Mangas, Punhos & Costura"
+                    info_meta["pill"] = "Pesponto Duplo"
                 if idx == 2 and is_shirt_arch_main:
-                    focus_cls = " brk-focus-top"
+                    focus_cls = " brk-focus-top brk-crop-sleeve-detail" if is_crop_sleeve else " brk-focus-top"
                 elif idx == 1 and is_shirt_arch_main:
                     focus_cls = " brk-focus-mid"
                 else:
@@ -2129,6 +2230,10 @@ class HTMLBuilder:
       display: block;
       margin: 0 auto;
       background: #ffffff;
+    }}
+    .brk-stage-loupe.brk-crop-sleeve-detail img {{
+      transform: scale(1.78);
+      transform-origin: 78% 58%;
     }}
     /* Camada de Zoom Fluido Estilo Mercado Livre (Segue o Mouse sem Travar) */
     .brk-ml-zoom-layer {{

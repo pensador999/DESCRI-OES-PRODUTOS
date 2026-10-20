@@ -1185,12 +1185,19 @@ const QUICK_BADGES_BY_ARCHETYPE = {
 };
 
 function buildClientQuickBadges(themeColor, themeBg, archetypeId, liveP) {
-  const badges = QUICK_BADGES_BY_ARCHETYPE[archetypeId] || [
+  const tLow = String((liveP && (liveP.formatted_title || liveP.title)) || "").toLowerCase();
+  const isKitShirtBoot = /\b(camisa|camiseta|blusa|segunda pele)\b/i.test(tLow) && /\b(botina|bota|coturno)\b/i.test(tLow);
+  const badges = isKitShirtBoot ? [
+    { icon: "box", title: "Kit Completo 2 em 1", sub: "Camisa BRK + Botina Couro" },
+    { icon: "sun", title: "Camisa FPU 50+ Dry", sub: "Proteção Solar & Frescor" },
+    { icon: "shield", title: "Couro Bovino Legítimo", sub: "Botina de Alta Resistência" },
+    { icon: "bolt", title: "Solado Antiderrapante", sub: "Tração Firme no Campo" }
+  ] : (QUICK_BADGES_BY_ARCHETYPE[archetypeId] || [
     { icon: "shield", title: "Qualidade Oficial", sub: "Matéria-Prima Selecionada" },
     { icon: "sparkle", title: "Acabamento Premium", sub: "Rigoroso Padrão BRK" },
     { icon: "truck", title: "Envio Rápido & Seguro", sub: "Rastreamento Completo" },
     { icon: "sparkle", title: "Garantia Oficial BRK", sub: "Procedência 100% Original" }
-  ];
+  ]);
 
   const itemsHtml = badges.map(b => `    <div class="brk-badge-item">
       <span class="brk-badge-icon">${getSvgIcon(b.icon, themeColor, 18)}</span>
@@ -1213,6 +1220,7 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
   // 1. Identificar se o produto é comprovadamente de vestuário superior / camisa
   // Nota: Camisas ArmorX e Hybrid possuem "com Luva" no título, portanto "luva" não desqualifica quando é camisa/CAX/HYB
   const hasExplicitShirtMarker = /camisa|camiseta|jersey|baby look|babylook|armorx|fusionx|segunda pele/i.test(tLow) || /^(c0|ci|cadv|adv|hyb|cmb|cbt|raglan|cax|fusion|casual|bp|cf|cm|apc)/i.test(skuLow);
+  const isKitShirtBootSg = hasExplicitShirtMarker && /\b(bota|botina|coturno|tênis|tenis|sapato)\b/i.test(tLow);
   const nonShirtRegex = hasExplicitShirtMarker
     ? /\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|chapéu|chapeu|boné|bone|manguito|manguitos|bandana|tubeneck|buff|balaclava)\b/i
     : /\b(calça|calca|calças|calcas|bermuda|bermudas|shorts|short|macacão|macacao|sandália|sandalia|babuche|chinelo|sapato|tênis|tenis|bota|botina|boaonda|chapéu|chapeu|boné|bone|luva|luvas|manguito|manguitos|bandana|tubeneck|buff|balaclava)\b/i;
@@ -1221,8 +1229,8 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
     hasExplicitShirtMarker
   ) && !nonShirtRegex.test(tLow);
 
-  // 0. Exclusão estrita de itens não-têxteis com UV ou termos ambíguos (apenas se NÃO for camisa)
-  if (!isShirt) {
+  // 0. Exclusão estrita de itens não-têxteis com UV ou termos ambíguos (apenas se NÃO for camisa nem Kit Camisa+Calçado)
+  if (!isShirt && !isKitShirtBootSg) {
     if (/\b(óculos|oculos|faca|facas|canivete|alicate|vara|varas|molinete|carretilha|isca|iscas|linha|linhas|anzol|anzois|anzóis|estojo|garrafa|copo|chaveiro|adesivo|carteira|protetor solar)\b/i.test(tLow)) {
       return "";
     }
@@ -1250,7 +1258,28 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
   else if (isArmorxSg) specialShirtPrefix = "Camisa UV50+ ArmorX (Punho Estendido com Luva Integrada)";
   else if (isHoodedSg) specialShirtPrefix = "Camisa Manga Longa UV50 com Capuz Integrado";
 
-  if (isShirt) {
+  if (isKitShirtBootSg) {
+    guideTitle = "Guia de Medidas do Kit — Camisa (PP ao G2) & Botina (34 ao 45)";
+    tipText = "<strong>Como conferir as medidas dos 2 itens do Kit:</strong> Para a <strong>Camisa</strong>, compare Tórax (axila a axila), Altura (ombro à barra) e Manga com uma peça sua estendida. Para a <strong>Botina em Couro Legítimo</strong>, meça o comprimento da palmilha interna de um calçado confortável do calcanhar até a ponta do dedão.";
+    const shirtSubPrefix = /térmica|termica|segunda pele/i.test(tLow) ? "Segunda Pele Térmica UV50+" : (isShortSleeve ? "Camisa Manga Curta UV50+" : "Camisa Manga Longa UV50+");
+    const subtitleShirt = `${shirtSubPrefix} | *As medidas podem variar de 2cm a 3cm`;
+    const sRows = [
+      ["PP", "49,5 cm", "67 cm", "56 cm"],
+      ["P", "51,5 cm", "69 cm", "59,5 cm"],
+      ["M", "54 cm", "71 cm", "62 cm"],
+      ["G", "56 cm", "72 cm", "64 cm"],
+      ["GG", "59 cm", "74 cm", "64 cm"],
+      ["G1", "62 cm", "75 cm", "66 cm"],
+      ["G2", "65 cm", "76,5 cm", "66 cm"],
+    ];
+    const bRows = [
+      ["34", "23,0 cm"], ["35", "23,7 cm"], ["36", "24,3 cm"],
+      ["37", "25,0 cm"], ["38", "25,7 cm"], ["39", "26,3 cm"],
+      ["40", "27,0 cm"], ["41", "27,7 cm"], ["42", "28,3 cm"],
+      ["43", "29,0 cm"], ["44", "29,7 cm"], ["45", "30,3 cm"]
+    ];
+    tableHtml = `<div class="brk-sg-card-header"><div class="brk-sg-card-title">ITEM 01 — TABELA DE MEDIDAS DA CAMISA (PP AO G2)</div><div class="brk-sg-subtitle">${subtitleShirt}</div></div><table class="brk-sg-table" style="margin-bottom: 18px;"><thead><tr class="brk-sg-th-row"><th>TAMANHO</th><th>TÓRAX</th><th>ALTURA</th><th>MANGA</th></tr></thead><tbody>${sRows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table><div class="brk-sg-card-header"><div class="brk-sg-card-title">ITEM 02 — GUIA DE TAMANHOS DA BOTINA / CALÇADO (34 AO 45)</div><div class="brk-sg-subtitle">Botina Country em Couro Bovino Legítimo | Medida da Palmilha Interna</div></div><table class="brk-sg-table"><thead><tr class="brk-sg-th-row"><th>NUMERAÇÃO BR</th><th>COMPRIMENTO DA PALMILHA (CM)</th></tr></thead><tbody>${bRows.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td></tr>`).join("")}</tbody></table>`;
+  } else if (isShirt) {
     // 1.1 Camisas de Botão / Utilitárias Work (CMB - Sarja/Algodão corte reto de trabalho)
     const isWorkGuide = (archetypeId === "shirts_button_work" || skuLow.includes("cmb") || skuLow.includes("cbt") || (tLow.includes("work") && tLow.includes("camisa") && !tLow.includes("xtech") && !tLow.includes("dry") && !tLow.includes("uv") && !tLow.includes("pesca"))) && !skuLow.startsWith("c0") && !skuLow.startsWith("ci");
     if (isWorkGuide) {
@@ -2571,7 +2600,7 @@ const EXPLICIT_BACK_POC_HASHES = [
   "45264908", "13105c88", "fd83706b", "8c080972", "f216f901", "4d2d6d08", "c252c71d",
   "46527a54", "690bc78c", "04573785", "e38b5b7a", "36f55c3f", "8ab61efc", "a5d85d3f",
   "99eac446", "9441361f", "467d8be4", "f6ac2d2f", "0613bce8", "0f246755", "b572fc99",
-  "918533a9", "7207f2f3", "6c7ea73a", "a0deafd1", "857b9ee5", "79bc00df", "9ea038aa",
+  "918533a9", "7207f2f3", "6c7ea73a", "a0deafd1", "79bc00df", "9ea038aa",
   "0171fd65", "9d69cd2a", "6cf52d17", "74ff3b1b", "84c0fd2a", "50927e47", "d53188b6",
   "f9272d9d", "b4e6b115", "6ae27aba", "da70f47a", "26162728", "3695e90e", "2aba8948",
   "28b07dbe", "477731fa", "d1fa0698", "b3c85297", "c11b6e73", "50cfe677", "ff755646",
@@ -2586,7 +2615,7 @@ const EXPLICIT_BACK_POC_HASHES = [
   "b56a2aed", "521f0869", "388fa6af", "6d9cbfb8", "b8d9699c", "c17c1302", "2bf64b3f",
   "61500b8b", "e530b68e", "c5b54f10", "2b6c194f", "02781a5e", "9ba59d31", "603df378",
   "eb6064ae", "1a8c7ea9", "93250732", "d3cacd5c", "4f445b35", "bce437e5", "f4a005bc",
-  "77850713", "08e156f1", "91b565a3", "c39e65b5", "da63c015", "b277f79c", "0e6cf2c0",
+  "77850713", "91b565a3", "c39e65b5", "da63c015", "b277f79c", "0e6cf2c0",
   "ba878fcc", "71a54be9", "abc2a560", "1aac96a2", "d6035923", "03dbed6f", "11fcc517",
   "81ccd5ac", "4f96b46d", "d670dece", "bc78e78c", "e2774c44", "6a833563", "f1e47bff",
   "d2d1d19a", "32a3d776", "dc2a5969", "53dca2d0", "8212ed55", "13ba8a69", "bc98ee7b",
@@ -3131,9 +3160,6 @@ function getProductModeBHTML(liveP) {
   }
   const showCopyright = (liveP.show_copyright !== undefined) ? liveP.show_copyright : originInfo.showCopyright;
 
-  const themeColor = liveP.theme_color || (liveP.store_key === "brk_agro" ? "#16a34a" : liveP.store_key === "brk_motors" ? "#f97316" : "#0284c7");
-  const themeBg = liveP.theme_bg || (liveP.store_key === "brk_agro" ? "#f0fdf4" : liveP.store_key === "brk_motors" ? "#fff7ed" : "#f0f9ff");
-
   // Coleta oficial e desduplicação em 4 camadas (Contingência Anti-Duplicação da 1ª Foto na Shopify)
   const rawSources = (liveP.cdn_images && liveP.cdn_images.length > 0)
     ? liveP.cdn_images
@@ -3141,6 +3167,33 @@ function getProductModeBHTML(liveP) {
       ? liveP.gallery
       : (liveP.images || []);
   const images = sanitizeAndDedupClientImages(rawSources, archetypeId, liveP.title || "");
+
+  let resolvedStoreKey = liveP.store_key || "";
+  if (!resolvedStoreKey) {
+    const imgsStrStore = images.join(" ").toLowerCase();
+    const tLowStore = (liveP.title || "").toLowerCase();
+    const vendorLowStore = (liveP.vendor || "").toLowerCase();
+    const catLowStore = (liveP.category || "").toLowerCase();
+    if (
+      vendorLowStore.includes("agro") || catLowStore.includes("agro") || archetypeId === "agro_field" ||
+      imgsStrStore.includes("0887/2083/4857") || imgsStrStore.includes("0798/6462/7495") ||
+      /\b(agro|botina|fazenda|pecuaria|pecuária|nelore)\b/i.test(tLowStore)
+    ) {
+      resolvedStoreKey = "brk_agro";
+    } else if (
+      vendorLowStore.includes("motors") || catLowStore.includes("motors") || archetypeId === "motors_speed" ||
+      imgsStrStore.includes("0714/9853/1081")
+    ) {
+      resolvedStoreKey = "brk_motors";
+    } else if (typeof currentStore !== "undefined" && currentStore) {
+      resolvedStoreKey = currentStore;
+    } else {
+      resolvedStoreKey = "brk_fishing";
+    }
+  }
+
+  const themeColor = liveP.theme_color || (resolvedStoreKey === "brk_agro" ? "#16a34a" : resolvedStoreKey === "brk_motors" ? "#f97316" : "#0284c7");
+  const themeBg = liveP.theme_bg || (resolvedStoreKey === "brk_agro" ? "#f0fdf4" : resolvedStoreKey === "brk_motors" ? "#fff7ed" : "#f0f9ff");
 
   const isApparel = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work", "pants_cargo_tactical"].includes(archetypeId);
   const isLure = (archetypeId === "fishing_lures");
@@ -3162,7 +3215,8 @@ function getProductModeBHTML(liveP) {
   const isHoodedModal = (isApparel && /\b(capuz|hood|hoodie)\b/i.test(tLowModal)) || isFusionModal || isHybridModal;
   const isKidsSkuModal = isApparel && (skuLowModal.startsWith("ci") || /^(?:c0|ci|cf|cm|casual|adv|cadv|ccpbr|bp|hyb|fusion|cax|raglan)\d+i(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$/i.test(skuLowModal)) && !/\b(feminina|feminino|baby look|babylook|masculina|masculino|adulto)\b/i.test(tLowModal);
   const isKidsModal = isApparel && (/\b(infantil|kids|juvenil|mini)\b/i.test(tLowModal) || isKidsSkuModal) && !/\b(adulto|unissex adulto)\b/i.test(tLowModal);
-  const isSegundaPeleModal = isApparel && (tLowModal.includes("segunda pele") || skuLowModal.startsWith("raglan"));
+  const isSegundaPeleModal = isApparel && (/segunda pele|camisa térmica|camisa termica|blusa térmica|blusa termica/i.test(tLowModal) || skuLowModal.startsWith("raglan"));
+  const isKitShirtBootModal = isApparel && /\b(camisa|camiseta|blusa|segunda pele)\b/i.test(tLowModal) && /\b(botina|bota|coturno)\b/i.test(tLowModal);
   const isShortSleeveModal = isApparel && (/\b(manga curta|manga-curta|camiseta)\b/i.test(tLowModal) || (tLowModal.includes("curta") && tLowModal.includes("manga")) || skuLowModal.startsWith("cbtmc") || ((/^(casual|bp|cm|cadv|cf)/i.test(skuLowModal)) && !/^(cmb|cbt)/i.test(skuLowModal))) && !/\b(manga longa|manga-longa)\b/i.test(tLowModal) && !isSegundaPeleModal;
   const isHasGloveModal = isApparel && (/\b(com luva|e luva|luva integrada|armorx)\b/i.test(tLowModal) || skuLowModal.startsWith("cax"));
   const isFemaleModal = (/\b(feminina|feminino|baby look|babylook|mulher)\b/i.test(tLowModal) || /femin/i.test(tagsLowModal) || (isApparel && /bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$/i.test(skuLowModal))) && !isKidsModal;
@@ -3178,6 +3232,12 @@ function getProductModeBHTML(liveP) {
   if (hasMultipleVariations && (images.length >= 4 || images.length === 2)) {
     img2 = images[2] || "";
     img3 = images[3] || "";
+  } else if (isKitShirtBootModal) {
+    img1 = images[0] || "";
+    img2 = images[1] || "";
+    img3 = images[2] || "";
+    back360Img = "";
+    isBackCover360 = false;
   } else if (isApparel) {
     [img1, img2, img3, back360Img, isBackCover360] = resolveClientApparelActAnd360Images(images, isFemaleModal, isKidsModal, skuLowModal, liveP.title || "");
   } else if (archetypeId === "cutlery_unique") {
@@ -3205,10 +3265,14 @@ function getProductModeBHTML(liveP) {
       let act3Title = tmpl.act3.title || "COSTURAS PLANAS REFORÇADAS E ACABAMENTO PREMIUM";
       let act3Desc = (tmpl.act3.desc_tmpl || "").replace(/\{title\}/g, formattedTitle);
       let act3Tag = tmpl.act3.tag || "Durabilidade & Acabamento";
+      let act1Tag = tmpl.act1.tag || "Destaque";
+      let act2Tag = tmpl.act2.tag || "Destaque";
 
       if (isKidsModal) {
+        act1Tag = "Proteção Infantil & Conforto";
         act1Title = "CONFORTO E PROTEÇÃO SOLAR TOTAL PARA OS PEQUENOS AVENTUREIROS";
         act1Desc = `Desenvolvida especialmente para crianças e jovens exploradores com grade inteligente por faixa de idade (1 a 13 anos, mantendo a referência dos tamanhos PP ao G2), o(a) ${formattedTitle} oferece proteção solar máxima FPU 50+ com toque extra suave na pele, garantindo segurança, leveza e liberdade total para brincar ao ar livre.`;
+        act2Tag = "Respirabilidade & Frescor";
         act2Title = "TECNOLOGIA DRY FIT QUE MANTÉM AS CRIANÇAS FRESCAS E SECAS";
         act2Desc = "Tecido tecnológico respirável que absorve e dissipa o suor rapidamente, evitando o superaquecimento e mantendo o corpo seco e confortável durante todas as brincadeiras e pescarias em família.";
         if (!isHoodedModal) {
@@ -3216,6 +3280,10 @@ function getProductModeBHTML(liveP) {
           act3Title = "COSTURAS PLANAS ANTI-ATRITO E MÁXIMA DURABILIDADE";
           act3Desc = "Construída com acabamento elástico de alta resistência que não pinica nem irrita a pele sensível das crianças, oferecendo caimento confortável que aguenta todas as aventuras infantis.";
         }
+      } else if (isSegundaPeleModal) {
+        act1Tag = "Segunda Pele Térmica & UV50+";
+        act1Title = isFemaleModal ? "MODELAGEM FEMININA ANATÔMICA, CONFORTO TÉRMICO E PROTEÇÃO UV50+" : "CONFORTO TÉRMICO, AJUSTE ANATÔMICO E PROTEÇÃO SOLAR UV50+";
+        act1Desc = `Projetada para atuar como uma verdadeira segunda pele sob jaquetas, macacões ou no uso direto ao ar livre, a ${formattedTitle} mantém o equilíbrio térmico corporal, reduz o atrito com equipamentos e garante proteção solar FPU 50+ com liberdade total de movimentos.`;
       } else if (isFemaleModal && archetypeId === "uv_performance") {
         act1Title = "MODELAGEM FEMININA ANATÔMICA COM CAIMENTO IMPECÁVEL";
         act1Desc = `Projetada sob medida para a anatomia feminina, a ${formattedTitle} combina corte acinturado esportivo (Baby Look), máxima liberdade de movimentos e proteção solar FPU 50+ com toque suave e elegante.`;
@@ -3233,6 +3301,10 @@ function getProductModeBHTML(liveP) {
         act3Tag = "Capuz Anatômico & Proteção 360°";
         act3Title = "CAPUZ ANATÔMICO INTEGRADO E COSTURA REFORÇADA";
         act3Desc = "Equipada com capuz anatômico integrado que oferece proteção solar 360° para nuca, orelhas e laterais do rosto contra a radiação forte e o vento, dispensando acessórios extras, com costuras planas reforçadas anti-atrito.";
+      } else if (isSegundaPeleModal) {
+        act3Tag = "Costuras Planas & Gola Anatômica";
+        act3Title = "MANGAS RAGLAN E COSTURAS PLANAS ANTI-ATRITO";
+        act3Desc = "Construída com mangas de corte raglan esportivo, gola redonda anatômica e costuras planas reforçadas que eliminam pontos de pressão sob jaquetas, coletes ou mochilas.";
       } else if (isShortSleeveModal) {
         act3Desc = act3Desc
           .replace(/punhos anatômicos que não laceiam com o uso frequente/gi, "mangas curtas com barra em costura dupla reforçada que proporcionam ventilação ideal e liberdade nos braços")
@@ -3247,21 +3319,41 @@ function getProductModeBHTML(liveP) {
       }
 
       if (archetypeId === "uv_performance" && !isKidsModal) {
-        const storeKeyEff = liveP.store_key || (typeof currentStore !== "undefined" ? currentStore : "brk_fishing");
+        const storeKeyEff = resolvedStoreKey;
         if (storeKeyEff === "brk_agro" || /\b(agro|campo|rural|trator|fazenda|pecuaria|pecuária)\b/i.test(tLowModal)) {
           act1Desc = act1Desc
             .replace(/pescadores e entusiastas do ar livre/g, "o homem e a mulher do campo e entusiastas do ar livre")
+            .replace(/os arremessos e manobras/g, "a rotina intensa no campo e manobras")
             .replace(/arremessos e manobras/g, "a rotina intensa no campo e manobras");
         } else if (storeKeyEff === "brk_motors" || /\b(moto|trail|cross|velocidade|motors|pista)\b/i.test(tLowModal)) {
           act1Desc = act1Desc
             .replace(/pescadores e entusiastas do ar livre/g, "pilotos, motociclistas e aventureiros")
+            .replace(/os arremessos e manobras/g, "a pilotagem e manobras")
             .replace(/arremessos e manobras/g, "a pilotagem e manobras");
         }
       }
 
+      if (isKitShirtBootModal) {
+        if (isSegundaPeleModal) {
+          act1Tag = "Item 01 do Kit: Segunda Pele Térmica UV50+";
+          act1Title = "CAMISA TÉRMICA DE TOQUE FRIO, MODELAGEM RAGLAN E PROTEÇÃO SOLAR FPU 50+";
+          act1Desc = `O primeiro item do ${formattedTitle} é a Camisa Térmica BRK com fator FPU 50+ homologado, mangas de corte raglan esportivo e costuras planas anti-atrito que mantêm o equilíbrio térmico corporal e dissipam o suor rapidamente sob o sol ou sob outras peças.`;
+        } else {
+          act1Tag = "Item 01 do Kit: Camisa Técnica BRK UV50+";
+          act1Title = "TECNOLOGIA XTECH PRO COM PROTEÇÃO SOLAR FPU 50+ E SECAGEM ULTRA RÁPIDA";
+          act1Desc = `O primeiro item do ${formattedTitle} é a Camisa Técnica BRK confeccionada em malha tecnológica leve e respirável com bloqueio permanente de até 98% dos raios UVA e UVB (FPU 50+), garantindo frescor, proteção solar e liberdade de movimentos na lida do campo.`;
+        }
+        act2Tag = "Item 02 do Kit: Botina em Couro Legítimo";
+        act2Title = "BOTINA EM COURO BOVINO LEGÍTIMO COM SOLADO ANTIDERRAPANTE E CALCE FÁCIL";
+        act2Desc = "Complementando o conjunto na segunda imagem, a Botina Country em Couro Bovino Legítimo Chocolate conta com elásticos laterais cobertos para calce rápido, puxador reforçado, palmilha anatômica macia de absorção de impacto e solado de borracha tratorado antiderrapante com acabamento blaqueado lateral para máxima firmeza e durabilidade.";
+        act3Tag = "Conjunto Completo Campo & Dia a Dia";
+        act3Title = "PROTEÇÃO DA CABEÇA AOS PÉS: A COMBINAÇÃO DEFINITIVA PARA A LIDA E O LAZER";
+        act3Desc = "Pensado para quem exige desempenho, resistência e apresentação impecável na fazenda, manejo rural, cavalgadas ou rotina diária, este kit reúne proteção solar superior no tronco e segurança robusta nos pés em uma única compra.";
+      }
+
       blocks = [
         {
-          tag: isKidsModal ? "Proteção Infantil & Conforto" : (tmpl.act1.tag || "Destaque"),
+          tag: act1Tag,
           title: act1Title,
           description: act1Desc,
           image: img1,
@@ -3269,7 +3361,7 @@ function getProductModeBHTML(liveP) {
           variations_summary: variationsSummary
         },
         {
-          tag: isKidsModal ? "Respirabilidade & Frescor" : (tmpl.act2.tag || "Destaque"),
+          tag: act2Tag,
           title: act2Title,
           description: act2Desc,
           image: img2
@@ -3382,7 +3474,7 @@ function getProductModeBHTML(liveP) {
   }
 
   // Trava Estrita Anti-Zíper no Modal para Fusion, Hybrid, Capuz, Gola Careca e Botão
-  if (isFusionModal || isHybridModal || isHoodedModal || isRoundNeckModal || archetypeId === "shirts_button_work") {
+  if (!isKitShirtBootModal && (isFusionModal || isHybridModal || isHoodedModal || isRoundNeckModal || archetypeId === "shirts_button_work")) {
     const replacementCollar = (isFusionModal || isHybridModal || isHoodedModal) ? "capuz anatômico contínuo" : "gola redonda anatômica";
     const replacementHood = isFusionModal ? "capuz com máscara facial integrada" : ((isHybridModal || isHoodedModal) ? "capuz anatômico integrado" : "gola redonda anatômica");
     blocks.forEach(b => {
@@ -3418,6 +3510,29 @@ function getProductModeBHTML(liveP) {
     careTips = "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar).";
   }
 
+  if (isKitShirtBootModal) {
+    specs = [
+      { label: "Itens Inclusos no Kit", value: "1 Camisa Técnica BRK UV50+ + 1 Par de Botinas em Couro Legítimo Chocolate" },
+      { label: "Item 01 — Tecido da Camisa", value: "Malha tecnológica XTech Pro® com proteção solar FPU 50+ permanente e secagem rápida (Dry)" },
+      { label: "Item 01 — Modelagem da Camisa", value: isSegundaPeleModal ? "Segunda pele térmica com mangas raglan e gola redonda anatômica" : "Manga longa anatômica com gola padre e zíper frontal com trava" },
+      { label: "Item 02 — Cabedal da Botina", value: "Couro Bovino Legítimo selecionado na cor Chocolate com elásticos laterais de calce fácil" },
+      { label: "Item 02 — Solado & Palmilha", value: "Borracha antiderrapante de alta tração blaqueada + Palmilha anatômica anti-impacto" },
+      { label: "Indicação de Uso", value: "Lida no campo, agronegócio, fazenda, cavalgadas, rodeios e uso diário" }
+    ];
+    careTips = "Camisa: lavar à mão ou em ciclo suave com sabão neutro e secar à sombra. Botina em Couro: limpar com pano levemente úmido, secar à sombra longe de fontes de calor e hidratar periodicamente com pasta ou condicionador para couro legítimo.";
+  }
+
+  const cropSleeveDetailModal = Boolean(isApparel && !isKitShirtBootModal && img3 && isClientExplicitBackName(img3));
+  if (cropSleeveDetailModal && blocks && blocks[2]) {
+    blocks[2].crop_sleeve_detail = true;
+    blocks[2].tag = "Detalhe Lateral: Mangas, Punhos & Costura";
+    if (!isFusionModal && !isHybridModal && !isHoodedModal) {
+      blocks[2].title = isShortSleeveModal
+        ? "MANGAS CURTAS COM BARRA REFORÇADA E COSTURAS PLANAS ANTI-ATRITO"
+        : "MANGAS ANATÔMICAS, PUNHOS FIRMES E COSTURAS PLANAS ANTI-ATRITO";
+    }
+  }
+
   // 1. Cabeçalho de Origem e Título
   let originBadge = "";
   if (originType === "revenda") {
@@ -3449,6 +3564,17 @@ function getProductModeBHTML(liveP) {
     const isShirtArch = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId);
     const hasUv = ["uv", "fpu", "proteção solar", "protecao solar", "xtech", "dry"].some(w => tLow.includes(w) || tagsLow.includes(w));
     const isCotton = ["algodão", "algodao", "cotton", "100% algod"].some(w => tLow.includes(w) || tagsLow.includes(w)) || (archetypeId === "agro_field" && !hasUv && tLow.includes("camiseta"));
+    const isKitShirtBoot = /\b(camisa|camiseta|blusa|segunda pele)\b/i.test(tLow) && /\b(botina|bota|coturno)\b/i.test(tLow);
+
+    if (isKitShirtBoot) {
+      if (idx === 0) {
+        return { view_tag: "ITEM 01 DO KIT • ATO 01", icon: "sun", label: "Item 01 do Kit: Camisa Técnica BRK UV50+", pill: "Conforto & Proteção", zoom_act3: false };
+      }
+      if (idx === 1) {
+        return { view_tag: "ITEM 02 DO KIT • ATO 02", icon: "shield", label: "Item 02 do Kit: Botina em Couro Bovino Legítimo", pill: "Solado Antiderrapante", zoom_act3: false };
+      }
+      return { view_tag: "CONJUNTO COMPLETO • ATO 03", icon: "sparkle", label: "Conjunto Completo: Proteção do Tronco aos Pés", pill: "Kit 2 em 1", zoom_act3: false };
+    }
 
     if (idx === 0) {
       if (isSplit) {
@@ -3575,8 +3701,13 @@ function getProductModeBHTML(liveP) {
       </div>`;
     } else if (blockImg) {
       const infoMeta = getClientMediaInfographicMeta(idx, archetypeId, liveP, formattedTitle, isShortSleeve, false);
+      const isCropSleeve = Boolean(block.crop_sleeve_detail);
+      if (isCropSleeve) {
+        infoMeta.label = "Detalhe Lateral: Mangas, Punhos & Costura";
+        infoMeta.pill = "Pesponto Duplo";
+      }
       let focusCls = " brk-focus-center";
-      if (idx === 2 && isShirtArchMain) focusCls = " brk-focus-top";
+      if (idx === 2 && isShirtArchMain) focusCls = isCropSleeve ? " brk-focus-top brk-crop-sleeve-detail" : " brk-focus-top";
       else if (idx === 1 && isShirtArchMain) focusCls = " brk-focus-mid";
       mediaHtml = `<div class="brk-desc-media brk-media-card brk-card-loupe">
         <div class="brk-media-stage brk-stage-loupe${focusCls}" ${mlTrackAttrs}>
@@ -3849,6 +3980,10 @@ function getProductModeBHTML(liveP) {
       display: block;
       margin: 0 auto;
       background: #ffffff;
+    }
+    .brk-stage-loupe.brk-crop-sleeve-detail img {
+      transform: scale(1.78);
+      transform-origin: 78% 58%;
     }
     .brk-ml-zoom-layer {
       position: absolute;
