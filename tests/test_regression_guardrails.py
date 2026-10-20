@@ -1483,6 +1483,69 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         self.assertIn("Kit Completo 2 em 1", html_kit)
         self.assertNotIn("durante os a ", html_kit.lower())
 
+        # 10. Varredura Global das 3 Lojas: Xadrez Sublimado UV50+ (C0/CI), Camisetas Manga Curta sem punhos, Sonho de Criança adulto, Algodão Sombreado UV50+ e Selos Especializados
+        c_xadrez_uv = {
+            "id": 99001,
+            "master_sku": "C0923",
+            "title": "Camisa Country Brk Xadrez Verde com Proteção Solar UV50+",
+            "images": ["https://cdn.shopify.com/s/files/1/0887/2083/4857/files/C0923_1.jpg"],
+        }
+        arch_xadrez = template_engine.detect_archetype(c_xadrez_uv["title"], "", [], "BRK", sku=c_xadrez_uv["master_sku"])
+        self.assertEqual(arch_xadrez, "uv_performance")
+
+        camiseta_mc = {
+            "id": 99002,
+            "master_sku": "CASUAL436",
+            "title": "Camiseta de Pesca Brk Brasil Independência Azul com com Proteção Solar UV50+",
+            "images": ["https://cdn.shopify.com/s/files/1/0612/8068/2177/files/CASUAL436_1.jpg"],
+        }
+        arch_mc = template_engine.detect_archetype(camiseta_mc["title"], "", [], "BRK", sku=camiseta_mc["master_sku"])
+        enr_mc = template_engine.generate_narrative_from_template(camiseta_mc, arch_mc, camiseta_mc["images"], store_key="brk_fishing")
+        html_mc = html_builder.build_shopify_html(enr_mc)
+        self.assertNotIn("com com", html_mc.lower())
+        self.assertNotIn("punho", html_mc.lower())
+        self.assertNotIn("punhos", html_mc.lower())
+        self.assertIn("Manga do ombro à barra da manga curta", html_mc)
+
+        sonho_crianca_adulto = {
+            "id": 99003,
+            "master_sku": "C01684",
+            "title": "Camisa Agro Brk Carreta Sonho de Criança com Proteção Solar UV50+",
+            "images": ["https://cdn.shopify.com/s/files/1/0887/2083/4857/files/C01684_1.jpg"],
+        }
+        enr_sc = template_engine.generate_narrative_from_template(sonho_crianca_adulto, "uv_performance", sonho_crianca_adulto["images"], store_key="brk_agro")
+        html_sc = html_builder.build_shopify_html(enr_sc)
+        self.assertFalse(enr_sc["is_kids"])
+        self.assertNotIn("Guia de Tamanhos Infantil (1 a 13 Anos)", html_sc)
+        self.assertIn("Tabela de Medidas Masculino / Unissex (PP ao G2)", html_sc)
+        self.assertIn('<div class="brk-sg-card-title">MASCULINO</div>', html_sc)
+
+        algodao_sombreado_uv = {
+            "id": 99004,
+            "master_sku": "C02724",
+            "title": "Camisa Agro BRK Força do Agro Algodão Sombreado com Proteção UV50+ Preta",
+            "images": [
+                "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/C02724_1.jpg",
+                "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/C02724_2.jpg",
+            ],
+        }
+        enr_as = template_engine.generate_narrative_from_template(algodao_sombreado_uv, "uv_performance", algodao_sombreado_uv["images"], store_key="brk_agro")
+        html_as = html_builder.build_shopify_html(enr_as)
+        self.assertNotIn("Malha 100% Algodão", html_as)
+        self.assertIn("Painel Dorsal & Tecido Tecnológico UV50+", html_as)
+
+        geladeira_motors = {
+            "id": 99005,
+            "master_sku": "BL35",
+            "title": "Geladeira Portátil Elber 35 Litros 12V/24V BL35",
+            "images": ["https://cdn.shopify.com/s/files/1/0920/4799/9271/files/BL35_1.jpg"],
+        }
+        enr_gel = template_engine.generate_narrative_from_template(geladeira_motors, "drinkware_thermo", geladeira_motors["images"], store_key="brk_motors")
+        html_gel = html_builder.build_shopify_html(enr_gel)
+        self.assertIn("Compressor 12V/24V", html_gel)
+        self.assertNotIn("Inox 18/8 com Vácuo", html_gel)
+        self.assertNotIn("pescarias", html_gel.lower())
+
 
 def run_tests():
     suite = unittest.TestSuite()

@@ -572,6 +572,7 @@ function resolveClientOriginAndTitle(liveP) {
     .replace(/\bProtecão\b/g, "Proteção")
     .replace(/\bprotecão\b/g, "proteção")
     .replace(/\bBalaclava\s+Balaclava\b/gi, "Balaclava")
+    .replace(/\b(com|de|para|em)\s+\1\b/gi, "$1")
     .replace(/\s{2,}/g, " ")
     .trim();
   const vendor = (liveP.vendor || "").trim();
@@ -1187,17 +1188,108 @@ const QUICK_BADGES_BY_ARCHETYPE = {
 function buildClientQuickBadges(themeColor, themeBg, archetypeId, liveP) {
   const tLow = String((liveP && (liveP.formatted_title || liveP.title)) || "").toLowerCase();
   const isKitShirtBoot = /\b(camisa|camiseta|blusa|segunda pele)\b/i.test(tLow) && /\b(botina|bota|coturno)\b/i.test(tLow);
-  const badges = isKitShirtBoot ? [
-    { icon: "box", title: "Kit Completo 2 em 1", sub: "Camisa BRK + Botina Couro" },
-    { icon: "sun", title: "Camisa FPU 50+ Dry", sub: "Proteção Solar & Frescor" },
-    { icon: "shield", title: "Couro Bovino Legítimo", sub: "Botina de Alta Resistência" },
-    { icon: "bolt", title: "Solado Antiderrapante", sub: "Tração Firme no Campo" }
-  ] : (QUICK_BADGES_BY_ARCHETYPE[archetypeId] || [
-    { icon: "shield", title: "Qualidade Oficial", sub: "Matéria-Prima Selecionada" },
-    { icon: "sparkle", title: "Acabamento Premium", sub: "Rigoroso Padrão BRK" },
-    { icon: "truck", title: "Envio Rápido & Seguro", sub: "Rastreamento Completo" },
-    { icon: "sparkle", title: "Garantia Oficial BRK", sub: "Procedência 100% Original" }
-  ]);
+  let badges = null;
+  if (isKitShirtBoot) {
+    badges = [
+      { icon: "box", title: "Kit Completo 2 em 1", sub: "Camisa BRK + Botina Couro" },
+      { icon: "sun", title: "Camisa FPU 50+ Dry", sub: "Proteção Solar & Frescor" },
+      { icon: "shield", title: "Couro Bovino Legítimo", sub: "Botina de Alta Resistência" },
+      { icon: "bolt", title: "Solado Antiderrapante", sub: "Tração Firme no Campo" }
+    ];
+  } else if (archetypeId === "drinkware_thermo") {
+    if (tLow.includes("geladeira")) {
+      badges = [
+        { icon: "snowflake", title: "Compressor 12V/24V", sub: "Refrigeração Portátil" },
+        { icon: "bolt", title: "Proteção de Bateria", sub: "Painel Digital Inteligente" },
+        { icon: "shield", title: "Gabinete Reforçado", sub: "Isolamento Alta Densidade" },
+        { icon: "sparkle", title: "100% Original Elber", sub: "Garantia Oficial de Fábrica" }
+      ];
+    } else if (["bolsa termica", "bolsa térmica", "caixa termica", "caixa térmica", "cooler"].some(w => tLow.includes(w))) {
+      badges = [
+        { icon: "snowflake", title: "Isolamento Térmico", sub: "Conservação Prolongada" },
+        { icon: "shield", title: "Interior Impermeável", sub: "Fácil Higienização" },
+        { icon: "bolt", title: "Alças Reforçadas", sub: "Transporte Confortável" },
+        { icon: "sparkle", title: "Qualidade Oficial", sub: "Procedência Garantida" }
+      ];
+    }
+  } else if (archetypeId === "tackle_boxes_storage") {
+    if (["primeiros socorros", "bolsa tática", "bolsa tatica"].some(w => tLow.includes(w))) {
+      badges = [
+        { icon: "shield", title: "Nylon Oxford 600D", sub: "Alta Resistência a Rasgos" },
+        { icon: "box", title: "Sistema Modular MOLLE", sub: "Fixação Rápida em Mochilas" },
+        { icon: "gear", title: "Divisórias Elásticas", sub: "Organização Interna" },
+        { icon: "bolt", title: "Fecho Engate Rápido", sub: "Acesso Imediato" }
+      ];
+    } else if (tLow.includes("suporte porta iscas") || (tLow.includes("porta iscas") && tLow.includes("inox"))) {
+      badges = [
+        { icon: "shield", title: "Aço Inox Naval", sub: "Imune à Ferrugem" },
+        { icon: "fish", title: "5 Fendas p/ Iscas", sub: "Acesso Rápido no Barco" },
+        { icon: "gear", title: "Trava Elástica", sub: "Para Alicates e Tesoura" },
+        { icon: "sparkle", title: "Alta Durabilidade", sub: "Água Doce e Salgada" }
+      ];
+    }
+  } else if (archetypeId === "closed_footwear_sneakers") {
+    if (/\b(botina|bota|coturno)\b/i.test(tLow)) {
+      badges = [
+        { icon: "shield", title: "Couro Bovino Legítimo", sub: "Alta Durabilidade" },
+        { icon: "bolt", title: "Solado Antiderrapante", sub: "Blaqueado de Alta Tração" },
+        { icon: "sparkle", title: "Palmilha Anatômica", sub: "Absorção de Impacto" },
+        { icon: "care", title: "Calce Fácil", sub: "Elásticos Laterais Reforçados" }
+      ];
+    }
+  } else if (archetypeId === "accessories_general") {
+    if (tLow.includes("barraca")) {
+      badges = [
+        { icon: "shield", title: "Sobreteto Impermeável", sub: "Proteção Chuva & Sol" },
+        { icon: "wind", title: "Tela Mosquiteiro", sub: "Ventilação Segura" },
+        { icon: "bolt", title: "Varetas Flexíveis", sub: "Fibra de Alta Resistência" },
+        { icon: "box", title: "Bolsa Inclusa", sub: "Transporte Compacto" }
+      ];
+    } else if (["mesa dobravel", "mesa dobrável", "mesa de camping", "cadeira", "banqueta"].some(w => tLow.includes(w))) {
+      badges = [
+        { icon: "shield", title: "Estrutura Tubular", sub: "Aço Anticorrosivo" },
+        { icon: "bolt", title: "Dobrável & Compacta", sub: "Montagem em Segundos" },
+        { icon: "sparkle", title: "Alta Resistência", sub: "Estabilidade no Terreno" },
+        { icon: "box", title: "Bolsa de Transporte", sub: "Portabilidade Fácil" }
+      ];
+    } else if (tLow.includes("fogareiro")) {
+      badges = [
+        { icon: "shield", title: "Aço Inoxidável", sub: "Alta Durabilidade" },
+        { icon: "bolt", title: "Ignição Automática", sub: "Dispensa Fósforos" },
+        { icon: "gear", title: "Trava de Segurança", sub: "Controle de Chama" },
+        { icon: "box", title: "Compacto & Portátil", sub: "Ideal p/ Camping e Pesca" }
+      ];
+    } else if (["cabo plug", "cabo de força", "cabo de alimentacao", "cabo de alimentação", "fonte conversora"].some(w => tLow.includes(w))) {
+      badges = [
+        { icon: "bolt", title: "Acessório Original Elber", sub: "Encaixe Padrão Direto" },
+        { icon: "shield", title: "Proteção Elétrica", sub: "Contra Surtos e Curto" },
+        { icon: "gear", title: "Alimentação Estável", sub: "12V / 24V Contínuos" },
+        { icon: "sparkle", title: "Alta Durabilidade", sub: "Isolamento Reforçado" }
+      ];
+    } else if (["coleira", "peitoral"].some(w => tLow.includes(w))) {
+      badges = [
+        { icon: "wind", title: "Malha Air Mesh", sub: "Ventilada & Macia" },
+        { icon: "sun", title: "Faixas Refletivas 360°", sub: "Visibilidade Noturna" },
+        { icon: "shield", title: "Trava Engate Rápido", sub: "Ajuste Anatômico" },
+        { icon: "sparkle", title: "Guia Inclusa", sub: "Passeio Seguro" }
+      ];
+    } else if (["personalização", "personalizacao"].some(w => tLow.includes(w))) {
+      badges = [
+        { icon: "sparkle", title: "Personalização Oficial", sub: "Padrão de Fábrica BRK" },
+        { icon: "shield", title: "Alta Fixação", sub: "Termotransferência Pro" },
+        { icon: "sun", title: "Não Desbota", sub: "Alta Durabilidade" },
+        { icon: "palette", title: "Tipografia Esportiva", sub: "Alinhada ao Design" }
+      ];
+    }
+  }
+  if (!badges) {
+    badges = QUICK_BADGES_BY_ARCHETYPE[archetypeId] || [
+      { icon: "shield", title: "Qualidade Oficial", sub: "Matéria-Prima Selecionada" },
+      { icon: "sparkle", title: "Acabamento Premium", sub: "Rigoroso Padrão BRK" },
+      { icon: "truck", title: "Envio Rápido & Seguro", sub: "Rastreamento Completo" },
+      { icon: "sparkle", title: "Garantia Oficial BRK", sub: "Procedência 100% Original" }
+    ];
+  }
 
   const itemsHtml = badges.map(b => `    <div class="brk-badge-item">
       <span class="brk-badge-icon">${getSvgIcon(b.icon, themeColor, 18)}</span>
@@ -1241,7 +1333,8 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
   const isArmorxSg = isShirt && (tLow.includes("armorx") || skuLow.startsWith("cax") || tLow.includes("com luva") || tLow.includes("e luva"));
   const isHoodedSg = isShirt && (tLow.includes("capuz") || isFusionSg || isHybridSg);
 
-  let tipText = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | Manga do ombro ao punho). Dica: compare com uma peça sua estendida para escolher o caimento ideal.";
+  const sleeveMeasureLbl = isShortSleeve ? "Manga do ombro à barra da manga curta" : "Manga do ombro ao punho";
+  let tipText = `<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | ${sleeveMeasureLbl}). Dica: compare com uma peça sua estendida para escolher o caimento ideal.`;
   if (isFusionSg) {
     tipText = "<strong>Como medir com precisão (Linha FusionX — Com Capuz & Bandana Embutida):</strong> A grade do tronco (PP ao G2) segue a mesma modelagem base BRK. <strong>Tórax:</strong> medido de axila a axila | <strong>Altura:</strong> medida da costura do ombro até a barra inferior (<u>sem contar o capuz e a bandana/máscara facial embutida</u>) | <strong>Manga:</strong> medida do ombro ao punho (com extensão elástica e abertura para o polegar/dedeira). O capuz e a bandana acoplada possuem elasticidade anatômica XTech Pro® que se ajusta ao rosto sem apertar.";
   } else if (isHybridSg) {
@@ -1340,13 +1433,15 @@ function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortS
     // 1.2 Camisas UV C0 Infantil (1 a 13 Anos | PP ao G2)
     else if (
       isKids
-      || /infantil|kids|juvenil|criança|crianca/i.test(tLow)
+      || /infantil|kids|juvenil/i.test(tLow)
       || /kids|inf/i.test(skuLow)
       || ((skuLow.startsWith("ci") || /^(?:c0|ci|cf|cm|casual|adv|cadv|ccpbr|bp|hyb|fusion|cax|raglan)\d+i(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$/i.test(skuLow)) && !/feminina|feminino|baby look|babylook|masculina|masculino|adulto/i.test(tLow))
     ) {
       guideTitle = "Guia de Tamanhos Infantil (1 a 13 Anos)";
       const badgeTitle = "INFANTIL";
-      tipText = "<strong>Escolha por Idade com Referência de Tamanho (PP ao G2):</strong> Na linha Infantil BRK, a seleção é guiada pela faixa de idade (1 a 13 Anos) mantendo a indicação do tamanho equivalente (PP ao G2). Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra, sem contar eventual capuz | Manga do ombro ao punho).";
+      const kidsSleeveLbl = isShortSleeve ? "Manga do ombro à barra da manga curta" : "Manga do ombro ao punho";
+      const kidsHeightLbl = isHoodedSg ? "Altura do ombro à barra, sem contar o capuz" : "Altura do ombro à barra";
+      tipText = `<strong>Escolha por Idade com Referência de Tamanho (PP ao G2):</strong> Na linha Infantil BRK, a seleção é guiada pela faixa de idade (1 a 13 Anos) mantendo a indicação do tamanho equivalente (PP ao G2). Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | ${kidsHeightLbl} | ${kidsSleeveLbl}).`;
       const shirtSubPrefix = specialShirtPrefix || (archetypeId === "agro_field" ? "Camiseta Algodão Premium" : (isShortSleeve ? "Camisa Manga Curta UV50" : "Camisa Manga Longa UV50"));
       const subtitle = `${shirtSubPrefix} | *As medidas podem variar de 2cm a 3cm`;
       const rows = [
@@ -3306,9 +3401,17 @@ function getProductModeBHTML(liveP) {
         act3Title = "MANGAS RAGLAN E COSTURAS PLANAS ANTI-ATRITO";
         act3Desc = "Construída com mangas de corte raglan esportivo, gola redonda anatômica e costuras planas reforçadas que eliminam pontos de pressão sob jaquetas, coletes ou mochilas.";
       } else if (isShortSleeveModal) {
-        act3Desc = act3Desc
-          .replace(/punhos anatômicos que não laceiam com o uso frequente/gi, "mangas curtas com barra em costura dupla reforçada que proporcionam ventilação ideal e liberdade nos braços")
-          .replace(/manga longa/gi, "manga curta");
+        if (/punhos anatômicos/i.test(act3Desc)) {
+          if (isRoundNeckModal) {
+            act3Title = "COSTURA REFORÇADA E GOLA REDONDA ANATÔMICA";
+            act3Desc = "Acabamento de alto padrão com costuras planas anti-atrito, gola redonda anatômica reforçada ombro a ombro e mangas curtas com barra em costura dupla reforçada que proporcionam ventilação ideal e liberdade total de movimentos.";
+          } else {
+            act3Desc = act3Desc
+              .replace(/punhos anatômicos que mantêm o ajuste firme e não laceiam/gi, "mangas curtas com barra em costura dupla reforçada que proporcionam ventilação ideal e liberdade nos braços")
+              .replace(/punhos anatômicos que não laceiam com o uso frequente/gi, "mangas curtas com barra em costura dupla reforçada que proporcionam ventilação ideal e liberdade nos braços");
+          }
+        }
+        act3Desc = act3Desc.replace(/manga longa/gi, "manga curta");
       } else if (isRoundNeckModal) {
         act3Title = "COSTURA REFORÇADA E GOLA REDONDA ANATÔMICA";
         act3Desc = "Acabamento de alto padrão com costuras planas anti-atrito, gola careca canelada reforçada ombro a ombro e caimento confortável para uso prolongado.";
@@ -3563,7 +3666,7 @@ function getProductModeBHTML(liveP) {
     const shortSlv = Boolean(isShortSlv) || ["manga curta", "camiseta", "t-shirt", "tshirt", "baby look"].some(w => tLow.includes(w));
     const isShirtArch = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId);
     const hasUv = ["uv", "fpu", "proteção solar", "protecao solar", "xtech", "dry"].some(w => tLow.includes(w) || tagsLow.includes(w));
-    const isCotton = ["algodão", "algodao", "cotton", "100% algod"].some(w => tLow.includes(w) || tagsLow.includes(w)) || (archetypeId === "agro_field" && !hasUv && tLow.includes("camiseta"));
+    const isCotton = (["algodão", "algodao", "cotton", "100% algod"].some(w => tLow.includes(w) || tagsLow.includes(w)) && !/algod[aã]o sombreado/i.test(tLow) && !hasUv) || (archetypeId === "agro_field" && !hasUv && tLow.includes("camiseta"));
     const isKitShirtBoot = /\b(camisa|camiseta|blusa|segunda pele)\b/i.test(tLow) && /\b(botina|bota|coturno)\b/i.test(tLow);
 
     if (isKitShirtBoot) {
@@ -3606,7 +3709,9 @@ function getProductModeBHTML(liveP) {
       const isArmor = tLow.includes("armor") || skuLow.startsWith("cax");
       const isRaglan = ["segunda pele", "raglan", "thermal", "termica", "térmica"].some(w => tLow.includes(w)) || skuLow.includes("raglan");
       const isButton = archetypeId === "shirts_button_work" || ["botão", "botao", "work", "operacional"].some(w => tLow.includes(w)) || skuLow.startsWith("cmb") || skuLow.startsWith("cbt");
-      const isCrew = ["careca", "redonda", "sem zíper", "sem ziper"].some(w => tLow.includes(w));
+      const isCrew = ["careca", "redonda", "sem zíper", "sem ziper", "casual", "t-shirt", "camiseta"].some(w => tLow.includes(w)) || /^(casual|bp|cm|cadv|cf)/i.test(skuLow) || /^ci0(?:54|7[2-9]|8[0-4])/i.test(skuLow);
+      const isKidsMeta = Boolean(prodObj.is_kids) || ["infantil", "kids", "juvenil"].some(w => tLow.includes(w)) || skuLow.startsWith("ci");
+      const isCasalMeta = tLow.includes("casal") && (tLow.includes("kit") || tLow.includes("combo"));
 
       let lbl = "Foco Frontal: Gola Padre Anatômica, Zíper & Punhos";
       let pill = "Pesponto Duplo";
@@ -3618,6 +3723,8 @@ function getProductModeBHTML(liveP) {
       else if (isButton) { lbl = "Foco Frontal: Colarinho Estruturado & Botões"; pill = "Costura em X"; }
       else if (isCotton) { lbl = "Foco Frontal: Gola em Ribana & Costura Dupla"; pill = "Anti-Deformação"; }
       else if (isCrew || shortSlv) { lbl = "Foco Frontal: Gola Anatômica & Costura Dupla"; pill = "Toque Suave"; }
+      else if (isKidsMeta) { lbl = "Foco Frontal: Costuras Planas & Acabamento Macio"; pill = "Toque Suave"; }
+      else if (isCasalMeta) { lbl = "Foco Frontal: Acabamento Duplo & Costura Plana"; pill = "Kit Casal"; }
 
       return { view_tag: "ZOOM DE ACABAMENTO • ATO 03", icon: "shield", label: lbl, pill: pill, zoom_act3: true };
     }
@@ -3703,7 +3810,7 @@ function getProductModeBHTML(liveP) {
       const infoMeta = getClientMediaInfographicMeta(idx, archetypeId, liveP, formattedTitle, isShortSleeve, false);
       const isCropSleeve = Boolean(block.crop_sleeve_detail);
       if (isCropSleeve) {
-        infoMeta.label = "Detalhe Lateral: Mangas, Punhos & Costura";
+        infoMeta.label = isShortSleeve ? "Detalhe Lateral: Mangas Curtas & Costura" : "Detalhe Lateral: Mangas, Punhos & Costura";
         infoMeta.pill = "Pesponto Duplo";
       }
       let focusCls = " brk-focus-center";

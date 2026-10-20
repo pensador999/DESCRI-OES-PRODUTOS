@@ -249,10 +249,17 @@ function detectClientArchetype(title, category, tags) {
 
   // 8. Camisas: Work/Botão vs Agro vs Motors vs UV50+
   if (/\b(camisa|camiseta|baby look|regata|t-shirt|polo)\b/i.test(t)) {
-    if (/\b(work|safari sarja|manga longa sarja|manga curta sarja|sarja|militar|operacional|botao|botão|de botao|de botão|lisa|sem estampa)\b/i.test(t) && !/\b(ziper|zíper)\b/i.test(t)) {
+    const hasUvOrVest = /\b(uv|uv50|fpu|fps|xtech|solar|colete|sublimad|segunda pele|termica|térmica)\b/i.test(t) || /^(c0|ci|cadv|adv|hyb|raglan)/i.test(p.master_sku || p.sku || "");
+    if (
+      (
+        /\b(work|safari sarja|manga longa sarja|manga curta sarja|sarja|militar|operacional|botao|botão|de botao|de botão)\b/i.test(t) ||
+        (/\bxadrez\b/i.test(t) && !hasUvOrVest) ||
+        (/\b(lisa|sem estampa)\b/i.test(t) && !hasUvOrVest)
+      ) && !/\b(ziper|zíper)\b/i.test(t)
+    ) {
       return { id: "shirts_button_work", name: "Camisas Work, Botão & Sarja Utilitária" };
     }
-    if (/\b(algodao|algodão|cotton)\b/i.test(t) || (/\bcamiseta\b/i.test(t) && /\b(agro|campo|fazenda|trator)\b/i.test(t))) {
+    if ((/\b(algodao|algodão|cotton)\b/i.test(t) && !/algod[aã]o sombreado/i.test(t) && !hasUvOrVest) || (/\bcamiseta\b/i.test(t) && /\b(agro|campo|fazenda|trator)\b/i.test(t) && !hasUvOrVest)) {
       return { id: "agro_field", name: "Força, Campo & Tradição" };
     }
     if (/\b(jersey|moto|cross|off-road|trilha|speed|motors)\b/i.test(t) && !/\b(uv|uv50|fpu|xtech|segunda pele|termica|térmica)\b/i.test(t)) {

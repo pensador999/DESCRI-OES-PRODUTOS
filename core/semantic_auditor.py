@@ -62,6 +62,31 @@ BADGE_TITLE_RE = re.compile(r'brk-badge-title">([^<]+)<')
 
 GENERIC_BADGE_TITLES = {"Qualidade Oficial", "Acabamento Premium", "Envio Rápido & Seguro", "Garantia Oficial BRK"}
 
+SUBTYPE_BADGE_TITLES_BY_ARCHETYPE = {
+    "uv_performance": {
+        "Kit Completo 2 em 1", "Camisa FPU 50+ Dry", "Couro Bovino Legítimo", "Solado Antiderrapante",
+    },
+    "drinkware_thermo": {
+        "Compressor 12V/24V", "Proteção de Bateria", "Gabinete Reforçado", "100% Original Elber",
+        "Isolamento Térmico", "Interior Impermeável", "Alças Reforçadas", "Qualidade Oficial",
+    },
+    "tackle_boxes_storage": {
+        "Nylon Oxford 600D", "Sistema Modular MOLLE", "Divisórias Elásticas", "Fecho Engate Rápido",
+        "Aço Inox Naval", "5 Fendas p/ Iscas", "Trava Elástica", "Alta Durabilidade",
+    },
+    "closed_footwear_sneakers": {
+        "Couro Bovino Legítimo", "Solado Antiderrapante", "Palmilha Anatômica", "Calce Fácil",
+    },
+    "accessories_general": {
+        "Sobreteto Impermeável", "Tela Mosquiteiro", "Varetas Flexíveis", "Bolsa Inclusa",
+        "Estrutura Tubular", "Dobrável & Compacta", "Alta Resistência", "Bolsa de Transporte",
+        "Aço Inoxidável", "Ignição Automática", "Trava de Segurança", "Compacto & Portátil",
+        "Acessório Original Elber", "Proteção Elétrica", "Alimentação Estável", "Alta Durabilidade",
+        "Malha Air Mesh", "Faixas Refletivas 360°", "Trava Engate Rápido", "Guia Inclusa",
+        "Personalização Oficial", "Alta Fixação", "Não Desbota", "Tipografia Esportiva",
+    },
+}
+
 
 def _first(regex: "re.Pattern", text: str) -> Optional[str]:
     m = regex.search(text)
@@ -108,7 +133,11 @@ def _rule_upper_body_in_pants(arch: str, title: str, body: str) -> Optional[str]
 
 
 def _rule_foreign_badge(arch: str, title: str, body: str) -> Optional[str]:
-    allowed = {b["title"] for b in QUICK_BADGES_BY_ARCHETYPE.get(arch, [])} | GENERIC_BADGE_TITLES
+    allowed = (
+        {b["title"] for b in QUICK_BADGES_BY_ARCHETYPE.get(arch, [])}
+        | SUBTYPE_BADGE_TITLES_BY_ARCHETYPE.get(arch, set())
+        | GENERIC_BADGE_TITLES
+    )
     foreign = [t for t in BADGE_TITLE_RE.findall(body) if t not in allowed]
     return ", ".join(foreign) if foreign else None
 
@@ -166,9 +195,9 @@ class SemanticAuditor:
         title = prod.get("title", "")
         vendor = prod.get("vendor", "")
         sku_code = prod.get("master_sku") or prod.get("sku") or (prod.get("variants_skus") and prod.get("variants_skus")[0]) or ""
-        arch = prod.get("archetype_id") or self.engine.detect_archetype(
+        arch = self.engine.detect_archetype(
             title, str(prod.get("product_type", "")), str(prod.get("tags", "")), vendor=vendor, sku=sku_code
-        )
+        ) or prod.get("archetype_id")
         raw_imgs = prod.get("cdn_images") or prod.get("gallery") or [
             (i.get("src", i) if isinstance(i, dict) else i) for i in prod.get("images", [])
         ]

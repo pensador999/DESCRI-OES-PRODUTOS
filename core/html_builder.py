@@ -283,6 +283,99 @@ class HTMLBuilder:
             ]
             return self._render_quick_badges(theme_color, badges)
 
+        if archetype_id == "drinkware_thermo":
+            if "geladeira" in t_low:
+                badges = [
+                    {"icon": "snowflake", "title": "Compressor 12V/24V", "sub": "Refrigeração Portátil"},
+                    {"icon": "bolt", "title": "Proteção de Bateria", "sub": "Painel Digital Inteligente"},
+                    {"icon": "shield", "title": "Gabinete Reforçado", "sub": "Isolamento Alta Densidade"},
+                    {"icon": "sparkle", "title": "100% Original Elber", "sub": "Garantia Oficial de Fábrica"},
+                ]
+                return self._render_quick_badges(theme_color, badges)
+            if any(w in t_low for w in ["bolsa termica", "bolsa térmica", "caixa termica", "caixa térmica", "cooler"]):
+                badges = [
+                    {"icon": "snowflake", "title": "Isolamento Térmico", "sub": "Conservação Prolongada"},
+                    {"icon": "shield", "title": "Interior Impermeável", "sub": "Fácil Higienização"},
+                    {"icon": "bolt", "title": "Alças Reforçadas", "sub": "Transporte Confortável"},
+                    {"icon": "sparkle", "title": "Qualidade Oficial", "sub": "Procedência Garantida"},
+                ]
+                return self._render_quick_badges(theme_color, badges)
+        elif archetype_id == "tackle_boxes_storage":
+            if any(w in t_low for w in ["primeiros socorros", "bolsa tática", "bolsa tatica"]):
+                badges = [
+                    {"icon": "shield", "title": "Nylon Oxford 600D", "sub": "Alta Resistência a Rasgos"},
+                    {"icon": "box", "title": "Sistema Modular MOLLE", "sub": "Fixação Rápida em Mochilas"},
+                    {"icon": "gear", "title": "Divisórias Elásticas", "sub": "Organização Interna"},
+                    {"icon": "bolt", "title": "Fecho Engate Rápido", "sub": "Acesso Imediato"},
+                ]
+                return self._render_quick_badges(theme_color, badges)
+            if "suporte porta iscas" in t_low or ("porta iscas" in t_low and "inox" in t_low):
+                badges = [
+                    {"icon": "shield", "title": "Aço Inox Naval", "sub": "Imune à Ferrugem"},
+                    {"icon": "fish", "title": "5 Fendas p/ Iscas", "sub": "Acesso Rápido no Barco"},
+                    {"icon": "gear", "title": "Trava Elástica", "sub": "Para Alicates e Tesoura"},
+                    {"icon": "sparkle", "title": "Alta Durabilidade", "sub": "Água Doce e Salgada"},
+                ]
+                return self._render_quick_badges(theme_color, badges)
+        elif archetype_id == "closed_footwear_sneakers":
+            if bool(re.search(r'\b(botina|bota|coturno)\b', t_low)):
+                badges = [
+                    {"icon": "shield", "title": "Couro Bovino Legítimo", "sub": "Alta Durabilidade"},
+                    {"icon": "bolt", "title": "Solado Antiderrapante", "sub": "Blaqueado de Alta Tração"},
+                    {"icon": "sparkle", "title": "Palmilha Anatômica", "sub": "Absorção de Impacto"},
+                    {"icon": "care", "title": "Calce Fácil", "sub": "Elásticos Laterais Reforçados"},
+                ]
+                return self._render_quick_badges(theme_color, badges)
+        elif archetype_id == "accessories_general":
+            if "barraca" in t_low:
+                badges = [
+                    {"icon": "shield", "title": "Sobreteto Impermeável", "sub": "Proteção Chuva & Sol"},
+                    {"icon": "wind", "title": "Tela Mosquiteiro", "sub": "Ventilação Segura"},
+                    {"icon": "bolt", "title": "Varetas Flexíveis", "sub": "Fibra de Alta Resistência"},
+                    {"icon": "box", "title": "Bolsa Inclusa", "sub": "Transporte Compacto"},
+                ]
+                return self._render_quick_badges(theme_color, badges)
+            if any(w in t_low for w in ["mesa dobravel", "mesa dobrável", "mesa de camping", "cadeira", "banqueta"]):
+                badges = [
+                    {"icon": "shield", "title": "Estrutura Tubular", "sub": "Aço Anticorrosivo"},
+                    {"icon": "bolt", "title": "Dobrável & Compacta", "sub": "Montagem em Segundos"},
+                    {"icon": "sparkle", "title": "Alta Resistência", "sub": "Estabilidade no Terreno"},
+                    {"icon": "box", "title": "Bolsa de Transporte", "sub": "Portabilidade Fácil"},
+                ]
+                return self._render_quick_badges(theme_color, badges)
+            if "fogareiro" in t_low:
+                badges = [
+                    {"icon": "shield", "title": "Aço Inoxidável", "sub": "Alta Durabilidade"},
+                    {"icon": "bolt", "title": "Ignição Automática", "sub": "Dispensa Fósforos"},
+                    {"icon": "gear", "title": "Trava de Segurança", "sub": "Controle de Chama"},
+                    {"icon": "box", "title": "Compacto & Portátil", "sub": "Ideal p/ Camping e Pesca"},
+                ]
+                return self._render_quick_badges(theme_color, badges)
+            if any(w in t_low for w in ["cabo plug", "cabo de força", "cabo de alimentacao", "cabo de alimentação", "fonte conversora"]):
+                badges = [
+                    {"icon": "bolt", "title": "Acessório Original Elber", "sub": "Encaixe Padrão Direto"},
+                    {"icon": "shield", "title": "Proteção Elétrica", "sub": "Contra Surtos e Curto"},
+                    {"icon": "gear", "title": "Alimentação Estável", "sub": "12V / 24V Contínuos"},
+                    {"icon": "sparkle", "title": "Alta Durabilidade", "sub": "Isolamento Reforçado"},
+                ]
+                return self._render_quick_badges(theme_color, badges)
+            if any(w in t_low for w in ["coleira", "peitoral"]):
+                badges = [
+                    {"icon": "wind", "title": "Malha Air Mesh", "sub": "Ventilada & Macia"},
+                    {"icon": "sun", "title": "Faixas Refletivas 360°", "sub": "Visibilidade Noturna"},
+                    {"icon": "shield", "title": "Trava Engate Rápido", "sub": "Ajuste Anatômico"},
+                    {"icon": "sparkle", "title": "Guia Inclusa", "sub": "Passeio Seguro"},
+                ]
+                return self._render_quick_badges(theme_color, badges)
+            if any(w in t_low for w in ["personalização", "personalizacao"]):
+                badges = [
+                    {"icon": "sparkle", "title": "Personalização Oficial", "sub": "Padrão de Fábrica BRK"},
+                    {"icon": "shield", "title": "Alta Fixação", "sub": "Termotransferência Pro"},
+                    {"icon": "sun", "title": "Não Desbota", "sub": "Alta Durabilidade"},
+                    {"icon": "palette", "title": "Tipografia Esportiva", "sub": "Alinhada ao Design"},
+                ]
+                return self._render_quick_badges(theme_color, badges)
+
         badges = QUICK_BADGES_BY_ARCHETYPE.get(archetype_id) or [
             {"icon": "shield", "title": "Qualidade Oficial", "sub": "Matéria-Prima Selecionada"},
             {"icon": "sparkle", "title": "Acabamento Premium", "sub": "Rigoroso Padrão BRK"},
@@ -334,7 +427,8 @@ class HTMLBuilder:
         elif is_hooded_sg:
             tip_text = "<strong>Como medir com precisão (Modelo com Capuz Integrado):</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura da costura do ombro à barra inferior, <u>desconsiderando o capuz</u> | Manga do ombro ao punho)."
         else:
-            tip_text = "<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | Manga do ombro ao punho). Dica: compare com uma peça sua estendida para escolher o caimento ideal."
+            sleeve_measure_lbl = "Manga do ombro à barra da manga curta" if is_short_sleeve else "Manga do ombro ao punho"
+            tip_text = f"<strong>Como medir com precisão:</strong> Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra | {sleeve_measure_lbl}). Dica: compare com uma peça sua estendida para escolher o caimento ideal."
 
         if is_fusion_sg:
             special_shirt_prefix = "Camisa UV50+ FusionX (Capuz + Bandana Embutida + Dedeira)"
@@ -507,7 +601,7 @@ class HTMLBuilder:
             # 1.2 Camisas UV C0 Infantil (1 a 13 Anos | PP ao G2)
             elif (
                 is_kids
-                or any(w in title_low for w in ["infantil", "kids", "juvenil", "criança", "crianca"])
+                or any(w in title_low for w in ["infantil", "kids", "juvenil"])
                 or "kids" in sku_low
                 or "inf" in sku_low
                 or (
@@ -517,7 +611,9 @@ class HTMLBuilder:
             ):
                 guide_title = "Guia de Tamanhos Infantil (1 a 13 Anos)"
                 badge_title = "INFANTIL"
-                tip_text = "<strong>Escolha por Idade com Referência de Tamanho (PP ao G2):</strong> Na linha Infantil BRK, a seleção é guiada pela faixa de idade (1 a 13 Anos) mantendo a indicação do tamanho equivalente (PP ao G2). Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | Altura do ombro à barra, sem contar eventual capuz | Manga do ombro ao punho)."
+                kids_sleeve_lbl = "Manga do ombro à barra da manga curta" if is_short_sleeve else "Manga do ombro ao punho"
+                kids_height_lbl = "Altura do ombro à barra, sem contar o capuz" if is_hooded_sg else "Altura do ombro à barra"
+                tip_text = f"<strong>Escolha por Idade com Referência de Tamanho (PP ao G2):</strong> Na linha Infantil BRK, a seleção é guiada pela faixa de idade (1 a 13 Anos) mantendo a indicação do tamanho equivalente (PP ao G2). Medidas tiradas com a peça plana em centímetros (Tórax de axila a axila | {kids_height_lbl} | {kids_sleeve_lbl})."
                 shirt_sub_prefix = special_shirt_prefix or ("Camiseta Algodão Premium" if archetype_id == "agro_field" else ("Camisa Manga Curta UV50" if is_short_sleeve else "Camisa Manga Longa UV50"))
                 subtitle = f"{shirt_sub_prefix} | *As medidas podem variar de 2cm a 3cm"
                 rows = [
@@ -1630,7 +1726,7 @@ class HTMLBuilder:
 
         has_uv = any(w in t_low or w in tags_low for w in ["uv", "fpu", "proteção solar", "protecao solar", "xtech", "dry"])
         is_cotton = (
-            any(w in t_low or w in tags_low for w in ["algodão", "algodao", "cotton", "100% algod"])
+            (any(w in t_low or w in tags_low for w in ["algodão", "algodao", "cotton", "100% algod"]) and "algodão sombreado" not in t_low and "algodao sombreado" not in t_low and not has_uv)
             or (archetype_id == "agro_field" and not has_uv and "camiseta" in t_low)
         )
         is_kit_shirt_boot = any(w in t_low for w in ["camisa", "camiseta", "blusa", "segunda pele"]) and bool(
@@ -1728,7 +1824,13 @@ class HTMLBuilder:
             is_armor = "armor" in t_low or sku_low.startswith("cax")
             is_raglan = any(w in t_low for w in ["segunda pele", "raglan", "thermal", "termica", "térmica"]) or "raglan" in sku_low
             is_button = archetype_id == "shirts_button_work" or any(w in t_low for w in ["botão", "botao", "work", "operacional"]) or sku_low.startswith(("cmb", "cbt"))
-            is_crew = any(w in t_low for w in ["careca", "redonda", "sem zíper", "sem ziper"])
+            is_crew = (
+                any(w in t_low for w in ["careca", "redonda", "sem zíper", "sem ziper", "casual", "t-shirt", "camiseta"])
+                or sku_low.startswith(("casual", "bp", "cm", "cadv", "cf"))
+                or bool(re.match(r'^ci0(?:54|7[2-9]|8[0-4])', sku_low))
+            )
+            is_kids_meta = bool(enriched_data.get("is_kids", False)) or any(w in t_low for w in ["infantil", "kids", "juvenil"]) or sku_low.startswith("ci")
+            is_casal_meta = "casal" in t_low and ("kit" in t_low or "combo" in t_low)
 
             if is_fusion:
                 lbl, pill = "Foco Frontal: Capuz, Máscara Facial & Dedeira", "Proteção 360°"
@@ -1746,6 +1848,10 @@ class HTMLBuilder:
                 lbl, pill = "Foco Frontal: Gola em Ribana & Costura Dupla", "Anti-Deformação"
             elif is_crew or is_short_sleeve:
                 lbl, pill = "Foco Frontal: Gola Anatômica & Costura Dupla", "Toque Suave"
+            elif is_kids_meta:
+                lbl, pill = "Foco Frontal: Costuras Planas & Acabamento Macio", "Toque Suave"
+            elif is_casal_meta:
+                lbl, pill = "Foco Frontal: Acabamento Duplo & Costura Plana", "Kit Casal"
             else:
                 lbl, pill = "Foco Frontal: Gola Padre Anatômica, Zíper & Punhos", "Pesponto Duplo"
 
@@ -1819,7 +1925,9 @@ class HTMLBuilder:
         is_hybrid_b = "hybrid" in t_low or sku_low.startswith("hyb") or "hybrid" in sku_low
         is_anti_zipper = (
             is_fusion_b or is_hybrid_b or
-            any(w in t_low for w in ["careca", "redonda", "sem zíper", "sem ziper"]) or
+            any(w in t_low for w in ["careca", "redonda", "sem zíper", "sem ziper", "casual", "t-shirt", "camiseta"]) or
+            sku_low.startswith(("casual", "bp", "cm", "cadv", "cf")) or
+            bool(re.match(r'^ci0(?:54|7[2-9]|8[0-4])', sku_low)) or
             archetype_id == "shirts_button_work"
         )
         if is_anti_zipper:
@@ -1957,7 +2065,7 @@ class HTMLBuilder:
                 info_meta = self._get_media_infographic_meta(idx, archetype_id, enriched_data, is_split=False)
                 is_crop_sleeve = bool(block.get("crop_sleeve_detail"))
                 if is_crop_sleeve:
-                    info_meta["label"] = "Detalhe Lateral: Mangas, Punhos & Costura"
+                    info_meta["label"] = "Detalhe Lateral: Mangas Curtas & Costura" if is_short_sleeve else "Detalhe Lateral: Mangas, Punhos & Costura"
                     info_meta["pill"] = "Pesponto Duplo"
                 if idx == 2 and is_shirt_arch_main:
                     focus_cls = " brk-focus-top brk-crop-sleeve-detail" if is_crop_sleeve else " brk-focus-top"

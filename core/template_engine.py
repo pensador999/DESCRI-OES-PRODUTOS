@@ -1210,9 +1210,11 @@ class TemplateEngine:
 
         if is_upper_body:
             # 10.1 Camisas Work / Botão / Sarja / Lisas / Xadrez (Sem zíper, com botões e bolsos utilitários)
+            has_uv_or_vest_marker = is_c0_or_uv_sku or any(w in t for w in ["uv", "uv50", "fpu", "fps", "xtech", "solar", "colete", "sublimad"])
             is_button_work = (
                 is_work_sku or
-                any(w in t for w in ["camisa work", "safari sarja", "camisa sarja", "camisa de botao", "camisa botao", "trabalho botao", "manga longa sarja", "manga curta sarja", "xadrez"]) or
+                any(w in t for w in ["camisa work", "safari sarja", "camisa sarja", "camisa de botao", "camisa botao", "trabalho botao", "manga longa sarja", "manga curta sarja"]) or
+                ("xadrez" in t and not has_uv_or_vest_marker) or
                 (("operacional" in t or "sarja" in t or "de botao" in t or "botao" in t) and not any(w in t for w in ["ziper"])) or
                 (("lisa" in t or "sem estampa" in t) and any(w in t for w in ["classic", "manga curta", "manga longa"]) and not any(w in t for w in ["uv", "uv50", "dry", "xtech", "segunda pele"]))
             )
@@ -1229,7 +1231,7 @@ class TemplateEngine:
                 return "uv_performance"
 
             # 10.3 Camisetas casuais de algodão (Agro / Campo / Lifestyle)
-            if any(w in t for w in ["algodao", "cotton"]) or ("camiseta" in t and any(w in t for w in ["campo", "agro", "fazenda", "trator"])):
+            if (any(w in t for w in ["algodao", "cotton"]) and "algodao sombreado" not in t) or ("camiseta" in t and any(w in t for w in ["campo", "agro", "fazenda", "trator"])):
                 return "agro_field"
 
             # 10.4 Jerseis de motocross sem proteção UV
@@ -1745,6 +1747,7 @@ class TemplateEngine:
         t_clean = re.sub(r'\bProtecão\b', 'Proteção', t_clean)
         t_clean = re.sub(r'\bprotecão\b', 'proteção', t_clean)
         t_clean = re.sub(r'\bBalaclava\s+Balaclava\b', 'Balaclava', t_clean, flags=re.IGNORECASE)
+        t_clean = re.sub(r'\b(com|de|para|em)\s+\1\b', r'\1', t_clean, flags=re.IGNORECASE)
         t_clean = re.sub(r'\s{2,}', ' ', t_clean).strip()
         if is_revenda:
             origin_type = "revenda"
@@ -3038,7 +3041,17 @@ class TemplateEngine:
         # 4. Adaptação Manga Curta (Elimina 'punhos anatômicos', injeta ventilação e barra pespontada)
         elif is_short_sleeve:
             if "punhos anatômicos" in act3.get("desc_tmpl", "").lower():
-                act3["desc_tmpl"] = act3["desc_tmpl"].replace("punhos anatômicos que não laceiam com o uso frequente", "mangas curtas com barra em costura dupla reforçada que proporcionam ventilação ideal e liberdade nos braços")
+                if is_round_neck:
+                    act3["title"] = "COSTURA REFORÇADA E GOLA REDONDA ANATÔMICA"
+                    act3["desc_tmpl"] = "Acabamento de alto padrão com costuras planas anti-atrito, gola redonda anatômica reforçada ombro a ombro e mangas curtas com barra em costura dupla reforçada que proporcionam ventilação ideal e liberdade total de movimentos."
+                else:
+                    act3["desc_tmpl"] = act3["desc_tmpl"].replace(
+                        "punhos anatômicos que mantêm o ajuste firme e não laceiam",
+                        "mangas curtas com barra em costura dupla reforçada que proporcionam ventilação ideal e liberdade nos braços"
+                    ).replace(
+                        "punhos anatômicos que não laceiam com o uso frequente",
+                        "mangas curtas com barra em costura dupla reforçada que proporcionam ventilação ideal e liberdade nos braços"
+                    )
             if "manga longa" in act3.get("desc_tmpl", "").lower():
                 act3["desc_tmpl"] = act3["desc_tmpl"].replace("manga longa", "manga curta")
 
@@ -3840,7 +3853,12 @@ class TemplateEngine:
                 act2["desc_tmpl"] = "Sua construção plana com bordas de acabamento refinado permite dobrar e amarrar com firmeza sem escorregar, sem pesar e sem abafar, destacando-se pela estampa exclusiva em alta definição."
                 act3["tag"] = "Múltiplas Formas de Uso"
                 act3["title"] = "USE NA CABEÇA, NO PESCOÇO, NOS CABELOS OU COMO ACESSÓRIO"
-                act3["desc_tmpl"] = "Extremamente versátil para pescarias, cavalgadas, praia, campo e dia a dia: pode ser usado amarrado na cabeça estilo bandana/camponesa, no pescoço estilo cowboy/outdoor, como faixa de cabelo ou preso a bolsas e chapéus."
+                lenco_ctx = (
+                    "para pescarias, passeios de barco, praia, lazer e dia a dia"
+                    if store_key == "brk_fishing" else
+                    "para pescarias, cavalgadas, praia, campo e dia a dia"
+                )
+                act3["desc_tmpl"] = f"Extremamente versátil {lenco_ctx}: pode ser usado amarrado na cabeça estilo bandana/camponesa, no pescoço estilo outdoor, como faixa de cabelo ou preso a bolsas e chapéus."
                 new_specs = [
                     {"label": "Proteção Solar", "value": "Fator FPU 50+ permanente integrado ao tecido"},
                     {"label": "Modelagem / Formato", "value": "Lenço quadrado plano de amarração versátil"},
@@ -4321,7 +4339,7 @@ class TemplateEngine:
                         {"label": "Material da Lâmina", "value": "Aço Inoxidável com revestimento escurecido protetor"},
                         {"label": "Empunhadura", "value": "Talas anatômicas em madeira com parafusos reforçados e olhal para fiel"},
                         {"label": "Recurso Adicional", "value": "Lâmina auxiliar cortadora de linha/corda com ponta de segurança"},
-                        {"label": "Aplicação", "value": "Pesca esportiva, camping, lida no campo e uso diário (EDC)"}
+                        {"label": "Aplicação", "value": "Pesca esportiva, camping, trilhas e uso diário (EDC)" if store_key == "brk_fishing" else "Pesca esportiva, camping, lida no campo e uso diário (EDC)"}
                     ]
                 else:
                     act1["tag"] = "Lâmina Tática em Aço Inox"
@@ -4577,6 +4595,9 @@ class TemplateEngine:
                         ("uniforme de pesca, campo ou aventura", "uniforme de campo, comitiva ou aventura"),
                         ("ideal para pescadores esportivos, torneios, comitivas, equipes", "ideal para comitivas, fazendas, eventos agropecuários, equipes"),
                         ("Caixas de pesca, barcos, caiaques, caminhonetes, coolers e copos térmicos", "Caminhonetes, tratores, caixas térmicas, coolers e copos térmicos"),
+                        ("no campo, na pescaria ou na rotina operacional", "no campo, na fazenda ou na rotina operacional"),
+                        ("em viagens, pescarias, caminhões, motorhomes e acampamentos", "em viagens, na fazenda, caminhonetes, caminhões e acampamentos"),
+                        ("Pesca, camping, overland, caminhões, barcos e viagens", "Fazenda, agronegócio, viagens, caminhonetes, caminhões e camping"),
                         ("na pescaria ou no campo", "na fazenda, na lida ou no lazer"),
                         ("no churrasco, no campo ou na pescaria", "no churrasco, na fazenda ou na lida campeira"),
                         ("no camping, na pescaria ou em casa", "na fazenda, no camping ou em casa"),
@@ -4613,6 +4634,10 @@ class TemplateEngine:
                         ("uniforme de pesca, campo ou aventura", "uniforme de equipe, trilha ou motociclismo"),
                         ("ideal para pescadores esportivos, torneios, comitivas, equipes", "ideal para pilotos, equipes de trilha e motocross, motoclubes"),
                         ("Caixas de pesca, barcos, caiaques, caminhonetes, coolers e copos térmicos", "Capacetes, motos, carros, caixas de ferramentas, coolers e copos térmicos"),
+                        ("no campo, na pescaria ou na rotina operacional", "nas oficinas, nos boxes, em viagens ou na rotina operacional"),
+                        ("em viagens, pescarias, caminhões, motorhomes e acampamentos", "em expedições overland, viagens de caminhonete, caminhões, motorhomes e acampamentos"),
+                        ("trilhas, barcos e estradas", "trilhas off-road, caminhonetes e estradas"),
+                        ("Pesca, camping, overland, caminhões, barcos e viagens", "Overland, expedições 4x4, caminhonetes, caminhões, motorhomes e camping"),
                         ("na pescaria ou no campo", "nas pistas, nas trilhas ou no dia a dia"),
                     ]
                 out = txt
@@ -4632,7 +4657,7 @@ class TemplateEngine:
 
         crop_sleeve_detail = bool(is_apparel and not is_kit_shirt_boot and img3 and self._is_explicit_back_name(img3))
         if crop_sleeve_detail:
-            act3["tag"] = "Detalhe Lateral: Mangas, Punhos & Costura"
+            act3["tag"] = "Detalhe Lateral: Mangas Curtas & Costura" if is_short_sleeve else "Detalhe Lateral: Mangas, Punhos & Costura"
             if not is_fusion and not is_hybrid and not is_hooded:
                 act3["title"] = (
                     "MANGAS CURTAS COM BARRA REFORÇADA E COSTURAS PLANAS ANTI-ATRITO"
