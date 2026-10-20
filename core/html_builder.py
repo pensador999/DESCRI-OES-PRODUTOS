@@ -1776,13 +1776,15 @@ class HTMLBuilder:
         is_shirt_arch_main = archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work")
         act2_img_candidate = (blocks[1].get("image") if len(blocks) > 1 and isinstance(blocks[1], dict) else "") or ""
         ml_track_attrs = (
-            'onmousemove="var r=this.getBoundingClientRect(),x=Math.max(0,Math.min(100,((event.clientX-r.left)/r.width)*100)),'
-            'y=Math.max(0,Math.min(100,((event.clientY-r.top)/r.height)*100));'
-            'this.style.setProperty(\'--lx\',x.toFixed(1)+\'%\');this.style.setProperty(\'--ly\',y.toFixed(1)+\'%\');" '
+            'onmousemove="var r=this.getBoundingClientRect(),'
+            'x=Math.max(0,Math.min(100,((event.clientX-r.left)/r.width)*100)).toFixed(2)+\'%\','
+            'y=Math.max(0,Math.min(100,((event.clientY-r.top)/r.height)*100)).toFixed(2)+\'%\';'
+            'var lz=this.querySelectorAll(\'.brk-ml-zoom-layer\');for(var i=0;i<lz.length;i++){lz[i].style.backgroundPosition=x+\' \'+y;}'
+            'var cr=this.querySelector(\'.brk-ml-cursor\');if(cr){cr.style.left=x;cr.style.top=y;}" '
             'ontouchmove="if(event.touches&&event.touches[0]){var r=this.getBoundingClientRect(),'
-            'x=Math.max(0,Math.min(100,((event.touches[0].clientX-r.left)/r.width)*100)),'
-            'y=Math.max(0,Math.min(100,((event.touches[0].clientY-r.top)/r.height)*100));'
-            'this.style.setProperty(\'--lx\',x.toFixed(1)+\'%\');this.style.setProperty(\'--ly\',y.toFixed(1)+\'%\');}"'
+            'x=Math.max(0,Math.min(100,((event.touches[0].clientX-r.left)/r.width)*100)).toFixed(2)+\'%\','
+            'y=Math.max(0,Math.min(100,((event.touches[0].clientY-r.top)/r.height)*100)).toFixed(2)+\'%\';'
+            'var lz=this.querySelectorAll(\'.brk-ml-zoom-layer\');for(var i=0;i<lz.length;i++){lz[i].style.backgroundPosition=x+\' \'+y;}}"'
         )
 
         blocks_html = []
@@ -1798,20 +1800,21 @@ class HTMLBuilder:
             
             safe_title_alt = str(formatted_title).replace('"', '&quot;')
             safe_block_alt = str(block.get('alt', formatted_title)).replace('"', '&quot;')
-            # Layout de Mídia: Card Infográfico Técnico c/ Visão 360° Interativa (Ato 1) e Lupa Dinâmica Estilo Mercado Livre (Atos 1, 2 e 3)
+            # Layout de Mídia: Card Infográfico Técnico c/ Visão 360° Interativa (Ato 1) e Lupa Fluida Estilo Mercado Livre (Atos 1, 2 e 3)
             if block_split_imgs and len(block_split_imgs) >= 2:
                 info_meta = self._get_media_infographic_meta(idx, archetype_id, enriched_data, is_split=True)
                 media_html = f"""<div class="brk-desc-media brk-media-card">
-        <input type="checkbox" id="brkloupe_{uid_base}_{idx}" class="brk-loupe-inp" />
-        <label for="brkloupe_{uid_base}_{idx}" class="brk-media-stage brk-desc-media-split brk-stage-loupe" {ml_track_attrs}>
-          <div class="brk-split-item">
+        <div class="brk-media-stage brk-desc-media-split">
+          <div class="brk-split-item brk-stage-loupe" {ml_track_attrs}>
             <img src="{block_split_imgs[0]}" alt="{safe_title_alt} - Opção 1" loading="lazy" referrerpolicy="no-referrer" />
+            <div class="brk-ml-zoom-layer" style="background-image: url('{block_split_imgs[0]}');"></div>
           </div>
-          <div class="brk-split-item">
+          <div class="brk-split-item brk-stage-loupe" {ml_track_attrs}>
             <img src="{block_split_imgs[1]}" alt="{safe_title_alt} - Opção 2" loading="lazy" referrerpolicy="no-referrer" />
+            <div class="brk-ml-zoom-layer" style="background-image: url('{block_split_imgs[1]}');"></div>
           </div>
-          <span class="brk-loupe-cta">Passe o mouse p/ Lupa 2.5x</span>
-        </label>
+          <span class="brk-loupe-cta">Passe o mouse p/ Lupa 2.4x</span>
+        </div>
         <div class="brk-media-infobar">
           <span class="brk-media-info-left">{get_svg_icon(info_meta['icon'], color=theme_color, size=14)} <span>{info_meta['label']}</span></span>
           <span class="brk-media-info-pill">{info_meta['pill']}</span>
@@ -1826,20 +1829,22 @@ class HTMLBuilder:
                 media_html = f"""<div class="brk-desc-media brk-media-card brk-card-360">
         <input type="radio" name="brk360_{uid_base}" id="brk360_{uid_base}_1" class="brk-360-inp brk-360-i1" checked />
         <input type="radio" name="brk360_{uid_base}" id="brk360_{uid_base}_2" class="brk-360-inp brk-360-i2" />
-        <input type="radio" name="brk360_{uid_base}" id="brk360_{uid_base}_3" class="brk-360-inp brk-360-i3" />
         <div class="brk-media-stage brk-stage-360{focus_cls}" {ml_track_attrs}>
           <div class="brk-360-rotator">
             <div class="brk-360-face brk-360-front">
               <img src="{img_src}" alt="{safe_block_alt}" loading="lazy" referrerpolicy="no-referrer" />
+              <div class="brk-ml-zoom-layer" style="background-image: url('{img_src}');"></div>
             </div>
-            <div class="brk-360-face brk-360-back" style="background-image: url('{back_360_url}');"></div>
+            <div class="brk-360-face brk-360-back" style="background-image: url('{back_360_url}');">
+              <div class="brk-ml-zoom-layer" style="background-image: url('{back_360_url}');"></div>
+            </div>
           </div>
           <span class="brk-ml-cursor"></span>
         </div>
         <div class="brk-360-controls">
           <label for="brk360_{uid_base}_1" class="brk-360-btn brk-360-b1">{btn1_lbl}</label>
           <label for="brk360_{uid_base}_2" class="brk-360-btn brk-360-b2">{btn2_lbl}</label>
-          <label for="brk360_{uid_base}_3" class="brk-360-btn brk-360-b3">Lupa 2.4x</label>
+          <span class="brk-360-hint">Passe o mouse p/ Lupa 2.4x</span>
         </div>
         <div class="brk-media-infobar">
           <span class="brk-media-info-left">{get_svg_icon(info_meta['icon'], color=theme_color, size=14)} <span>{info_meta['label']}</span></span>
@@ -1855,13 +1860,13 @@ class HTMLBuilder:
                 else:
                     focus_cls = " brk-focus-center"
                 media_html = f"""<div class="brk-desc-media brk-media-card brk-card-loupe">
-        <input type="checkbox" id="brkloupe_{uid_base}_{idx}" class="brk-loupe-inp" />
-        <label for="brkloupe_{uid_base}_{idx}" class="brk-media-stage brk-stage-loupe{focus_cls}" {ml_track_attrs} title="Passe o mouse para aproximar na peça">
+        <div class="brk-media-stage brk-stage-loupe{focus_cls}" {ml_track_attrs}>
           <img src="{img_src}" alt="{safe_block_alt}" loading="lazy" referrerpolicy="no-referrer" />
+          <div class="brk-ml-zoom-layer" style="background-image: url('{img_src}');"></div>
           <span class="brk-ml-cursor"></span>
           <span class="brk-loupe-lens" style="background-image: url('{img_src}');"><span class="brk-loupe-badge">Lupa 2.4x</span></span>
-          <span class="brk-loupe-cta">Passe o mouse p/ Lupa 2.5x</span>
-        </label>
+          <span class="brk-loupe-cta">Passe o mouse p/ Lupa 2.4x</span>
+        </div>
         <div class="brk-media-infobar">
           <span class="brk-media-info-left">{get_svg_icon(info_meta['icon'], color=theme_color, size=14)} <span>{info_meta['label']}</span></span>
           <span class="brk-media-info-pill">{info_meta['pill']}</span>
@@ -2103,8 +2108,6 @@ class HTMLBuilder:
       box-shadow: 0 12px 30px rgba(15, 23, 42, 0.11);
     }}
     .brk-media-stage {{
-      --lx: 50%;
-      --ly: 25%;
       position: relative;
       width: 100%;
       overflow: hidden;
@@ -2121,11 +2124,32 @@ class HTMLBuilder:
       display: block;
       margin: 0 auto;
       background: #ffffff;
-      transform-origin: var(--lx, 50%) var(--ly, 25%);
-      transition: transform 0.16s ease-out;
-      will-change: transform, transform-origin;
     }}
-    /* Visor Interativo 360 / Giro 3D no Ato 1 + Lupa Dinâmica Estilo Mercado Livre */
+    /* Camada de Zoom Fluido Estilo Mercado Livre (Segue o Mouse sem Travar) */
+    .brk-ml-zoom-layer {{
+      position: absolute;
+      inset: 6px;
+      border-radius: 10px;
+      background-repeat: no-repeat;
+      background-color: #ffffff;
+      background-size: 250%;
+      background-position: 50% 30%;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.16s ease;
+      z-index: 2;
+    }}
+    .brk-stage-loupe:hover .brk-ml-zoom-layer,
+    .brk-stage-360:hover .brk-360-front .brk-ml-zoom-layer {{
+      opacity: 1;
+    }}
+    .brk-360-i2:checked ~ .brk-stage-360:hover .brk-360-front .brk-ml-zoom-layer {{
+      opacity: 0;
+    }}
+    .brk-360-i2:checked ~ .brk-stage-360:hover .brk-360-back .brk-ml-zoom-layer {{
+      opacity: 1;
+    }}
+    /* Visor Interativo 360 / Giro 3D no Ato 1 */
     .brk-360-inp, .brk-loupe-inp {{
       display: none !important;
     }}
@@ -2140,6 +2164,7 @@ class HTMLBuilder:
       transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
     }}
     .brk-360-face {{
+      position: relative;
       width: 100%;
       overflow: hidden;
       border-radius: 10px;
@@ -2155,19 +2180,9 @@ class HTMLBuilder:
       background-repeat: no-repeat;
       background-color: #ffffff;
       border-radius: 10px;
-      transition: background-size 0.16s ease-out;
     }}
     .brk-360-i2:checked ~ .brk-stage-360 .brk-360-rotator {{
       transform: rotateY(180deg);
-    }}
-    .brk-stage-360:hover .brk-360-front img,
-    .brk-360-i3:checked ~ .brk-stage-360 .brk-360-front img {{
-      transform: scale(2.5);
-      transform-origin: var(--lx, 50%) var(--ly, 22%);
-    }}
-    .brk-360-i2:checked ~ .brk-stage-360:hover .brk-360-back {{
-      background-size: 250%;
-      background-position: var(--lx, 50%) var(--ly, 35%);
     }}
     .brk-360-controls {{
       display: flex;
@@ -2197,35 +2212,28 @@ class HTMLBuilder:
       color: {theme_color};
     }}
     .brk-360-i1:checked ~ .brk-360-controls .brk-360-b1,
-    .brk-360-i2:checked ~ .brk-360-controls .brk-360-b2,
-    .brk-360-i3:checked ~ .brk-360-controls .brk-360-b3 {{
+    .brk-360-i2:checked ~ .brk-360-controls .brk-360-b2 {{
       background: {theme_color};
       color: #ffffff;
       border-color: {theme_color};
       box-shadow: 0 2px 8px {theme_color}40;
     }}
-    /* Lupa Dinâmica Estilo Mercado Livre (Segue o Mouse pela Peça) */
+    .brk-360-hint {{
+      font-size: 10px;
+      font-weight: 700;
+      color: #64748b;
+      padding: 0 6px;
+      white-space: nowrap;
+    }}
+    /* Cursor Guia da Lupa Dinâmica Estilo Mercado Livre */
     .brk-stage-loupe {{
+      position: relative;
       cursor: crosshair;
-    }}
-    .brk-stage-loupe.brk-focus-top {{
-      --ly: 20%;
-    }}
-    .brk-stage-loupe.brk-focus-mid {{
-      --ly: 38%;
-    }}
-    .brk-stage-loupe.brk-focus-center {{
-      --ly: 48%;
-    }}
-    .brk-stage-loupe:hover img,
-    .brk-loupe-inp:checked + .brk-stage-loupe img {{
-      transform: scale(2.55);
-      transform-origin: var(--lx, 50%) var(--ly, 25%);
     }}
     .brk-ml-cursor {{
       position: absolute;
-      left: var(--lx, 50%);
-      top: var(--ly, 50%);
+      left: 50%;
+      top: 50%;
       width: 96px;
       height: 96px;
       transform: translate(-50%, -50%) scale(0.7);
@@ -2236,7 +2244,7 @@ class HTMLBuilder:
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.18s ease, transform 0.18s ease;
-      z-index: 3;
+      z-index: 4;
     }}
     .brk-media-stage:hover .brk-ml-cursor {{
       opacity: 1;
@@ -2252,7 +2260,7 @@ class HTMLBuilder:
       position: absolute;
       bottom: 10px;
       right: 12px;
-      z-index: 2;
+      z-index: 3;
       background: rgba(15, 23, 42, 0.78);
       color: #ffffff;
       font-size: 10px;
@@ -2261,13 +2269,11 @@ class HTMLBuilder:
       border-radius: 9999px;
       backdrop-filter: blur(4px);
       pointer-events: none;
-      transition: opacity 0.2s ease, background 0.2s ease;
+      transition: opacity 0.2s ease;
     }}
-    .brk-stage-loupe:hover .brk-loupe-cta {{
+    .brk-stage-loupe:hover .brk-loupe-cta,
+    .brk-media-stage:hover .brk-loupe-cta {{
       opacity: 0;
-    }}
-    .brk-loupe-inp:checked + .brk-stage-loupe .brk-loupe-cta {{
-      background: {theme_color};
     }}
     .brk-media-infobar {{
       display: flex;

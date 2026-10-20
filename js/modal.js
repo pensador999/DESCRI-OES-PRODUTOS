@@ -3388,7 +3388,7 @@ function getProductModeBHTML(liveP) {
   const uidBase = rawUid.replace(/[^A-Za-z0-9]/g, "").slice(0, 16) || "brk";
   const isShirtArchMain = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId);
   const act2ImgCandidate = img2 || "";
-  const mlTrackAttrs = `onmousemove="var r=this.getBoundingClientRect(),x=Math.max(0,Math.min(100,((event.clientX-r.left)/r.width)*100)),y=Math.max(0,Math.min(100,((event.clientY-r.top)/r.height)*100));this.style.setProperty('--lx',x.toFixed(1)+'%');this.style.setProperty('--ly',y.toFixed(1)+'%');" ontouchmove="if(event.touches&&event.touches[0]){var r=this.getBoundingClientRect(),x=Math.max(0,Math.min(100,((event.touches[0].clientX-r.left)/r.width)*100)),y=Math.max(0,Math.min(100,((event.touches[0].clientY-r.top)/r.height)*100));this.style.setProperty('--lx',x.toFixed(1)+'%');this.style.setProperty('--ly',y.toFixed(1)+'%');}"`;
+  const mlTrackAttrs = `onmousemove="var r=this.getBoundingClientRect(),x=Math.max(0,Math.min(100,((event.clientX-r.left)/r.width)*100)).toFixed(2)+'%',y=Math.max(0,Math.min(100,((event.clientY-r.top)/r.height)*100)).toFixed(2)+'%';var lz=this.querySelectorAll('.brk-ml-zoom-layer');for(var i=0;i<lz.length;i++){lz[i].style.backgroundPosition=x+' '+y;}var cr=this.querySelector('.brk-ml-cursor');if(cr){cr.style.left=x;cr.style.top=y;}" ontouchmove="if(event.touches&&event.touches[0]){var r=this.getBoundingClientRect(),x=Math.max(0,Math.min(100,((event.touches[0].clientX-r.left)/r.width)*100)).toFixed(2)+'%',y=Math.max(0,Math.min(100,((event.touches[0].clientY-r.top)/r.height)*100)).toFixed(2)+'%';var lz=this.querySelectorAll('.brk-ml-zoom-layer');for(var i=0;i<lz.length;i++){lz[i].style.backgroundPosition=x+' '+y;}}"`;
 
   const blocksHtml = [];
   blocks.forEach((block, idx) => {
@@ -3410,12 +3410,17 @@ function getProductModeBHTML(liveP) {
     if (blockSplitImgs && blockSplitImgs.length >= 2) {
       const infoMeta = getClientMediaInfographicMeta(idx, archetypeId, liveP, formattedTitle, isShortSleeve, true);
       mediaHtml = `<div class="brk-desc-media brk-media-card">
-        <input type="checkbox" id="brkloupe_${uidBase}_${idx}" class="brk-loupe-inp" />
-        <label for="brkloupe_${uidBase}_${idx}" class="brk-media-stage brk-desc-media-split brk-stage-loupe" ${mlTrackAttrs}>
-          <div class="brk-split-item"><img src="${blockSplitImgs[0]}" alt="${safeTitleAlt} - Opção 1" loading="lazy" referrerpolicy="no-referrer" /></div>
-          <div class="brk-split-item"><img src="${blockSplitImgs[1]}" alt="${safeTitleAlt} - Opção 2" loading="lazy" referrerpolicy="no-referrer" /></div>
-          <span class="brk-loupe-cta">Passe o mouse p/ Lupa 2.5x</span>
-        </label>
+        <div class="brk-media-stage brk-desc-media-split">
+          <div class="brk-split-item brk-stage-loupe" ${mlTrackAttrs}>
+            <img src="${blockSplitImgs[0]}" alt="${safeTitleAlt} - Opção 1" loading="lazy" referrerpolicy="no-referrer" />
+            <div class="brk-ml-zoom-layer" style="background-image: url('${blockSplitImgs[0]}');"></div>
+          </div>
+          <div class="brk-split-item brk-stage-loupe" ${mlTrackAttrs}>
+            <img src="${blockSplitImgs[1]}" alt="${safeTitleAlt} - Opção 2" loading="lazy" referrerpolicy="no-referrer" />
+            <div class="brk-ml-zoom-layer" style="background-image: url('${blockSplitImgs[1]}');"></div>
+          </div>
+          <span class="brk-loupe-cta">Passe o mouse p/ Lupa 2.4x</span>
+        </div>
         <div class="brk-media-infobar">
           <span class="brk-media-info-left">${getSvgIcon(infoMeta.icon, themeColor, 14)} <span>${infoMeta.label}</span></span>
           <span class="brk-media-info-pill">${infoMeta.pill}</span>
@@ -3430,20 +3435,22 @@ function getProductModeBHTML(liveP) {
       mediaHtml = `<div class="brk-desc-media brk-media-card brk-card-360">
         <input type="radio" name="brk360_${uidBase}" id="brk360_${uidBase}_1" class="brk-360-inp brk-360-i1" checked />
         <input type="radio" name="brk360_${uidBase}" id="brk360_${uidBase}_2" class="brk-360-inp brk-360-i2" />
-        <input type="radio" name="brk360_${uidBase}" id="brk360_${uidBase}_3" class="brk-360-inp brk-360-i3" />
         <div class="brk-media-stage brk-stage-360${focusCls}" ${mlTrackAttrs}>
           <div class="brk-360-rotator">
             <div class="brk-360-face brk-360-front">
               <img src="${blockImg}" alt="${safeBlockAlt}" loading="lazy" referrerpolicy="no-referrer" />
+              <div class="brk-ml-zoom-layer" style="background-image: url('${blockImg}');"></div>
             </div>
-            <div class="brk-360-face brk-360-back" style="background-image: url('${back360Url}');"></div>
+            <div class="brk-360-face brk-360-back" style="background-image: url('${back360Url}');">
+              <div class="brk-ml-zoom-layer" style="background-image: url('${back360Url}');"></div>
+            </div>
           </div>
           <span class="brk-ml-cursor"></span>
         </div>
         <div class="brk-360-controls">
           <label for="brk360_${uidBase}_1" class="brk-360-btn brk-360-b1">${btn1Lbl}</label>
           <label for="brk360_${uidBase}_2" class="brk-360-btn brk-360-b2">${btn2Lbl}</label>
-          <label for="brk360_${uidBase}_3" class="brk-360-btn brk-360-b3">Lupa 2.4x</label>
+          <span class="brk-360-hint">Passe o mouse p/ Lupa 2.4x</span>
         </div>
         <div class="brk-media-infobar">
           <span class="brk-media-info-left">${getSvgIcon(infoMeta.icon, themeColor, 14)} <span>${infoMeta.label}</span></span>
@@ -3456,13 +3463,13 @@ function getProductModeBHTML(liveP) {
       if (idx === 2 && isShirtArchMain) focusCls = " brk-focus-top";
       else if (idx === 1 && isShirtArchMain) focusCls = " brk-focus-mid";
       mediaHtml = `<div class="brk-desc-media brk-media-card brk-card-loupe">
-        <input type="checkbox" id="brkloupe_${uidBase}_${idx}" class="brk-loupe-inp" />
-        <label for="brkloupe_${uidBase}_${idx}" class="brk-media-stage brk-stage-loupe${focusCls}" ${mlTrackAttrs} title="Passe o mouse para aproximar na peça">
+        <div class="brk-media-stage brk-stage-loupe${focusCls}" ${mlTrackAttrs}>
           <img src="${blockImg}" alt="${safeBlockAlt}" loading="lazy" referrerpolicy="no-referrer" />
+          <div class="brk-ml-zoom-layer" style="background-image: url('${blockImg}');"></div>
           <span class="brk-ml-cursor"></span>
           <span class="brk-loupe-lens" style="background-image: url('${blockImg}');"><span class="brk-loupe-badge">Lupa 2.4x</span></span>
-          <span class="brk-loupe-cta">Passe o mouse p/ Lupa 2.5x</span>
-        </label>
+          <span class="brk-loupe-cta">Passe o mouse p/ Lupa 2.4x</span>
+        </div>
         <div class="brk-media-infobar">
           <span class="brk-media-info-left">${getSvgIcon(infoMeta.icon, themeColor, 14)} <span>${infoMeta.label}</span></span>
           <span class="brk-media-info-pill">${infoMeta.pill}</span>
@@ -3710,8 +3717,6 @@ function getProductModeBHTML(liveP) {
       box-shadow: 0 12px 30px rgba(15, 23, 42, 0.11);
     }
     .brk-media-stage {
-      --lx: 50%;
-      --ly: 25%;
       position: relative;
       width: 100%;
       overflow: hidden;
@@ -3728,9 +3733,29 @@ function getProductModeBHTML(liveP) {
       display: block;
       margin: 0 auto;
       background: #ffffff;
-      transform-origin: var(--lx, 50%) var(--ly, 25%);
-      transition: transform 0.16s ease-out;
-      will-change: transform, transform-origin;
+    }
+    .brk-ml-zoom-layer {
+      position: absolute;
+      inset: 6px;
+      border-radius: 10px;
+      background-repeat: no-repeat;
+      background-color: #ffffff;
+      background-size: 250%;
+      background-position: 50% 30%;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.16s ease;
+      z-index: 2;
+    }
+    .brk-stage-loupe:hover .brk-ml-zoom-layer,
+    .brk-stage-360:hover .brk-360-front .brk-ml-zoom-layer {
+      opacity: 1;
+    }
+    .brk-360-i2:checked ~ .brk-stage-360:hover .brk-360-front .brk-ml-zoom-layer {
+      opacity: 0;
+    }
+    .brk-360-i2:checked ~ .brk-stage-360:hover .brk-360-back .brk-ml-zoom-layer {
+      opacity: 1;
     }
     .brk-360-inp, .brk-loupe-inp {
       display: none !important;
@@ -3746,6 +3771,7 @@ function getProductModeBHTML(liveP) {
       transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .brk-360-face {
+      position: relative;
       width: 100%;
       overflow: hidden;
       border-radius: 10px;
@@ -3761,19 +3787,9 @@ function getProductModeBHTML(liveP) {
       background-repeat: no-repeat;
       background-color: #ffffff;
       border-radius: 10px;
-      transition: background-size 0.16s ease-out;
     }
     .brk-360-i2:checked ~ .brk-stage-360 .brk-360-rotator {
       transform: rotateY(180deg);
-    }
-    .brk-stage-360:hover .brk-360-front img,
-    .brk-360-i3:checked ~ .brk-stage-360 .brk-360-front img {
-      transform: scale(2.5);
-      transform-origin: var(--lx, 50%) var(--ly, 22%);
-    }
-    .brk-360-i2:checked ~ .brk-stage-360:hover .brk-360-back {
-      background-size: 250%;
-      background-position: var(--lx, 50%) var(--ly, 35%);
     }
     .brk-360-controls {
       display: flex;
@@ -3803,34 +3819,27 @@ function getProductModeBHTML(liveP) {
       color: ${themeColor};
     }
     .brk-360-i1:checked ~ .brk-360-controls .brk-360-b1,
-    .brk-360-i2:checked ~ .brk-360-controls .brk-360-b2,
-    .brk-360-i3:checked ~ .brk-360-controls .brk-360-b3 {
+    .brk-360-i2:checked ~ .brk-360-controls .brk-360-b2 {
       background: ${themeColor};
       color: #ffffff;
       border-color: ${themeColor};
       box-shadow: 0 2px 8px ${themeColor}40;
     }
+    .brk-360-hint {
+      font-size: 10px;
+      font-weight: 700;
+      color: #64748b;
+      padding: 0 6px;
+      white-space: nowrap;
+    }
     .brk-stage-loupe {
+      position: relative;
       cursor: crosshair;
-    }
-    .brk-stage-loupe.brk-focus-top {
-      --ly: 20%;
-    }
-    .brk-stage-loupe.brk-focus-mid {
-      --ly: 38%;
-    }
-    .brk-stage-loupe.brk-focus-center {
-      --ly: 48%;
-    }
-    .brk-stage-loupe:hover img,
-    .brk-loupe-inp:checked + .brk-stage-loupe img {
-      transform: scale(2.55);
-      transform-origin: var(--lx, 50%) var(--ly, 25%);
     }
     .brk-ml-cursor {
       position: absolute;
-      left: var(--lx, 50%);
-      top: var(--ly, 50%);
+      left: 50%;
+      top: 50%;
       width: 96px;
       height: 96px;
       transform: translate(-50%, -50%) scale(0.7);
@@ -3841,7 +3850,7 @@ function getProductModeBHTML(liveP) {
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.18s ease, transform 0.18s ease;
-      z-index: 3;
+      z-index: 4;
     }
     .brk-media-stage:hover .brk-ml-cursor {
       opacity: 1;
@@ -3857,7 +3866,7 @@ function getProductModeBHTML(liveP) {
       position: absolute;
       bottom: 10px;
       right: 12px;
-      z-index: 2;
+      z-index: 3;
       background: rgba(15, 23, 42, 0.78);
       color: #ffffff;
       font-size: 10px;
@@ -3866,13 +3875,11 @@ function getProductModeBHTML(liveP) {
       border-radius: 9999px;
       backdrop-filter: blur(4px);
       pointer-events: none;
-      transition: opacity 0.2s ease, background 0.2s ease;
+      transition: opacity 0.2s ease;
     }
-    .brk-stage-loupe:hover .brk-loupe-cta {
+    .brk-stage-loupe:hover .brk-loupe-cta,
+    .brk-media-stage:hover .brk-loupe-cta {
       opacity: 0;
-    }
-    .brk-loupe-inp:checked + .brk-stage-loupe .brk-loupe-cta {
-      background: ${themeColor};
     }
     .brk-media-infobar {
       display: flex;
@@ -4325,18 +4332,25 @@ ${copyrightHtml}
 ${schemaJsonLd}`;
 }
 
-// Delegação global para Lupa Dinâmica Estilo Mercado Livre (acompanha o mouse em tempo real nos 3 Atos)
+// Delegação global para Lupa Dinâmica Estilo Mercado Livre (acompanha o mouse em tempo real nos 3 Atos sem travar)
 if (typeof document !== "undefined" && !window.__BRK_ML_LOUPE_BOUND) {
   window.__BRK_ML_LOUPE_BOUND = true;
   const updateBrkStageCoords = (e, clientX, clientY) => {
-    const stage = e.target && e.target.closest ? e.target.closest(".brk-media-stage") : null;
+    const stage = e.target && e.target.closest ? e.target.closest(".brk-stage-loupe, .brk-stage-360, .brk-media-stage") : null;
     if (!stage) return;
     const r = stage.getBoundingClientRect();
     if (!r.width || !r.height) return;
-    const x = Math.max(0, Math.min(100, ((clientX - r.left) / r.width) * 100));
-    const y = Math.max(0, Math.min(100, ((clientY - r.top) / r.height) * 100));
-    stage.style.setProperty("--lx", x.toFixed(1) + "%");
-    stage.style.setProperty("--ly", y.toFixed(1) + "%");
+    const x = Math.max(0, Math.min(100, ((clientX - r.left) / r.width) * 100)).toFixed(2) + "%";
+    const y = Math.max(0, Math.min(100, ((clientY - r.top) / r.height) * 100)).toFixed(2) + "%";
+    const layers = stage.querySelectorAll(".brk-ml-zoom-layer");
+    for (let i = 0; i < layers.length; i++) {
+      layers[i].style.backgroundPosition = x + " " + y;
+    }
+    const cursor = stage.querySelector(".brk-ml-cursor");
+    if (cursor) {
+      cursor.style.left = x;
+      cursor.style.top = y;
+    }
   };
   document.addEventListener("mousemove", (e) => updateBrkStageCoords(e, e.clientX, e.clientY), { passive: true });
   document.addEventListener("touchmove", (e) => {
