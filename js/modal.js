@@ -2563,7 +2563,40 @@ const EXPLICIT_BACK_POC_HASHES = [
   "236b64bb841b", "0721a4c8ce17", "82bf06e5656d", "086u9hh",
   "4ad9fc8f16bc", "94a3b81f5954", "73591bff33b1", "32165d82a90b",
   "fcb50f9e02ac", "b3e2c7dc24a2", "c8a91438bfdd", "e5092aceccc3",
-  "2339b90698f3", "84a9e29f3d47", "0a5de4344adb", "c02837bl.webp"
+  "2339b90698f3", "84a9e29f3d47", "0a5de4344adb", "c02837bl.webp",
+  "c548407e", "ec5b9024", "1a8929e3", "1524a040", "2f96f543", "d000cf7e", "fa33bfa6",
+  "bc24ae71", "dca252fa", "f8fbe84e", "0a8feee6", "59c6e4c0", "9170d7b1", "878c454f",
+  "59a38649", "4b867467", "a8302ae8", "3ceae18c", "ce5d92d7", "58953552", "061eb7bc",
+  "b0e916f8", "d43c5a58", "61812f9a", "a5c13f78", "1ca3d397", "a4c26e1c",
+  "45264908", "13105c88", "fd83706b", "8c080972", "f216f901", "4d2d6d08", "c252c71d",
+  "46527a54", "690bc78c", "04573785", "e38b5b7a", "36f55c3f", "8ab61efc", "a5d85d3f",
+  "99eac446", "9441361f", "467d8be4", "f6ac2d2f", "0613bce8", "0f246755", "b572fc99",
+  "918533a9", "7207f2f3", "6c7ea73a", "a0deafd1", "857b9ee5", "79bc00df", "9ea038aa",
+  "0171fd65", "9d69cd2a", "6cf52d17", "74ff3b1b", "84c0fd2a", "50927e47", "d53188b6",
+  "f9272d9d", "b4e6b115", "6ae27aba", "da70f47a", "26162728", "3695e90e", "2aba8948",
+  "28b07dbe", "477731fa", "d1fa0698", "b3c85297", "c11b6e73", "50cfe677", "ff755646",
+  "e2e61d79", "3d94f24c", "1f3124fe", "9c9aec2c", "b32ac4aa", "bde30803", "e97cd38b",
+  "9866b4af", "474379d9", "aee9a4d7", "a0268929", "80e0722b", "ba4b97f3", "311b1a48",
+  "387611db",
+  "1e528db3", "1ae31ae8", "eeb483da", "641138aa", "7af8bee7", "96a33263", "bd421e10",
+  "72a45e5a", "171544dd", "0e2f0090", "0efb8232", "e5731d9f", "54bfe1d4", "9f9bda93",
+  "bb5b18c7", "e88ba3e1", "0010ded4", "21f474ee", "c79bce79", "3adfeb2d", "e566edc6",
+  "6e7e1221", "787a7d0b", "a5025406", "891beb7a", "57649b54", "09af3788", "173299e0",
+  "d7f2bfe2", "876b52fe", "9ef1be5e", "ce77f8a9", "a8fc9f34", "f926f2f9", "f5047d84",
+  "b56a2aed", "521f0869", "388fa6af", "6d9cbfb8", "b8d9699c", "c17c1302", "2bf64b3f",
+  "61500b8b", "e530b68e", "c5b54f10", "2b6c194f", "02781a5e", "9ba59d31", "603df378",
+  "eb6064ae", "1a8c7ea9", "93250732", "d3cacd5c", "4f445b35", "bce437e5", "f4a005bc",
+  "77850713", "08e156f1", "91b565a3", "c39e65b5", "da63c015", "b277f79c", "0e6cf2c0",
+  "ba878fcc", "71a54be9", "abc2a560", "1aac96a2", "d6035923", "03dbed6f", "11fcc517",
+  "81ccd5ac", "4f96b46d", "d670dece", "bc78e78c", "e2774c44", "6a833563", "f1e47bff",
+  "d2d1d19a", "32a3d776", "dc2a5969", "53dca2d0", "8212ed55", "13ba8a69", "bc98ee7b",
+  "583328cc", "063a40dd", "8db723a7", "9e0d1a83", "14a98c08", "8070ee59", "c2b30a94",
+  "33d33a45", "fb4ca266", "573b0e79", "3a78a6a2", "bdcc212d", "33f3559a", "cabfb843",
+  "9b2d4240", "d0518590", "611b4e36", "97181e9f", "a2b260ba", "8b129343", "0ae4a4ba",
+  "12836d62", "5deb18b2", "4fae46ea", "a95867bc", "a359da0e", "a3fe2a08", "3f1079ca",
+  "350ac9a4", "42ed5a54", "e12745ed", "784b0d09", "07a248f9", "7ceab477", "e6ae4c22",
+  "fd8814b0", "f18b4e92", "f23c1aae", "e8ab12ed", "d1911749", "05978a94", "55ff42d9",
+  "38b9f32b", "ec809742", "c2db5498", "dd5b5986", "03_6c7c8bc", "cbtmc042.webp"
 ];
 
 function isClientBackViewUrl(url, include03 = false) {
@@ -2859,6 +2892,27 @@ function selectClientApparelActImages(cdnImages, isFemale = false, isKids = fals
       return [workingImages[0], workingImages[2], workingImages[3]];
     }
 
+    if (fnames[1].includes("171544dd") && fnames[3].includes("6d0faf03")) {
+      return [workingImages[0], workingImages[1], workingImages[3]];
+    }
+
+    const pocFlags = fnames.slice(0, 4).map(f => f.includes("productonchannel"));
+    if ((!pocFlags[0] && pocFlags[1] && pocFlags[2] && pocFlags[3]) || (fnames[0].includes("c1bd5af8") && pocFlags[1] && pocFlags[2] && pocFlags[3])) {
+      const backsPoc = workingImages.slice(1, 4).filter(u => isClientExplicitBackName(u));
+      const frontsPoc = workingImages.slice(1, 4).filter(u => !isClientExplicitBackName(u));
+      if (backsPoc.length > 0 && frontsPoc.length > 0) {
+        return [workingImages[0], backsPoc[0], frontsPoc[0]];
+      }
+      return [workingImages[0], workingImages[2], workingImages[1]];
+    }
+
+    if (pocFlags.every(Boolean) && isClientExplicitBackName(workingImages[0]) && !isClientExplicitBackName(workingImages[1])) {
+      const front0 = workingImages[1];
+      const back0 = workingImages[0];
+      const act3Cand = !isClientExplicitBackName(workingImages[2]) ? workingImages[2] : workingImages[3];
+      return [front0, back0, act3Cand];
+    }
+
     if (fnames[0].includes("frente") && isClientExplicitBackName(workingImages[1])) {
       const nonBackRest = workingImages.slice(1).filter(u => !isClientExplicitBackName(u));
       if (nonBackRest.length > 0) {
@@ -2880,10 +2934,6 @@ function selectClientApparelActImages(cdnImages, isFemale = false, isKids = fals
       return [workingImages[0], workingImages[1], workingImages[2]];
     }
 
-    const pocFlags = fnames.slice(0, 4).map(f => f.includes("productonchannel"));
-    if (!pocFlags[0] && pocFlags[1] && pocFlags[2] && pocFlags[3]) {
-      return [workingImages[0], workingImages[2], workingImages[1]];
-    }
     if (!pocFlags[0] && !pocFlags[1] && pocFlags[2] && pocFlags[3]) {
       return [workingImages[0], workingImages[2], workingImages[3]];
     }
@@ -2976,6 +3026,64 @@ function selectClientApparelActImages(cdnImages, isFemale = false, isKids = fals
   return [img1, rem[0], rem[1]];
 }
 
+const HUMANIZED_BACK_COVER_SKU_PREFIXES = [
+  "BP10", "C02893", "C02894", "C02895", "C02896", "C02897",
+  "C02864", "C02865", "C02863", "C02861", "C02860",
+  "C02830", "C02829", "C02827", "C02826", "C02824", "C02822",
+  "C02884", "C02879", "C02875"
+];
+
+function resolveClientApparelActAnd360Images(cdnImages, isFemale = false, isKids = false, sku = "", title = "") {
+  const [base1, base2, base3] = selectClientApparelActImages(cdnImages, isFemale, isKids, sku, title);
+  if (!cdnImages || cdnImages.length < 4) {
+    return [base1, base2, base3, "", false];
+  }
+
+  const classifyAud = (u) => {
+    const fname = (u || "").toLowerCase().split("?")[0].split("/").pop();
+    const hasMasc = ["masc", "man2", "homem"].some(k => fname.includes(k)) || /^(?:casual|c0|cm)\d+(?:pp|p|m|g|gg|xg|xgg|g1|g2|g3)(?:[-_.\d]|$)/i.test(fname);
+    const hasFem = ["fem", "mulher"].some(k => fname.includes(k)) || /(?:^|[-_.\d])bl(?:[-_.\d]|$)/i.test(fname) || /^(?:casual|c0|cf|cm)\d+bl/i.test(fname);
+    const hasInf = ["inf", "kids", "crianca", "juvenil"].some(k => fname.includes(k)) || /^(?:casual|c0|cm)\d+i(?:pp|p|m|g|gg|g1|g2|\d+)?(?:[-_.\d]|$)/i.test(fname);
+    return { om: hasMasc && !hasFem && !hasInf, of: hasFem && !hasMasc && !hasInf, oi: hasInf && !hasMasc && !hasFem };
+  };
+
+  let workingPool = [...cdnImages];
+  if (isKids || isFemale || cdnImages.some(u => { const c = classifyAud(u); return c.om || c.of || c.oi; })) {
+    const compat = cdnImages.filter(u => {
+      const { om, of, oi } = classifyAud(u);
+      if (isKids) return !om && !of;
+      if (isFemale) return !om && !oi;
+      return !of && !oi;
+    });
+    if (compat.length > 0) workingPool = compat;
+  }
+
+  const usedBase = new Set([base1, base2, base3].filter(Boolean));
+  const unused4 = workingPool.filter(u => u && !usedBase.has(u));
+  if (unused4.length === 0) {
+    return [base1, base2, base3, "", false];
+  }
+
+  const f0 = ((base1 || workingPool[0]) || "").toLowerCase().split("?")[0].split("/").pop();
+  const skuUp = (sku || "").trim().toUpperCase();
+  const isHumanizedCover = (!f0.includes("productonchannel")) || f0.includes("c1bd5af8");
+  const studioBacksInRest = workingPool.slice(1, 4).filter(u => isClientExplicitBackName(u)).length;
+  const isHumanizedBackCover = isHumanizedCover && (
+    f0.includes("c1bd5af8")
+    || HUMANIZED_BACK_COVER_SKU_PREFIXES.some(p => skuUp.startsWith(p))
+    || (
+      studioBacksInRest >= 2
+      && !["frente", "01_", "1_", "01fem", "01masc", "01inf", "1fem", "1masc", "1inf"].some(k => f0.includes(k))
+      && (workingPool[1] || "").toLowerCase().includes("productonchannel")
+    )
+  );
+
+  if (isHumanizedBackCover) {
+    return [base1, base2, unused4[0], base3, true];
+  }
+  return [base1, unused4[0], base3, base2, false];
+}
+
 function selectClientCutleryActImages(cdnImages, title = "") {
   if (!cdnImages || cdnImages.length === 0) return ["", "", ""];
   if (cdnImages.length === 1) return [cdnImages[0], "", ""];
@@ -3064,16 +3172,23 @@ function getProductModeBHTML(liveP) {
   let img1 = images[0] || "";
   let img2 = images[1] || "";
   let img3 = images[2] || "";
+  let back360Img = "";
+  let isBackCover360 = false;
 
   if (hasMultipleVariations && (images.length >= 4 || images.length === 2)) {
     img2 = images[2] || "";
     img3 = images[3] || "";
   } else if (isApparel) {
-    [img1, img2, img3] = selectClientApparelActImages(images, isFemaleModal, isKidsModal, skuLowModal, liveP.title || "");
+    [img1, img2, img3, back360Img, isBackCover360] = resolveClientApparelActAnd360Images(images, isFemaleModal, isKidsModal, skuLowModal, liveP.title || "");
   } else if (archetypeId === "cutlery_unique") {
     [img1, img2, img3] = selectClientCutleryActImages(images, liveP.title || "");
   } else if (archetypeId === "fishing_tackle_gear" && (liveP.title || "").toLowerCase().includes("trava vara") && images.length >= 3) {
     [img1, img2, img3] = [images[0], images[2], images[1]];
+  }
+  if (!isApparel && !splitImages && images.length >= 4) {
+    const usedNonApp = new Set([img1, img2, img3].filter(Boolean));
+    const unusedNonApp = images.filter(u => u && !usedNonApp.has(u) && !u.toLowerCase().includes("2-capa"));
+    if (unusedNonApp.length > 0) back360Img = unusedNonApp[0];
   }
 
   let blocks = liveP.narrative_blocks ? liveP.narrative_blocks.map(b => ({ ...b })) : null;
@@ -3426,12 +3541,13 @@ function getProductModeBHTML(liveP) {
           <span class="brk-media-info-pill">${infoMeta.pill}</span>
         </div>
       </div>`;
-    } else if (blockImg && idx === 0) {
+    } else if (blockImg && idx === 0 && (block.back_360_image || back360Img) && (block.back_360_image || back360Img) !== blockImg) {
       const infoMeta = getClientMediaInfographicMeta(idx, archetypeId, liveP, formattedTitle, isShortSleeve, false);
-      const back360Url = act2ImgCandidate || blockImg;
+      const back360Url = block.back_360_image || back360Img;
+      const isBack360 = Boolean(block.is_back_cover_360 !== undefined ? block.is_back_cover_360 : isBackCover360);
       const focusCls = isShirtArchMain ? " brk-focus-top" : " brk-focus-center";
-      const btn1Lbl = isShirtArchMain ? "0° Frente" : "0° Vista 1";
-      const btn2Lbl = (isShirtArchMain && act2ImgCandidate) ? "180° Costas" : "180° Giro 3D";
+      const btn1Lbl = isBack360 ? "180° Costas" : (isShirtArchMain ? "0° Frente" : "0° Vista 1");
+      const btn2Lbl = isBack360 ? "0° Frente" : (isShirtArchMain ? "180° Costas" : "180° Giro 3D");
       mediaHtml = `<div class="brk-desc-media brk-media-card brk-card-360">
         <input type="radio" name="brk360_${uidBase}" id="brk360_${uidBase}_1" class="brk-360-inp brk-360-i1" checked />
         <input type="radio" name="brk360_${uidBase}" id="brk360_${uidBase}_2" class="brk-360-inp brk-360-i2" />

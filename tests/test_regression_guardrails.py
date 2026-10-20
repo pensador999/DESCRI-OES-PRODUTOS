@@ -1387,7 +1387,7 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         self.assertEqual(g_stat_bad, "MODO_B_DESATUALIZADO")
         self.assertIn("bainha", g_reason_bad.lower())
 
-        # 6. Card Infográfico Técnico c/ Giro 360° (Ato 1) e Lupa Óptica 2.4x (Atos 2 e 3) sem selos no topo
+        # 6. Card Infográfico Técnico c/ Giro 360° (Ato 1) e Lupa Óptica 2.4x (Atos 2 e 3) sem selos no topo e ZERO duplicação
         fusion_3imgs = {
             "id": 9183938609999,
             "master_sku": "FUSION159BL",
@@ -1396,6 +1396,7 @@ class TestBRKStudioVerticalization(unittest.TestCase):
                 "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/f159_1.jpg",
                 "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/f159_2.jpg",
                 "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/f159_3.jpg",
+                "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/f159_4.jpg",
             ],
         }
         enr_f159 = template_engine.generate_narrative_from_template(fusion_3imgs, "uv_performance", fusion_3imgs["images"], store_key="brk_fishing")
@@ -1410,6 +1411,33 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         self.assertIn("Foco Frontal: Capuz, Máscara Facial & Dedeira", html_f159)
         self.assertNotIn("brk-media-view-pill", html_f159, "Nomenclaturas do topo das 3 imagens devem ser removidas!")
         self.assertNotIn("ZOOM DE ACABAMENTO • ATO 03", html_f159)
+
+        # 7. Mapeamento de Capa Humanizada de Costas (ex: C02894BL) vs. Capa Humanizada de Frente (ex: FUSION53) com ZERO fotos duplicadas
+        c02894bl = {
+            "id": 9974611804487,
+            "master_sku": "C02894BL",
+            "title": "Camisa Feminina Brk Motors Freddy It's Closer Com Proteção Solar UV50+",
+            "images": [
+                "https://cdn.shopify.com/s/files/1/0920/4799/9271/files/c1bd5af8-660e-442e-8fa6-8aa10be287bd.png?v=1776186801",
+                "https://cdn.shopify.com/s/files/1/0920/4799/9271/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F187989328_2F7b43fa894fa84b36afce86cf504eb5e1.jpg?v=1774011343",
+                "https://cdn.shopify.com/s/files/1/0920/4799/9271/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F187989328_2Fdca252fa584e4376901980d0e004f87b.jpg?v=1774011346",
+                "https://cdn.shopify.com/s/files/1/0920/4799/9271/files/246708f34b714adb975e4f56237d4841_2FproductOnChannel_2Fimages_2F187989328_2F4f88725a70334433bfeb288acde54b2c.jpg?v=1774011348",
+            ],
+        }
+        enr_2894 = template_engine.generate_narrative_from_template(c02894bl, "uv_performance", c02894bl["images"], store_key="brk_motors")
+        html_2894 = html_builder.build_shopify_html(enr_2894)
+        self.assertTrue(enr_2894["act1"]["is_back_cover_360"])
+        self.assertIn("c1bd5af8", enr_2894["act1"]["image"])
+        self.assertIn("7b43fa89", enr_2894["act1"]["back_360_image"])
+        self.assertIn("dca252fa", enr_2894["act2"]["image"])
+        self.assertIn("4f88725a", enr_2894["act3"]["image"])
+        self.assertIn('class="brk-360-btn brk-360-b1">180° Costas</label>', html_2894)
+        self.assertIn('class="brk-360-btn brk-360-b2">0° Frente</label>', html_2894)
+        srcs_2894 = re.findall(r'<img[^>]+src=["\']([^"\']+)["\']', html_2894, re.I)
+        bgs_2894 = re.findall(r'brk-360-back["\'][^>]*style=["\'][^"\']*url\(["\']?([^"\'\)]+)["\']?\)', html_2894, re.I)
+        all_4_2894 = [u.split("?")[0] for u in (srcs_2894 + bgs_2894)]
+        self.assertEqual(len(all_4_2894), 4)
+        self.assertEqual(len(set(all_4_2894)), 4, "As 4 fotos visuais (Ato 1 Face 1, Ato 1 Face 2, Ato 2 e Ato 3) devem ser 100% distintas!")
 
 
 def run_tests():

@@ -1791,6 +1791,42 @@ class TemplateEngine:
         "4ad9fc8f16bc", "94a3b81f5954", "73591bff33b1", "32165d82a90b",
         "fcb50f9e02ac", "b3e2c7dc24a2", "c8a91438bfdd", "e5092aceccc3",
         "2339b90698f3", "84a9e29f3d47", "0a5de4344adb", "c02837bl.webp",
+        # brk_motors (C02893..C02897BL, C02893I..2897I, BP105BL)
+        "c548407e", "ec5b9024", "1a8929e3", "1524a040", "2f96f543", "d000cf7e", "fa33bfa6",
+        "bc24ae71", "dca252fa", "f8fbe84e", "0a8feee6", "59c6e4c0", "9170d7b1", "878c454f",
+        "59a38649", "4b867467", "a8302ae8", "3ceae18c", "ce5d92d7", "58953552", "061eb7bc",
+        "b0e916f8", "d43c5a58", "61812f9a", "a5c13f78", "1ca3d397", "a4c26e1c",
+        # brk_fishing (FUSION264..267BL, CI139I..146I, C02874..2888BL, FUSION156BL/160, C02406, C02907/2906, C02800I..2819, C02795I..2799I, C02503BL, C01828BL, C01316BL)
+        "45264908", "13105c88", "fd83706b", "8c080972", "f216f901", "4d2d6d08", "c252c71d",
+        "46527a54", "690bc78c", "04573785", "e38b5b7a", "36f55c3f", "8ab61efc", "a5d85d3f",
+        "99eac446", "9441361f", "467d8be4", "f6ac2d2f", "0613bce8", "0f246755", "b572fc99",
+        "918533a9", "7207f2f3", "6c7ea73a", "a0deafd1", "857b9ee5", "79bc00df", "9ea038aa",
+        "0171fd65", "9d69cd2a", "6cf52d17", "74ff3b1b", "84c0fd2a", "50927e47", "d53188b6",
+        "f9272d9d", "b4e6b115", "6ae27aba", "da70f47a", "26162728", "3695e90e", "2aba8948",
+        "28b07dbe", "477731fa", "d1fa0698", "b3c85297", "c11b6e73", "50cfe677", "ff755646",
+        "e2e61d79", "3d94f24c", "1f3124fe", "9c9aec2c", "b32ac4aa", "bde30803", "e97cd38b",
+        "9866b4af", "474379d9", "aee9a4d7", "a0268929", "80e0722b", "ba4b97f3", "311b1a48",
+        "387611db",
+        # brk_agro (C02901..2906, CI111..124, BP103..105, C0796, C01203, C01966BL, C01828BL/I, C02806..2869, C02783I..2794I, C02648..2684, C02585, C02047I, CBTML024, CBTMC042)
+        "1e528db3", "1ae31ae8", "eeb483da", "641138aa", "7af8bee7", "96a33263", "bd421e10",
+        "72a45e5a", "171544dd", "0e2f0090", "0efb8232", "e5731d9f", "54bfe1d4", "9f9bda93",
+        "bb5b18c7", "e88ba3e1", "0010ded4", "21f474ee", "c79bce79", "3adfeb2d", "e566edc6",
+        "6e7e1221", "787a7d0b", "a5025406", "891beb7a", "57649b54", "09af3788", "173299e0",
+        "d7f2bfe2", "876b52fe", "9ef1be5e", "ce77f8a9", "a8fc9f34", "f926f2f9", "f5047d84",
+        "b56a2aed", "521f0869", "388fa6af", "6d9cbfb8", "b8d9699c", "c17c1302", "2bf64b3f",
+        "61500b8b", "e530b68e", "c5b54f10", "2b6c194f", "02781a5e", "9ba59d31", "603df378",
+        "eb6064ae", "1a8c7ea9", "93250732", "d3cacd5c", "4f445b35", "bce437e5", "f4a005bc",
+        "77850713", "08e156f1", "91b565a3", "c39e65b5", "da63c015", "b277f79c", "0e6cf2c0",
+        "ba878fcc", "71a54be9", "abc2a560", "1aac96a2", "d6035923", "03dbed6f", "11fcc517",
+        "81ccd5ac", "4f96b46d", "d670dece", "bc78e78c", "e2774c44", "6a833563", "f1e47bff",
+        "d2d1d19a", "32a3d776", "dc2a5969", "53dca2d0", "8212ed55", "13ba8a69", "bc98ee7b",
+        "583328cc", "063a40dd", "8db723a7", "9e0d1a83", "14a98c08", "8070ee59", "c2b30a94",
+        "33d33a45", "fb4ca266", "573b0e79", "3a78a6a2", "bdcc212d", "33f3559a", "cabfb843",
+        "9b2d4240", "d0518590", "611b4e36", "97181e9f", "a2b260ba", "8b129343", "0ae4a4ba",
+        "12836d62", "5deb18b2", "4fae46ea", "a95867bc", "a359da0e", "a3fe2a08", "3f1079ca",
+        "350ac9a4", "42ed5a54", "e12745ed", "784b0d09", "07a248f9", "7ceab477", "e6ae4c22",
+        "fd8814b0", "f18b4e92", "f23c1aae", "e8ab12ed", "d1911749", "05978a94", "55ff42d9",
+        "38b9f32b", "ec809742", "c2db5498", "dd5b5986", "03_6c7c8bc", "cbtmc042.webp",
     )
 
     def _is_back_view_url(self, url: str, include_03: bool = False) -> bool:
@@ -2094,6 +2130,25 @@ class TemplateEngine:
             if nums_first4[:3] in ([7, 6, 8], [6, 7, 8], [5, 6, 7], [6, 5, 7]) or set(n for n in nums_first4 if n is not None) == {7, 8, 9}:
                 return working_images[0], working_images[2], working_images[3]
 
+            # Caso especial C01828BL em brk_agro ([0]=Humanizada Frente, [1]=POC 180° Costas 171544dd, [2]=5_fem Combo, [3]=POC 0° Frente 6d0faf03)
+            if "171544dd" in fnames[1] and "6d0faf03" in fnames[3]:
+                return working_images[0], working_images[1], working_images[3]
+
+            # Subcaso 1D-POC: Galerias productOnChannel (com ou sem capa humanizada em [0])
+            poc_flags = ["productonchannel" in f for f in fnames[:4]]
+            if (not poc_flags[0] and all(poc_flags[1:4])) or ("c1bd5af8" in fnames[0] and all(poc_flags[1:4])):
+                backs_poc = [u for u in working_images[1:4] if self._is_explicit_back_name(u)]
+                fronts_poc = [u for u in working_images[1:4] if not self._is_explicit_back_name(u)]
+                if backs_poc and fronts_poc:
+                    return working_images[0], backs_poc[0], fronts_poc[0]
+                return working_images[0], working_images[2], working_images[1]
+
+            if all(poc_flags[:4]) and self._is_explicit_back_name(working_images[0]) and not self._is_explicit_back_name(working_images[1]):
+                front0 = working_images[1]
+                back0 = working_images[0]
+                act3_cand = working_images[2] if not self._is_explicit_back_name(working_images[2]) else working_images[3]
+                return front0, back0, act3_cand
+
             # Subcaso 1D: 4 fotos de estúdio explicitamente nomeadas ([0]=FRENTE, [1]=COSTAS, ...)
             if "frente" in fnames[0] and self._is_explicit_back_name(working_images[1]):
                 img1 = working_images[0]
@@ -2119,10 +2174,6 @@ class TemplateEngine:
                 return working_images[0], working_images[1], working_images[2]
 
             # Subcaso 1F: Galerias productOnChannel de 4+ fotos
-            poc_flags = ["productonchannel" in f for f in fnames[:4]]
-            if not poc_flags[0] and all(poc_flags[1:4]):
-                return working_images[0], working_images[2], working_images[1]
-
             if poc_flags[:4] == [False, False, True, True]:
                 # C01828 / C01828BL: [0]=Humanizada, [1]=Frente, [2]=POC Costas, [3]=POC 3/4 Frontal
                 return working_images[0], working_images[2], working_images[3]
@@ -2222,6 +2273,81 @@ class TemplateEngine:
 
         # 2D: Padrão 3 fotos de estúdio na mesma sequência ([0]=Frente, [1]=Costas, [2]=3/4 Frontal)
         return img1, rem[0], rem[1]
+
+    _HUMANIZED_BACK_COVER_SKU_PREFIXES = (
+        "BP10", "C02893", "C02894", "C02895", "C02896", "C02897",
+        "C02864", "C02865", "C02863", "C02861", "C02860",
+        "C02830", "C02829", "C02827", "C02826", "C02824", "C02822",
+        "C02884", "C02879", "C02875",
+    )
+
+    def _resolve_apparel_act_and_360_images(self, cdn_images: List[str], is_female: bool = False, is_kids: bool = False, sku: str = "", title: str = ""):
+        """
+        Alocação inteligente de 4 slots (Ato 1 Face 1, Ato 1 Face 2 Giro 360°, Ato 2 Lupa, Ato 3 Lupa)
+        sem JAMAIS duplicar nenhuma foto na descrição e mapeando capas humanizadas de Costas (180° Costas -> 0° Frente)
+        vs. capas humanizadas/estúdio de Frente (0° Frente -> 180° Costas).
+        """
+        base1, base2, base3 = self._select_apparel_act_images(
+            cdn_images, is_female=is_female, is_kids=is_kids, sku=sku, title=title
+        )
+        if not cdn_images or len(cdn_images) < 4:
+            return base1, base2, base3, "", False
+
+        # Reaplica filtro de público-alvo sobre cdn_images para extrair a 4ª foto compatível (unused4)
+        def _classify_aud(u: str):
+            fname = u.lower().split("?")[0].split("/")[-1]
+            has_masc = any(k in fname for k in ["masc", "man2", "homem"]) or bool(re.search(r'^(?:casual|c0|cm)\d+(?:pp|p|m|g|gg|xg|xgg|g1|g2|g3)(?:[-_.\d]|$)', fname))
+            has_fem = any(k in fname for k in ["fem", "mulher"]) or bool(re.search(r'(?:^|[-_.\d])bl(?:[-_.\d]|$)', fname)) or bool(re.search(r'^(?:casual|c0|cf|cm)\d+bl', fname))
+            has_inf = any(k in fname for k in ["inf", "kids", "crianca", "juvenil"]) or bool(re.search(r'^(?:casual|c0|cm)\d+i(?:pp|p|m|g|gg|g1|g2|\d+)?(?:[-_.\d]|$)', fname))
+            return has_masc and not has_fem and not has_inf, has_fem and not has_masc and not has_inf, has_inf and not has_masc and not has_fem
+
+        working_pool = list(cdn_images)
+        if is_kids or is_female or any(_classify_aud(u) != (False, False, False) for u in cdn_images):
+            compat = []
+            for u in cdn_images:
+                om, of, oi = _classify_aud(u)
+                if is_kids and not om and not of:
+                    compat.append(u)
+                elif is_female and not om and not oi:
+                    compat.append(u)
+                elif not is_kids and not is_female and not of and not oi:
+                    compat.append(u)
+            if compat:
+                working_pool = compat
+
+        used_base = {u for u in (base1, base2, base3) if u}
+        unused4 = [u for u in working_pool if u and u not in used_base]
+        if not unused4:
+            return base1, base2, base3, "", False
+
+        f0 = (base1 or working_pool[0]).lower().split("?")[0].split("/")[-1]
+        sku_up = (sku or "").strip().upper()
+        is_humanized_cover = ("productonchannel" not in f0) or ("c1bd5af8" in f0)
+        studio_backs_in_rest = sum(1 for u in working_pool[1:4] if self._is_explicit_back_name(u))
+        is_humanized_back_cover = is_humanized_cover and (
+            "c1bd5af8" in f0
+            or any(sku_up.startswith(p) for p in self._HUMANIZED_BACK_COVER_SKU_PREFIXES)
+            or (
+                studio_backs_in_rest >= 2
+                and not any(k in f0 for k in ("frente", "01_", "1_", "01fem", "01masc", "01inf", "1fem", "1masc", "1inf"))
+                and "productonchannel" in working_pool[1].lower()
+            )
+        )
+
+        if is_humanized_back_cover:
+            # Capa Humanizada de Costas (180° Costas):
+            # - Ato 1 Face 1 (180° Costas): base1 (Humanizada de Costas)
+            # - Ato 1 Face 2 (0° Frente): base3 (Estúdio 0° Frente)
+            # - Ato 2 (Lupa): base2 (Estúdio 180° Costas)
+            # - Ato 3 (Lupa): unused4[0] (Estúdio 3/4)
+            return base1, base2, unused4[0], base3, True
+
+        # Capa de Frente (Humanizada Frontal ou Estúdio 0° Frente):
+        # - Ato 1 Face 1 (0° Frente): base1 (Capa Frontal)
+        # - Ato 1 Face 2 (180° Costas): base2 (Estúdio 180° Costas)
+        # - Ato 2 (Lupa): unused4[0] (4ª foto distinta de estúdio)
+        # - Ato 3 (Lupa): base3 (Estúdio Frontal / 3/4 Frente / Detalhe)
+        return base1, unused4[0], base3, base2, False
 
     def _select_cutlery_act_images(self, cdn_images: List[str], title: str = ""):
         """
@@ -2734,7 +2860,10 @@ class TemplateEngine:
         split_images = None
         variations_summary = ""
 
-        # Alocação estrita de imagens exclusivas por ato - ZERO DUPLICAÇÃO DE MESMA COR / 2-CAPA
+        back_360_img = ""
+        is_back_cover_360 = False
+
+        # Alocação estrita de imagens exclusivas por ato - ZERO DUPLICAÇÃO DE MESMA COR / 2-CAPA / GIRO 360°
         if has_multiple_variations and (len(cdn_images) >= 4 or len(cdn_images) == 2):
             split_images, img1, img2, img3 = self._select_lure_act_images(
                 cdn_images, variants=variants, product_id=str(product.get("id", "")), title=title
@@ -2747,7 +2876,9 @@ class TemplateEngine:
             else:
                 variations_summary = "Múltiplas variações e opções de cores disponíveis para escolha no anúncio."
         elif is_apparel:
-            img1, img2, img3 = self._select_apparel_act_images(cdn_images, is_female=is_female, is_kids=is_kids, sku=sku_clean_for_flags, title=title)
+            img1, img2, img3, back_360_img, is_back_cover_360 = self._resolve_apparel_act_and_360_images(
+                cdn_images, is_female=is_female, is_kids=is_kids, sku=sku_clean_for_flags, title=title
+            )
         elif archetype_id == "cutlery_unique":
             img1, img2, img3 = self._select_cutlery_act_images(cdn_images, title)
         elif archetype_id == "fishing_tackle_gear" and "trava vara" in title.lower() and len(cdn_images) >= 3:
@@ -2776,6 +2907,12 @@ class TemplateEngine:
                     variations_summary = f"Disponível em {len(variant_titles)} opções de cores e modelos no anúncio ({', '.join(variant_titles[:4])}{'...' if len(variant_titles) > 4 else ''})."
                 else:
                     variations_summary = "Múltiplas variações e opções de cores disponíveis para escolha no anúncio."
+
+        if not is_apparel and not split_images and len(cdn_images) >= 4:
+            used_non_app = {u for u in (img1, img2, img3) if u}
+            unused_non_app = [u for u in cdn_images if u and u not in used_non_app and "2-capa" not in u.lower()]
+            if unused_non_app:
+                back_360_img = unused_non_app[0]
 
         act1 = dict(template["act1"])
         act2 = dict(template["act2"])
@@ -4437,6 +4574,8 @@ class TemplateEngine:
             "title": act1["title"],
             "description": act1["desc_tmpl"].format(title=formatted_title),
             "image": img1,
+            "back_360_image": back_360_img,
+            "is_back_cover_360": is_back_cover_360,
             "split_images": split_images,
             "variations_summary": variations_summary
         }

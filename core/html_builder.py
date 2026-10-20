@@ -1820,12 +1820,17 @@ class HTMLBuilder:
           <span class="brk-media-info-pill">{info_meta['pill']}</span>
         </div>
       </div>"""
-            elif img_src and idx == 0:
+            elif img_src and idx == 0 and block.get("back_360_image") and block.get("back_360_image") != img_src:
                 info_meta = self._get_media_infographic_meta(idx, archetype_id, enriched_data, is_split=False)
-                back_360_url = act2_img_candidate or img_src
+                back_360_url = block.get("back_360_image")
+                is_back_cover_360 = bool(block.get("is_back_cover_360"))
                 focus_cls = " brk-focus-top" if is_shirt_arch_main else " brk-focus-center"
-                btn1_lbl = "0° Frente" if is_shirt_arch_main else "0° Vista 1"
-                btn2_lbl = "180° Costas" if (is_shirt_arch_main and act2_img_candidate) else "180° Giro 3D"
+                if is_back_cover_360:
+                    btn1_lbl = "180° Costas"
+                    btn2_lbl = "0° Frente"
+                else:
+                    btn1_lbl = "0° Frente" if is_shirt_arch_main else "0° Vista 1"
+                    btn2_lbl = "180° Costas" if is_shirt_arch_main else "180° Giro 3D"
                 media_html = f"""<div class="brk-desc-media brk-media-card brk-card-360">
         <input type="radio" name="brk360_{uid_base}" id="brk360_{uid_base}_1" class="brk-360-inp brk-360-i1" checked />
         <input type="radio" name="brk360_{uid_base}" id="brk360_{uid_base}_2" class="brk-360-inp brk-360-i2" />

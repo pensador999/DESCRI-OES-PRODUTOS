@@ -519,10 +519,12 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
     engine, builder = get_engine_and_builder()
     if raw_b and len(raw_b.strip()) > 500 and "<!-- BRK-MODO-B" in raw_b and "use-brk-images-s3" not in raw_b and "troca descomplicada" not in raw_b.lower() and "troca fácil" not in raw_b.lower() and '<div class="brk-desc-trust-bar"></div>' not in raw_b and "dinheiro de volta" not in raw_b.lower() and "BRK-MODO-B v1" not in raw_b:
         img_srcs = re.findall(r'<img[^>]+src=["\']([^"\']+)["\']', raw_b, re.I)
+        bg_360_srcs = re.findall(r'brk-360-back["\'][^>]*style=["\'][^"\']*url\(["\']?([^"\'\)]+)["\']?\)', raw_b, re.I)
         img_roots = [u.split("?")[0].lower() for u in img_srcs]
-        has_dup_imgs = len(img_roots) != len(set(img_roots))
+        all_visual_roots = [u.split("?")[0].lower() for u in (img_srcs + bg_360_srcs)]
+        has_dup_imgs = len(all_visual_roots) != len(set(all_visual_roots))
         if not has_dup_imgs and engine and hasattr(engine, "KNOWN_SHOPIFY_DUP_IMAGE_TOKENS"):
-            has_dup_imgs = any(tok in u for u in img_roots for tok in engine.KNOWN_SHOPIFY_DUP_IMAGE_TOKENS)
+            has_dup_imgs = any(tok in u for u in all_visual_roots for tok in engine.KNOWN_SHOPIFY_DUP_IMAGE_TOKENS)
         has_store_color = any(c in raw_b for c in expected_theme_marker)
         sku_low = sku_str.lower()
         has_mfk75t_violation = ("fillet" in title_l or "mfk75t" in title_l or "79081379076" in sku_low) and "bainha" in raw_b.lower()
@@ -577,7 +579,7 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
                     is_casal_flag = "casal" in title_l and ("kit" in title_l or "combo" in title_l)
                     is_fem_flag = (any(w in title_l for w in ["feminina", "feminino", "baby look", "babylook", "mulher"]) or bool(re.search(r'bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$', sku_low))) and not is_kids_flag and not is_casal_flag
                     dedup_imgs = engine._sanitize_and_dedup_images(raw_cdn_list, archetype_id=arch_id or "uv_performance", title=p.get("title", ""))
-                    exp_imgs = [u.split("?")[0].lower() for u in engine._select_apparel_act_images(dedup_imgs, is_female=is_fem_flag, is_kids=is_kids_flag, sku=sku_low, title=title_l) if u]
+                    exp_imgs = [u.split("?")[0].lower() for u in engine._resolve_apparel_act_and_360_images(dedup_imgs, is_female=is_fem_flag, is_kids=is_kids_flag, sku=sku_low, title=title_l)[:3] if u]
                     if exp_imgs and non_svg_roots[:len(exp_imgs)] != exp_imgs:
                         has_act3_back_violation = True
 
