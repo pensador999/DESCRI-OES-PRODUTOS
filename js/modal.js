@@ -3326,6 +3326,64 @@ function getProductModeBHTML(liveP) {
   const schemaJsonLd = buildClientSchemaJsonLd(liveP);
 
   // 2. Blocos Narrativos
+  function getClientMediaInfographicMeta(idx, archetypeId, prodObj, fTitle, isShortSlv, isSplit) {
+    const tLow = String(fTitle || prodObj.title || "").toLowerCase();
+    const skuLow = String(prodObj.master_sku || prodObj.sku || "").toLowerCase();
+    const tagsLow = String(Array.isArray(prodObj.tags) ? prodObj.tags.join(" ") : (prodObj.tags || "")).toLowerCase();
+    const shortSlv = Boolean(isShortSlv) || ["manga curta", "camiseta", "t-shirt", "tshirt", "baby look"].some(w => tLow.includes(w));
+    const isShirtArch = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId);
+    const hasUv = ["uv", "fpu", "proteção solar", "protecao solar", "xtech", "dry"].some(w => tLow.includes(w) || tagsLow.includes(w));
+    const isCotton = ["algodão", "algodao", "cotton", "100% algod"].some(w => tLow.includes(w) || tagsLow.includes(w)) || (archetypeId === "agro_field" && !hasUv && tLow.includes("camiseta"));
+
+    if (idx === 0) {
+      if (isSplit) {
+        return { view_tag: "GALERIA OFICIAL • ATO 01", icon: "palette", label: "Padrões de Cores & Acabamento Visual", pill: "Alta Atratividade", zoom_act3: false };
+      }
+      if (isShirtArch) {
+        return { view_tag: "VISTA FRONTAL • ATO 01", icon: "sparkle", label: "Modelagem Anatômica & Identidade Visual", pill: "Caimento Oficial BRK", zoom_act3: false };
+      }
+      return { view_tag: "APRESENTAÇÃO • ATO 01", icon: "sparkle", label: "Design Funcional & Construção Original", pill: "Padrão Oficial", zoom_act3: false };
+    }
+
+    if (idx === 1) {
+      if (isShirtArch) {
+        if (isCotton) {
+          return { view_tag: "ENGENHARIA TÊXTIL • ATO 02", icon: "care", label: "Malha 100% Algodão Premium & Respirabilidade", pill: "Toque Nobre", zoom_act3: false };
+        }
+        if (archetypeId === "shirts_button_work" || ["botão", "botao", "work", "sarja"].some(w => tLow.includes(w)) || skuLow.startsWith("cmb") || skuLow.startsWith("cbt")) {
+          return { view_tag: "ESTRUTURA TÊXTIL • ATO 02", icon: "shield", label: "Tecido de Alta Gramatura & Resistência", pill: "Uso Operacional", zoom_act3: false };
+        }
+        return { view_tag: "TECNOLOGIA TÊXTIL • ATO 02", icon: "sun", label: "Painel Dorsal & Tecido Tecnológico UV50+", pill: "Secagem Rápida", zoom_act3: false };
+      }
+      return { view_tag: "PERFORMANCE • ATO 02", icon: "bolt", label: "Engenharia de Materiais & Desempenho", pill: "Alta Durabilidade", zoom_act3: false };
+    }
+
+    if (isShirtArch) {
+      const isFusion = tLow.includes("fusion") || skuLow.includes("fusion");
+      const isHybrid = tLow.includes("hybrid") || skuLow.startsWith("hyb") || skuLow.includes("hybrid");
+      const hasCapuz = isFusion || isHybrid || ["capuz", "hood", "balaclava"].some(w => tLow.includes(w)) || skuLow.startsWith("ccp");
+      const isArmor = tLow.includes("armor") || skuLow.startsWith("cax");
+      const isRaglan = ["segunda pele", "raglan", "thermal", "termica", "térmica"].some(w => tLow.includes(w)) || skuLow.includes("raglan");
+      const isButton = archetypeId === "shirts_button_work" || ["botão", "botao", "work", "operacional"].some(w => tLow.includes(w)) || skuLow.startsWith("cmb") || skuLow.startsWith("cbt");
+      const isCrew = ["careca", "redonda", "sem zíper", "sem ziper"].some(w => tLow.includes(w));
+
+      let lbl = "Foco Frontal: Gola Padre Anatômica, Zíper & Punhos";
+      let pill = "Pesponto Duplo";
+      if (isFusion) { lbl = "Foco Frontal: Capuz, Máscara Facial & Dedeira"; pill = "Proteção 360°"; }
+      else if (isHybrid) { lbl = "Foco Frontal: Capuz Anatômico & Punho c/ Dedeira"; pill = "Nuca & Mãos"; }
+      else if (hasCapuz) { lbl = "Foco Frontal: Capuz Integrado & Proteção de Nuca"; pill = "Barreira Solar"; }
+      else if (isArmor) { lbl = "Foco Frontal: Punho c/ Luva Integrada & Gola"; pill = "Proteção de Punho"; }
+      else if (isRaglan) { lbl = "Foco Frontal: Corte Raglan & Costura Plana"; pill = "Zero Atrito"; }
+      else if (isButton) { lbl = "Foco Frontal: Colarinho Estruturado & Botões"; pill = "Costura em X"; }
+      else if (isCotton) { lbl = "Foco Frontal: Gola em Ribana & Costura Dupla"; pill = "Anti-Deformação"; }
+      else if (isCrew || shortSlv) { lbl = "Foco Frontal: Gola Anatômica & Costura Dupla"; pill = "Toque Suave"; }
+
+      return { view_tag: "ZOOM DE ACABAMENTO • ATO 03", icon: "shield", label: lbl, pill: pill, zoom_act3: true };
+    }
+
+    return { view_tag: "DETALHE TÉCNICO • ATO 03", icon: "shield", label: "Acabamento de Precisão & Componentes", pill: "Rigor Oficial BRK", zoom_act3: false };
+  }
+
   const blocksHtml = [];
   blocks.forEach((block, idx) => {
     const isReverse = (idx % 2 === 1);
@@ -3344,13 +3402,30 @@ function getProductModeBHTML(liveP) {
     const safeBlockAlt = String(block.alt || formattedTitle || "").replace(/"/g, "&quot;");
     let mediaHtml = "";
     if (blockSplitImgs && blockSplitImgs.length >= 2) {
-      mediaHtml = `<div class="brk-desc-media brk-desc-media-split">
-        <div class="brk-split-item"><img src="${blockSplitImgs[0]}" alt="${safeTitleAlt} - Opção 1" loading="lazy" referrerpolicy="no-referrer" /></div>
-        <div class="brk-split-item"><img src="${blockSplitImgs[1]}" alt="${safeTitleAlt} - Opção 2" loading="lazy" referrerpolicy="no-referrer" /></div>
+      const infoMeta = getClientMediaInfographicMeta(idx, archetypeId, liveP, formattedTitle, isShortSleeve, true);
+      mediaHtml = `<div class="brk-desc-media brk-media-card">
+        <div class="brk-media-stage brk-desc-media-split">
+          <span class="brk-media-view-pill">${infoMeta.view_tag}</span>
+          <div class="brk-split-item"><img src="${blockSplitImgs[0]}" alt="${safeTitleAlt} - Opção 1" loading="lazy" referrerpolicy="no-referrer" /></div>
+          <div class="brk-split-item"><img src="${blockSplitImgs[1]}" alt="${safeTitleAlt} - Opção 2" loading="lazy" referrerpolicy="no-referrer" /></div>
+        </div>
+        <div class="brk-media-infobar">
+          <span class="brk-media-info-left">${getSvgIcon(infoMeta.icon, themeColor, 14)} <span>${infoMeta.label}</span></span>
+          <span class="brk-media-info-pill">${infoMeta.pill}</span>
+        </div>
       </div>`;
     } else if (blockImg) {
-      mediaHtml = `<div class="brk-desc-media">
-        <img src="${blockImg}" alt="${safeBlockAlt}" loading="lazy" referrerpolicy="no-referrer" />
+      const infoMeta = getClientMediaInfographicMeta(idx, archetypeId, liveP, formattedTitle, isShortSleeve, false);
+      const zoomCls = infoMeta.zoom_act3 ? " brk-media-zoom-act3" : "";
+      mediaHtml = `<div class="brk-desc-media brk-media-card">
+        <div class="brk-media-stage${zoomCls}">
+          <span class="brk-media-view-pill">${infoMeta.view_tag}</span>
+          <img src="${blockImg}" alt="${safeBlockAlt}" loading="lazy" referrerpolicy="no-referrer" />
+        </div>
+        <div class="brk-media-infobar">
+          <span class="brk-media-info-left">${getSvgIcon(infoMeta.icon, themeColor, 14)} <span>${infoMeta.label}</span></span>
+          <span class="brk-media-info-pill">${infoMeta.pill}</span>
+        </div>
       </div>`;
     }
 
@@ -3578,24 +3653,103 @@ function getProductModeBHTML(liveP) {
       flex: 1;
       min-width: 0;
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      align-items: stretch;
       justify-content: center;
+    }
+    .brk-media-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .brk-media-card:hover {
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.11);
+    }
+    .brk-media-stage {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      background: #ffffff;
+      padding: 6px;
+    }
+    .brk-media-view-pill {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 2;
+      background: rgba(15, 23, 42, 0.78);
+      color: #ffffff;
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      pointer-events: none;
     }
     .brk-desc-media img {
       width: 100%;
       height: auto;
-      max-height: 520px;
+      max-height: 500px;
       object-fit: contain;
-      border-radius: 14px;
+      border-radius: 10px;
       display: block;
       margin: 0 auto;
-      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
-      border: 1px solid #f1f5f9;
       background: #ffffff;
+      transition: transform 0.35s ease;
+    }
+    .brk-media-stage.brk-media-zoom-act3 img {
+      transform: scale(1.12);
+      transform-origin: 50% 18%;
+    }
+    .brk-media-card:hover .brk-media-stage.brk-media-zoom-act3 img {
+      transform: scale(1.16);
+    }
+    .brk-media-infobar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      font-size: 11.5px;
+    }
+    .brk-media-info-left {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 700;
+      color: #1e293b;
+      min-width: 0;
+      line-height: 1.25;
+    }
+    .brk-media-info-left span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .brk-media-info-pill {
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: ${themeColor};
+      background: ${themeBg};
+      border: 1px solid ${themeColor}30;
+      padding: 3px 9px;
+      border-radius: 9999px;
     }
     .brk-desc-media-split {
       display: flex;
-      gap: 12px;
+      gap: 10px;
+      padding: 10px;
     }
     .brk-desc-media-split .brk-split-item {
       flex: 1;
@@ -3909,6 +4063,20 @@ function getProductModeBHTML(liveP) {
       .brk-desc-media-split {
         flex-direction: row;
         gap: 8px;
+      }
+      .brk-media-infobar {
+        padding: 8px 10px;
+        font-size: 10.5px;
+      }
+      .brk-media-info-pill {
+        font-size: 9px;
+        padding: 2px 7px;
+      }
+      .brk-media-view-pill {
+        font-size: 8.5px;
+        padding: 3px 8px;
+        top: 8px;
+        left: 8px;
       }
       .brk-desc-title {
         font-size: 18px;

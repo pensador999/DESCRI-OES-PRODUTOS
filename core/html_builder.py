@@ -1540,6 +1540,134 @@ class HTMLBuilder:
 </section>
 </div>"""
 
+    def _get_media_infographic_meta(
+        self,
+        idx: int,
+        archetype_id: str,
+        enriched_data: Dict[str, Any],
+        is_split: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Retorna metadados de infográfico técnico (badge de ângulo, ícone, legenda técnica, pílula e flag de zoom)
+        para transformar fotos de estúdio nos 3 Atos em cards informativos visuais sem poluição semântica.
+        """
+        t_low = str(enriched_data.get("formatted_title") or enriched_data.get("title") or "").lower()
+        sku_low = str(enriched_data.get("sku") or enriched_data.get("master_sku") or "").lower()
+        tags_low = str(enriched_data.get("tags") or "").lower()
+        is_short_sleeve = bool(enriched_data.get("is_short_sleeve", False)) or any(
+            w in t_low for w in ["manga curta", "camiseta", "t-shirt", "tshirt", "baby look"]
+        )
+        is_shirt_arch = archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work")
+
+        has_uv = any(w in t_low or w in tags_low for w in ["uv", "fpu", "proteção solar", "protecao solar", "xtech", "dry"])
+        is_cotton = (
+            any(w in t_low or w in tags_low for w in ["algodão", "algodao", "cotton", "100% algod"])
+            or (archetype_id == "agro_field" and not has_uv and "camiseta" in t_low)
+        )
+
+        if idx == 0:
+            if is_split:
+                return {
+                    "view_tag": "GALERIA OFICIAL • ATO 01",
+                    "icon": "palette",
+                    "label": "Padrões de Cores & Acabamento Visual",
+                    "pill": "Alta Atratividade",
+                    "zoom_act3": False,
+                }
+            if is_shirt_arch:
+                return {
+                    "view_tag": "VISTA FRONTAL • ATO 01",
+                    "icon": "sparkle",
+                    "label": "Modelagem Anatômica & Identidade Visual",
+                    "pill": "Caimento Oficial BRK",
+                    "zoom_act3": False,
+                }
+            return {
+                "view_tag": "APRESENTAÇÃO • ATO 01",
+                "icon": "sparkle",
+                "label": "Design Funcional & Construção Original",
+                "pill": "Padrão Oficial",
+                "zoom_act3": False,
+            }
+
+        if idx == 1:
+            if is_shirt_arch:
+                if is_cotton:
+                    return {
+                        "view_tag": "ENGENHARIA TÊXTIL • ATO 02",
+                        "icon": "care",
+                        "label": "Malha 100% Algodão Premium & Respirabilidade",
+                        "pill": "Toque Nobre",
+                        "zoom_act3": False,
+                    }
+                if archetype_id == "shirts_button_work" or any(w in t_low for w in ["botão", "botao", "work", "sarja"]) or sku_low.startswith(("cmb", "cbt")):
+                    return {
+                        "view_tag": "ESTRUTURA TÊXTIL • ATO 02",
+                        "icon": "shield",
+                        "label": "Tecido de Alta Gramatura & Resistência",
+                        "pill": "Uso Operacional",
+                        "zoom_act3": False,
+                    }
+                return {
+                    "view_tag": "TECNOLOGIA TÊXTIL • ATO 02",
+                    "icon": "sun",
+                    "label": "Painel Dorsal & Tecido Tecnológico UV50+",
+                    "pill": "Secagem Rápida",
+                    "zoom_act3": False,
+                }
+            return {
+                "view_tag": "PERFORMANCE • ATO 02",
+                "icon": "bolt",
+                "label": "Engenharia de Materiais & Desempenho",
+                "pill": "Alta Durabilidade",
+                "zoom_act3": False,
+            }
+
+        # Ato 3 (idx == 2)
+        if is_shirt_arch:
+            is_fusion = "fusion" in t_low or "fusion" in sku_low
+            is_hybrid = "hybrid" in t_low or sku_low.startswith("hyb") or "hybrid" in sku_low
+            has_capuz = is_fusion or is_hybrid or any(w in t_low for w in ["capuz", "hood", "balaclava"]) or sku_low.startswith("ccp")
+            is_armor = "armor" in t_low or sku_low.startswith("cax")
+            is_raglan = any(w in t_low for w in ["segunda pele", "raglan", "thermal", "termica", "térmica"]) or "raglan" in sku_low
+            is_button = archetype_id == "shirts_button_work" or any(w in t_low for w in ["botão", "botao", "work", "operacional"]) or sku_low.startswith(("cmb", "cbt"))
+            is_crew = any(w in t_low for w in ["careca", "redonda", "sem zíper", "sem ziper"])
+
+            if is_fusion:
+                lbl, pill = "Foco Frontal: Capuz, Máscara Facial & Dedeira", "Proteção 360°"
+            elif is_hybrid:
+                lbl, pill = "Foco Frontal: Capuz Anatômico & Punho c/ Dedeira", "Nuca & Mãos"
+            elif has_capuz:
+                lbl, pill = "Foco Frontal: Capuz Integrado & Proteção de Nuca", "Barreira Solar"
+            elif is_armor:
+                lbl, pill = "Foco Frontal: Punho c/ Luva Integrada & Gola", "Proteção de Punho"
+            elif is_raglan:
+                lbl, pill = "Foco Frontal: Corte Raglan & Costura Plana", "Zero Atrito"
+            elif is_button:
+                lbl, pill = "Foco Frontal: Colarinho Estruturado & Botões", "Costura em X"
+            elif is_cotton:
+                lbl, pill = "Foco Frontal: Gola em Ribana & Costura Dupla", "Anti-Deformação"
+            elif is_crew or is_short_sleeve:
+                lbl, pill = "Foco Frontal: Gola Anatômica & Costura Dupla", "Toque Suave"
+            else:
+                lbl, pill = "Foco Frontal: Gola Padre Anatômica, Zíper & Punhos", "Pesponto Duplo"
+
+            return {
+                "view_tag": "ZOOM DE ACABAMENTO • ATO 03",
+                "icon": "shield",
+                "label": lbl,
+                "pill": pill,
+                "zoom_act3": True,
+            }
+
+        return {
+            "view_tag": "DETALHE TÉCNICO • ATO 03",
+            "icon": "shield",
+            "label": "Acabamento de Precisão & Componentes",
+            "pill": "Rigor Oficial BRK",
+            "zoom_act3": False,
+        }
+
     def build_shopify_html(self, enriched_data: Dict[str, Any]) -> str:
         """
         Compila a descrição em HTML no padrão verticalizado BRK, 100% autônomo com SVGs inline estilo Font Awesome.
@@ -1656,19 +1784,36 @@ class HTMLBuilder:
             
             safe_title_alt = str(formatted_title).replace('"', '&quot;')
             safe_block_alt = str(block.get('alt', formatted_title)).replace('"', '&quot;')
-            # Layout de Mídia: Split para iscas/variações ou Imagem Única
+            # Layout de Mídia: Card Infográfico Técnico (Split para iscas/variações ou Imagem Única com Smart Zoom no Ato 3)
             if block_split_imgs and len(block_split_imgs) >= 2:
-                media_html = f"""<div class="brk-desc-media brk-desc-media-split">
-        <div class="brk-split-item">
-          <img src="{block_split_imgs[0]}" alt="{safe_title_alt} - Opção 1" loading="lazy" referrerpolicy="no-referrer" />
+                info_meta = self._get_media_infographic_meta(idx, archetype_id, enriched_data, is_split=True)
+                media_html = f"""<div class="brk-desc-media brk-media-card">
+        <div class="brk-media-stage brk-desc-media-split">
+          <span class="brk-media-view-pill">{info_meta['view_tag']}</span>
+          <div class="brk-split-item">
+            <img src="{block_split_imgs[0]}" alt="{safe_title_alt} - Opção 1" loading="lazy" referrerpolicy="no-referrer" />
+          </div>
+          <div class="brk-split-item">
+            <img src="{block_split_imgs[1]}" alt="{safe_title_alt} - Opção 2" loading="lazy" referrerpolicy="no-referrer" />
+          </div>
         </div>
-        <div class="brk-split-item">
-          <img src="{block_split_imgs[1]}" alt="{safe_title_alt} - Opção 2" loading="lazy" referrerpolicy="no-referrer" />
+        <div class="brk-media-infobar">
+          <span class="brk-media-info-left">{get_svg_icon(info_meta['icon'], color=theme_color, size=14)} <span>{info_meta['label']}</span></span>
+          <span class="brk-media-info-pill">{info_meta['pill']}</span>
         </div>
       </div>"""
             elif img_src:
-                media_html = f"""<div class="brk-desc-media">
-        <img src="{img_src}" alt="{safe_block_alt}" loading="lazy" referrerpolicy="no-referrer" />
+                info_meta = self._get_media_infographic_meta(idx, archetype_id, enriched_data, is_split=False)
+                zoom_cls = " brk-media-zoom-act3" if info_meta.get("zoom_act3") else ""
+                media_html = f"""<div class="brk-desc-media brk-media-card">
+        <div class="brk-media-stage{zoom_cls}">
+          <span class="brk-media-view-pill">{info_meta['view_tag']}</span>
+          <img src="{img_src}" alt="{safe_block_alt}" loading="lazy" referrerpolicy="no-referrer" />
+        </div>
+        <div class="brk-media-infobar">
+          <span class="brk-media-info-left">{get_svg_icon(info_meta['icon'], color=theme_color, size=14)} <span>{info_meta['label']}</span></span>
+          <span class="brk-media-info-pill">{info_meta['pill']}</span>
+        </div>
       </div>"""
             else:
                 media_html = ""
@@ -1890,26 +2035,106 @@ class HTMLBuilder:
       flex: 1;
       min-width: 0;
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      align-items: stretch;
       justify-content: center;
+    }}
+    .brk-media-card {{
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }}
+    .brk-media-card:hover {{
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.11);
+    }}
+    .brk-media-stage {{
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      background: #ffffff;
+      padding: 6px;
+    }}
+    .brk-media-view-pill {{
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 2;
+      background: rgba(15, 23, 42, 0.78);
+      color: #ffffff;
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      pointer-events: none;
     }}
     .brk-desc-media img {{
       width: 100%;
       height: auto;
-      max-height: 520px;
+      max-height: 500px;
       object-fit: contain;
-      border-radius: 14px;
+      border-radius: 10px;
       display: block;
       margin: 0 auto;
-      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
-      border: 1px solid #f1f5f9;
       background: #ffffff;
+      transition: transform 0.35s ease;
+    }}
+    /* Zoom Técnico Inteligente no Ato 3 (Foco Superior de Acabamento) */
+    .brk-media-stage.brk-media-zoom-act3 img {{
+      transform: scale(1.12);
+      transform-origin: 50% 18%;
+    }}
+    .brk-media-card:hover .brk-media-stage.brk-media-zoom-act3 img {{
+      transform: scale(1.16);
+    }}
+    .brk-media-infobar {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      font-size: 11.5px;
+    }}
+    .brk-media-info-left {{
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 700;
+      color: #1e293b;
+      min-width: 0;
+      line-height: 1.25;
+    }}
+    .brk-media-info-left span {{
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }}
+    .brk-media-info-pill {{
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: {theme_color};
+      background: {theme_bg};
+      border: 1px solid {theme_color}30;
+      padding: 3px 9px;
+      border-radius: 9999px;
     }}
 
     /* Midia Dividida para Iscas / Variacoes (Split Media) */
     .brk-desc-media-split {{
       display: flex;
-      gap: 12px;
+      gap: 10px;
+      padding: 10px;
     }}
     .brk-desc-media-split .brk-split-item {{
       flex: 1;
@@ -2234,6 +2459,20 @@ class HTMLBuilder:
       .brk-desc-media-split {{
         flex-direction: row;
         gap: 8px;
+      }}
+      .brk-media-infobar {{
+        padding: 8px 10px;
+        font-size: 10.5px;
+      }}
+      .brk-media-info-pill {{
+        font-size: 9px;
+        padding: 2px 7px;
+      }}
+      .brk-media-view-pill {{
+        font-size: 8.5px;
+        padding: 3px 8px;
+        top: 8px;
+        left: 8px;
       }}
       .brk-desc-title {{
         font-size: 18px;

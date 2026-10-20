@@ -1387,6 +1387,25 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         self.assertEqual(g_stat_bad, "MODO_B_DESATUALIZADO")
         self.assertIn("bainha", g_reason_bad.lower())
 
+        # 6. Card Infográfico Técnico (brk-media-card, brk-media-infobar, brk-media-zoom-act3)
+        fusion_3imgs = {
+            "id": 9183938609999,
+            "master_sku": "FUSION159BL",
+            "title": "Camisa Feminina FusionX Brk Capivara Rosa com Proteção UV50+",
+            "images": [
+                "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/f159_1.jpg",
+                "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/f159_2.jpg",
+                "https://cdn.shopify.com/s/files/1/0612/8068/2177/files/f159_3.jpg",
+            ],
+        }
+        enr_f159 = template_engine.generate_narrative_from_template(fusion_3imgs, "uv_performance", fusion_3imgs["images"], store_key="brk_fishing")
+        html_f159 = html_builder.build_shopify_html(enr_f159)
+        self.assertIn("brk-media-card", html_f159)
+        self.assertIn("brk-media-infobar", html_f159)
+        self.assertIn("brk-media-zoom-act3", html_f159)
+        self.assertIn("Foco Frontal: Capuz, Máscara Facial & Dedeira", html_f159)
+        self.assertIn("ZOOM DE ACABAMENTO • ATO 03", html_f159)
+
 
 def run_tests():
     suite = unittest.TestSuite()
