@@ -1387,7 +1387,7 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         self.assertEqual(g_stat_bad, "MODO_B_DESATUALIZADO")
         self.assertIn("bainha", g_reason_bad.lower())
 
-        # 6. Card Infográfico Técnico (brk-media-card, brk-media-infobar, brk-media-zoom-act3)
+        # 6. Card Infográfico Técnico c/ Giro 360° (Ato 1) e Lupa Óptica 2.4x (Atos 2 e 3) sem selos no topo
         fusion_3imgs = {
             "id": 9183938609999,
             "master_sku": "FUSION159BL",
@@ -1402,9 +1402,14 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         html_f159 = html_builder.build_shopify_html(enr_f159)
         self.assertIn("brk-media-card", html_f159)
         self.assertIn("brk-media-infobar", html_f159)
-        self.assertIn("brk-media-zoom-act3", html_f159)
+        self.assertIn("brk-card-360", html_f159)
+        self.assertIn("brk-360-rotator", html_f159)
+        self.assertIn("180° Costas", html_f159)
+        self.assertIn("brk-loupe-lens", html_f159)
+        self.assertIn("Lupa 2.4x", html_f159)
         self.assertIn("Foco Frontal: Capuz, Máscara Facial & Dedeira", html_f159)
-        self.assertIn("ZOOM DE ACABAMENTO • ATO 03", html_f159)
+        self.assertNotIn("brk-media-view-pill", html_f159, "Nomenclaturas do topo das 3 imagens devem ser removidas!")
+        self.assertNotIn("ZOOM DE ACABAMENTO • ATO 03", html_f159)
 
 
 def run_tests():

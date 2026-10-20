@@ -1771,6 +1771,11 @@ class HTMLBuilder:
   </div>"""
 
         # 3. Os 3 Atos Narrativos
+        raw_uid = str(enriched_data.get("id") or enriched_data.get("sku") or enriched_data.get("master_sku") or "brk")
+        uid_base = re.sub(r"[^A-Za-z0-9]", "", raw_uid)[:16] or "brk"
+        is_shirt_arch_main = archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work")
+        act2_img_candidate = (blocks[1].get("image") if len(blocks) > 1 and isinstance(blocks[1], dict) else "") or ""
+
         blocks_html = []
         for idx, block in enumerate(blocks):
             is_reverse = (idx % 2 == 1)
@@ -1784,18 +1789,47 @@ class HTMLBuilder:
             
             safe_title_alt = str(formatted_title).replace('"', '&quot;')
             safe_block_alt = str(block.get('alt', formatted_title)).replace('"', '&quot;')
-            # Layout de Mídia: Card Infográfico Técnico (Split para iscas/variações ou Imagem Única com Smart Zoom no Ato 3)
+            # Layout de Mídia: Card Infográfico Técnico c/ Visão 360° Interativa (Ato 1) e Lupa Óptica 2.4x (Atos 2 e 3), sem selos no topo
             if block_split_imgs and len(block_split_imgs) >= 2:
                 info_meta = self._get_media_infographic_meta(idx, archetype_id, enriched_data, is_split=True)
                 media_html = f"""<div class="brk-desc-media brk-media-card">
-        <div class="brk-media-stage brk-desc-media-split">
-          <span class="brk-media-view-pill">{info_meta['view_tag']}</span>
+        <input type="checkbox" id="brkloupe_{uid_base}_{idx}" class="brk-loupe-inp" />
+        <label for="brkloupe_{uid_base}_{idx}" class="brk-media-stage brk-desc-media-split brk-stage-loupe">
           <div class="brk-split-item">
             <img src="{block_split_imgs[0]}" alt="{safe_title_alt} - Opção 1" loading="lazy" referrerpolicy="no-referrer" />
           </div>
           <div class="brk-split-item">
             <img src="{block_split_imgs[1]}" alt="{safe_title_alt} - Opção 2" loading="lazy" referrerpolicy="no-referrer" />
           </div>
+          <span class="brk-loupe-cta">{get_svg_icon('sparkle', color='#ffffff', size=11)} Lupa 2.4x • Toque p/ Aproximar</span>
+        </label>
+        <div class="brk-media-infobar">
+          <span class="brk-media-info-left">{get_svg_icon(info_meta['icon'], color=theme_color, size=14)} <span>{info_meta['label']}</span></span>
+          <span class="brk-media-info-pill">{info_meta['pill']}</span>
+        </div>
+      </div>"""
+            elif img_src and idx == 0:
+                info_meta = self._get_media_infographic_meta(idx, archetype_id, enriched_data, is_split=False)
+                back_360_url = act2_img_candidate or img_src
+                focus_cls = " brk-focus-top" if is_shirt_arch_main else " brk-focus-center"
+                btn1_lbl = "0° Frente" if is_shirt_arch_main else "0° Vista 1"
+                btn2_lbl = "180° Costas" if (is_shirt_arch_main and act2_img_candidate) else "180° Giro 3D"
+                media_html = f"""<div class="brk-desc-media brk-media-card brk-card-360">
+        <input type="radio" name="brk360_{uid_base}" id="brk360_{uid_base}_1" class="brk-360-inp brk-360-i1" checked />
+        <input type="radio" name="brk360_{uid_base}" id="brk360_{uid_base}_2" class="brk-360-inp brk-360-i2" />
+        <input type="radio" name="brk360_{uid_base}" id="brk360_{uid_base}_3" class="brk-360-inp brk-360-i3" />
+        <div class="brk-media-stage brk-stage-360{focus_cls}">
+          <div class="brk-360-rotator">
+            <div class="brk-360-face brk-360-front">
+              <img src="{img_src}" alt="{safe_block_alt}" loading="lazy" referrerpolicy="no-referrer" />
+            </div>
+            <div class="brk-360-face brk-360-back" style="background-image: url('{back_360_url}');"></div>
+          </div>
+        </div>
+        <div class="brk-360-controls">
+          <label for="brk360_{uid_base}_1" class="brk-360-btn brk-360-b1">{btn1_lbl}</label>
+          <label for="brk360_{uid_base}_2" class="brk-360-btn brk-360-b2">{btn2_lbl}</label>
+          <label for="brk360_{uid_base}_3" class="brk-360-btn brk-360-b3">Lupa 2.4x</label>
         </div>
         <div class="brk-media-infobar">
           <span class="brk-media-info-left">{get_svg_icon(info_meta['icon'], color=theme_color, size=14)} <span>{info_meta['label']}</span></span>
@@ -1804,12 +1838,19 @@ class HTMLBuilder:
       </div>"""
             elif img_src:
                 info_meta = self._get_media_infographic_meta(idx, archetype_id, enriched_data, is_split=False)
-                zoom_cls = " brk-media-zoom-act3" if info_meta.get("zoom_act3") else ""
-                media_html = f"""<div class="brk-desc-media brk-media-card">
-        <div class="brk-media-stage{zoom_cls}">
-          <span class="brk-media-view-pill">{info_meta['view_tag']}</span>
+                if idx == 2 and is_shirt_arch_main:
+                    focus_cls = " brk-focus-top"
+                elif idx == 1 and is_shirt_arch_main:
+                    focus_cls = " brk-focus-mid"
+                else:
+                    focus_cls = " brk-focus-center"
+                media_html = f"""<div class="brk-desc-media brk-media-card brk-card-loupe">
+        <input type="checkbox" id="brkloupe_{uid_base}_{idx}" class="brk-loupe-inp" />
+        <label for="brkloupe_{uid_base}_{idx}" class="brk-media-stage brk-stage-loupe{focus_cls}" title="Toque ou passe o mouse para ativar a Lupa 2.4x">
           <img src="{img_src}" alt="{safe_block_alt}" loading="lazy" referrerpolicy="no-referrer" />
-        </div>
+          <span class="brk-loupe-lens" style="background-image: url('{img_src}');"><span class="brk-loupe-badge">Lupa 2.4x</span></span>
+          <span class="brk-loupe-cta">Toque ou passe o mouse p/ Lupa 2.4x</span>
+        </label>
         <div class="brk-media-infobar">
           <span class="brk-media-info-left">{get_svg_icon(info_meta['icon'], color=theme_color, size=14)} <span>{info_meta['label']}</span></span>
           <span class="brk-media-info-pill">{info_meta['pill']}</span>
@@ -2056,23 +2097,7 @@ class HTMLBuilder:
       overflow: hidden;
       background: #ffffff;
       padding: 6px;
-    }}
-    .brk-media-view-pill {{
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      z-index: 2;
-      background: rgba(15, 23, 42, 0.78);
-      color: #ffffff;
-      font-size: 9.5px;
-      font-weight: 800;
-      letter-spacing: 0.7px;
-      text-transform: uppercase;
-      padding: 4px 10px;
-      border-radius: 9999px;
-      backdrop-filter: blur(4px);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-      pointer-events: none;
+      display: block;
     }}
     .brk-desc-media img {{
       width: 100%;
@@ -2083,15 +2108,163 @@ class HTMLBuilder:
       display: block;
       margin: 0 auto;
       background: #ffffff;
-      transition: transform 0.35s ease;
+      transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
     }}
-    /* Zoom Técnico Inteligente no Ato 3 (Foco Superior de Acabamento) */
-    .brk-media-stage.brk-media-zoom-act3 img {{
-      transform: scale(1.12);
+    /* Visor Interativo 360 / Giro 3D no Ato 1 */
+    .brk-360-inp, .brk-loupe-inp {{
+      display: none !important;
+    }}
+    .brk-stage-360 {{
+      perspective: 1100px;
+    }}
+    .brk-360-rotator {{
+      position: relative;
+      width: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }}
+    .brk-360-face {{
+      width: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }}
+    .brk-360-back {{
+      position: absolute;
+      inset: 0;
+      transform: rotateY(180deg);
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-color: #ffffff;
+      border-radius: 10px;
+    }}
+    .brk-360-i2:checked ~ .brk-stage-360 .brk-360-rotator {{
+      transform: rotateY(180deg);
+    }}
+    .brk-360-i3:checked ~ .brk-stage-360.brk-focus-top .brk-360-front img {{
+      transform: scale(2.35);
+      transform-origin: 50% 20%;
+    }}
+    .brk-360-i3:checked ~ .brk-stage-360.brk-focus-center .brk-360-front img {{
+      transform: scale(2.25);
+      transform-origin: 50% 48%;
+    }}
+    .brk-360-controls {{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 10px;
+      background: #f1f5f9;
+      border-top: 1px solid #e2e8f0;
+    }}
+    .brk-360-btn {{
+      flex: 1;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 800;
+      color: #475569;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 6px 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+    }}
+    .brk-360-btn:hover {{
+      border-color: {theme_color};
+      color: {theme_color};
+    }}
+    .brk-360-i1:checked ~ .brk-360-controls .brk-360-b1,
+    .brk-360-i2:checked ~ .brk-360-controls .brk-360-b2,
+    .brk-360-i3:checked ~ .brk-360-controls .brk-360-b3 {{
+      background: {theme_color};
+      color: #ffffff;
+      border-color: {theme_color};
+      box-shadow: 0 2px 8px {theme_color}40;
+    }}
+    /* Efeito Lupa Optica 2.4x de Aproximacao nos Atos 2 e 3 */
+    .brk-stage-loupe {{
+      cursor: zoom-in;
+    }}
+    .brk-loupe-inp:checked + .brk-stage-loupe {{
+      cursor: zoom-out;
+    }}
+    .brk-stage-loupe.brk-focus-top img {{
       transform-origin: 50% 18%;
     }}
-    .brk-media-card:hover .brk-media-stage.brk-media-zoom-act3 img {{
-      transform: scale(1.16);
+    .brk-stage-loupe.brk-focus-mid img {{
+      transform-origin: 50% 38%;
+    }}
+    .brk-stage-loupe.brk-focus-center img {{
+      transform-origin: 50% 48%;
+    }}
+    .brk-stage-loupe:hover img,
+    .brk-loupe-inp:checked + .brk-stage-loupe img {{
+      transform: scale(2.35);
+    }}
+    .brk-loupe-lens {{
+      position: absolute;
+      right: 14px;
+      bottom: 42px;
+      width: 116px;
+      height: 116px;
+      border-radius: 50%;
+      border: 3px solid #ffffff;
+      outline: 2px solid {theme_color};
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.26);
+      background-repeat: no-repeat;
+      background-color: #ffffff;
+      background-size: 270%;
+      background-position: 50% 18%;
+      z-index: 2;
+      transition: opacity 0.28s ease, transform 0.28s ease;
+      pointer-events: none;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      overflow: hidden;
+    }}
+    .brk-stage-loupe.brk-focus-mid .brk-loupe-lens {{
+      background-position: 50% 38%;
+    }}
+    .brk-stage-loupe.brk-focus-center .brk-loupe-lens {{
+      background-position: 50% 48%;
+    }}
+    .brk-loupe-badge {{
+      background: {theme_color};
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      margin-bottom: 5px;
+      letter-spacing: 0.4px;
+    }}
+    .brk-stage-loupe:hover .brk-loupe-lens,
+    .brk-loupe-inp:checked + .brk-stage-loupe .brk-loupe-lens {{
+      opacity: 0;
+      transform: scale(0.85);
+    }}
+    .brk-loupe-cta {{
+      position: absolute;
+      bottom: 10px;
+      right: 12px;
+      z-index: 2;
+      background: rgba(15, 23, 42, 0.80);
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      backdrop-filter: blur(4px);
+      pointer-events: none;
+      transition: background 0.2s ease;
+    }}
+    .brk-loupe-inp:checked + .brk-stage-loupe .brk-loupe-cta {{
+      background: {theme_color};
     }}
     .brk-media-infobar {{
       display: flex;
@@ -2468,11 +2641,15 @@ class HTMLBuilder:
         font-size: 9px;
         padding: 2px 7px;
       }}
-      .brk-media-view-pill {{
-        font-size: 8.5px;
-        padding: 3px 8px;
-        top: 8px;
-        left: 8px;
+      .brk-loupe-lens {{
+        width: 90px;
+        height: 90px;
+        right: 10px;
+        bottom: 38px;
+      }}
+      .brk-360-btn {{
+        font-size: 10px;
+        padding: 5px 6px;
       }}
       .brk-desc-title {{
         font-size: 18px;

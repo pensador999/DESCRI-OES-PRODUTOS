@@ -3384,6 +3384,11 @@ function getProductModeBHTML(liveP) {
     return { view_tag: "DETALHE TÉCNICO • ATO 03", icon: "shield", label: "Acabamento de Precisão & Componentes", pill: "Rigor Oficial BRK", zoom_act3: false };
   }
 
+  const rawUid = String(liveP.id || liveP.master_sku || liveP.sku || "brk");
+  const uidBase = rawUid.replace(/[^A-Za-z0-9]/g, "").slice(0, 16) || "brk";
+  const isShirtArchMain = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId);
+  const act2ImgCandidate = img2 || "";
+
   const blocksHtml = [];
   blocks.forEach((block, idx) => {
     const isReverse = (idx % 2 === 1);
@@ -3404,10 +3409,39 @@ function getProductModeBHTML(liveP) {
     if (blockSplitImgs && blockSplitImgs.length >= 2) {
       const infoMeta = getClientMediaInfographicMeta(idx, archetypeId, liveP, formattedTitle, isShortSleeve, true);
       mediaHtml = `<div class="brk-desc-media brk-media-card">
-        <div class="brk-media-stage brk-desc-media-split">
-          <span class="brk-media-view-pill">${infoMeta.view_tag}</span>
+        <input type="checkbox" id="brkloupe_${uidBase}_${idx}" class="brk-loupe-inp" />
+        <label for="brkloupe_${uidBase}_${idx}" class="brk-media-stage brk-desc-media-split brk-stage-loupe">
           <div class="brk-split-item"><img src="${blockSplitImgs[0]}" alt="${safeTitleAlt} - Opção 1" loading="lazy" referrerpolicy="no-referrer" /></div>
           <div class="brk-split-item"><img src="${blockSplitImgs[1]}" alt="${safeTitleAlt} - Opção 2" loading="lazy" referrerpolicy="no-referrer" /></div>
+          <span class="brk-loupe-cta">${getSvgIcon('sparkle', '#ffffff', 11)} Lupa 2.4x • Toque p/ Aproximar</span>
+        </label>
+        <div class="brk-media-infobar">
+          <span class="brk-media-info-left">${getSvgIcon(infoMeta.icon, themeColor, 14)} <span>${infoMeta.label}</span></span>
+          <span class="brk-media-info-pill">${infoMeta.pill}</span>
+        </div>
+      </div>`;
+    } else if (blockImg && idx === 0) {
+      const infoMeta = getClientMediaInfographicMeta(idx, archetypeId, liveP, formattedTitle, isShortSleeve, false);
+      const back360Url = act2ImgCandidate || blockImg;
+      const focusCls = isShirtArchMain ? " brk-focus-top" : " brk-focus-center";
+      const btn1Lbl = isShirtArchMain ? "0° Frente" : "0° Vista 1";
+      const btn2Lbl = (isShirtArchMain && act2ImgCandidate) ? "180° Costas" : "180° Giro 3D";
+      mediaHtml = `<div class="brk-desc-media brk-media-card brk-card-360">
+        <input type="radio" name="brk360_${uidBase}" id="brk360_${uidBase}_1" class="brk-360-inp brk-360-i1" checked />
+        <input type="radio" name="brk360_${uidBase}" id="brk360_${uidBase}_2" class="brk-360-inp brk-360-i2" />
+        <input type="radio" name="brk360_${uidBase}" id="brk360_${uidBase}_3" class="brk-360-inp brk-360-i3" />
+        <div class="brk-media-stage brk-stage-360${focusCls}">
+          <div class="brk-360-rotator">
+            <div class="brk-360-face brk-360-front">
+              <img src="${blockImg}" alt="${safeBlockAlt}" loading="lazy" referrerpolicy="no-referrer" />
+            </div>
+            <div class="brk-360-face brk-360-back" style="background-image: url('${back360Url}');"></div>
+          </div>
+        </div>
+        <div class="brk-360-controls">
+          <label for="brk360_${uidBase}_1" class="brk-360-btn brk-360-b1">${btn1Lbl}</label>
+          <label for="brk360_${uidBase}_2" class="brk-360-btn brk-360-b2">${btn2Lbl}</label>
+          <label for="brk360_${uidBase}_3" class="brk-360-btn brk-360-b3">Lupa 2.4x</label>
         </div>
         <div class="brk-media-infobar">
           <span class="brk-media-info-left">${getSvgIcon(infoMeta.icon, themeColor, 14)} <span>${infoMeta.label}</span></span>
@@ -3416,12 +3450,16 @@ function getProductModeBHTML(liveP) {
       </div>`;
     } else if (blockImg) {
       const infoMeta = getClientMediaInfographicMeta(idx, archetypeId, liveP, formattedTitle, isShortSleeve, false);
-      const zoomCls = infoMeta.zoom_act3 ? " brk-media-zoom-act3" : "";
-      mediaHtml = `<div class="brk-desc-media brk-media-card">
-        <div class="brk-media-stage${zoomCls}">
-          <span class="brk-media-view-pill">${infoMeta.view_tag}</span>
+      let focusCls = " brk-focus-center";
+      if (idx === 2 && isShirtArchMain) focusCls = " brk-focus-top";
+      else if (idx === 1 && isShirtArchMain) focusCls = " brk-focus-mid";
+      mediaHtml = `<div class="brk-desc-media brk-media-card brk-card-loupe">
+        <input type="checkbox" id="brkloupe_${uidBase}_${idx}" class="brk-loupe-inp" />
+        <label for="brkloupe_${uidBase}_${idx}" class="brk-media-stage brk-stage-loupe${focusCls}" title="Toque ou passe o mouse para ativar a Lupa 2.4x">
           <img src="${blockImg}" alt="${safeBlockAlt}" loading="lazy" referrerpolicy="no-referrer" />
-        </div>
+          <span class="brk-loupe-lens" style="background-image: url('${blockImg}');"><span class="brk-loupe-badge">Lupa 2.4x</span></span>
+          <span class="brk-loupe-cta">Toque ou passe o mouse p/ Lupa 2.4x</span>
+        </label>
         <div class="brk-media-infobar">
           <span class="brk-media-info-left">${getSvgIcon(infoMeta.icon, themeColor, 14)} <span>${infoMeta.label}</span></span>
           <span class="brk-media-info-pill">${infoMeta.pill}</span>
@@ -3674,23 +3712,7 @@ function getProductModeBHTML(liveP) {
       overflow: hidden;
       background: #ffffff;
       padding: 6px;
-    }
-    .brk-media-view-pill {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      z-index: 2;
-      background: rgba(15, 23, 42, 0.78);
-      color: #ffffff;
-      font-size: 9.5px;
-      font-weight: 800;
-      letter-spacing: 0.7px;
-      text-transform: uppercase;
-      padding: 4px 10px;
-      border-radius: 9999px;
-      backdrop-filter: blur(4px);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-      pointer-events: none;
+      display: block;
     }
     .brk-desc-media img {
       width: 100%;
@@ -3701,14 +3723,161 @@ function getProductModeBHTML(liveP) {
       display: block;
       margin: 0 auto;
       background: #ffffff;
-      transition: transform 0.35s ease;
+      transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
     }
-    .brk-media-stage.brk-media-zoom-act3 img {
-      transform: scale(1.12);
+    .brk-360-inp, .brk-loupe-inp {
+      display: none !important;
+    }
+    .brk-stage-360 {
+      perspective: 1100px;
+    }
+    .brk-360-rotator {
+      position: relative;
+      width: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .brk-360-face {
+      width: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .brk-360-back {
+      position: absolute;
+      inset: 0;
+      transform: rotateY(180deg);
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-color: #ffffff;
+      border-radius: 10px;
+    }
+    .brk-360-i2:checked ~ .brk-stage-360 .brk-360-rotator {
+      transform: rotateY(180deg);
+    }
+    .brk-360-i3:checked ~ .brk-stage-360.brk-focus-top .brk-360-front img {
+      transform: scale(2.35);
+      transform-origin: 50% 20%;
+    }
+    .brk-360-i3:checked ~ .brk-stage-360.brk-focus-center .brk-360-front img {
+      transform: scale(2.25);
+      transform-origin: 50% 48%;
+    }
+    .brk-360-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 10px;
+      background: #f1f5f9;
+      border-top: 1px solid #e2e8f0;
+    }
+    .brk-360-btn {
+      flex: 1;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 800;
+      color: #475569;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 6px 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+    .brk-360-btn:hover {
+      border-color: ${themeColor};
+      color: ${themeColor};
+    }
+    .brk-360-i1:checked ~ .brk-360-controls .brk-360-b1,
+    .brk-360-i2:checked ~ .brk-360-controls .brk-360-b2,
+    .brk-360-i3:checked ~ .brk-360-controls .brk-360-b3 {
+      background: ${themeColor};
+      color: #ffffff;
+      border-color: ${themeColor};
+      box-shadow: 0 2px 8px ${themeColor}40;
+    }
+    .brk-stage-loupe {
+      cursor: zoom-in;
+    }
+    .brk-loupe-inp:checked + .brk-stage-loupe {
+      cursor: zoom-out;
+    }
+    .brk-stage-loupe.brk-focus-top img {
       transform-origin: 50% 18%;
     }
-    .brk-media-card:hover .brk-media-stage.brk-media-zoom-act3 img {
-      transform: scale(1.16);
+    .brk-stage-loupe.brk-focus-mid img {
+      transform-origin: 50% 38%;
+    }
+    .brk-stage-loupe.brk-focus-center img {
+      transform-origin: 50% 48%;
+    }
+    .brk-stage-loupe:hover img,
+    .brk-loupe-inp:checked + .brk-stage-loupe img {
+      transform: scale(2.35);
+    }
+    .brk-loupe-lens {
+      position: absolute;
+      right: 14px;
+      bottom: 42px;
+      width: 116px;
+      height: 116px;
+      border-radius: 50%;
+      border: 3px solid #ffffff;
+      outline: 2px solid ${themeColor};
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.26);
+      background-repeat: no-repeat;
+      background-color: #ffffff;
+      background-size: 270%;
+      background-position: 50% 18%;
+      z-index: 2;
+      transition: opacity 0.28s ease, transform 0.28s ease;
+      pointer-events: none;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .brk-stage-loupe.brk-focus-mid .brk-loupe-lens {
+      background-position: 50% 38%;
+    }
+    .brk-stage-loupe.brk-focus-center .brk-loupe-lens {
+      background-position: 50% 48%;
+    }
+    .brk-loupe-badge {
+      background: ${themeColor};
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      margin-bottom: 5px;
+      letter-spacing: 0.4px;
+    }
+    .brk-stage-loupe:hover .brk-loupe-lens,
+    .brk-loupe-inp:checked + .brk-stage-loupe .brk-loupe-lens {
+      opacity: 0;
+      transform: scale(0.85);
+    }
+    .brk-loupe-cta {
+      position: absolute;
+      bottom: 10px;
+      right: 12px;
+      z-index: 2;
+      background: rgba(15, 23, 42, 0.80);
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      backdrop-filter: blur(4px);
+      pointer-events: none;
+      transition: background 0.2s ease;
+    }
+    .brk-loupe-inp:checked + .brk-stage-loupe .brk-loupe-cta {
+      background: ${themeColor};
     }
     .brk-media-infobar {
       display: flex;
@@ -4072,11 +4241,15 @@ function getProductModeBHTML(liveP) {
         font-size: 9px;
         padding: 2px 7px;
       }
-      .brk-media-view-pill {
-        font-size: 8.5px;
-        padding: 3px 8px;
-        top: 8px;
-        left: 8px;
+      .brk-loupe-lens {
+        width: 90px;
+        height: 90px;
+        right: 10px;
+        bottom: 38px;
+      }
+      .brk-360-btn {
+        font-size: 10px;
+        padding: 5px 6px;
       }
       .brk-desc-title {
         font-size: 18px;
