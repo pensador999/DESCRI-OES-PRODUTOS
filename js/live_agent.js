@@ -79,7 +79,10 @@ const LiveAgent = (() => {
   function updateCounters() {
     const data = MASTER_PAYLOAD.stores[currentStore];
     if (!data) return;
-    const prods = data.products || [];
+    const allProds = data.products || [];
+    const prods = (typeof selectedCategory !== "undefined" && selectedCategory !== "all")
+      ? allProds.filter(p => p.category === selectedCategory)
+      : allProds;
     const colado = prods.filter(p => p.live && COLADO.includes(p.live.s)).length;
     const recolar = prods.filter(p => p.live && RECOLAR.includes(p.live.s)).length;
     const a = el("count-colado"); if (a) a.innerText = colado;

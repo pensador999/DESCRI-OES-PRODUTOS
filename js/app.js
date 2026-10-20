@@ -201,7 +201,7 @@ async function performLiveSync(isManual = false) {
   }
 }
 
-function detectClientArchetype(title, category, tags) {
+function detectClientArchetype(title, category, tags, sku = "") {
   const t = (title || "").toLowerCase();
   const cat = (category || "").toLowerCase();
   const text = `${t} ${cat} ${Array.isArray(tags) ? tags.join(" ") : tags || ""}`.toLowerCase();
@@ -249,7 +249,7 @@ function detectClientArchetype(title, category, tags) {
 
   // 8. Camisas: Work/Botão vs Agro vs Motors vs UV50+
   if (/\b(camisa|camiseta|baby look|regata|t-shirt|polo)\b/i.test(t)) {
-    const hasUvOrVest = /\b(uv|uv50|fpu|fps|xtech|solar|colete|sublimad|segunda pele|termica|térmica)\b/i.test(t) || /^(c0|ci|cadv|adv|hyb|raglan)/i.test(p.master_sku || p.sku || "");
+    const hasUvOrVest = /\b(uv|uv50|fpu|fps|xtech|solar|colete|sublimad|segunda pele|termica|térmica)\b/i.test(t) || /^(c0|ci|cadv|adv|hyb|raglan)/i.test(sku || "");
     if (
       (
         /\b(work|safari sarja|manga longa sarja|manga curta sarja|sarja|militar|operacional|botao|botão|de botao|de botão)\b/i.test(t) ||
@@ -511,7 +511,7 @@ async function switchStore(storeKey) {
   if (typeof LiveAgent !== "undefined") LiveAgent.onStoreReady(storeKey);
 }
 
-// Atualizar Cockpit do Topo
+// Atualizar Cockpit do Topo e Contadores dos Filtros (Escopados pela Categoria Selecionada)
 function updateCockpit() {
   const storeData = MASTER_PAYLOAD.stores[currentStore];
   if (!storeData) return;
@@ -533,18 +533,27 @@ function updateCockpit() {
     emptyCockpitElem.innerText = loadedEmpty.toLocaleString('pt-BR');
   }
 
+  // Escopar contadores das pílulas de filtro pela categoria selecionada (ou loja inteira se "all")
+  const scopedProducts = selectedCategory === "all"
+    ? products
+    : products.filter(p => p.category === selectedCategory);
+
+  const scopedBroken = scopedProducts.filter(p => p.status === "IMAGENS_QUEBRADAS").length;
+  const scopedEmpty = scopedProducts.filter(p => p.status === "SEM_DESCRICAO").length;
+  const scopedHealthy = scopedProducts.filter(p => p.status === "SAUDAVEL" || (!p.is_out_of_standard && p.status !== "IMAGENS_QUEBRADAS" && p.status !== "SEM_DESCRICAO")).length;
+
   const cAll = document.getElementById("count-all");
-  if (cAll) cAll.innerText = products.length;
+  if (cAll) cAll.innerText = scopedProducts.length;
   const cBroken = document.getElementById("count-broken");
-  if (cBroken) cBroken.innerText = loadedBroken;
+  if (cBroken) cBroken.innerText = scopedBroken;
   const cEmpty = document.getElementById("count-empty");
-  if (cEmpty) cEmpty.innerText = loadedEmpty;
+  if (cEmpty) cEmpty.innerText = scopedEmpty;
   const cHealthy = document.getElementById("count-healthy");
-  if (cHealthy) cHealthy.innerText = loadedHealthy;
+  if (cHealthy) cHealthy.innerText = scopedHealthy;
   const cColado = document.getElementById("count-colado");
-  if (cColado) cColado.innerText = products.filter(p => p.live && ["COLADO_ATUAL", "COLADO_DESATUALIZADO", "COLADO_SEM_MARCADOR"].includes(p.live.s)).length;
+  if (cColado) cColado.innerText = scopedProducts.filter(p => p.live && ["COLADO_ATUAL", "COLADO_DESATUALIZADO", "COLADO_SEM_MARCADOR"].includes(p.live.s)).length;
   const cRecolar = document.getElementById("count-recolar");
-  if (cRecolar) cRecolar.innerText = products.filter(p => p.live && ["COLADO_DESATUALIZADO", "COLADO_SEM_MARCADOR"].includes(p.live.s)).length;
+  if (cRecolar) cRecolar.innerText = scopedProducts.filter(p => p.live && ["COLADO_DESATUALIZADO", "COLADO_SEM_MARCADOR"].includes(p.live.s)).length;
 }
 
 // Filtros Rápidos do Cockpit
@@ -577,6 +586,7 @@ function syncFilterButtons() {
 function renderCategories() {
   const storeData = MASTER_PAYLOAD.stores[currentStore];
   if (!storeData) return;
+  const products = storeData.products || [];
   const rawCategories = storeData.categories;
   let categoriesList = [];
   if (Array.isArray(rawCategories)) {
@@ -596,10 +606,18 @@ function renderCategories() {
   // Botão "Todas"
   const allDiv = document.createElement("div");
   allDiv.className = "flex flex-col items-center gap-2 cursor-pointer flex-shrink-0 group";
-  allDiv.onclick = () => { selectedCategory = "all"; renderProducts(); highlightCategory(allDiv); };
+  allDiv.onclick = () => {
+    selectedCategory = "all";
+    currentFilter = "all";
+    syncFilterButtons();
+    updateCockpit();
+    renderProducts();
+    highlightCategory(allDiv);
+  };
   allDiv.innerHTML = `
-    <div class="w-16 h-16 rounded-full p-0.5 bg-blue-600 transition-all transform group-hover:scale-105 shadow-md flex items-center justify-center text-white font-extrabold text-xl">
+    <div class="relative w-16 h-16 rounded-full p-0.5 bg-blue-600 transition-all transform group-hover:scale-105 shadow-md flex items-center justify-center text-white font-extrabold text-xl">
       🌐
+      <span class="absolute -bottom-1 right-0 bg-slate-900 text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded-full border border-white">${products.length}</span>
     </div>
     <span class="text-xs font-bold text-slate-700 group-hover:text-blue-600">Todas</span>
   `;
@@ -608,8 +626,16 @@ function renderCategories() {
   categoriesList.forEach(cat => {
     const div = document.createElement("div");
     div.className = "flex flex-col items-center gap-2 cursor-pointer flex-shrink-0 group w-20 text-center";
-    div.onclick = () => { selectedCategory = cat.name; renderProducts(); highlightCategory(div); };
+    div.onclick = () => {
+      selectedCategory = cat.name;
+      currentFilter = "all";
+      syncFilterButtons();
+      updateCockpit();
+      renderProducts();
+      highlightCategory(div);
+    };
     
+    const catCount = cat.count || products.filter(p => p.category === cat.name).length;
     const ringClass = cat.broken_count > 0 ? "category-ring has-broken" : "category-ring";
     const imgUrl = cat.sample_image || cat.thumb || "https://placehold.co/100x100?text=BRK";
 
@@ -617,8 +643,9 @@ function renderCategories() {
       <div class="relative w-16 h-16 rounded-full p-[2px] ${ringClass} transition-all transform group-hover:scale-105 shadow-md">
         <img src="${imgUrl}" alt="${cat.name}" class="w-full h-full object-cover rounded-full bg-white p-0.5" loading="lazy" />
         ${cat.broken_count > 0 ? `<span class="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded-full border border-white">!</span>` : ''}
+        <span class="absolute -bottom-1 right-0 bg-slate-900 text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded-full border border-white" title="${catCount} produto(s) nesta categoria">${catCount}</span>
       </div>
-      <span class="text-[11px] font-semibold text-slate-700 truncate w-full group-hover:text-blue-600 block">${cat.name}</span>
+      <span class="text-[11px] font-semibold text-slate-700 truncate w-full group-hover:text-blue-600 block" title="${cat.name} (${catCount})">${cat.name}</span>
     `;
     categoriesRail.appendChild(div);
   });
