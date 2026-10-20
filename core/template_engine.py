@@ -31,7 +31,10 @@ KNOWN_BRANDS = [
     'Rapala', 'Deyu', 'Marine Sports', 'Marine', 'Daisen', 'Albatroz', 
     'Boaonda', 'American Hat', 'Elber', 'Maruri', 'Daiwa', 'Shimano', 
     'Loomis', 'Monster 3X', 'Moriah', 'Kowalsky', 'VMC', 'Mustad', 
-    'Crown', 'Ottoni', 'Pesca Brasil', 'Sumax', 'Saint', 'Jogá', 'Joga'
+    'Crown', 'Ottoni', 'Pesca Brasil', 'Sumax', 'Saint', 'Jogá', 'Joga',
+    "Cutelaria D'Avila", "D'Avila", "D'avila", 'Karandá', 'Karanda',
+    'Pralana', 'Nelson Nakamura', 'Yara', 'Jackall', 'Sunline',
+    'Spiderwire', 'Okuma', 'Coleman', 'CCM'
 ]
 
 KNOWN_SHOPIFY_DUP_IMAGE_TOKENS = {
@@ -1736,8 +1739,13 @@ class TemplateEngine:
         detected_brand = None
         for brand in self.known_brands:
             if re.search(r'\b' + re.escape(brand) + r'\b', full_info, re.IGNORECASE):
-                detected_brand = brand
+                detected_brand = "Cutelaria D'Avila" if brand.lower() in ("d'avila", "cutelaria d'avila") else ("Karandá" if brand.lower() == "karanda" else brand)
                 break
+        if not detected_brand:
+            if re.search(r'faca\s+artesanal\s+ga[úu]cha', full_info, re.IGNORECASE):
+                detected_brand = "Cutelaria D'Avila"
+            elif re.search(r'\bisca\s+artificial\s+inna\b', full_info, re.IGNORECASE):
+                detected_brand = "Marine Sports"
                 
         is_revenda = detected_brand is not None and detected_brand.lower() != "brk"
         
@@ -2932,12 +2940,6 @@ class TemplateEngine:
                     variations_summary = f"Disponível em {len(variant_titles)} opções de cores e modelos no anúncio ({', '.join(variant_titles[:4])}{'...' if len(variant_titles) > 4 else ''})."
                 else:
                     variations_summary = "Múltiplas variações e opções de cores disponíveis para escolha no anúncio."
-
-        if not is_apparel and not split_images and len(cdn_images) >= 4:
-            used_non_app = {u for u in (img1, img2, img3) if u}
-            unused_non_app = [u for u in cdn_images if u and u not in used_non_app and "2-capa" not in u.lower()]
-            if unused_non_app:
-                back_360_img = unused_non_app[0]
 
         act1 = dict(template["act1"])
         act2 = dict(template["act2"])

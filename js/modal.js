@@ -564,7 +564,10 @@ function resolveClientOriginAndTitle(liveP) {
     'Rapala', 'Deyu', 'Marine Sports', 'Marine', 'Daisen', 'Albatroz', 
     'Boaonda', 'American Hat', 'Elber', 'Maruri', 'Daiwa', 'Shimano', 
     'Loomis', 'Monster 3X', 'Moriah', 'Kowalsky', 'VMC', 'Mustad', 
-    'Crown', 'Ottoni', 'Pesca Brasil', 'Sumax', 'Saint', 'Jogá', 'Joga'
+    'Crown', 'Ottoni', 'Pesca Brasil', 'Sumax', 'Saint', 'Jogá', 'Joga',
+    "Cutelaria D'Avila", "D'Avila", "D'avila", 'Karandá', 'Karanda',
+    'Pralana', 'Nelson Nakamura', 'Yara', 'Jackall', 'Sunline',
+    'Spiderwire', 'Okuma', 'Coleman', 'CCM'
   ];
   const rawTitle = (liveP.title || "Produto BRK").trim()
     .replace(/\bÒculos\b/g, "Óculos")
@@ -582,9 +585,16 @@ function resolveClientOriginAndTitle(liveP) {
   let detectedBrand = null;
   for (const b of KNOWN_BRANDS) {
     const bLower = b.toLowerCase();
-    if (new RegExp('\\b' + bLower + '\\b', 'i').test(fullInfo)) {
-      detectedBrand = b;
+    if (new RegExp('\\b' + bLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(fullInfo)) {
+      detectedBrand = (bLower === "d'avila" || bLower === "cutelaria d'avila") ? "Cutelaria D'Avila" : (bLower === "karanda" ? "Karandá" : b);
       break;
+    }
+  }
+  if (!detectedBrand) {
+    if (/faca\s+artesanal\s+ga[úu]cha/i.test(fullInfo)) {
+      detectedBrand = "Cutelaria D'Avila";
+    } else if (/\bisca\s+artificial\s+inna\b/i.test(fullInfo)) {
+      detectedBrand = "Marine Sports";
     }
   }
 
@@ -3340,11 +3350,6 @@ function getProductModeBHTML(liveP) {
   } else if (archetypeId === "fishing_tackle_gear" && (liveP.title || "").toLowerCase().includes("trava vara") && images.length >= 3) {
     [img1, img2, img3] = [images[0], images[2], images[1]];
   }
-  if (!isApparel && !splitImages && images.length >= 4) {
-    const usedNonApp = new Set([img1, img2, img3].filter(Boolean));
-    const unusedNonApp = images.filter(u => u && !usedNonApp.has(u) && !u.toLowerCase().includes("2-capa"));
-    if (unusedNonApp.length > 0) back360Img = unusedNonApp[0];
-  }
 
   let blocks = liveP.narrative_blocks ? liveP.narrative_blocks.map(b => ({ ...b })) : null;
   if (!blocks || blocks.length === 0) {
@@ -3774,7 +3779,7 @@ function getProductModeBHTML(liveP) {
           <span class="brk-media-info-pill">${infoMeta.pill}</span>
         </div>
       </div>`;
-    } else if (blockImg && idx === 0 && (block.back_360_image || back360Img) && (block.back_360_image || back360Img) !== blockImg) {
+    } else if (blockImg && idx === 0 && isApparel && (block.back_360_image || back360Img) && (block.back_360_image || back360Img) !== blockImg) {
       const infoMeta = getClientMediaInfographicMeta(idx, archetypeId, liveP, formattedTitle, isShortSleeve, false);
       const back360Url = block.back_360_image || back360Img;
       const isBack360 = Boolean(block.is_back_cover_360 !== undefined ? block.is_back_cover_360 : isBackCover360);

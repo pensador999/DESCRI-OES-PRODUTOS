@@ -1546,6 +1546,29 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         self.assertNotIn("Inox 18/8 com Vácuo", html_gel)
         self.assertNotIn("pescarias", html_gel.lower())
 
+        # 11. Produtos de Revenda / Únicos sem frente-e-costas (ex: Faca Artesanal Gaúcha Cutelaria D'Avila): sem botão 180° Giro 3D e com selo Revenda
+        faca_davila = {
+            "id": 99006,
+            "master_sku": "CARBONO",
+            "title": 'Faca Artesanal Gaúcha Churrasco Aço Carbono 12" Cabo Hibrido',
+            "images": [
+                "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/faca-artesanal-gaucha-churrasco-aco-carbono-12-cabo-hibrido-carbono23-faca-artesanal-7908456420584-brk-agro-default-title-41251635626281.png?v=1787681134",
+                "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/faca-artesanal-gaucha-churrasco-aco-carbono-12-cabo-hibrido-carbono23-faca-artesanal-7908456420584-brk-agro-default-title-41251635659049.png?v=1787680936",
+                "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/faca-artesanal-gaucha-churrasco-aco-carbono-12-cabo-hibrido-carbono23-faca-artesanal-7908456420584-brk-agro-default-title-41251635691817.png?v=1787681325",
+                "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/nqWudRJ.png?v=1741789942",
+            ],
+        }
+        arch_davila = template_engine.detect_archetype(faca_davila["title"], "", [], "", sku=faca_davila["master_sku"])
+        enr_davila = template_engine.generate_narrative_from_template(faca_davila, arch_davila, faca_davila["images"], store_key="brk_agro")
+        html_davila = html_builder.build_shopify_html(enr_davila)
+        self.assertEqual(enr_davila["origin_type"], "revenda")
+        self.assertEqual(enr_davila["brand_name"], "Cutelaria D'Avila")
+        self.assertEqual(enr_davila["act1"].get("back_360_image", ""), "")
+        self.assertNotIn("brk-card-360", html_davila)
+        self.assertNotIn("180° Giro 3D", html_davila)
+        self.assertNotIn("BRK Faca Artesanal", html_davila)
+        self.assertNotIn("41251635691817", html_davila, "O banner de pergaminho com texto ([2]) nunca deve ser exibido!")
+
 
 def run_tests():
     suite = unittest.TestSuite()

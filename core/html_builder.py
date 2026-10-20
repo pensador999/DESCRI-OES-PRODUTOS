@@ -968,7 +968,8 @@ class HTMLBuilder:
                 desc_parts.append(" ".join(clean_d.split()))
         short_desc = " ".join(desc_parts)[:280] if desc_parts else f"{formatted_title} oficial com qualidade e garantia BRK."
 
-        raw_imgs = enriched_data.get("images") or enriched_data.get("cdn_images") or enriched_data.get("gallery") or []
+        block_imgs = [b.get("image") for b in blocks if isinstance(b, dict) and b.get("image")]
+        raw_imgs = block_imgs or enriched_data.get("images") or enriched_data.get("cdn_images") or enriched_data.get("gallery") or []
         imgs = [u for u in raw_imgs if isinstance(u, str) and u.startswith("http")]
 
         schema_obj = {
@@ -2025,7 +2026,7 @@ class HTMLBuilder:
           <span class="brk-media-info-pill">{info_meta['pill']}</span>
         </div>
       </div>"""
-            elif img_src and idx == 0 and block.get("back_360_image") and block.get("back_360_image") != img_src:
+            elif img_src and idx == 0 and (is_shirt_arch_main or archetype_id == "pants_cargo_tactical") and block.get("back_360_image") and block.get("back_360_image") != img_src:
                 info_meta = self._get_media_infographic_meta(idx, archetype_id, enriched_data, is_split=False)
                 back_360_url = block.get("back_360_image")
                 is_back_cover_360 = bool(block.get("is_back_cover_360"))
