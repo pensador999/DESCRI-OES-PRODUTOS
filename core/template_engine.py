@@ -1798,7 +1798,7 @@ class TemplateEngine:
             return False
         u_low = url.lower()
         fname = u_low.split("/")[-1].split("?")[0]
-        if fname.startswith("02_1918aa2d") or "zoom" in fname:
+        if fname.startswith("02_1918aa2d") or "zoom" in fname or "2-capa" in fname or "capa-2" in fname:
             return False
         if "productonchannel" in fname:
             return any(h in fname for h in self._EXPLICIT_BACK_POC_HASHES)
@@ -1809,17 +1809,20 @@ class TemplateEngine:
             return False
         keywords = [
             "costas", "costa", "back", "traseira", "verso", "tras",
-            "02fem", "02masc", "02inf", "02_fem", "02_masc", "02_inf"
+            "02fem", "02masc", "02inf", "02_fem", "02_masc", "02_inf",
+            "2fem", "2masc", "2inf", "2-fem", "2-masc", "2-inf", "2_fem", "2_masc", "2_inf"
         ]
         if any(w in fname_no_ts for w in keywords):
             return True
+        if any(k in fname_no_ts for k in ("-brk-agro-", "-brk-fishing-", "-brk-motors-", "camisa-agro-", "camisa-de-pesca-", "camisa-pesca-")):
+            return False
         return bool(re.search(r'(?:^|[-_.\s])(2|02|b)(?:[-_.\s]|masc|fem|inf|kids|bl|$)', fname_no_ts))
 
     def _is_explicit_back_name(self, url: str) -> bool:
         if not url or not isinstance(url, str):
             return False
         fname = url.lower().split("/")[-1].split("?")[0]
-        if fname.startswith("02_1918aa2d") or "zoom" in fname:
+        if fname.startswith("02_1918aa2d") or "zoom" in fname or "2-capa" in fname or "capa-2" in fname:
             return False
         if "productonchannel" in fname:
             return any(h in fname for h in self._EXPLICIT_BACK_POC_HASHES)
@@ -1835,13 +1838,17 @@ class TemplateEngine:
             ]
         ):
             return True
-        return bool(re.search(r'(?:^|[-_.\s])2_(?:fem|masc|inf)', fname))
+        return bool(re.search(r'(?:^|[-_.\s])0?2[-_]?(?:fem|masc|inf)', fname))
 
     def _select_apparel_act_images(self, cdn_images: List[str], is_female: bool = False, is_kids: bool = False, sku: str = "", title: str = ""):
         if not cdn_images:
             return "", "", ""
         if len(cdn_images) == 1:
             return cdn_images[0], "", ""
+
+        # Caso especial CI075 / CI083 em brk_agro onde [0] foi nomeado 01_MASC mas é a Frente Infantil e [1]=10INF (Costas), [2]=11INF (Infográfico Frontal)
+        if len(cdn_images) >= 3 and "01_masc" in cdn_images[0].lower() and "10inf" in cdn_images[1].lower():
+            return cdn_images[0], cdn_images[1], cdn_images[2]
 
         # Filtragem inteligente de galerias mistas de família (MASC / FEM / INF no mesmo produto)
         def _classify_img_audience(u: str):
@@ -1891,8 +1898,11 @@ class TemplateEngine:
                 # e só existem 1 ou 2 fotos específicas do público-alvo (preferred), preferred[0] é 100% Frontal daquele público!
                 if 1 <= len(preferred) <= 2 and len(cdn_images) >= 3:
                     p0 = preferred[0]
-                    act1_img = cdn_images[0] if cdn_images[0] != p0 else (preferred[1] if len(preferred) > 1 else cdn_images[1])
-                    act2_img = preferred[1] if len(preferred) == 2 else next((u for u in cdn_images if u not in (act1_img, p0)), cdn_images[1])
+                    neutral_cands = [u for u in compatible if u not in preferred]
+                    if not neutral_cands:
+                        return (p0, (preferred[1] if len(preferred) == 2 else ""), "")
+                    act1_img = neutral_cands[0]
+                    act2_img = preferred[1] if len(preferred) == 2 else (neutral_cands[1] if len(neutral_cands) > 1 else act1_img)
                     return act1_img, act2_img, p0
 
                 ordered_compatible = (
@@ -1903,7 +1913,7 @@ class TemplateEngine:
                 if len(ordered_compatible) >= 3:
                     working_images = ordered_compatible
                 elif len(ordered_compatible) >= 1:
-                    working_images = ordered_compatible + [u for u in cdn_images if u not in ordered_compatible]
+                    working_images = ordered_compatible
 
         if len(working_images) == 1:
             return working_images[0], "", ""
@@ -1939,9 +1949,9 @@ class TemplateEngine:
             if "01_fem_frente_costas" in fnames[1] and "02_fem" in fnames[0]:
                 return working_images[0], working_images[2], working_images[3]
 
-            # Caso especial 1-capa / 2-capa (ex: CI077 onde [0]=1-capa Frente, [1]=2-capa Frente, [2]=05inf Costas, [3]=06inf Costas)
-            if "1-capa" in fnames[0] and "2-capa" in fnames[1]:
-                return working_images[0], working_images[2], working_images[1]
+            # Caso especial 1-capa / 2-capa (ex: CI073, CI077, CI016I onde [0]=1-capa Humanizada Frente, [1]=2-capa Humanizada Frente, [2]=Estúdio 100% Frente, [3]=Estúdio Costas)
+            if "2-capa" in fnames[1] or "capa-2" in fnames[1]:
+                return working_images[0], working_images[3], working_images[2]
 
             # Caso especial C01824 / C01824BL com imagens geradas (gemini_generated_image / chatgpt_image) onde [1] é Costas e [3] é Frontal
             if sku_up.startswith("C01824") or any("gemini_generated_image" in f for f in fnames[1:3]):
@@ -2122,9 +2132,12 @@ class TemplateEngine:
                     return working_images[0], working_images[1], working_images[3]
                 return working_images[0], working_images[1], working_images[2]
 
-            # Subcaso 1G: Fallback para demais galerias de 4+ fotos (Capa Externa/Design em [0], Estúdio Frente em [1], Costas em [2])
+            # Subcaso 1G: Fallback para demais galerias de 4+ fotos
             if sku_up.startswith("ADV"):
                 return working_images[0], working_images[2], working_images[3]
+            if any(k in fnames[0] for k in ("-brk-agro-", "-brk-fishing-", "-brk-motors-", "camisa-agro-", "camisa-de-pesca-", "camisa-pesca-", "camisa-uv")):
+                # Galeria de 4 fotos com nomes SEO-slug de estúdio sem capa externa em [0] ([0]=Frente, [1]=Costas, [2]=3/4 Frente, [3]=3/4 Costas)
+                return working_images[0], working_images[1], working_images[2]
             return working_images[0], working_images[2], working_images[1]
 
         # =====================================================================
@@ -2689,6 +2702,7 @@ class TemplateEngine:
         is_short_sleeve = is_apparel and (
             any(w in t_low for w in ["manga curta", "manga-curta", "camiseta"])
             or ("curta" in t_low and "manga" in t_low)
+            or sku_clean_for_flags.startswith("cbtmc")
             or (sku_clean_for_flags.startswith(("casual", "bp", "cm", "cadv", "cf")) and not sku_clean_for_flags.startswith(("cmb", "cbt")))
         ) and not any(w in t_low for w in ["manga longa", "manga-longa"]) and not is_segunda_pele
         is_has_glove = is_apparel and (any(w in t_low for w in ["com luva", "e luva", "luva integrada", "armorx"]) or sku_clean_for_flags.startswith("cax"))
@@ -2702,10 +2716,11 @@ class TemplateEngine:
             is_apparel
             and archetype_id != "shirts_button_work"
             and not sku_clean_for_flags.startswith(("cmb", "cbt"))
-            and not any(w in t_low for w in ["botão", "botao", "colarinho", "xadrez", "camisa work"])
+            and not any(w in t_low for w in ["botão", "botao", "colarinho", "camisa work"])
             and (
                 is_segunda_pele
                 or is_short_sleeve
+                or bool(re.match(r'^ci0(?:54|7[2-9]|8[0-4])(?:i|pp|p|m|g|gg|g1|g2)?(?:_full|_out)?$', sku_clean_for_flags))
                 or any(w in t_low for w in ["gola careca", "gola redonda", "sem zíper", "sem ziper", "t-shirt", "camisa casual", "casual"])
             )
             and not any(w in t_low for w in ["com zíper", "com ziper"])
@@ -2879,13 +2894,6 @@ class TemplateEngine:
             act3["title"] = "PUNHOS ESTENDIDOS COM LUVA INTEGRADA E COSTURAS REFORÇADAS"
             act3["desc_tmpl"] = "Acabamento de alto padrão com costuras planas anti-atrito, gola padre anatômica e punhos estendidos com luva integrada (abertura para o polegar) que garantem proteção solar contínua no dorso das mãos com total liberdade nos dedos."
 
-        # 7. Detecção Contextual da Foto 3 (Costas / Painel Traseiro vs. Acabamento Universal)
-        is_back_view = self._is_back_view_url(img3, include_03=True)
-        if is_back_view and archetype_id == "uv_performance" and not is_fusion and not is_hybrid and not is_hooded and not is_round_neck and not is_has_glove:
-            act3["tag"] = "Design Traseiro & Acabamento"
-            act3["title"] = "PAINEL TRASEIRO EM ALTA DEFINIÇÃO E COSTURAS REFORÇADAS"
-            act3["desc_tmpl"] = "Painel traseiro com estampa nítida e sublimação de alta resolução que não desbota, estruturado com costuras planas reforçadas nos ombros e dorso para total liberdade de movimentos e resistência ao uso contínuo."
-
         sibling_specs = sibling_info.get("extracted_specs") if sibling_info else None
         specs = self.extract_product_specs(product, archetype_id, sibling_specs=sibling_specs)
         specs = self.sanitize_specs_for_archetype(specs, archetype_id)
@@ -2979,9 +2987,9 @@ class TemplateEngine:
         elif is_hooded and not any("capuz" in s["label"].lower() for s in new_specs):
             new_specs.append({"label": "Capuz", "value": "Capuz anatômico integrado para proteção solar estendida"})
 
-        if is_fusion or is_hybrid or is_round_neck:
+        if is_fusion or is_hybrid or is_hooded or is_round_neck:
             act3["title"] = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', act3["title"], flags=re.IGNORECASE).strip()
-            replacement_collar = "capuz anatômico contínuo" if (is_fusion or is_hybrid) else "gola redonda anatômica"
+            replacement_collar = "capuz anatômico contínuo" if (is_fusion or is_hybrid or is_hooded) else "gola redonda anatômica"
             act3["desc_tmpl"] = re.sub(r'gola padre com cobertura no cursor do z[íi]per', replacement_collar, act3["desc_tmpl"], flags=re.IGNORECASE)
             act3["desc_tmpl"] = re.sub(r'\bcursor do z[íi]per\b', 'acabamento anatômico', act3["desc_tmpl"], flags=re.IGNORECASE)
             act3["desc_tmpl"] = re.sub(r'\bz[íi]per com trava de seguran[çc]a\b', 'conforto anatômico contínuo', act3["desc_tmpl"], flags=re.IGNORECASE)
@@ -2990,7 +2998,7 @@ class TemplateEngine:
             new_clean_specs = []
             for sp in new_specs:
                 lbl_c = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', sp["label"], flags=re.IGNORECASE).strip()
-                replacement_hood = "capuz com máscara facial integrada" if is_fusion else ("capuz anatômico integrado" if is_hybrid else "gola redonda anatômica")
+                replacement_hood = "capuz com máscara facial integrada" if is_fusion else ("capuz anatômico integrado" if (is_hybrid or is_hooded) else "gola redonda anatômica")
                 val_c = re.sub(r'gola padre[^,;.]*', replacement_hood, sp["value"], flags=re.IGNORECASE)
                 val_c = re.sub(r'\bcursor do z[íi]per\b', 'acabamento contínuo', val_c, flags=re.IGNORECASE)
                 val_c = re.sub(r'\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b', '', val_c, flags=re.IGNORECASE)
@@ -3020,6 +3028,55 @@ class TemplateEngine:
                 for sp in new_specs:
                     if "uso recomendado" in sp["label"].lower():
                         sp["value"] = "Encontros de motociclismo, viagens, passeios e uso casual no dia a dia"
+
+        # 8.5 Adaptação 360° para Camisas de Botão: Work Safari UV50+ (CMB) vs Country Xadrez / Lisa Classic (CBTML / CBTMC)
+        elif archetype_id == "shirts_button_work":
+            is_cmb_work_uv = sku_clean_for_flags.startswith("cmb") or ("work" in t_low and "uv" in t_low)
+            if is_cmb_work_uv:
+                act1["tag"] = "Proteção Solar UV50+ & Linha Work"
+                act1["title"] = "TECIDO TÉCNICO LEVE COM PROTEÇÃO SOLAR FPU 50+ E CAIMENTO OPERACIONAL"
+                act1["desc_tmpl"] = "Desenvolvida para unir apresentação profissional, máxima funcionalidade e proteção solar certificada FPU 50+ no campo, na pescaria ou na rotina operacional, a {title} mantém o corpo fresco, protegido e confortável durante todo o dia."
+                act2["tag"] = "Bolsos Utilitários & Abotoamento"
+                act2["title"] = "DOIS BOLSOS FRONTAIS COM LAPELA ABOTOADA E COLARINHO ESTRUTURADO"
+                act2["desc_tmpl"] = "Equipada com fechamento frontal integral por botões reforçados, colarinho estruturado de excelente postura e dois bolsos utilitários frontais no peito com lapela e botão para guardar objetos com total segurança."
+                act3["tag"] = "Versatilidade & Acabamento"
+                act3["title"] = "MANGAS COM PRESILHA DE AJUSTE E COSTURAS REFORÇADAS"
+                act3["desc_tmpl"] = "Construída com costuras reforçadas nos pontos de maior exigência, punhos abotoados e sistema funcional de presilha (martingale) que permite dobrar e fixar as mangas com praticidade nos momentos de maior calor."
+                new_specs = [
+                    {"label": "Proteção Solar", "value": "Fator FPU 50+ homologado contra raios UVA e UVB"},
+                    {"label": "Fechamento & Gola", "value": "Abotoamento frontal reforçado e colarinho estruturado"},
+                    {"label": "Bolsos Utilitários", "value": "2 bolsos frontais no peito com lapela e fechamento por botão"},
+                    {"label": "Mangas & Ajuste", "value": "Manga longa com punho abotoado e presilha para uso dobrado"},
+                    {"label": "Modelagem", "value": "Operacional / Safari Work confortável de alta mobilidade"}
+                ]
+            else:
+                estilo_padrao = "Xadrez Country" if "xadrez" in t_low else "Lisa Classic"
+                manga_txt = "Manga Curta" if is_short_sleeve else "Manga Longa"
+                publico_txt = "Feminina acinturada" if is_female else "Masculina confortável"
+                act1["tag"] = f"Estilo {estilo_padrao} & Tradição"
+                act1["title"] = f"TECIDO ENCORPADO DE TOQUE MACIO E VISUAL {estilo_padrao.upper()} AUTÊNTICO"
+                act1["desc_tmpl"] = f"Desenvolvida para quem valoriza elegância, tradição e durabilidade no campo, no trabalho ou em eventos sertanejos, a {{title}} entrega caimento impecável ({publico_txt}) e conforto térmico o dia inteiro."
+                act2["tag"] = "Abotoamento & Colarinho"
+                act2["title"] = "FECHAMENTO FRONTAL POR BOTÕES REFORÇADOS E COLARINHO ESTRUTURADO"
+                act2["desc_tmpl"] = "Conta com abotoamento frontal de alta resistência, colarinho firme que preserva o alinhamento da peça e bolso frontal funcional com acabamento de alto padrão."
+                act3["tag"] = f"Acabamento {manga_txt}"
+                act3["title"] = (
+                    "MANGAS CURTAS COM BARRA REFORÇADA E COSTURAS DE ALTA PRECISÃO"
+                    if is_short_sleeve else
+                    "PUNHOS ABOTOADOS, PALA TRASEIRA ANATÔMICA E COSTURAS REFORÇADAS"
+                )
+                act3["desc_tmpl"] = (
+                    "Construída com mangas curtas de caimento leve e ventilado, pala traseira anatômica e pespontos reforçados que garantem liberdade total de movimentos nos dias quentes."
+                    if is_short_sleeve else
+                    "Construída com punhos estruturados com abotoamento firme, pala traseira anatômica e costuras reforçadas que garantem durabilidade superior e ampla mobilidade dos braços."
+                )
+                new_specs = [
+                    {"label": "Estilo / Padrão", "value": f"Camisa {estilo_padrao} de Botão ({manga_txt})"},
+                    {"label": "Fechamento & Gola", "value": "Botões frontais reforçados e colarinho tradicional estruturado"},
+                    {"label": "Mangas", "value": "Mangas curtas com barra pespontada" if is_short_sleeve else "Mangas longas com punhos abotoados"},
+                    {"label": "Tecido", "value": "Algodão / Sarja leve de alta resistência e toque macio"},
+                    {"label": "Modelagem", "value": f"{publico_txt} com ótimo caimento e liberdade de movimentos"}
+                ]
 
         # 9. Adaptação 360° por Subtipo de Equipamentos de Pesca (fishing_tackle_gear)
         elif archetype_id == "fishing_tackle_gear":

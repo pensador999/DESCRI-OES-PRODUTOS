@@ -693,9 +693,9 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "sub": "Pesponto Duplo Anti-Atrito"
     },
     {
-      "icon": "return",
-      "title": "Troca Fácil BRK",
-      "sub": "Satisfação 100% Garantida"
+      "icon": "sparkle",
+      "title": "Qualidade Oficial BRK",
+      "sub": "Padrão 100% Garantido"
     }
   ],
   "agro_field": [
@@ -715,8 +715,8 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "sub": "Estrutura Anti-Deformação"
     },
     {
-      "icon": "return",
-      "title": "Troca Fácil BRK",
+      "icon": "sparkle",
+      "title": "Qualidade Oficial BRK",
       "sub": "Procedência Garantida"
     }
   ],
@@ -737,8 +737,8 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "sub": "Pronta para Off-Road"
     },
     {
-      "icon": "return",
-      "title": "Troca Fácil BRK",
+      "icon": "sparkle",
+      "title": "Qualidade Oficial BRK",
       "sub": "Garantia Oficial BRK"
     }
   ],
@@ -759,9 +759,9 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "sub": "Postura o Dia Todo"
     },
     {
-      "icon": "return",
-      "title": "Troca Fácil BRK",
-      "sub": "Satisfação 100% Garantida"
+      "icon": "sparkle",
+      "title": "Qualidade Oficial BRK",
+      "sub": "Padrão 100% Garantido"
     }
   ],
   "pants_cargo_tactical": [
@@ -781,9 +781,9 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "sub": "Profundos e Estruturados"
     },
     {
-      "icon": "return",
-      "title": "Troca Fácil BRK",
-      "sub": "Satisfação 100% Garantida"
+      "icon": "sparkle",
+      "title": "Qualidade Oficial BRK",
+      "sub": "Padrão 100% Garantido"
     }
   ],
   "overalls_workwear": [
@@ -803,9 +803,9 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "sub": "Engate Rápido"
     },
     {
-      "icon": "return",
-      "title": "Troca Fácil BRK",
-      "sub": "Satisfação 100% Garantida"
+      "icon": "sparkle",
+      "title": "Qualidade Oficial BRK",
+      "sub": "Padrão 100% Garantido"
     }
   ],
   "sun_sleeves_manguitos": [
@@ -825,9 +825,9 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "sub": "Ajuste Firme no Braço"
     },
     {
-      "icon": "return",
-      "title": "Troca Fácil BRK",
-      "sub": "Satisfação 100% Garantida"
+      "icon": "sparkle",
+      "title": "Qualidade Oficial BRK",
+      "sub": "Padrão 100% Garantido"
     }
   ],
   "neck_gaiters_balaclavas": [
@@ -847,9 +847,9 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "sub": "Tecido Tecnológico Leve"
     },
     {
-      "icon": "return",
-      "title": "Troca Fácil BRK",
-      "sub": "Satisfação 100% Garantida"
+      "icon": "sparkle",
+      "title": "Qualidade Oficial BRK",
+      "sub": "Padrão 100% Garantido"
     }
   ],
   "gloves_tactical_fishing": [
@@ -869,9 +869,9 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "sub": "Firmeza no Pulso"
     },
     {
-      "icon": "return",
-      "title": "Troca Fácil BRK",
-      "sub": "Satisfação 100% Garantida"
+      "icon": "sparkle",
+      "title": "Qualidade Oficial BRK",
+      "sub": "Padrão 100% Garantido"
     }
   ],
   "hats_safari_outdoor": [
@@ -891,8 +891,8 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "sub": "Segurança Anti-Vento"
     },
     {
-      "icon": "return",
-      "title": "Troca Fácil BRK",
+      "icon": "sparkle",
+      "title": "Qualidade Oficial BRK",
       "sub": "Satisfação Garantida"
     }
   ],
@@ -913,9 +913,9 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "sub": "Encaixe Macio e Estável"
     },
     {
-      "icon": "return",
-      "title": "Troca Fácil BRK",
-      "sub": "Satisfação 100% Garantida"
+      "icon": "sparkle",
+      "title": "Qualidade Oficial BRK",
+      "sub": "Padrão 100% Garantido"
     }
   ],
   "caps_trucker_snapback": [
@@ -935,9 +935,9 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "sub": "Tamanho Único Ajustável"
     },
     {
-      "icon": "return",
-      "title": "Troca Fácil BRK",
-      "sub": "Satisfação 100% Garantida"
+      "icon": "sparkle",
+      "title": "Qualidade Oficial BRK",
+      "sub": "Padrão 100% Garantido"
     }
   ],
   "eyewear_sunglasses": [
@@ -979,8 +979,8 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "sub": "Material Antibacteriano"
     },
     {
-      "icon": "return",
-      "title": "Troca Fácil BRK",
+      "icon": "sparkle",
+      "title": "Qualidade Oficial BRK",
       "sub": "Ajuste Perfeito Garantido"
     }
   ],
@@ -1001,8 +1001,8 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "sub": "Reforços Laterais"
     },
     {
-      "icon": "return",
-      "title": "Troca Fácil BRK",
+      "icon": "sparkle",
+      "title": "Qualidade Oficial BRK",
       "sub": "Ajuste Perfeito Garantido"
     }
   ],
@@ -1750,7 +1750,7 @@ function sanitizeAndDedupClientImages(rawSources, archetypeId = "uv_performance"
 
     if (seenKeys.has(stem)) return;
 
-    const isPureFrontLabel = stem.includes("frente") && !["costa", "verso", "tras", "detalhe", "zoom", "persp", "lateral", "2", "02"].some(k => stem.includes(k));
+    const isPureFrontLabel = stem.includes("frente") && !["costa", "verso", "tras", "detalhe", "zoom", "persp", "lateral", "2", "02", "3", "03", "4", "04", "5", "05"].some(k => stem.includes(k));
     if (isPureFrontLabel) {
       const audTag = stem.includes("fem") ? "fem" : (stem.includes("inf") ? "inf" : "masc");
       if (seenPureFrontMockup.has(audTag) && rawDeduped.length >= 1) {
@@ -2553,33 +2553,77 @@ ${cuidadosLi}
 </div>`;
 }
 
+const EXPLICIT_BACK_POC_HASHES = [
+  "7b19cafab14e", "e2f62ee973da", "387e870f3379", "7bdc66337bfe",
+  "b4b1be48b687", "028bb8fdcfd5", "fff9408f57fe", "b01708bd7eea",
+  "0855ecb1a641", "61d791ea91ca", "ee825cc65556", "e8f232579489",
+  "c4773979284d", "3b4aba35b3d2", "0c83e30f278a", "22311f856466",
+  "2320ad7a784d", "8da0d64f829c", "9656ca14524e", "33beb817c568",
+  "7b1e90ac1efc", "71b9cbecac2a", "c06bcd092644", "6f84821f7619",
+  "236b64bb841b", "0721a4c8ce17", "82bf06e5656d", "086u9hh",
+  "4ad9fc8f16bc", "94a3b81f5954", "73591bff33b1", "32165d82a90b",
+  "fcb50f9e02ac", "b3e2c7dc24a2", "c8a91438bfdd", "e5092aceccc3",
+  "2339b90698f3", "84a9e29f3d47", "0a5de4344adb", "c02837bl.webp"
+];
+
 function isClientBackViewUrl(url, include03 = false) {
   if (!url || typeof url !== "string") return false;
   const uLow = url.toLowerCase();
   const fname = uLow.split("/").pop().split("?")[0];
+  if (fname.startsWith("02_1918aa2d") || fname.includes("zoom") || fname.includes("2-capa") || fname.includes("capa-2")) {
+    return false;
+  }
+  if (fname.includes("productonchannel")) {
+    return EXPLICIT_BACK_POC_HASHES.some(h => fname.includes(h));
+  }
+  if (EXPLICIT_BACK_POC_HASHES.some(h => fname.includes(h))) return true;
   const fnameNoTs = fname.replace(/(?:^|[_.\-\s])\d{2}_\d{2}_\d{2}(?=[_.\-\s]|$)/g, "");
-  if (fnameNoTs.includes("frente")) return false;
+  if (fnameNoTs.includes("frente") || fnameNoTs.includes("mkpmaopunho")) return false;
   const keywords = [
     "costas", "costa", "back", "traseira", "verso", "tras",
-    "02fem", "02masc", "02inf", "2fem", "2masc", "2inf",
-    "02_fem", "02_masc", "02_inf", "2_fem", "2_masc", "2_inf"
+    "02fem", "02masc", "02inf", "02_fem", "02_masc", "02_inf",
+    "2fem", "2masc", "2inf", "2-fem", "2-masc", "2-inf", "2_fem", "2_masc", "2_inf"
   ];
-  if (include03) {
-    keywords.push("03fem", "03masc", "03inf");
-  }
   if (keywords.some(w => fnameNoTs.includes(w))) return true;
+  if (["-brk-agro-", "-brk-fishing-", "-brk-motors-", "camisa-agro-", "camisa-de-pesca-", "camisa-pesca-"].some(k => fnameNoTs.includes(k))) {
+    return false;
+  }
   return /(?:^|[-_.\s])(2|02|b)(?:[-_.\s]|masc|fem|inf|kids|bl|$)/i.test(fnameNoTs);
 }
 
-function selectClientApparelActImages(cdnImages, isFemale = false, isKids = false) {
+function isClientExplicitBackName(url) {
+  if (!url || typeof url !== "string") return false;
+  const fname = url.toLowerCase().split("/").pop().split("?")[0];
+  if (fname.startsWith("02_1918aa2d") || fname.includes("zoom") || fname.includes("2-capa") || fname.includes("capa-2")) {
+    return false;
+  }
+  if (fname.includes("productonchannel")) {
+    return EXPLICIT_BACK_POC_HASHES.some(h => fname.includes(h));
+  }
+  if (EXPLICIT_BACK_POC_HASHES.some(h => fname.includes(h))) return true;
+  if (fname.includes("frente") || fname.includes("mkpmaopunho")) return false;
+  const keywords = [
+    "costas", "costa", "back", "traseira", "verso", "tras",
+    "02fem", "02masc", "02inf", "02_fem", "02_masc", "02_inf",
+    "02_", "-02."
+  ];
+  if (keywords.some(w => fname.includes(w))) return true;
+  return /(?:^|[-_.\s])0?2[-_]?(?:fem|masc|inf)/i.test(fname);
+}
+
+function selectClientApparelActImages(cdnImages, isFemale = false, isKids = false, sku = "", title = "") {
   if (!cdnImages || cdnImages.length === 0) return ["", "", ""];
   if (cdnImages.length === 1) return [cdnImages[0], "", ""];
 
+  if (cdnImages.length >= 3 && cdnImages[0].toLowerCase().includes("01_masc") && cdnImages[1].toLowerCase().includes("10inf")) {
+    return [cdnImages[0], cdnImages[1], cdnImages[2]];
+  }
+
   const classifyImgAudience = (u) => {
     const fname = (u || "").toLowerCase().split("?")[0].split("/").pop();
-    const hasMasc = ["masc", "man2", "homem"].some(k => fname.includes(k)) || /(?:casual|c0|cm)\d+(?:pp|p|m|g|gg|xg|xgg|g1|g2|g3)(?:[-_.\d]|$)/i.test(fname);
-    const hasFem = ["fem", "mulher"].some(k => fname.includes(k)) || /(?:^|[-_.\d])bl(?:[-_.\d]|$)/i.test(fname) || /(?:casual|c0|cf|cm)\d+bl/i.test(fname);
-    const hasInf = ["inf", "kids", "crianca", "juvenil"].some(k => fname.includes(k)) || /(?:casual|c0|cm)\d+i(?:pp|p|m|g|gg|g1|g2|\d+)?(?:[-_.\d]|$)/i.test(fname);
+    const hasMasc = ["masc", "man2", "homem"].some(k => fname.includes(k)) || /^(?:casual|c0|cm)\d+(?:pp|p|m|g|gg|xg|xgg|g1|g2|g3)(?:[-_.\d]|$)/i.test(fname);
+    const hasFem = ["fem", "mulher"].some(k => fname.includes(k)) || /(?:^|[-_.\d])bl(?:[-_.\d]|$)/i.test(fname) || /^(?:casual|c0|cf|cm)\d+bl/i.test(fname);
+    const hasInf = ["inf", "kids", "crianca", "juvenil"].some(k => fname.includes(k)) || /^(?:casual|c0|cm)\d+i(?:pp|p|m|g|gg|g1|g2|\d+)?(?:[-_.\d]|$)/i.test(fname);
     const onlyMasc = hasMasc && !hasFem && !hasInf;
     const onlyFem = hasFem && !hasMasc && !hasInf;
     const onlyInf = hasInf && !hasMasc && !hasFem;
@@ -2603,63 +2647,333 @@ function selectClientApparelActImages(cdnImages, isFemale = false, isKids = fals
         if (!onlyFem && !onlyInf) compatible.push(u);
       }
     });
-    const orderedCompatible = preferred.length > 0
-      ? [...preferred, ...compatible.filter(u => !preferred.includes(u))]
-      : compatible;
-    if (orderedCompatible.length >= 3 || preferred.length >= 1 || isFemale || isKids) {
-      if (orderedCompatible.length >= 1) {
+
+    if (compatible.length < cdnImages.length) {
+      if (preferred.length >= 1 && preferred.length <= 2 && cdnImages.length >= 3) {
+        const p0 = preferred[0];
+        const neutralCands = compatible.filter(u => !preferred.includes(u));
+        if (neutralCands.length === 0) {
+          return [p0, preferred.length === 2 ? preferred[1] : "", ""];
+        }
+        const act1Img = neutralCands[0];
+        const act2Img = preferred.length === 2 ? preferred[1] : (neutralCands.length > 1 ? neutralCands[1] : act1Img);
+        return [act1Img, act2Img, p0];
+      }
+      const orderedCompatible = (compatible.length > 0 && compatible[0] === cdnImages[0])
+        ? compatible
+        : (preferred.length > 0 ? [...preferred, ...compatible.filter(u => !preferred.includes(u))] : compatible);
+      if (orderedCompatible.length >= 3) {
+        workingImages = orderedCompatible;
+      } else if (orderedCompatible.length >= 1) {
         workingImages = orderedCompatible;
       }
-    } else if (orderedCompatible.length >= 1) {
-      workingImages = [...orderedCompatible, ...cdnImages.filter(u => !orderedCompatible.includes(u))];
     }
+  }
+
+  if (workingImages.length === 1) return [workingImages[0], "", ""];
+  if (workingImages.length === 2) return [workingImages[0], workingImages[1], ""];
+
+  const fnames = workingImages.map(u => (u || "").toLowerCase().split("?")[0].split("/").pop());
+  const skuUp = (sku || "").trim().toUpperCase();
+  const skuTLow = `${sku || ""} ${title || ""}`.toLowerCase();
+
+  const matchExplicitStudioNum = (fnameStr) => {
+    const mSt = fnameStr.match(/(?:^|\d{10,14}[-_]|[-_])(0?[1-9]|1[0-3])(?:[-_](?:20)?(?:masc|fem|inf|ffem)|masc|fem|inf|ffem)?(?:_\d)?(?:_(?:frente_costas|zoom_fem|zoom_masc|zoom))?(?:_[a-z0-9]{6})?(?:_[0-9a-f]{8}-[0-9a-f-]{27})?\.[a-z0-9]+$/i);
+    return mSt ? parseInt(mSt[1], 10) : null;
+  };
+
+  const extractTs4 = (fnameStr) => {
+    const mTs = fnameStr.match(/^(\d{4})\d{6,10}[-_]/);
+    return mTs ? mTs[1] : "";
+  };
+
+  const ts0 = extractTs4(fnames[0]);
+  const sameSet = (arr, target) => arr.length === target.length && target.every(v => arr.includes(v));
+
+  // PILAR 1: GALERIAS COM 4 OU MAIS FOTOS
+  if (workingImages.length >= 4) {
+    if (fnames[0].startsWith("1780685222215")) {
+      return [workingImages[2], workingImages[1], workingImages[0]];
+    }
+    if (fnames[1].includes("01_fem_frente_costas") && fnames[0].includes("02_fem")) {
+      return [workingImages[0], workingImages[2], workingImages[3]];
+    }
+    if (fnames[1].includes("2-capa") || fnames[1].includes("capa-2")) {
+      return [workingImages[0], workingImages[3], workingImages[2]];
+    }
+    if (skuUp.startsWith("C01824") || fnames.slice(1, 3).some(f => f.includes("gemini_generated_image"))) {
+      return [workingImages[0], workingImages[1], workingImages[3]];
+    }
+    if (fnames[3].includes("03_zoom") || fnames[3].includes("04_zoom") || fnames[3].includes("11_zoom")) {
+      return [workingImages[0], workingImages[1], workingImages[3]];
+    }
+    if (fnames[2].includes("zoom")) {
+      return [workingImages[0], workingImages[1], workingImages[2]];
+    }
+    if (fnames[3].includes("zoom")) {
+      return [workingImages[0], workingImages[2], workingImages[3]];
+    }
+
+    let seqMap = {};
+    for (let idxU = 0; idxU < 4; idxU++) {
+      const f = fnames[idxU];
+      const stNum = matchExplicitStudioNum(f);
+      if ([1, 2, 3, 4].includes(stNum) && !f.includes("frente_costas") && !f.includes("zoom")) {
+        seqMap[stNum] = workingImages[idxU];
+      }
+    }
+    if (![1, 2, 3, 4].every(k => seqMap[k])) {
+      const gluedPrefixes = new Set();
+      const gluedMap = {};
+      for (let idxU = 0; idxU < 4; idxU++) {
+        const mGl = fnames[idxU].match(/^((?:c0|casual|adv|cadv|fusion|hyb|cax|raglan)\d+(?:bl|i)?)([1234])\.[a-z0-9]+$/i);
+        if (mGl) {
+          gluedPrefixes.add(mGl[1]);
+          gluedMap[parseInt(mGl[2], 10)] = workingImages[idxU];
+        }
+      }
+      if (gluedPrefixes.size === 1 && [1, 2, 3, 4].every(k => gluedMap[k])) {
+        seqMap = gluedMap;
+      }
+    }
+    if ([1, 2, 3, 4].every(k => seqMap[k])) {
+      const isCombo1234 = (
+        skuUp.startsWith("CCPBR")
+        || fnames[0].includes("ccpbr")
+        || (ts0 === "1761" && (skuUp.startsWith("HYB") || skuTLow.includes("hyb")))
+        || (
+          !skuUp.startsWith("ADV")
+          && (fnames[0].includes("01fem") || (fnames[0].includes("1fem") && !fnames[0].includes("1_fem")))
+          && ["1744", "1746", "1750", "1755", "1757", "1758", "1760", "1762", "1764", "1768", "1770", "1772"].includes(ts0)
+        )
+        || fnames[0].startsWith("1790364852293")
+        || fnames[0].startsWith("1790354628351")
+      );
+      if (isCombo1234) {
+        return [seqMap[1], seqMap[3], seqMap[4]];
+      }
+      return [seqMap[1], seqMap[2], seqMap[3]];
+    }
+
+    const numsFirst4 = fnames.slice(0, 4).map(matchExplicitStudioNum);
+    if (sameSet(numsFirst4, [1, 4, 5, 6])) {
+      const sMap = {};
+      numsFirst4.forEach((n, i) => { sMap[n] = workingImages[i]; });
+      if (numsFirst4[0] === 5 || numsFirst4[0] === 6) {
+        return [workingImages[0], sMap[4], sMap[1]];
+      }
+      return [sMap[1], sMap[4], sMap[5]];
+    }
+    if (sameSet(numsFirst4, [1, 2, 5, 6])) {
+      const sMap = {};
+      numsFirst4.forEach((n, i) => { sMap[n] = workingImages[i]; });
+      if (numsFirst4[0] === 5 || numsFirst4[0] === 6) {
+        return [workingImages[0], sMap[2], sMap[1]];
+      }
+      return [sMap[1], sMap[2], sMap[5]];
+    }
+    if (sameSet(numsFirst4, [1, 2, 4, 5])) {
+      const sMap = {};
+      numsFirst4.forEach((n, i) => { sMap[n] = workingImages[i]; });
+      if (isFemale) {
+        return [sMap[4], sMap[2], sMap[1]];
+      }
+      return [sMap[1], sMap[2], sMap[4]];
+    }
+
+    const n3Str = JSON.stringify(numsFirst4.slice(0, 3));
+    if ((n3Str === "[1,2,3]" || n3Str === "[2,1,3]") && numsFirst4[3] === null && !isClientExplicitBackName(workingImages[3])) {
+      return [workingImages[0], workingImages[2], workingImages[3]];
+    }
+    if (JSON.stringify(numsFirst4) === "[1,null,2,3]") {
+      if (fnames[3].includes("03fem") || fnames[1].includes("fishing")) {
+        return [workingImages[0], workingImages[3], workingImages[1]];
+      }
+      return [workingImages[0], workingImages[2], workingImages[3]];
+    }
+    if (fnames[3].includes("frente") && !fnames[3].includes("costas")) {
+      if (isClientExplicitBackName(workingImages[0]) && fnames[2].includes("frente")) {
+        return [workingImages[2], workingImages[0], workingImages[3]];
+      }
+      return [workingImages[0], workingImages[2], workingImages[3]];
+    }
+
+    const f0Num = numsFirst4[0];
+    const restSeq = {};
+    for (let idxU = 1; idxU < workingImages.length; idxU++) {
+      const stNum = matchExplicitStudioNum(fnames[idxU]);
+      if (stNum !== null && !(stNum in restSeq)) {
+        restSeq[stNum] = workingImages[idxU];
+      }
+    }
+
+    if (f0Num !== 1 && restSeq[1]) {
+      if (fnames[0].includes("frente") && !fnames[0].includes("costas") && !isKids) {
+        if (restSeq[3]) return [workingImages[0], restSeq[2] || workingImages[2], restSeq[3]];
+        if (restSeq[5]) return [workingImages[0], restSeq[2] || workingImages[2], restSeq[5]];
+      }
+      let backCand = restSeq[2] || restSeq[3] || restSeq[4] || restSeq[9] || workingImages[2];
+      if (backCand === restSeq[1]) {
+        backCand = workingImages[1] !== restSeq[1] ? workingImages[1] : workingImages[2];
+      }
+      return [workingImages[0], backCand, restSeq[1]];
+    }
+
+    if (f0Num === null) {
+      if (restSeq[5] && restSeq[6] && restSeq[7]) {
+        if (restSeq[5].toLowerCase().includes("frente_costas")) {
+          return [workingImages[0], restSeq[7], restSeq[6]];
+        }
+        return [workingImages[0], restSeq[6], restSeq[7]];
+      }
+      if (restSeq[6] && restSeq[7] && restSeq[8]) {
+        return [workingImages[0], restSeq[7], restSeq[8]];
+      }
+      if (restSeq[7] && restSeq[8] && restSeq[9]) {
+        if (fnames[0].startsWith("c0492bl") || fnames[0].startsWith("c02418bl")) {
+          return [workingImages[0], restSeq[9], restSeq[8]];
+        }
+        return [workingImages[0], restSeq[8], restSeq[9]];
+      }
+    }
+
+    if (numsFirst4.every(n => n !== null && n >= 4)) {
+      if (numsFirst4[0] === 9 && sameSet(numsFirst4, [7, 8, 9, 10])) {
+        return [workingImages[1], workingImages[0], workingImages[3]];
+      }
+      const n4Str = JSON.stringify(numsFirst4);
+      if (n4Str === "[6,7,10,11]" || n4Str === "[5,6,7,9]" || (n4Str === "[6,7,8,9]" && !isFemale && !isKids)) {
+        return [workingImages[0], workingImages[1], workingImages[2]];
+      }
+      if (n4Str === "[4,5,6,7]" || n4Str === "[6,5,7,10]" || fnames[0].startsWith("174897")) {
+        return [workingImages[0], workingImages[2], workingImages[3]];
+      }
+      if (isFemale || isKids) {
+        return [workingImages[0], workingImages[2], workingImages[1]];
+      }
+      return [workingImages[0], workingImages[2], workingImages[3]];
+    }
+
+    const nonNullSet = [...new Set(numsFirst4.filter(n => n !== null))];
+    if (["[7,6,8]", "[6,7,8]", "[5,6,7]", "[6,5,7]"].includes(n3Str) || sameSet(nonNullSet, [7, 8, 9])) {
+      return [workingImages[0], workingImages[2], workingImages[3]];
+    }
+
+    if (fnames[0].includes("frente") && isClientExplicitBackName(workingImages[1])) {
+      const nonBackRest = workingImages.slice(1).filter(u => !isClientExplicitBackName(u));
+      if (nonBackRest.length > 0) {
+        return [workingImages[0], workingImages[1], nonBackRest[0]];
+      }
+      return [workingImages[2], workingImages[1], workingImages[0]];
+    }
+
+    if (isClientExplicitBackName(workingImages[2]) && isClientExplicitBackName(workingImages[3])) {
+      return [workingImages[0], workingImages[2], workingImages[1]];
+    }
+    if (isClientExplicitBackName(workingImages[3]) && !isClientExplicitBackName(workingImages[2])) {
+      return [workingImages[0], workingImages[3], workingImages[2]];
+    }
+    if (isClientExplicitBackName(workingImages[2]) && !isClientExplicitBackName(workingImages[3])) {
+      return [workingImages[0], workingImages[2], workingImages[3]];
+    }
+    if (isClientExplicitBackName(workingImages[1]) && !isClientExplicitBackName(workingImages[2])) {
+      return [workingImages[0], workingImages[1], workingImages[2]];
+    }
+
+    const pocFlags = fnames.slice(0, 4).map(f => f.includes("productonchannel"));
+    if (!pocFlags[0] && pocFlags[1] && pocFlags[2] && pocFlags[3]) {
+      return [workingImages[0], workingImages[2], workingImages[1]];
+    }
+    if (!pocFlags[0] && !pocFlags[1] && pocFlags[2] && pocFlags[3]) {
+      return [workingImages[0], workingImages[2], workingImages[3]];
+    }
+    if (pocFlags.every(Boolean)) {
+      if (["raglan", "segunda pele", "hyb", "cax"].some(k => skuTLow.includes(k)) || isKids) {
+        return [workingImages[0], workingImages[1], workingImages[3]];
+      }
+      return [workingImages[0], workingImages[1], workingImages[2]];
+    }
+
+    if (skuUp.startsWith("ADV")) {
+      return [workingImages[0], workingImages[2], workingImages[3]];
+    }
+    if (["-brk-agro-", "-brk-fishing-", "-brk-motors-", "camisa-agro-", "camisa-de-pesca-", "camisa-pesca-", "camisa-uv"].some(k => fnames[0].includes(k))) {
+      return [workingImages[0], workingImages[1], workingImages[2]];
+    }
+    return [workingImages[0], workingImages[2], workingImages[1]];
+  }
+
+  // PILAR 2: GALERIAS COM EXATAMENTE 3 FOTOS
+  const nonBackAll = workingImages.filter(u => !isClientExplicitBackName(u));
+  if (nonBackAll.length === 1) {
+    const onlyFront = nonBackAll[0];
+    const backs = workingImages.filter(u => u !== onlyFront);
+    return [backs[0], backs[1], onlyFront];
+  }
+  if (fnames[0].startsWith("1755030263590")) {
+    return [workingImages[1], workingImages[2], workingImages[0]];
+  }
+
+  const nums3 = fnames.slice(0, 3).map(matchExplicitStudioNum);
+  const nums3Str = JSON.stringify(nums3);
+  if (["[2,3,4]", "[1,2,5]", "[1,5,6]"].includes(nums3Str)) {
+    return [workingImages[1], workingImages[2], workingImages[0]];
+  }
+  if (nums3Str === "[2,1,3]") {
+    return [workingImages[0], workingImages[2], workingImages[1]];
+  }
+  if (nums3Str === "[6,5,7]") {
+    return [workingImages[1], workingImages[2], workingImages[0]];
+  }
+  if (nums3Str === "[8,9,7]") {
+    return [workingImages[2], workingImages[1], workingImages[0]];
   }
 
   let img1 = workingImages[0];
-  if (isClientBackViewUrl(img1)) {
-    const pureFrontCandidates = workingImages.filter(
-      u => !isClientBackViewUrl(u)
-        && ["frente", "01", "-1", "capa"].some(k => u.toLowerCase().split("/").pop().includes(k))
-        && !["persp", "zoom"].some(p => u.toLowerCase().split("/").pop().includes(p))
-    );
-    const frontCandidates = workingImages.filter(
-      u => !isClientBackViewUrl(u) && ["frente", "01", "-1", "capa"].some(k => u.toLowerCase().split("/").pop().includes(k))
-    );
-    const nonBackCandidates = workingImages.filter(u => !isClientBackViewUrl(u));
-    if (pureFrontCandidates.length > 0) {
-      img1 = pureFrontCandidates[0];
-    } else if (frontCandidates.length > 0) {
-      img1 = frontCandidates[0];
-    } else if (nonBackCandidates.length > 0) {
-      img1 = nonBackCandidates[0];
-    }
+  if (isClientExplicitBackName(img1) && nonBackAll.length > 0) {
+    img1 = nonBackAll[0];
   }
-
   const rem = workingImages.filter(u => u !== img1);
-  if (rem.length === 0) return [img1, "", ""];
-  if (rem.length === 1) return [img1, rem[0], ""];
-
-  let img2 = "";
-  let img3 = "";
-  if (isClientBackViewUrl(rem[0])) {
-    const nonBackAfter = rem.slice(1).filter(u => !isClientBackViewUrl(u));
-    if (nonBackAfter.length > 0) {
-      img2 = nonBackAfter[0];
-      img3 = rem[0];
-    } else {
-      img2 = rem[0];
-      img3 = rem[1];
-    }
-  } else {
-    img2 = rem[0];
-    if (isClientBackViewUrl(rem[1])) {
-      img3 = rem[1];
-    } else {
-      const backAfter = rem.slice(2).filter(u => isClientBackViewUrl(u));
-      img3 = backAfter.length > 0 ? backAfter[0] : rem[1];
-    }
+  if (rem.length < 2) {
+    return [img1, rem[0] || "", ""];
   }
-  return [img1, img2, img3];
+
+  if (nums3Str === "[1,2,3]") {
+    const isCombo123 = (
+      skuUp.startsWith("CCPBR")
+      || fnames[0].includes("ccpbr")
+      || (fnames[0].includes("01fem") && Boolean(ts0) && parseInt(ts0, 10) < 1775)
+    );
+    if (isCombo123) {
+      return [workingImages[0], workingImages[2], workingImages[1]];
+    }
+    return [workingImages[0], workingImages[1], workingImages[2]];
+  }
+
+  if (
+    ["[6,7,8]", "[7,8,9]", "[7,8,11]", "[9,12,13]"].includes(nums3Str)
+    || (nums3Str === "[5,6,7]" && (fnames[0].includes("frente_costas") || (["1760", "1761", "1768"].includes(ts0) && !skuUp.startsWith("FUSION"))))
+    || (nums3[0] === null && !fnames[0].includes("frente") && nums3[1] === 1 && (nums3[2] === 2 || nums3[2] === 3))
+  ) {
+    return [workingImages[0], workingImages[2], workingImages[1]];
+  }
+
+  if (isClientExplicitBackName(rem[0]) && !isClientExplicitBackName(rem[1])) {
+    return [img1, rem[0], rem[1]];
+  }
+  if (isClientBackViewUrl(rem[1]) && !isClientBackViewUrl(rem[0])) {
+    return [img1, rem[1], rem[0]];
+  }
+
+  const pocRe = /productonchannel(?:_2f|\/)images(?:_2f|\/)(\d+)/i;
+  const g0 = (img1.match(pocRe) || [])[1] || null;
+  const g1 = (rem[0].match(pocRe) || [])[1] || null;
+  const g2 = (rem[1].match(pocRe) || [])[1] || null;
+  if (g0 === null && g1 && g2 && g1 === g2) {
+    return [img1, rem[1], rem[0]];
+  }
+
+  return [img1, rem[0], rem[1]];
 }
 
 function selectClientCutleryActImages(cdnImages, title = "") {
@@ -2741,10 +3055,10 @@ function getProductModeBHTML(liveP) {
   const isKidsSkuModal = isApparel && (skuLowModal.startsWith("ci") || /^(?:c0|ci|cf|cm|casual|adv|cadv|ccpbr|bp|hyb|fusion|cax|raglan)\d+i(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$/i.test(skuLowModal)) && !/\b(feminina|feminino|baby look|babylook|masculina|masculino|adulto)\b/i.test(tLowModal);
   const isKidsModal = isApparel && (/\b(infantil|kids|juvenil|mini)\b/i.test(tLowModal) || isKidsSkuModal) && !/\b(adulto|unissex adulto)\b/i.test(tLowModal);
   const isSegundaPeleModal = isApparel && (tLowModal.includes("segunda pele") || skuLowModal.startsWith("raglan"));
-  const isShortSleeveModal = isApparel && (/\b(manga curta|manga-curta|camiseta)\b/i.test(tLowModal) || (tLowModal.includes("curta") && tLowModal.includes("manga")) || ((/^(casual|bp|cm|cadv|cf)/i.test(skuLowModal)) && !/^(cmb|cbt)/i.test(skuLowModal))) && !/\b(manga longa|manga-longa)\b/i.test(tLowModal) && !isSegundaPeleModal;
+  const isShortSleeveModal = isApparel && (/\b(manga curta|manga-curta|camiseta)\b/i.test(tLowModal) || (tLowModal.includes("curta") && tLowModal.includes("manga")) || skuLowModal.startsWith("cbtmc") || ((/^(casual|bp|cm|cadv|cf)/i.test(skuLowModal)) && !/^(cmb|cbt)/i.test(skuLowModal))) && !/\b(manga longa|manga-longa)\b/i.test(tLowModal) && !isSegundaPeleModal;
   const isHasGloveModal = isApparel && (/\b(com luva|e luva|luva integrada|armorx)\b/i.test(tLowModal) || skuLowModal.startsWith("cax"));
   const isFemaleModal = (/\b(feminina|feminino|baby look|babylook|mulher)\b/i.test(tLowModal) || /femin/i.test(tagsLowModal) || (isApparel && /bl(?:pp|p|m|g|gg|xg|g1|g2)?(?:_full|_out)?$/i.test(skuLowModal))) && !isKidsModal;
-  const isRoundNeckModal = isApparel && archetypeId !== "shirts_button_work" && !/^(cmb|cbt)/i.test(skuLowModal) && !/\b(botão|botao|colarinho|xadrez|camisa work)\b/i.test(tLowModal) && (isSegundaPeleModal || isShortSleeveModal || /\b(gola careca|gola redonda|sem zíper|sem ziper|t-shirt|camisa casual|casual)\b/i.test(tLowModal)) && !/\b(com zíper|com ziper)\b/i.test(tLowModal);
+  const isRoundNeckModal = isApparel && archetypeId !== "shirts_button_work" && !/^(cmb|cbt)/i.test(skuLowModal) && !/\b(botão|botao|colarinho|camisa work)\b/i.test(tLowModal) && (isSegundaPeleModal || isShortSleeveModal || /^ci0(?:54|7[2-9]|8[0-4])(?:i|pp|p|m|g|gg|g1|g2)?(?:_full|_out)?$/i.test(skuLowModal) || /\b(gola careca|gola redonda|sem zíper|sem ziper|t-shirt|camisa casual|casual)\b/i.test(tLowModal)) && !/\b(com zíper|com ziper)\b/i.test(tLowModal);
 
   // Atribuição de imagens exclusivas por ato - ZERO DUPLICAÇÃO e Alinhamento Semântico
   let img1 = images[0] || "";
@@ -2755,7 +3069,7 @@ function getProductModeBHTML(liveP) {
     img2 = images[2] || "";
     img3 = images[3] || "";
   } else if (isApparel) {
-    [img1, img2, img3] = selectClientApparelActImages(images, isFemaleModal, isKidsModal);
+    [img1, img2, img3] = selectClientApparelActImages(images, isFemaleModal, isKidsModal, skuLowModal, liveP.title || "");
   } else if (archetypeId === "cutlery_unique") {
     [img1, img2, img3] = selectClientCutleryActImages(images, liveP.title || "");
   } else if (archetypeId === "fishing_tackle_gear" && (liveP.title || "").toLowerCase().includes("trava vara") && images.length >= 3) {
@@ -2878,14 +3192,6 @@ function getProductModeBHTML(liveP) {
     }
   }
 
-  // Garantir alinhamento semântico do Ato 3 com foto de costas (mesmo com narrative_blocks pré-carregados)
-  const isBackView = isClientBackViewUrl(img3, true);
-  if (blocks && blocks.length >= 3 && isBackView && archetypeId === "uv_performance" && !isFusionModal && !isHybridModal && !isHoodedModal && !isRoundNeckModal) {
-    blocks[2].tag = "Design Traseiro & Acabamento";
-    blocks[2].title = "PAINEL TRASEIRO EM ALTA DEFINIÇÃO E COSTURAS REFORÇADAS";
-    blocks[2].description = "Painel traseiro com estampa nítida e sublimação de alta resolução que não desbota, estruturado com costuras planas reforçadas nos ombros e dorso para total liberdade de movimentos e resistência ao uso contínuo.";
-  }
-
   const isReadyDelivery = (p) => {
     if (!p) return false;
     const fullOutPattern = /(_FULL|_OUT|\bFULL\b|\bOUT\b|-FULL|-OUT)/i;
@@ -2960,13 +3266,15 @@ function getProductModeBHTML(liveP) {
     }
   }
 
-  // Trava Estrita Anti-Zíper no Modal para Fusion, Hybrid, Gola Careca e Botão
-  if (isFusionModal || isHybridModal || isRoundNeckModal || archetypeId === "shirts_button_work") {
+  // Trava Estrita Anti-Zíper no Modal para Fusion, Hybrid, Capuz, Gola Careca e Botão
+  if (isFusionModal || isHybridModal || isHoodedModal || isRoundNeckModal || archetypeId === "shirts_button_work") {
+    const replacementCollar = (isFusionModal || isHybridModal || isHoodedModal) ? "capuz anatômico contínuo" : "gola redonda anatômica";
+    const replacementHood = isFusionModal ? "capuz com máscara facial integrada" : ((isHybridModal || isHoodedModal) ? "capuz anatômico integrado" : "gola redonda anatômica");
     blocks.forEach(b => {
       if (b.title) b.title = b.title.replace(/\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b/gi, "").trim();
       if (b.description) {
         b.description = b.description
-          .replace(/gola padre com cobertura no cursor do z[íi]per/gi, "capuz anatômico contínuo")
+          .replace(/gola padre com cobertura no cursor do z[íi]per/gi, replacementCollar)
           .replace(/\bcursor do z[íi]per\b/gi, "acabamento anatômico")
           .replace(/\bz[íi]per com trava de seguran[çc]a\b/gi, "conforto anatômico contínuo")
           .replace(/\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b/gi, "")
@@ -2977,7 +3285,7 @@ function getProductModeBHTML(liveP) {
     specs = specs.map(s => {
       const lbl = s.label.replace(/\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b/gi, "").trim() || "Acabamento";
       let val = s.value
-        .replace(/gola padre[^,;.]*/gi, isFusionModal ? "capuz com máscara facial integrada" : "capuz anatômico integrado")
+        .replace(/gola padre[^,;.]*/gi, replacementHood)
         .replace(/\bcursor do z[íi]per\b/gi, "acabamento contínuo")
         .replace(/\b(com zíper|com ziper|sem zíper|sem ziper|zíper|ziper)\b/gi, "")
         .replace(/\(\s*\)/g, "")

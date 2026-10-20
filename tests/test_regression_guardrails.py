@@ -515,7 +515,7 @@ class TestLiveAgentAndTracking(unittest.TestCase):
         self.assertEqual(c(legacy + '<img src="https://use-brk-images-s3.s3.amazonaws.com/a.jpg">')["s"], "IMAGENS_QUEBRADAS")
         _, html = self._mode_b()
         self.assertEqual(c(html)["s"], "COLADO_ATUAL")
-        old = html.replace("BRK-MODO-B v1", "BRK-MODO-B v0", 1)
+        old = html.replace(f"BRK-MODO-B v{self.live.MODO_B_VERSION}", "BRK-MODO-B v0", 1)
         self.assertEqual(c(old)["s"], "COLADO_DESATUALIZADO")
         stripped = self.live.MARKER_RE.sub("", html)  # editor da Shopify removeu o comentario
         self.assertEqual(c(stripped)["s"], "COLADO_SEM_MARCADOR")
@@ -886,7 +886,7 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         self.assertNotIn("Pronta entrega", html_hybrid)
 
     def test_act3_image_semantic_alignment_and_no_back_zipper(self):
-        """Valida que o Ato 3 de camisas UV padrão NÃO menciona zíper frontal ao ser pareado com foto de costas."""
+        """Valida que o Ato 3 de camisas UV recebe sempre foto Frontal (deslocando Costas para o Ato 2) e preserva foco em Gola, Zíper e Punhos."""
         prod = {
             "id": 999901,
             "title": "Camisa de Pesca BRK Patriota Masculina UV50+",
@@ -896,24 +896,18 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         gallery_with_back = [
             "https://cdn.shopify.com/files/frente.jpg",
             "https://cdn.shopify.com/files/tecido.jpg",
-            "https://cdn.shopify.com/files/1786018701234-09_FEM_COSTAS.jpg"
+            "https://cdn.shopify.com/files/1786018701234-09_MASC_COSTAS.jpg"
         ]
         arch = self.engine.detect_archetype(prod["title"], prod["category"], [], "BRK", sku=prod["master_sku"])
         narrative = self.engine.generate_narrative_from_template(prod, arch, gallery_with_back, store_key="brk_fishing")
         
-        # Validar blocos narrativos
+        # Validar blocos narrativos: Ato 2 recebe a foto de Costas e Ato 3 recebe a foto Frontal/Detalhe
         blocks = narrative["narrative_blocks"]
+        act2 = blocks[1]
         act3 = blocks[2]
-        
-        # Ato 3 JAMAIS deve conter zíper no título ou descrição
-        self.assertNotIn("zíper", act3["title"].lower(), "Ato 3 não pode ter zíper no título!")
-        self.assertNotIn("ziper", act3["title"].lower(), "Ato 3 não pode ter ziper no título!")
-        self.assertNotIn("zíper", act3["description"].lower(), "Ato 3 não pode citar zíper frontal ao mostrar foto das costas!")
-        self.assertNotIn("cursor do zíper", act3["description"].lower())
-        
-        # Com foto de costas detectada, o título deve focar em painel traseiro ou costuras planas
-        self.assertIn("TRASEIRO", act3["title"].upper())
-        self.assertIn("COSTURAS REFORÇADAS", act3["title"].upper())
+        self.assertEqual(act2["image"], gallery_with_back[2])
+        self.assertEqual(act3["image"], gallery_with_back[1])
+        self.assertNotIn("TRASEIRO", act3["title"].upper())
 
         # Validar HTML final
         html = self.builder.build_shopify_html(narrative)
@@ -922,10 +916,10 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         self.assertIn("trava de segurança", html)
 
     def test_smart_3_act_apparel_image_ordering_and_python_js_parity(self):
-        """Valida que fotos de Costas (02 / -2 / COSTAS) vão para o Ato 3 (Painel Traseiro), Frente para o Ato 1 e Detalhe para o Ato 2, com paridade Python/JS."""
+        """Valida que fotos de Costas (02 / -2 / COSTAS) vão para o Ato 2, Frente para o Ato 1 e 3/4 Frontal/Detalhe para o Ato 3, com paridade Python/JS."""
         from core.html_replacer import HTMLReplacer
 
-        # 1. Galeria padrão BRK onde a 2ª foto é Costas (-2 / 02FEM) e a 3ª é Perspectiva (-3 / 03FEM)
+        # 1. Galeria padrão BRK de estúdio onde a 2ª foto é Costas (-2 / 02FEM) e a 3ª é Perspectiva Frontal (-3 / 03FEM)
         prod = {
             "id": 999902,
             "title": "Camisa de Pesca Feminina BRK Capivara Floral UV50+",
@@ -941,11 +935,11 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         narrative = self.engine.generate_narrative_from_template(prod, arch, gallery_123, store_key="brk_fishing")
         blocks = narrative["narrative_blocks"]
 
-        # Ato 1 = Foto 1 (Frente), Ato 2 = Foto 3 (Detalhe), Ato 3 = Foto 2 (Costas + Painel Traseiro)
+        # Ato 1 = Foto 1 (Frente), Ato 2 = Foto 2 (Costas), Ato 3 = Foto 3 (3/4 Frontal)
         self.assertEqual(blocks[0]["image"], gallery_123[0])
-        self.assertEqual(blocks[1]["image"], gallery_123[2])
-        self.assertEqual(blocks[2]["image"], gallery_123[1])
-        self.assertIn("PAINEL TRASEIRO EM ALTA DEFINIÇÃO E COSTURAS REFORÇADAS", blocks[2]["title"])
+        self.assertEqual(blocks[1]["image"], gallery_123[1])
+        self.assertEqual(blocks[2]["image"], gallery_123[2])
+        self.assertNotIn("PAINEL TRASEIRO", blocks[2]["title"])
         self.assertIn("MODELAGEM FEMININA ANATÔMICA", blocks[0]["title"])
 
         # 2. Galeria invertida onde Costas foi subida como 1ª foto (ex: C02822BL)
@@ -956,10 +950,10 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         ]
         narrative_inv = self.engine.generate_narrative_from_template(prod, arch, gallery_inverted, store_key="brk_agro")
         blocks_inv = narrative_inv["narrative_blocks"]
-        self.assertEqual(blocks_inv[0]["image"], gallery_inverted[2], "Ato 1 deve promover a foto frontal FRENTE_FEM.jpg")
-        self.assertEqual(blocks_inv[1]["image"], gallery_inverted[1], "Ato 2 deve usar a foto de perspectiva")
-        self.assertEqual(blocks_inv[2]["image"], gallery_inverted[0], "Ato 3 deve receber a foto de costas COSTAS_FEM.jpg")
-        self.assertIn("PAINEL TRASEIRO", blocks_inv[2]["title"])
+        self.assertEqual(blocks_inv[0]["image"], gallery_inverted[1], "Ato 1 deve promover foto frontal")
+        self.assertEqual(blocks_inv[1]["image"], gallery_inverted[0], "Ato 2 deve receber a foto de costas COSTAS_FEM.jpg")
+        self.assertEqual(blocks_inv[2]["image"], gallery_inverted[2], "Ato 3 deve receber a foto frontal FRENTE_FEM.jpg")
+        self.assertNotIn("PAINEL TRASEIRO", blocks_inv[2]["title"])
 
         # 3. Timestamp HH_MM_SS com _02_ não pode ser confundido com foto de costas
         self.assertFalse(self.engine._is_back_view_url("https://cdn.shopify.com/files/ChatGPT_Image_24_de_set._de_2026_10_02_34.png"))
@@ -1060,7 +1054,7 @@ class TestDeepFlowAuditGuardrails(unittest.TestCase):
         nar_work = engine.generate_narrative_from_template(prod_work, arch_work, [], store_key="brk_agro")
         specs_work_str = json.dumps(nar_work.get("specs", []), ensure_ascii=False)
         self.assertNotIn("Gola redonda anatômica", specs_work_str)
-        self.assertIn("Botões reforçados", specs_work_str)
+        self.assertIn("Abotoamento frontal reforçado", specs_work_str)
 
         # 4. Corta-Vento (Windbreaker)
         prod_wb = {"id": 9903, "title": "Corta Vento Impermeável Brk Motors", "category": "Jaquetas", "master_sku": "CV001"}
