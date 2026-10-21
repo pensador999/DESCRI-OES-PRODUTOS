@@ -149,6 +149,24 @@ def _rule_bearings_in_rod(arch: str, title: str, body: str) -> Optional[str]:
     return None
 
 
+def _rule_hand_glove_slot_and_caption(arch: str, title: str, body: str) -> Optional[str]:
+    parts = re.split(r"<!--\s*Ato\s+0?[123]:", body)
+    if len(parts) < 4:
+        return None
+    act1_html, act2_html, act3_html = parts[1], parts[2], parts[3]
+    url_re = re.compile(r"https?://[^\s\"')>]+")
+    for slot_name, seg in (("Ato 01 (Frente/360°)", act1_html), ("Ato 02 (Painel Dorsal)", act2_html)):
+        for u in url_re.findall(seg):
+            if TemplateEngine._is_hand_glove_photo(u):
+                return f"Foto humanizada de mãos/luva posicionada em {slot_name}: {u.split('/')[-1].split('?')[0]}"
+    act3_urls = url_re.findall(act3_html)
+    if any(TemplateEngine._is_hand_glove_photo(u) for u in act3_urls):
+        m_info = re.search(r'brk-media-info-left">.*?<span>([^<]+)</span>', act3_html, re.S)
+        if m_info and "gola" in m_info.group(1).lower():
+            return f"Infobar do Ato 03 menciona 'Gola' em foto exclusiva de mãos/dedeira: {m_info.group(1)}"
+    return None
+
+
 # (id, severidade, descricao, funcao(arq, titulo, corpo_html) -> trecho_encontrado | None)
 RULES: List[Dict[str, Any]] = [
     {"id": "textil_em_nao_textil", "severity": "ERROR",
@@ -175,6 +193,9 @@ RULES: List[Dict[str, Any]] = [
     {"id": "dryfit_em_camisa_de_algodao", "severity": "WARNING",
      "desc": "Camisa Agro (algodao) com selo/texto Dry Fit (poliester)",
      "check": _rule_dryfit_in_cotton_shirt},
+    {"id": "foto_mao_dedeira_em_slot_ou_legenda_errada", "severity": "ERROR",
+     "desc": "Foto humanizada de mãos/dedeira no Ato 01/02 ou com legenda mencionando Gola no Ato 03",
+     "check": _rule_hand_glove_slot_and_caption},
 ]
 
 

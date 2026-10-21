@@ -1569,6 +1569,85 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         self.assertNotIn("BRK Faca Artesanal", html_davila)
         self.assertNotIn("41251635691817", html_davila, "O banner de pergaminho com texto ([2]) nunca deve ser exibido!")
 
+    def test_phase10_humanized_hands_glove_and_model_mapping(self):
+        """
+        Fase 10:
+        1. Camisas ArmorX (CAX039BL, CAX038, CAX005) com foto humanizada de mãos/dedeira posicionam a foto de mãos exclusivamente no Ato 3, costas no Giro 360° e Ato 2, e usam título/infobar focados 100% no furo anatômico do polegar (sem mencionar 'Gola' na legenda do Ato 3).
+        2. Coleção Apache Agro (C02841 e C02833BL) aloca corretamente 0° Frente, 180° Costas e foto humanizada de modelo.
+        3. Bandanas Amazon (T660) alocam 3D no Ato 2 e foto humanizada em uso real no Ato 3.
+        """
+        template_engine = TemplateEngine()
+        html_builder = HTMLBuilder()
+
+        cax039bl = {
+            "id": 8500001,
+            "master_sku": "CAX039BL",
+            "title": "Camisa ArmorX Feminina Degradê Azul Marinho com Proteção UV50+",
+            "images": [
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/1723039660484-01FEM_942466ab-93d4-46da-bc6f-94643f594695.jpg",
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/https___s3.amazonaws.com_appforest_uf_f1623699781775x777656534115487200_productOnChannel_2Fimages_2F9574074_2F44c44e9612c4-54cc-422c-b19b-3bd83c72b8b3.jpg",
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/1723039667628-02FEM_e6d735b0-3803-45d2-b89f-73eb2bb6a1be.jpg",
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/1723039675365-03FEM_64e7833a-a47d-4dc7-b849-410fb67fc1c0.jpg",
+            ],
+        }
+        enr_39 = template_engine.generate_narrative_from_template(cax039bl, "uv_performance", cax039bl["images"], store_key="brk_fishing")
+        html_39 = html_builder.build_shopify_html(enr_39)
+        self.assertIn("01FEM", enr_39["act1"]["image"])
+        self.assertIn("02FEM", enr_39["act1"]["back_360_image"])
+        self.assertIn("03FEM", enr_39["act2"]["image"])
+        self.assertIn("44c44e9612c4", enr_39["act3"]["image"])
+        self.assertIn("PUNHOS ALONGADOS COM ABERTURA ANATÔMICA PARA O POLEGAR (LUVA INTEGRADA)", html_39)
+        self.assertIn("Detalhe Humanizado: Furo Anatômico p/ Polegar", html_39)
+        self.assertNotIn("Foco Frontal: Punho c/ Luva Integrada & Gola", html_39)
+
+        cax038 = {
+            "id": 8500002,
+            "master_sku": "CAX038",
+            "title": "Camisa ArmorX Masculina Degradê Azul Royal com Proteção UV50+",
+            "images": [
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/1722959656648-01MASC.jpg",
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/cax38.jpg",
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/1722959661717-02MASC.jpg",
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/1722959667456-03MASC.jpg",
+            ],
+        }
+        enr_38 = template_engine.generate_narrative_from_template(cax038, "uv_performance", cax038["images"], store_key="brk_fishing")
+        self.assertIn("01MASC", enr_38["act1"]["image"])
+        self.assertIn("02MASC", enr_38["act1"]["back_360_image"])
+        self.assertIn("03MASC", enr_38["act2"]["image"])
+        self.assertIn("cax38.jpg", enr_38["act3"]["image"])
+
+        c02833bl = {
+            "id": 8500003,
+            "master_sku": "C02833BL",
+            "title": "Camisa Agro Feminina BRK Cavalos Apache com Proteção UV50+",
+            "images": [
+                "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/C02833BL.webp",
+                "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/1739300001-01FEM.png",
+                "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/1739300002-02FEM.png",
+                "https://cdn.shopify.com/s/files/1/0887/2083/4857/files/1739300003-03FEM.png",
+            ],
+        }
+        enr_apache = template_engine.generate_narrative_from_template(c02833bl, "uv_performance", c02833bl["images"], store_key="brk_agro")
+        self.assertIn("03FEM", enr_apache["act1"]["image"])
+        self.assertIn("02FEM", enr_apache["act3"]["image"])
+
+        t660 = {
+            "id": 8500004,
+            "master_sku": "T660",
+            "title": "Bandana Tubular BRK Amazon Tucunaré com Proteção UV50+",
+            "images": [
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/t660_1.jpg",
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/t660_modelo.jpg",
+                "https://cdn.shopify.com/s/files/1/0628/1445/3826/files/t660_3d.jpg",
+            ],
+        }
+        enr_t660 = template_engine.generate_narrative_from_template(t660, "neck_gaiters_balaclavas", t660["images"], store_key="brk_fishing")
+        html_t660 = html_builder.build_shopify_html(enr_t660)
+        self.assertIn("t660_3d.jpg", enr_t660["act2"]["image"])
+        self.assertIn("t660_modelo.jpg", enr_t660["act3"]["image"])
+        self.assertIn("Ajuste Anatômico no Rosto & Pescoço em Uso Real", html_t660)
+
 
 def run_tests():
     suite = unittest.TestSuite()

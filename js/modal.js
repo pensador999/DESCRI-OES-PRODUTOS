@@ -2697,7 +2697,9 @@ const EXPLICIT_BACK_POC_HASHES = [
   "236b64bb841b", "0721a4c8ce17", "82bf06e5656d", "086u9hh",
   "4ad9fc8f16bc", "94a3b81f5954", "73591bff33b1", "32165d82a90b",
   "fcb50f9e02ac", "b3e2c7dc24a2", "c8a91438bfdd", "e5092aceccc3",
-  "2339b90698f3", "84a9e29f3d47", "0a5de4344adb", "c02837bl.webp",
+  "2339b90698f3", "84a9e29f3d47", "0a5de4344adb", "5f5276d2", "d19242f6", "094fb596", "e65b23e7",
+  "voului", "hkjbjth", "91d0224d198b", "d639ff6b1c5a", "d1caa407ee4c", "4a16f38fbd2e", "41cdcae64190",
+  "b43394572417", "f8fd81f01331",
   "c548407e", "ec5b9024", "1a8929e3", "1524a040", "2f96f543", "d000cf7e", "fa33bfa6",
   "bc24ae71", "dca252fa", "f8fbe84e", "0a8feee6", "59c6e4c0", "9170d7b1", "878c454f",
   "59a38649", "4b867467", "a8302ae8", "3ceae18c", "ce5d92d7", "58953552", "061eb7bc",
@@ -2776,6 +2778,39 @@ function isClientExplicitBackName(url) {
   ];
   if (keywords.some(w => fname.includes(w))) return true;
   return /(?:^|[-_.\s])0?2[-_]?(?:fem|masc|inf)/i.test(fname);
+}
+
+const HAND_GLOVE_POC_TOKENS = [
+  "44c44e9612c4", "f2e090fe8ba1", "62aaf6b25986", "d7f4f49cf301",
+  "8059f931198b", "dc7c509bffe8", "aa4b90bdb553", "48aec41d5e02",
+];
+
+const HUMANIZED_MODEL_TOKENS = [
+  "aayvxta", "tb1io0b", "5m5m0yc", "iyewcrl", "dw7n5ow", "yx5ql6y", "nc5vehx", "vbu8izl",
+  "gemini_generat", "psdemusoambiente", "emusoambiente", "psd_20em_20uso",
+];
+
+function isClientHandGlovePhoto(url) {
+  if (!url || typeof url !== "string") return false;
+  const fname = url.toLowerCase().split("?")[0].split("/").pop();
+  if (fname.includes("mkpmaopunho")) return true;
+  if (HAND_GLOVE_POC_TOKENS.some(tok => fname.includes(tok))) return true;
+  if (
+    /^cax\d+(?:[._-]|$)/i.test(fname)
+    && !["01fem", "02fem", "03fem", "01masc", "02masc", "03masc", "frente", "costas"].some(k => fname.includes(k))
+    && !/^cax\d+(?:bl|i)?[_-]?[1234]\./i.test(fname)
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function isClientHumanizedModelPhoto(url) {
+  if (!url || typeof url !== "string") return false;
+  const fname = url.toLowerCase().split("?")[0].split("/").pop();
+  if (HUMANIZED_MODEL_TOKENS.some(tok => fname.includes(tok))) return true;
+  if (/^c028\d+(?:bl|i)?(?:_[0-9a-f-]+)?\.webp$/i.test(fname)) return true;
+  return false;
 }
 
 function selectClientApparelActImages(cdnImages, isFemale = false, isKids = false, sku = "", title = "") {
@@ -2859,6 +2894,22 @@ function selectClientApparelActImages(cdnImages, isFemale = false, isKids = fals
 
   // PILAR 1: GALERIAS COM 4 OU MAIS FOTOS
   if (workingImages.length >= 4) {
+    // Regra Prioritária 0A: Camisas ArmorX (CAX*) com foto humanizada de mãos/dedeira
+    if (isClientHandGlovePhoto(workingImages[1])) {
+      return [workingImages[0], workingImages[2], workingImages[1]];
+    }
+    if (isClientHandGlovePhoto(workingImages[3])) {
+      return [workingImages[0], workingImages[1], workingImages[3]];
+    }
+    if (["CAX050", "CAX050BL"].includes(skuUp)) {
+      return [workingImages[0], workingImages[1], workingImages[2]];
+    }
+
+    // Regra Prioritária 0B: Coleção Apache Agro com foto humanizada nas costas
+    if (["C02833BL", "C02834", "C02833"].some(p => skuUp.startsWith(p))) {
+      return [workingImages[3], workingImages[0], workingImages[2]];
+    }
+
     if (fnames[0].startsWith("1780685222215")) {
       return [workingImages[2], workingImages[1], workingImages[0]];
     }
@@ -2953,8 +3004,8 @@ function selectClientApparelActImages(cdnImages, isFemale = false, isKids = fals
       return [workingImages[0], workingImages[2], workingImages[3]];
     }
     if (JSON.stringify(numsFirst4) === "[1,null,2,3]") {
-      if (fnames[3].includes("03fem") || fnames[1].includes("fishing")) {
-        return [workingImages[0], workingImages[3], workingImages[1]];
+      if (fnames[3].includes("03fem") || fnames[1].includes("fishing") || fnames[1].endsWith(".webp") || isClientHumanizedModelPhoto(workingImages[1])) {
+        return [workingImages[0], workingImages[2], workingImages[1]];
       }
       return [workingImages[0], workingImages[2], workingImages[3]];
     }
@@ -3088,6 +3139,9 @@ function selectClientApparelActImages(cdnImages, isFemale = false, isKids = fals
   }
 
   // PILAR 2: GALERIAS COM EXATAMENTE 3 FOTOS
+  if (isClientHandGlovePhoto(workingImages[1])) {
+    return [workingImages[0], workingImages[2], workingImages[1]];
+  }
   const nonBackAll = workingImages.filter(u => !isClientExplicitBackName(u));
   if (nonBackAll.length === 1) {
     const onlyFront = nonBackAll[0];
@@ -3349,6 +3403,13 @@ function getProductModeBHTML(liveP) {
     [img1, img2, img3] = selectClientCutleryActImages(images, liveP.title || "");
   } else if (archetypeId === "fishing_tackle_gear" && (liveP.title || "").toLowerCase().includes("trava vara") && images.length >= 3) {
     [img1, img2, img3] = [images[0], images[2], images[1]];
+  } else if (archetypeId === "neck_gaiters_balaclavas") {
+    const skuUpGaiter = (liveP.sku || liveP.master_sku || "").trim().toUpperCase();
+    if (skuUpGaiter === "T563" && images.length >= 4) {
+      [img1, img2, img3] = [images[0], images[2], images[3]];
+    } else if (/^T6(?:59|6\d|7[01])$/.test(skuUpGaiter) && images.length >= 3) {
+      [img1, img2, img3] = [images[0], images[2], images[1]];
+    }
   }
 
   let blocks = liveP.narrative_blocks ? liveP.narrative_blocks.map(b => ({ ...b })) : null;
@@ -3421,9 +3482,21 @@ function getProductModeBHTML(liveP) {
         act3Title = "COSTURA REFORÇADA E GOLA REDONDA ANATÔMICA";
         act3Desc = "Acabamento de alto padrão com costuras planas anti-atrito, gola careca canelada reforçada ombro a ombro e caimento confortável para uso prolongado.";
       } else if (isHasGloveModal) {
-        act3Tag = "Punho com Luva Integrada & Acabamento";
-        act3Title = "PUNHOS ESTENDIDOS COM LUVA INTEGRADA E COSTURAS REFORÇADAS";
-        act3Desc = "Acabamento de alto padrão com costuras planas anti-atrito, gola padre anatômica e punhos estendidos com luva integrada (abertura para o polegar) que garantem proteção solar contínua no dorso das mãos com total liberdade nos dedos.";
+        if (isClientHandGlovePhoto(img3)) {
+          let actionCtx = "o manuseio de carretilhas, varas e equipamentos de pesca";
+          if (resolvedStoreKey === "brk_agro" || /\b(agro|campo|rural|trator|fazenda|pecuaria|pecuária)\b/i.test(tLowModal)) {
+            actionCtx = "a condução de tratores, rédeas e ferramentas na rotina intensa do campo";
+          } else if (resolvedStoreKey === "brk_motors" || /\b(moto|trail|cross|velocidade|motors|pista)\b/i.test(tLowModal)) {
+            actionCtx = "a pilotagem, acelerador e comandos sob sol forte";
+          }
+          act3Tag = "Punho Luva com Encaixe de Polegar";
+          act3Title = "PUNHOS ALONGADOS COM ABERTURA ANATÔMICA PARA O POLEGAR (LUVA INTEGRADA)";
+          act3Desc = `Projetada para eliminar a fresta de sol entre a manga e a mão, a linha ArmorX possui punhos alongados em tecido elástico de toque macio com abertura anatômica reforçada para passar o polegar (dedeira). Esse sistema mantém a manga firme no lugar e protege integralmente o dorso das mãos contra os raios solares FPU 50+, deixando os dedos totalmente livres para ${actionCtx}.`;
+        } else {
+          act3Tag = "Punho com Luva Integrada & Acabamento";
+          act3Title = "PUNHOS ESTENDIDOS COM LUVA INTEGRADA E COSTURAS REFORÇADAS";
+          act3Desc = "Acabamento de alto padrão com costuras planas anti-atrito, gola padre anatômica e punhos estendidos com luva integrada (abertura para o polegar) que garantem proteção solar contínua no dorso das mãos com total liberdade nos dedos.";
+        }
       }
 
       if (archetypeId === "uv_performance" && !isKidsModal) {
@@ -3664,7 +3737,7 @@ function getProductModeBHTML(liveP) {
   const schemaJsonLd = buildClientSchemaJsonLd(liveP);
 
   // 2. Blocos Narrativos
-  function getClientMediaInfographicMeta(idx, archetypeId, prodObj, fTitle, isShortSlv, isSplit) {
+  function getClientMediaInfographicMeta(idx, archetypeId, prodObj, fTitle, isShortSlv, isSplit, blockImg = "", blockObj = null) {
     const tLow = String(fTitle || prodObj.title || "").toLowerCase();
     const skuLow = String(prodObj.master_sku || prodObj.sku || "").toLowerCase();
     const tagsLow = String(Array.isArray(prodObj.tags) ? prodObj.tags.join(" ") : (prodObj.tags || "")).toLowerCase();
@@ -3707,6 +3780,9 @@ function getProductModeBHTML(liveP) {
       return { view_tag: "PERFORMANCE • ATO 02", icon: "bolt", label: "Engenharia de Materiais & Desempenho", pill: "Alta Durabilidade", zoom_act3: false };
     }
 
+    const isHandGloveImg = Boolean(blockObj && blockObj.is_hand_glove_act3) || isClientHandGlovePhoto(blockImg);
+    const isHumanizedModelImg = Boolean(blockObj && blockObj.is_humanized_model_act3) || isClientHumanizedModelPhoto(blockImg);
+
     if (isShirtArch) {
       const isFusion = tLow.includes("fusion") || skuLow.includes("fusion");
       const isHybrid = tLow.includes("hybrid") || skuLow.startsWith("hyb") || skuLow.includes("hybrid");
@@ -3720,10 +3796,21 @@ function getProductModeBHTML(liveP) {
 
       let lbl = "Foco Frontal: Gola Padre Anatômica, Zíper & Punhos";
       let pill = "Pesponto Duplo";
-      if (isFusion) { lbl = "Foco Frontal: Capuz, Máscara Facial & Dedeira"; pill = "Proteção 360°"; }
+      if (isHandGloveImg) {
+        lbl = "Detalhe Humanizado: Furo Anatômico p/ Polegar";
+        pill = "Proteção no Dorso da Mão";
+      } else if (isHumanizedModelImg) {
+        if (isFusion) {
+          lbl = "Caimento Real: Capuz, Máscara & Punho em Ação";
+          pill = "Proteção 360°";
+        } else {
+          lbl = "Caimento Real no Corpo: Mobilidade & Proteção Solar";
+          pill = "Uso na Prática";
+        }
+      } else if (isFusion) { lbl = "Foco Frontal: Capuz, Máscara Facial & Dedeira"; pill = "Proteção 360°"; }
       else if (isHybrid) { lbl = "Foco Frontal: Capuz Anatômico & Punho c/ Dedeira"; pill = "Nuca & Mãos"; }
       else if (hasCapuz) { lbl = "Foco Frontal: Capuz Integrado & Proteção de Nuca"; pill = "Barreira Solar"; }
-      else if (isArmor) { lbl = "Foco Frontal: Punho c/ Luva Integrada & Gola"; pill = "Proteção de Punho"; }
+      else if (isArmor) { lbl = "Vista 3/4: Gola Padre c/ Zíper & Punho c/ Dedeira"; pill = "Proteção de Punho"; }
       else if (isRaglan) { lbl = "Foco Frontal: Corte Raglan & Costura Plana"; pill = "Zero Atrito"; }
       else if (isButton) { lbl = "Foco Frontal: Colarinho Estruturado & Botões"; pill = "Costura em X"; }
       else if (isCotton) { lbl = "Foco Frontal: Gola em Ribana & Costura Dupla"; pill = "Anti-Deformação"; }
@@ -3731,7 +3818,17 @@ function getProductModeBHTML(liveP) {
       else if (isKidsMeta) { lbl = "Foco Frontal: Costuras Planas & Acabamento Macio"; pill = "Toque Suave"; }
       else if (isCasalMeta) { lbl = "Foco Frontal: Acabamento Duplo & Costura Plana"; pill = "Kit Casal"; }
 
-      return { view_tag: "ZOOM DE ACABAMENTO • ATO 03", icon: "shield", label: lbl, pill: pill, zoom_act3: true };
+      return { view_tag: "ZOOM DE ACABAMENTO • ATO 03", icon: "shield", label: lbl, pill: pill, zoom_act3: true, is_hand_glove: isHandGloveImg };
+    }
+
+    if (archetypeId === "neck_gaiters_balaclavas") {
+      return {
+        view_tag: "USO NA PRÁTICA • ATO 03",
+        icon: "shield",
+        label: "Ajuste Anatômico no Rosto & Pescoço em Uso Real",
+        pill: "Estabilidade em Movimento",
+        zoom_act3: false,
+      };
     }
 
     return { view_tag: "DETALHE TÉCNICO • ATO 03", icon: "shield", label: "Acabamento de Precisão & Componentes", pill: "Rigor Oficial BRK", zoom_act3: false };
@@ -3812,14 +3909,17 @@ function getProductModeBHTML(liveP) {
         </div>
       </div>`;
     } else if (blockImg) {
-      const infoMeta = getClientMediaInfographicMeta(idx, archetypeId, liveP, formattedTitle, isShortSleeve, false);
+      const infoMeta = getClientMediaInfographicMeta(idx, archetypeId, liveP, formattedTitle, isShortSleeve, false, blockImg, block);
       const isCropSleeve = Boolean(block.crop_sleeve_detail);
       if (isCropSleeve) {
         infoMeta.label = isShortSleeve ? "Detalhe Lateral: Mangas Curtas & Costura" : "Detalhe Lateral: Mangas, Punhos & Costura";
         infoMeta.pill = "Pesponto Duplo";
       }
       let focusCls = " brk-focus-center";
-      if (idx === 2 && isShirtArchMain) focusCls = isCropSleeve ? " brk-focus-top brk-crop-sleeve-detail" : " brk-focus-top";
+      if (idx === 2 && isShirtArchMain) {
+        if (infoMeta.is_hand_glove) focusCls = " brk-focus-center";
+        else focusCls = isCropSleeve ? " brk-focus-top brk-crop-sleeve-detail" : " brk-focus-top";
+      }
       else if (idx === 1 && isShirtArchMain) focusCls = " brk-focus-mid";
       mediaHtml = `<div class="brk-desc-media brk-media-card brk-card-loupe">
         <div class="brk-media-stage brk-stage-loupe${focusCls}" ${mlTrackAttrs}>

@@ -1818,6 +1818,26 @@ class HTMLBuilder:
             }
 
         # Ato 3 (idx == 2)
+        blocks_meta = enriched_data.get("narrative_blocks") or []
+        act3_block = (blocks_meta[2] if len(blocks_meta) > 2 and isinstance(blocks_meta[2], dict) else enriched_data.get("act3")) or {}
+        act3_img = str(act3_block.get("image") or "")
+        act3_fname = act3_img.lower().split("?")[0].split("/")[-1] if act3_img else ""
+        is_hand_glove_img = bool(
+            act3_block.get("is_hand_glove_act3")
+            or "mkpmaopunho" in act3_fname
+            or any(tok in act3_fname for tok in ("44c44e9612c4", "f2e090fe8ba1", "62aa6b25986", "d77f4f49cf301", "8059f931198b", "dc7c509bffe8", "aa4b90bdb553", "48aec41d5e02"))
+            or (
+                re.match(r'^cax\d+(?:[._-]|$)', act3_fname)
+                and not any(k in act3_fname for k in ("01fem", "02fem", "03fem", "01masc", "02masc", "03masc", "frente", "costas"))
+                and not re.match(r'^cax\d+(?:bl|i)?[1234]\.', act3_fname)
+            )
+        )
+        is_humanized_model_img = bool(
+            act3_block.get("is_humanized_model_act3")
+            or any(tok in act3_fname for tok in ("aayvxta", "tb1io0b", "5m5m0yc", "iyewcrl", "dw7n5ow", "yx5ql6y", "nc5vehx", "vbu8izl", "gemini_generat"))
+            or re.match(r'^c028\d+(?:bl|i)?(?:_[0-9a-f-]+)?\.webp$', act3_fname)
+        )
+
         if is_shirt_arch:
             is_fusion = "fusion" in t_low or "fusion" in sku_low
             is_hybrid = "hybrid" in t_low or sku_low.startswith("hyb") or "hybrid" in sku_low
@@ -1833,14 +1853,21 @@ class HTMLBuilder:
             is_kids_meta = bool(enriched_data.get("is_kids", False)) or any(w in t_low for w in ["infantil", "kids", "juvenil"]) or sku_low.startswith("ci")
             is_casal_meta = "casal" in t_low and ("kit" in t_low or "combo" in t_low)
 
-            if is_fusion:
+            if is_hand_glove_img:
+                lbl, pill = "Detalhe Humanizado: Furo Anatômico p/ Polegar", "Proteção no Dorso da Mão"
+            elif is_humanized_model_img:
+                if is_fusion:
+                    lbl, pill = "Caimento Real: Capuz, Máscara & Punho em Ação", "Proteção 360°"
+                else:
+                    lbl, pill = "Caimento Real no Corpo: Mobilidade & Proteção Solar", "Uso na Prática"
+            elif is_fusion:
                 lbl, pill = "Foco Frontal: Capuz, Máscara Facial & Dedeira", "Proteção 360°"
             elif is_hybrid:
                 lbl, pill = "Foco Frontal: Capuz Anatômico & Punho c/ Dedeira", "Nuca & Mãos"
             elif has_capuz:
                 lbl, pill = "Foco Frontal: Capuz Integrado & Proteção de Nuca", "Barreira Solar"
             elif is_armor:
-                lbl, pill = "Foco Frontal: Punho c/ Luva Integrada & Gola", "Proteção de Punho"
+                lbl, pill = "Vista 3/4: Gola Padre c/ Zíper & Punho c/ Dedeira", "Proteção de Punho"
             elif is_raglan:
                 lbl, pill = "Foco Frontal: Corte Raglan & Costura Plana", "Zero Atrito"
             elif is_button:
@@ -1862,6 +1889,16 @@ class HTMLBuilder:
                 "label": lbl,
                 "pill": pill,
                 "zoom_act3": True,
+                "is_hand_glove_img": is_hand_glove_img,
+            }
+
+        if archetype_id == "neck_gaiters_balaclavas":
+            return {
+                "view_tag": "USO NA PRÁTICA • ATO 03",
+                "icon": "shield",
+                "label": "Ajuste Anatômico no Rosto & Pescoço em Uso Real",
+                "pill": "Estabilidade em Movimento",
+                "zoom_act3": False,
             }
 
         return {
@@ -2069,7 +2106,10 @@ class HTMLBuilder:
                     info_meta["label"] = "Detalhe Lateral: Mangas Curtas & Costura" if is_short_sleeve else "Detalhe Lateral: Mangas, Punhos & Costura"
                     info_meta["pill"] = "Pesponto Duplo"
                 if idx == 2 and is_shirt_arch_main:
-                    focus_cls = " brk-focus-top brk-crop-sleeve-detail" if is_crop_sleeve else " brk-focus-top"
+                    if info_meta.get("is_hand_glove_img"):
+                        focus_cls = " brk-focus-center"
+                    else:
+                        focus_cls = " brk-focus-top brk-crop-sleeve-detail" if is_crop_sleeve else " brk-focus-top"
                 elif idx == 1 and is_shirt_arch_main:
                     focus_cls = " brk-focus-mid"
                 else:

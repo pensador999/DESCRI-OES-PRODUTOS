@@ -1801,7 +1801,9 @@ class TemplateEngine:
         "236b64bb841b", "0721a4c8ce17", "82bf06e5656d", "086u9hh",
         "4ad9fc8f16bc", "94a3b81f5954", "73591bff33b1", "32165d82a90b",
         "fcb50f9e02ac", "b3e2c7dc24a2", "c8a91438bfdd", "e5092aceccc3",
-        "2339b90698f3", "84a9e29f3d47", "0a5de4344adb", "c02837bl.webp",
+        "2339b90698f3", "84a9e29f3d47", "0a5de4344adb", "5f5276d2", "d19242f6", "094fb596", "e65b23e7",
+        "voului", "hkjbjth", "91d0224d198b", "d639ff6b1c5a", "d1caa407ee4c", "4a16f38fbd2e", "41cdcae64190",
+        "b43394572417", "f8fd81f01331",
         # brk_motors (C02893..C02897BL, C02893I..2897I, BP105BL)
         "c548407e", "ec5b9024", "1a8929e3", "1524a040", "2f96f543", "d000cf7e", "fa33bfa6",
         "bc24ae71", "dca252fa", "f8fbe84e", "0a8feee6", "59c6e4c0", "9170d7b1", "878c454f",
@@ -1886,6 +1888,50 @@ class TemplateEngine:
         ):
             return True
         return bool(re.search(r'(?:^|[-_.\s])0?2[-_]?(?:fem|masc|inf)', fname))
+
+    _HAND_GLOVE_POC_TOKENS = (
+        "44c44e9612c4",  # CAX039BL[1]
+        "f2e090fe8ba1",  # CAX028BL[1]
+        "62aaf6b25986",  # CAX005[3]
+        "d7f4f49cf301",  # CAX003BL[1]
+        "8059f931198b",  # CAX005BL[3]
+        "dc7c509bffe8",  # CAX039[1]
+        "aa4b90bdb553",  # CAX034[1]
+        "48aec41d5e02",  # CAX029[1]
+    )
+
+    _HUMANIZED_MODEL_TOKENS = (
+        "aayvxta", "tb1io0b", "5m5m0yc", "iyewcrl", "dw7n5ow", "yx5ql6y", "nc5vehx", "vbu8izl",
+        "gemini_generat", "psdemusoambiente", "emusoambiente", "psd_20em_20uso",
+    )
+
+    @classmethod
+    def _is_hand_glove_photo(cls, url: str) -> bool:
+        if not url or not isinstance(url, str):
+            return False
+        fname = url.lower().split("/")[-1].split("?")[0]
+        if "mkpmaopunho" in fname:
+            return True
+        if any(tok in fname for tok in cls._HAND_GLOVE_POC_TOKENS):
+            return True
+        if (
+            re.match(r'^cax\d+(?:[._-]|$)', fname)
+            and not any(k in fname for k in ("01fem", "02fem", "03fem", "01masc", "02masc", "03masc", "frente", "costas"))
+            and not re.match(r'^cax\d+(?:bl|i)?[_-]?[1234]\.', fname)
+        ):
+            return True
+        return False
+
+    @classmethod
+    def _is_humanized_model_photo(cls, url: str) -> bool:
+        if not url or not isinstance(url, str):
+            return False
+        fname = url.lower().split("/")[-1].split("?")[0]
+        if any(tok in fname for tok in cls._HUMANIZED_MODEL_TOKENS):
+            return True
+        if re.match(r'^c028\d+(?:bl|i)?(?:_[0-9a-f-]+)?\.webp$', fname):
+            return True
+        return False
 
     def _select_apparel_act_images(self, cdn_images: List[str], is_female: bool = False, is_kids: bool = False, sku: str = "", title: str = ""):
         if not cdn_images:
@@ -1988,6 +2034,28 @@ class TemplateEngine:
         # PILAR 1: GALERIAS COM 4 OU MAIS FOTOS
         # =====================================================================
         if len(working_images) >= 4:
+            # Caso especial 0A: Camisas ArmorX (CAX*) com foto humanizada de mãos/dedeira em [1] ou [3]
+            if self._is_hand_glove_photo(working_images[1]):
+                # [0]=0° Frente, [1]=Humanized Hands/Glove, [2]=180° Costas Reta, [3]=Costas 3/4
+                # Retorna (base1=[0], base2=[2] p/ Giro 180° Costas, base3=[1] p/ Ato 3 Mãos; unused4=[3] vai p/ Ato 2)
+                return working_images[0], working_images[2], working_images[1]
+            if self._is_hand_glove_photo(working_images[3]):
+                # [0]=0° Frente, [1]=180° Costas Reta, [2]=Costas 3/4, [3]=Humanized Hands/Glove (CAX005, CAX005BL, CAX020, CAX022, CAX023)
+                return working_images[0], working_images[1], working_images[3]
+
+            # Caso especial 0B: Coleção Apache BRK Agro (C02833BL, C02834, C02833) onde [0]=180° Costas Estúdio, [1]=Humanizada Costas, [2]=3/4 Frente, [3]=0° Frente
+            if sku_up in ("C02833BL", "C02834", "C02833"):
+                return working_images[3], working_images[0], working_images[2]
+
+            # Caso especial 0C: Coleção Apache BRK Agro (C02832BL..C02854BL) com foto humanizada frontal .webp em [1]
+            if self._is_humanized_model_photo(working_images[1]) and fnames[1].startswith("c028"):
+                if self._is_explicit_back_name(working_images[3]):
+                    # [0]=3/4 Frente, [1]=Humanizada Frente .webp, [2]=0° Frente, [3]=180° Costas
+                    return working_images[0], working_images[3], working_images[1]
+                if self._is_explicit_back_name(working_images[2]):
+                    # [0]=3/4 Frente, [1]=Humanizada Frente .webp, [2]=180° Costas, [3]=0° Frente
+                    return working_images[0], working_images[2], working_images[1]
+
             # Caso especial RAGLAN230BL (1780685222215) onde [0] é a única foto Frontal e [1..3] são Costas
             if fnames[0].startswith("1780685222215"):
                 return working_images[2], working_images[1], working_images[0]
@@ -2190,7 +2258,7 @@ class TemplateEngine:
                 return working_images[0], working_images[2], working_images[3]
 
             if all(poc_flags[:4]):
-                if any(k in sku_t_low for k in ("raglan", "segunda pele", "hyb", "cax")) or is_kids:
+                if any(k in sku_t_low for k in ("raglan", "segunda pele", "hyb")) or is_kids:
                     return working_images[0], working_images[1], working_images[3]
                 return working_images[0], working_images[1], working_images[2]
 
@@ -2205,6 +2273,12 @@ class TemplateEngine:
         # =====================================================================
         # PILAR 2: GALERIAS COM EXATAMENTE 3 FOTOS (len == 3)
         # =====================================================================
+        if self._is_hand_glove_photo(working_images[1]):
+            # CAX003BL: [0]=0° Frente, [1]=Humanized Hands/Glove, [2]=180° Costas Reta
+            return working_images[0], working_images[2], working_images[1]
+        if self._is_hand_glove_photo(working_images[2]):
+            return working_images[0], working_images[1], working_images[2]
+
         non_back_all = [u for u in working_images if not self._is_explicit_back_name(u)]
         if len(non_back_all) == 1:
             # Se só existe 1 única foto Frontal e 2 fotos explicitamente Costas (ex: C02826, C02837BL),
@@ -2914,6 +2988,15 @@ class TemplateEngine:
             )
         elif archetype_id == "cutlery_unique":
             img1, img2, img3 = self._select_cutlery_act_images(cdn_images, title)
+        elif archetype_id == "neck_gaiters_balaclavas" and len(cdn_images) >= 3:
+            sku_up_gaiter = sku_clean_for_flags.upper()
+            if sku_up_gaiter in ("T659", "T660", "T662", "T663", "T664", "T665", "T666", "T667", "T668", "T669", "T670", "T671"):
+                # Bandanas Amazon onde [1] é foto humanizada em uso no rosto/pescoço e [2] é render 3D tubular lateral
+                img1, img2, img3 = cdn_images[0], cdn_images[2], cdn_images[1]
+            elif sku_up_gaiter == "T563" and len(cdn_images) >= 4:
+                img1, img2, img3 = cdn_images[0], cdn_images[2], cdn_images[3]
+            else:
+                img1, img2, img3 = cdn_images[0], cdn_images[1], cdn_images[2]
         elif archetype_id == "fishing_tackle_gear" and "trava vara" in title.lower() and len(cdn_images) >= 3:
             img1, img2, img3 = cdn_images[0], cdn_images[2], cdn_images[1]
         elif (
@@ -3064,9 +3147,16 @@ class TemplateEngine:
 
         # 6. Adaptação Camisa com Luva Integrada (Linha ArmorX / CAX)
         elif is_has_glove:
-            act3["tag"] = "Punho com Luva Integrada & Acabamento"
-            act3["title"] = "PUNHOS ESTENDIDOS COM LUVA INTEGRADA E COSTURAS REFORÇADAS"
-            act3["desc_tmpl"] = "Acabamento de alto padrão com costuras planas anti-atrito, gola padre anatômica e punhos estendidos com luva integrada (abertura para o polegar) que garantem proteção solar contínua no dorso das mãos com total liberdade nos dedos."
+            if self._is_hand_glove_photo(img3):
+                act3["tag"] = "Punho Luva com Encaixe de Polegar"
+                act3["title"] = "PUNHOS ALONGADOS COM ABERTURA ANATÔMICA PARA O POLEGAR (LUVA INTEGRADA)"
+                act3["desc_tmpl"] = (
+                    "Projetada para proteger uma das regiões mais expostas ao sol durante a pescaria, a linha ArmorX conta com punhos alongados em tecido elástico e abertura anatômica para passar o polegar (luva integrada). Esse sistema mantém a manga firme sobre o dorso da mão sem subir nos arremessos, deixando os dedos totalmente livres para sensibilidade tátil no manuseio de carretilha, molinete e iscas."
+                )
+            else:
+                act3["tag"] = "Punho com Luva Integrada & Acabamento"
+                act3["title"] = "PUNHOS ESTENDIDOS COM LUVA INTEGRADA E COSTURAS REFORÇADAS"
+                act3["desc_tmpl"] = "Acabamento de alto padrão com costuras planas anti-atrito, gola padre anatômica e punhos estendidos com luva integrada (abertura para o polegar) que garantem proteção solar contínua no dorso das mãos com total liberdade nos dedos."
 
         sibling_specs = sibling_info.get("extracted_specs") if sibling_info else None
         specs = self.extract_product_specs(product, archetype_id, sibling_specs=sibling_specs)
@@ -4608,6 +4698,8 @@ class TemplateEngine:
                         ("Pesca esportiva, camping, lida no campo e uso diário (EDC)", "Lida no campo, fazenda, camping e uso diário (EDC)"),
                         ("Porte na cintura, lida no campo, rodeios, cavalgadas, pesca e churrasco", "Porte na cintura, lida no campo, rodeios, cavalgadas e churrasco"),
                         ("Pesca, camping, trilhas e uso diário (EDC)", "Lida no campo, camping, trilhas e uso diário (EDC)"),
+                        ("durante a pescaria, a linha ArmorX", "na lida do campo e nas cavalgadas, a linha ArmorX"),
+                        ("sem subir nos arremessos, deixando os dedos totalmente livres para sensibilidade tátil no manuseio de carretilha, molinete e iscas", "sem subir durante os movimentos, deixando os dedos totalmente livres para o manuseio de rédeas, ferramentas e equipamentos"),
                     ]
                 else:  # brk_motors
                     replacements = [
@@ -4641,6 +4733,8 @@ class TemplateEngine:
                         ("trilhas, barcos e estradas", "trilhas off-road, caminhonetes e estradas"),
                         ("Pesca, camping, overland, caminhões, barcos e viagens", "Overland, expedições 4x4, caminhonetes, caminhões, motorhomes e camping"),
                         ("na pescaria ou no campo", "nas pistas, nas trilhas ou no dia a dia"),
+                        ("durante a pescaria, a linha ArmorX", "durante a pilotagem e as trilhas, a linha ArmorX"),
+                        ("sem subir nos arremessos, deixando os dedos totalmente livres para sensibilidade tátil no manuseio de carretilha, molinete e iscas", "sem subir durante a pilotagem, deixando os dedos totalmente livres para sensibilidade tátil nos manetes e comandos"),
                     ]
                 out = txt
                 for old_s, new_s in replacements:
@@ -4657,7 +4751,9 @@ class TemplateEngine:
         source_type = "sibling_template" if sibling_info else "archetype_specialized"
         source_label = f"Molde Homólogo do Site ({sibling_info['sibling_title']})" if sibling_info else f"Arquétipo Especializado ({template['name']})"
 
-        crop_sleeve_detail = bool(is_apparel and not is_kit_shirt_boot and img3 and self._is_explicit_back_name(img3))
+        is_hand_glove_act3 = bool(is_apparel and img3 and self._is_hand_glove_photo(img3))
+        is_humanized_model_act3 = bool(is_apparel and img3 and self._is_humanized_model_photo(img3))
+        crop_sleeve_detail = bool(is_apparel and not is_kit_shirt_boot and img3 and not is_hand_glove_act3 and self._is_explicit_back_name(img3))
         if crop_sleeve_detail:
             act3["tag"] = "Detalhe Lateral: Mangas Curtas & Costura" if is_short_sleeve else "Detalhe Lateral: Mangas, Punhos & Costura"
             if not is_fusion and not is_hybrid and not is_hooded:
@@ -4691,7 +4787,9 @@ class TemplateEngine:
             "title": act3["title"],
             "description": act3["desc_tmpl"].format(title=formatted_title),
             "image": img3,
-            "crop_sleeve_detail": crop_sleeve_detail
+            "crop_sleeve_detail": crop_sleeve_detail,
+            "is_hand_glove_act3": is_hand_glove_act3,
+            "is_humanized_model_act3": is_humanized_model_act3
         }
 
         sku = str(product.get("sku") or product.get("master_sku") or product.get("id") or "")
