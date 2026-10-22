@@ -1900,6 +1900,34 @@ class TestLojaDoceVtexVerticalization(unittest.TestCase):
             self.assertIn('class="vtex-desc-wrapper"', html_b)
             self.assertNotIn("brk-", html_b, f"SKU {sku} nao pode ter classe CSS brk- no mode_b_html")
             self.assertNotIn("brk-", html_a, f"SKU {sku} nao pode ter classe CSS brk- no mode_a_html")
+            self.assertNotIn("text-only", html_b, f"SKU {sku} nao pode conter blocos text-only no mode_b_html")
+            self.assertEqual(
+                html_b.count('class="vtex-desc-media '),
+                3,
+                f"SKU {sku} deve possuir exatamente 3 colunas visuais .vtex-desc-media (1 por Ato)",
+            )
+
+            imgs = p.get("images") or []
+            if len(imgs) == 1:
+                self.assertEqual(
+                    html_b.count("vtex-infographic-card"),
+                    3,  # 1 na folha CSS + 2 nos Atos 2 e 3
+                    f"SKU {sku} com 1 foto deve renderizar Card Infográfico nos Atos 2 e 3",
+                )
+                self.assertIn("INFOGRÁFICO • RENDIMENTO & MEDIDAS", html_b)
+                self.assertIn("SEGURANÇA, CONSERVAÇÃO & PROCEDÊNCIA", html_b)
+                self.assertNotIn(
+                    "Desempenho calibrado para uso profissional e doméstico com alta estabilidade.",
+                    html_b,
+                    f"SKU {sku} caiu em fallback genérico de parâmetro técnico no Ato 2",
+                )
+            elif len(imgs) == 2:
+                self.assertEqual(
+                    html_b.count("vtex-infographic-card"),
+                    2,  # 1 na folha CSS + 1 no Ato 3
+                    f"SKU {sku} com 2 fotos deve renderizar Card Infográfico no Ato 3",
+                )
+                self.assertIn("SEGURANÇA, CONSERVAÇÃO & PROCEDÊNCIA", html_b)
 
             for field_name, content in (
                 ("mode_b_html", html_b),
@@ -1922,7 +1950,7 @@ class TestLojaDoceVtexVerticalization(unittest.TestCase):
             self.assertTrue(bool((p.get("allergen_info") or {}).get("alerta_alergenicos")), f"SKU {sku} sem alerta_alergenicos")
             self.assertTrue(bool((p.get("yield_info") or {}).get("resumo_rendimento")), f"SKU {sku} sem resumo_rendimento")
 
-        # Verificar senha exclusiva fgh369, token unificado e ausência de lojadoce.com.br no js/app.js e js/modal.js
+        # Verificar senha exclusiva fgh369, token unificado, paridade do Card Infográfico e ausência de lojadoce.com.br no js/app.js e js/modal.js
         with open(os.path.join(BASE_DIR, "js", "app.js"), "r", encoding="utf-8") as f_app:
             app_js = f_app.read()
         with open(os.path.join(BASE_DIR, "js", "modal.js"), "r", encoding="utf-8") as f_modal:
@@ -1935,6 +1963,85 @@ class TestLojaDoceVtexVerticalization(unittest.TestCase):
         self.assertNotIn("LOJA_DOCE_FGH369_AUTHORIZED", app_js)
         self.assertNotIn("lojadoce.com.br", app_js.lower())
         self.assertNotIn("lojadoce.com.br", modal_js.lower())
+        self.assertIn("function buildClientLojaDoceInfographicCard(", modal_js)
+        self.assertIn("INFOGRÁFICO • RENDIMENTO & MEDIDAS", modal_js)
+        self.assertIn("SEGURANÇA, CONSERVAÇÃO & PROCEDÊNCIA", modal_js)
+
+    def test_lojadoce_edge_case_zero_photos_renders_infographic_cards(self):
+        """Mesmo em um SKU hipotético sem fotos (0 imagens) ou care_tips=None, todos os 3 Atos devem ter mídia infográfica distinta e zero text-only."""
+        from core.template_engine import TemplateEngine
+        from core.html_builder import HTMLBuilder
+        te = TemplateEngine()
+        hb = HTMLBuilder()
+        prod_zero_img = {
+            "sku": "999990",
+            "title": "Cobertura Fracionada Chocolate Meio Amargo 1kg Harald Top",
+            "raw_erp_title": "COB FRAC CHOC MEIO AMARGO 1KG TOP HARALD",
+            "brand": "Harald",
+            "category": "/CONFEITARIA/CHOCOLATES/",
+            "images": [],
+        }
+        enriched = te.generate_narrative_from_template(
+            prod_zero_img, "ld_confeitaria_ingredientes", [], store_key="loja_doce"
+        )
+        enriched["care_tips"] = None
+        html_out = hb.build_shopify_html(enriched)
+        md_out = hb.build_shopify_markdown(enriched)
+        self.assertNotIn("text-only", html_out)
+        self.assertEqual(html_out.count('class="vtex-desc-media '), 3)
+        self.assertIn("APRESENTAÇÃO • FICHA COMERCIAL & ORIGEM", html_out)
+        self.assertIn("INFOGRÁFICO • RENDIMENTO & MEDIDAS", html_out)
+        self.assertIn("SEGURANÇA, CONSERVAÇÃO & PROCEDÊNCIA", html_out)
+        self.assertNotIn("ferro de passar", html_out.lower())
+        self.assertNotIn("ferro de passar", md_out.lower())
+
+    def test_lojadoce_client_js_runtime_and_parity(self):
+        """Executa getProductModeBHTML em Node.js VM para garantir ausência de ReferenceError (TDZ) e paridade 100% com o backend Python."""
+        import shutil
+        import subprocess
+        if not shutil.which("node"):
+            return
+        js_script = """
+const fs = require('fs'), vm = require('vm');
+const svgIcons = fs.readFileSync('js/svg_icons.js', 'utf8');
+const code = fs.readFileSync('js/modal.js', 'utf8');
+const sandbox = {
+  window: {},
+  document: {
+    addEventListener: () => {},
+    getElementById: () => null,
+    querySelector: () => null,
+    querySelectorAll: () => [],
+    createElement: () => ({ style: {}, classList: { add: () => {}, remove: () => {} }, appendChild: () => {} }),
+    body: { appendChild: () => {} }
+  },
+  navigator: {},
+  localStorage: { getItem: () => null, setItem: () => {} },
+  console
+};
+sandbox.window = sandbox;
+vm.createContext(sandbox);
+vm.runInContext(svgIcons, sandbox);
+vm.runInContext(code, sandbox);
+
+const ld = JSON.parse(fs.readFileSync('data/stores/loja_doce.json', 'utf8')).products;
+for (const p of ld.slice(0, 25)) {
+  const htmlJs = sandbox.getProductModeBHTML({ ...p, mode_b_html: '', __bunkerOverride: true, care_tips: null });
+  if (!htmlJs.includes('vtex-infographic-card')) throw new Error('Missing vtex-infographic-card for ' + p.sku);
+  if (htmlJs.includes('text-only')) throw new Error('Found text-only for ' + p.sku);
+  if (/\\b(?:brk|shopify|lojadoce|loja\\s+doce)\\b/i.test(htmlJs)) throw new Error('Brand leak for ' + p.sku);
+  if (htmlJs.includes('ferro de passar')) throw new Error('Clothing care leak for ' + p.sku);
+}
+const fish = JSON.parse(fs.readFileSync('data/stores/brk_fishing.json', 'utf8')).products;
+const fImg = (fish[0].cdn_images || fish[0].gallery || fish[0].images || ['https://cdn.shopify.com/s/files/1/test.jpg'])[0];
+const oneImgBrk = { ...fish[0], images: [fImg], cdn_images: [fImg], gallery: [fImg], narrative_blocks: [{ tag: 'Ato 1', title: 'T1', description: 'D1', image: fImg }, { tag: 'Ato 2', title: 'T2', description: 'D2', image: '' }, { tag: 'Ato 3', title: 'T3', description: 'D3', image: '' }] };
+const brkHtml = sandbox.getProductModeBHTML(oneImgBrk);
+if (!brkHtml.includes('brk-desc-wrapper') || brkHtml.includes('vtex-infographic-card')) {
+  throw new Error('BRK 1-photo rendering broken in JS');
+}
+"""
+        res = subprocess.run(["node", "-e", js_script], cwd=BASE_DIR, capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(res.returncode, 0, f"Falha na execução JS client-side: {res.stderr}")
 
 
 def run_tests():

@@ -890,12 +890,15 @@ function buildClientModeBMarkdown(liveP) {
     lines.push(``);
   }
 
+  const defaultMdCare = isLojaDoce
+    ? "Conservar na embalagem original fechada, em local seco, fresco e arejado, ao abrigo da luz solar direta."
+    : "Lavar à mão ou em ciclo suave com sabão neutro. Secar à sombra (dispensa uso de ferro).";
   lines.push(`### Guia de Cuidados & Conservação`);
-  lines.push(`${liveP.care_tips || "Lavar à mão ou em ciclo suave com sabão neutro. Secar à sombra (dispensa uso de ferro)."}\n`);
+  lines.push(`${liveP.care_tips || defaultMdCare}\n`);
 
   lines.push(`---`);
   if (isLojaDoce) {
-    lines.push(`- **Procedência Oficial Garantida:** Lotes originais com controle rigoroso`);
+    lines.push(`- **Procedência 100% Original:** Curadoria Oficial • Marca ${brandName}`);
   } else {
     lines.push(`- **Qualidade Oficial BRK:** Matérias-primas nobres testadas`);
   }
@@ -2237,11 +2240,14 @@ function buildClientSchemaJsonLd(liveP) {
       : (liveP.images || []);
   const images = sanitizeAndDedupClientImages(rawImgs, liveP.archetype_id, liveP.title).slice(0, 3);
 
+  const isLdSchema = isLojaDoceProduct(liveP);
   const schemaObj = {
     "@context": "https://schema.org/",
     "@type": "Product",
     "name": formattedTitle,
-    "description": `${formattedTitle} oficial com garantia e qualidade oficial BRK.`,
+    "description": isLdSchema
+      ? `${formattedTitle} original com procedência garantida e envio seguro.`
+      : `${formattedTitle} oficial com garantia e qualidade oficial BRK.`,
     "sku": String(sku),
     "brand": {
       "@type": "Brand",
@@ -3582,7 +3588,8 @@ function selectClientCutleryActImages(cdnImages, title = "") {
 
 function getProductModeBHTML(liveP) {
   if (!liveP) return "";
-  if (isLojaDoceProduct(liveP) && liveP.mode_b_html && !liveP.__bunkerOverride) {
+  const isLojaDoce = isLojaDoceProduct(liveP);
+  if (isLojaDoce && liveP.mode_b_html && !liveP.__bunkerOverride) {
     return liveP.mode_b_html;
   }
   const originInfo = resolveClientOriginAndTitle(liveP);
@@ -3611,7 +3618,9 @@ function getProductModeBHTML(liveP) {
     const tLowStore = (liveP.title || "").toLowerCase();
     const vendorLowStore = (liveP.vendor || "").toLowerCase();
     const catLowStore = (liveP.category || "").toLowerCase();
-    if (
+    if (isLojaDoce) {
+      resolvedStoreKey = "loja_doce";
+    } else if (
       vendorLowStore.includes("agro") || catLowStore.includes("agro") || archetypeId === "agro_field" ||
       imgsStrStore.includes("0887/2083/4857") || imgsStrStore.includes("0798/6462/7495") ||
       /\b(agro|botina|fazenda|pecuaria|pecuária|nelore)\b/i.test(tLowStore)
@@ -3691,6 +3700,14 @@ function getProductModeBHTML(liveP) {
   }
 
   let blocks = liveP.narrative_blocks ? liveP.narrative_blocks.map(b => ({ ...b })) : null;
+  if (!blocks || blocks.length === 0) {
+    const directActs = ["act1", "act2", "act3"]
+      .map(k => (liveP[k] && typeof liveP[k] === "object") ? { ...liveP[k] } : null)
+      .filter(Boolean);
+    if (directActs.length > 0) {
+      blocks = directActs;
+    }
+  }
   if (!blocks || blocks.length === 0) {
     const moldes = window.__STORE_MOLDES || {};
     let archKey = archetypeId;
@@ -3966,7 +3983,9 @@ function getProductModeBHTML(liveP) {
     careTips = window.__STORE_MOLDES[archKey]?.care_tips;
   }
   if (!careTips) {
-    careTips = "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar).";
+    careTips = isLojaDoce
+      ? "Conservar na embalagem original fechada, em local seco, fresco e arejado, ao abrigo da luz solar direta."
+      : "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar).";
   }
 
   if (isKitShirtBootModal) {
@@ -4033,6 +4052,34 @@ function getProductModeBHTML(liveP) {
         return { view_tag: "ITEM 02 DO KIT • ATO 02", icon: "shield", label: "Item 02 do Kit: Botina em Couro Bovino Legítimo", pill: "Solado Antiderrapante", zoom_act3: false };
       }
       return { view_tag: "CONJUNTO COMPLETO • ATO 03", icon: "sparkle", label: "Conjunto Completo: Proteção do Tronco aos Pés", pill: "Kit 2 em 1", zoom_act3: false };
+    }
+
+    if (String(archetypeId || "").startsWith("ld_") || isLojaDoce) {
+      if (idx === 0) {
+        return {
+          view_tag: "APRESENTAÇÃO • ATO 01",
+          icon: "sparkle",
+          label: "Apresentação Comercial & Embalagem Original",
+          pill: "Curadoria Oficial",
+          zoom_act3: false,
+        };
+      }
+      if (idx === 1) {
+        return {
+          view_tag: "ESPECIFICAÇÃO • ATO 02",
+          icon: "bolt",
+          label: "Rendimento, Composição & Padrão Profissional",
+          pill: "Alto Desempenho",
+          zoom_act3: false,
+        };
+      }
+      return {
+        view_tag: "APLICAÇÃO • ATO 03",
+        icon: "shield",
+        label: "Acabamento & Praticidade na Rotina",
+        pill: "Procedência Original",
+        zoom_act3: false,
+      };
     }
 
     if (idx === 0) {
@@ -4126,47 +4173,140 @@ function getProductModeBHTML(liveP) {
       prodObj.brand_name || vtexSpecs["Marca"] || specsMap["Marca / Fabricante"] || brandName || "Original"
     ).trim();
     const skuCode = String(
-      prodObj.sku || prodObj.master_sku || vtexSpecs["Código SKU"] || specsMap["Código SKU"] || ""
+      prodObj.sku || prodObj.master_sku || vtexSpecs["Código de Referência (SKU)"] || vtexSpecs["Código SKU"] || specsMap["Código de Referência (SKU)"] || specsMap["Código SKU"] || ""
     ).trim();
     const careTipsVal = String(
       careTips || "Conservar na embalagem original fechada, em local seco, fresco e arejado, ao abrigo da luz solar direta."
     ).trim();
 
+    const pesoMedida = (
+      vtexSpecs["Peso Líquido / Volume"] ||
+      vtexSpecs["Peso / Volume"] ||
+      vtexSpecs["Dimensões / Medidas"] ||
+      specsMap["Peso Líquido / Volume"] ||
+      specsMap["Peso / Volume Líquido"] ||
+      specsMap["Dimensões / Medidas"] ||
+      "Padrão Oficial de Fábrica"
+    );
+    const qtdEmb = (
+      vtexSpecs["Apresentação / Quantidade"] ||
+      vtexSpecs["Quantidade por Embalagem"] ||
+      specsMap["Apresentação / Quantidade"] ||
+      specsMap["Conteúdo da Embalagem"] ||
+      "Embalagem Comercial"
+    );
+    const dimSummary = (pesoMedida !== qtdEmb) ? `${pesoMedida} • ${qtdEmb}` : pesoMedida;
+    const pillCode = skuCode ? `SKU ${skuCode}` : `Marca ${brandLabel}`;
+
+    if (idx === 0) {
+      const catVal = (
+        vtexSpecs["Categoria VTEX"] ||
+        specsMap["Departamento / Linha"] ||
+        specsMap["Categoria Técnica"] ||
+        "Confeitaria, Festas & Embalagens"
+      );
+      const usoVal = (
+        specsMap["Uso Recomendado"] ||
+        specsMap["Modo de Aplicação Técnica"] ||
+        vtexSpecs["Uso Recomendado"] ||
+        "Pronto para uso profissional e doméstico com padrão de fábrica."
+      );
+      return `<div class="brk-desc-media brk-media-card brk-infographic-card">
+        <div class="brk-infog-header">
+          <span class="brk-infog-head-left">${getSvgIcon('sparkle', themeColor, 14)} <span>APRESENTAÇÃO • FICHA COMERCIAL & ORIGEM</span></span>
+          <span class="brk-infog-head-pill">${pillCode}</span>
+        </div>
+        <div class="brk-infog-stage">
+          <div class="brk-infog-hero">
+            <div class="brk-infog-diagram">
+              <div class="brk-infog-svg-badge">
+                <svg width="38" height="38" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <rect x="6" y="8" width="36" height="32" rx="6" fill="${themeBg}" stroke="${themeColor}" stroke-width="2.5"/>
+                  <path d="M14 18H34M14 25H28M14 32H22" stroke="${themeColor}" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="brk-infog-hero-copy">
+                <span class="brk-infog-kicker">IDENTIFICAÇÃO OFICIAL DO ITEM</span>
+                <strong class="brk-infog-headline">Marca ${brandLabel} • ${pesoMedida}</strong>
+                <span class="brk-infog-subline">${qtdEmb} • ${pillCode}</span>
+              </div>
+            </div>
+          </div>
+          <div class="brk-infog-metrics">
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">${getSvgIcon('box', themeColor, 13)}</span>
+                <span class="brk-infog-metric-label">Apresentação Comercial & Embalagem</span>
+              </div>
+              <div class="brk-infog-metric-val">${dimSummary}</div>
+            </div>
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">${getSvgIcon('sparkle', themeColor, 13)}</span>
+                <span class="brk-infog-metric-label">Departamento & Linha Oficial</span>
+              </div>
+              <div class="brk-infog-metric-val">${catVal}</div>
+            </div>
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">${getSvgIcon('check', themeColor, 13)}</span>
+                <span class="brk-infog-metric-label">Aplicação & Indicação Principal</span>
+              </div>
+              <div class="brk-infog-metric-val">${usoVal}</div>
+            </div>
+          </div>
+        </div>
+        <div class="brk-media-infobar">
+          <span class="brk-media-info-left">${getSvgIcon('sparkle', themeColor, 14)} <span>Apresentação Comercial & Embalagem Original</span></span>
+          <span class="brk-media-info-pill">Curadoria Oficial</span>
+        </div>
+      </div>`;
+    }
+
     if (idx === 1) {
       const yieldVal = (
         yieldInfo.yield_estimate ||
         yieldInfo.dimensional_equiv ||
+        vtexSpecs["Rendimento Prático Estimado"] ||
         vtexSpecs["Rendimento Estimado"] ||
+        vtexSpecs["Equivalência Dimensional / Capacidade"] ||
         vtexSpecs["Equivalência Dimensional"] ||
+        specsMap["Rendimento Prático Estimado"] ||
         specsMap["Rendimento Estimado"] ||
+        specsMap["Equivalência Dimensional / Capacidade"] ||
         specsMap["Equivalência Dimensional"] ||
         yieldInfo.resumo_rendimento ||
         "Dimensionamento otimizado para padronização de receitas, montagem e controle exato de custo por unidade produzida."
       );
-      const pesoMedida = (
-        vtexSpecs["Peso / Volume"] ||
-        vtexSpecs["Dimensões / Medidas"] ||
-        specsMap["Peso / Volume Líquido"] ||
-        specsMap["Dimensões / Medidas"] ||
-        "Padrão Oficial de Fábrica"
+      const dimEquivExtra = (
+        yieldInfo.dimensional_equiv ||
+        vtexSpecs["Equivalência Dimensional / Capacidade"] ||
+        specsMap["Equivalência Dimensional / Capacidade"] ||
+        ""
       );
-      const qtdEmb = (
-        vtexSpecs["Quantidade por Embalagem"] ||
-        specsMap["Conteúdo da Embalagem"] ||
-        "Embalagem Comercial"
-      );
-      const dimSummary = (pesoMedida !== qtdEmb) ? `${pesoMedida} • ${qtdEmb}` : pesoMedida;
+      const supplyFormatVal = (dimEquivExtra && dimEquivExtra !== yieldVal && !dimSummary.includes(dimEquivExtra))
+        ? `${dimSummary} (${dimEquivExtra})`
+        : dimSummary;
+      const heroHeadline = (pesoMedida !== "Padrão Oficial de Fábrica") ? pesoMedida : dimSummary;
+      const heroSubline = (pesoMedida !== qtdEmb) ? `${qtdEmb} • Marca ${brandLabel}` : `Marca ${brandLabel} • Medição Padronizada`;
 
       let techParamLabel = "Parâmetro Técnico de Aplicação";
       let techParamVal = "";
       const candLabels = [
         "Classificação Técnica",
         "Necessita Temperagem?",
+        "Modo de Aplicação Técnica",
+        "Tipo de Inflagem Recomendada",
         "Inflagem / Aplicação",
         "Estabilidade Térmica",
         "Solubilidade / Base Técnica",
         "Material Principal",
-        "Categoria Técnica"
+        "Uso Recomendado",
+        "Sabor / Tonalidade",
+        "Sabor / Cor / Tonalidade",
+        "Categoria Técnica",
+        "Departamento / Linha",
+        "Categoria VTEX"
       ];
       for (let i = 0; i < candLabels.length; i++) {
         const cLbl = candLabels[i];
@@ -4177,15 +4317,34 @@ function getProductModeBHTML(liveP) {
         }
       }
       if (!techParamVal) {
-        techParamVal = (
-          yieldInfo.gas_and_arch ||
-          vtexSpecs["Inflagem / Aplicação"] ||
-          vtexSpecs["Material"] ||
-          "Desempenho calibrado para uso profissional e doméstico com alta estabilidade."
-        );
+        if (yieldInfo.gas_and_arch) {
+          techParamLabel = "Tipo de Inflagem Recomendada";
+          techParamVal = String(yieldInfo.gas_and_arch);
+        } else {
+          const vtexCandLabels = [
+            "Modo de Aplicação Técnica",
+            "Tipo de Inflagem Recomendada",
+            "Inflagem / Aplicação",
+            "Uso Recomendado",
+            "Sabor / Cor / Tonalidade",
+            "Sabor / Tonalidade",
+            "Material",
+            "Categoria VTEX"
+          ];
+          for (let i = 0; i < vtexCandLabels.length; i++) {
+            const vLbl = vtexCandLabels[i];
+            if (vtexSpecs[vLbl]) {
+              techParamLabel = vLbl;
+              techParamVal = String(vtexSpecs[vLbl]);
+              break;
+            }
+          }
+        }
+      }
+      if (!techParamVal) {
+        techParamVal = "Desempenho calibrado para uso profissional e doméstico com alta estabilidade.";
       }
 
-      const pillCode = skuCode ? `SKU ${skuCode}` : `Marca ${brandLabel}`;
       const thumbHtml = primaryImg ? `
             <div class="brk-infog-thumb brk-stage-loupe" ${mlTrackAttrsStr}>
               <img src="${primaryImg}" alt="${safeTitleAlt} - Zoom de Especificação" class="brk-infog-crop-zoom" loading="lazy" referrerpolicy="no-referrer" />
@@ -4210,8 +4369,8 @@ function getProductModeBHTML(liveP) {
               </div>
               <div class="brk-infog-hero-copy">
                 <span class="brk-infog-kicker">ESPECIFICAÇÃO COMERCIAL</span>
-                <strong class="brk-infog-headline">${dimSummary}</strong>
-                <span class="brk-infog-subline">Marca ${brandLabel} • Medição Padronizada</span>
+                <strong class="brk-infog-headline">${heroHeadline}</strong>
+                <span class="brk-infog-subline">${heroSubline}</span>
               </div>
             </div>
           </div>
@@ -4228,7 +4387,7 @@ function getProductModeBHTML(liveP) {
                 <span class="brk-infog-metric-icon">${getSvgIcon('box', themeColor, 13)}</span>
                 <span class="brk-infog-metric-label">Formato de Fornecimento & Medidas</span>
               </div>
-              <div class="brk-infog-metric-val">${dimSummary}</div>
+              <div class="brk-infog-metric-val">${supplyFormatVal}</div>
             </div>
             <div class="brk-infog-metric-card">
               <div class="brk-infog-metric-top">
@@ -4246,14 +4405,40 @@ function getProductModeBHTML(liveP) {
       </div>`;
     }
 
+    const allergenSpecKeys = [
+      "Informação de Alergênicos (ANVISA)",
+      "Alerta de Alergênicos & Lactose (ANVISA)",
+      "Alerta de Alergênicos & Glúten (ANVISA)",
+      "Segurança Alimentar & Alergênicos (ANVISA)",
+      "Orientação de Alergênicos (ANVISA)",
+      "Segurança & Grau Alimentício",
+      "Segurança & Certificação",
+      "Segurança & Conformidade",
+      "Segurança & Material"
+    ];
+    let matchedAllergenKey = "";
+    let matchedAllergenVal = "";
+    for (let i = 0; i < allergenSpecKeys.length; i++) {
+      const aKey = allergenSpecKeys[i];
+      if (specsMap[aKey]) {
+        matchedAllergenKey = aKey;
+        matchedAllergenVal = specsMap[aKey];
+        break;
+      }
+      if (vtexSpecs[aKey]) {
+        matchedAllergenKey = aKey;
+        matchedAllergenVal = String(vtexSpecs[aKey]);
+        break;
+      }
+    }
+
     const allergenLabel = String(
-      allergenInfo.label || specsMap["Segurança & Material"] || "Orientação de Alergênicos & Segurança (ANVISA)"
+      allergenInfo.label || matchedAllergenKey || "Orientação de Alergênicos & Segurança (ANVISA)"
     ).trim();
     const allergenVal = String(
       allergenInfo.value ||
       allergenInfo.alerta_alergenicos ||
-      specsMap["Orientação de Alergênicos (ANVISA)"] ||
-      specsMap["Segurança & Material"] ||
+      matchedAllergenVal ||
       "Consulte sempre a listagem oficial de ingredientes, tabela nutricional e alérgenos impressa pelo fabricante no rótulo da embalagem original."
     ).trim();
     const isAnvisaFood = (
@@ -4511,9 +4696,8 @@ function getProductModeBHTML(liveP) {
   }
 
   // 5. Estrutura HTML Completa com CSS Embutido Responsivo
-  const isLojaDoce = isLojaDoceProduct(liveP);
-  const trustTitle1 = isLojaDoce ? "Procedência Oficial Garantida" : "Qualidade Oficial BRK";
-  const trustDesc1 = isLojaDoce ? "Lotes originais com controle rigoroso" : "Matérias-primas nobres testadas";
+  const trustTitle1 = isLojaDoce ? "Procedência 100% Original" : "Qualidade Oficial BRK";
+  const trustDesc1 = isLojaDoce ? `Curadoria Oficial • Marca ${brandName}` : "Matérias-primas nobres testadas";
   let rawOutHtml = `${buildClientTrackingMarker(liveP.master_sku || liveP.sku || liveP.id, archetypeId)}
 <!-- BRK GROUP - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL SHOPIFY) -->
 <div class="brk-desc-wrapper">
@@ -5496,7 +5680,7 @@ ${schemaJsonLd}`;
     rawOutHtml = rawOutHtml
       .replace(/\s*\.brk-desc-block\.brk-desc-block-text-only\s*\{[^}]*\}/g, "")
       .replace(/<!--\s*BRK-MODO-B/g, "<!-- VTEX-MODO-B")
-      .replace(/<!--\s*BRK GROUP[^>]*-->/g, "<!-- PADRAO OFICIAL VTEX - DESCRICAO VERTICALIZADA EM 3 ATOS -->")
+      .replace(/<!--\s*BRK GROUP[^>]*-->/g, "<!-- DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL VTEX) -->")
       .replace(/brk-/g, "vtex-")
       .replace(/brk360_/g, "vtex360_")
       .replace(/\b(?:BRK|Loja\s+Doce(?:\s+Import)?)\b/gi, "");

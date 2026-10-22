@@ -2024,7 +2024,9 @@ class HTMLBuilder:
         sku_code = str(
             enriched_data.get("sku")
             or enriched_data.get("master_sku")
+            or vtex_specs.get("Código de Referência (SKU)")
             or vtex_specs.get("Código SKU")
+            or specs_map.get("Código de Referência (SKU)")
             or specs_map.get("Código SKU")
             or ""
         ).strip()
@@ -2033,55 +2035,162 @@ class HTMLBuilder:
             or "Conservar na embalagem original fechada, em local seco, fresco e arejado, ao abrigo da luz solar direta."
         ).strip()
 
+        peso_medida = (
+            vtex_specs.get("Peso Líquido / Volume")
+            or vtex_specs.get("Peso / Volume")
+            or vtex_specs.get("Dimensões / Medidas")
+            or specs_map.get("Peso Líquido / Volume")
+            or specs_map.get("Peso / Volume Líquido")
+            or specs_map.get("Dimensões / Medidas")
+            or "Padrão Oficial de Fábrica"
+        )
+        qtd_emb = (
+            vtex_specs.get("Apresentação / Quantidade")
+            or vtex_specs.get("Quantidade por Embalagem")
+            or specs_map.get("Apresentação / Quantidade")
+            or specs_map.get("Conteúdo da Embalagem")
+            or "Embalagem Comercial"
+        )
+        dim_summary = f"{peso_medida} • {qtd_emb}" if peso_medida != qtd_emb else peso_medida
+        pill_code = f"SKU {sku_code}" if sku_code else f"Marca {brand_name}"
+
+        if idx == 0:
+            cat_val = (
+                vtex_specs.get("Categoria VTEX")
+                or specs_map.get("Departamento / Linha")
+                or specs_map.get("Categoria Técnica")
+                or "Confeitaria, Festas & Embalagens"
+            )
+            uso_val = (
+                specs_map.get("Uso Recomendado")
+                or specs_map.get("Modo de Aplicação Técnica")
+                or vtex_specs.get("Uso Recomendado")
+                or "Pronto para uso profissional e doméstico com padrão de fábrica."
+            )
+            return f"""<div class="brk-desc-media brk-media-card brk-infographic-card">
+        <div class="brk-infog-header">
+          <span class="brk-infog-head-left">{get_svg_icon('sparkle', color=theme_color, size=14)} <span>APRESENTAÇÃO • FICHA COMERCIAL & ORIGEM</span></span>
+          <span class="brk-infog-head-pill">{pill_code}</span>
+        </div>
+        <div class="brk-infog-stage">
+          <div class="brk-infog-hero">
+            <div class="brk-infog-diagram">
+              <div class="brk-infog-svg-badge">
+                <svg width="38" height="38" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <rect x="6" y="8" width="36" height="32" rx="6" fill="{theme_bg}" stroke="{theme_color}" stroke-width="2.5"/>
+                  <path d="M14 18H34M14 25H28M14 32H22" stroke="{theme_color}" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="brk-infog-hero-copy">
+                <span class="brk-infog-kicker">IDENTIFICAÇÃO OFICIAL DO ITEM</span>
+                <strong class="brk-infog-headline">Marca {brand_name} • {peso_medida}</strong>
+                <span class="brk-infog-subline">{qtd_emb} • {pill_code}</span>
+              </div>
+            </div>
+          </div>
+          <div class="brk-infog-metrics">
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">{get_svg_icon('box', color=theme_color, size=13)}</span>
+                <span class="brk-infog-metric-label">Apresentação Comercial & Embalagem</span>
+              </div>
+              <div class="brk-infog-metric-val">{dim_summary}</div>
+            </div>
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">{get_svg_icon('sparkle', color=theme_color, size=13)}</span>
+                <span class="brk-infog-metric-label">Departamento & Linha Oficial</span>
+              </div>
+              <div class="brk-infog-metric-val">{cat_val}</div>
+            </div>
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">{get_svg_icon('check', color=theme_color, size=13)}</span>
+                <span class="brk-infog-metric-label">Aplicação & Indicação Principal</span>
+              </div>
+              <div class="brk-infog-metric-val">{uso_val}</div>
+            </div>
+          </div>
+        </div>
+        <div class="brk-media-infobar">
+          <span class="brk-media-info-left">{get_svg_icon('sparkle', color=theme_color, size=14)} <span>Apresentação Comercial & Embalagem Original</span></span>
+          <span class="brk-media-info-pill">Curadoria Oficial</span>
+        </div>
+      </div>"""
+
         if idx == 1:
             yield_val = (
                 yield_info.get("yield_estimate")
                 or yield_info.get("dimensional_equiv")
+                or vtex_specs.get("Rendimento Prático Estimado")
                 or vtex_specs.get("Rendimento Estimado")
+                or vtex_specs.get("Equivalência Dimensional / Capacidade")
                 or vtex_specs.get("Equivalência Dimensional")
+                or specs_map.get("Rendimento Prático Estimado")
                 or specs_map.get("Rendimento Estimado")
+                or specs_map.get("Equivalência Dimensional / Capacidade")
                 or specs_map.get("Equivalência Dimensional")
                 or yield_info.get("resumo_rendimento")
                 or "Dimensionamento otimizado para padronização de receitas, montagem e controle exato de custo por unidade produzida."
             )
-            peso_medida = (
-                vtex_specs.get("Peso / Volume")
-                or vtex_specs.get("Dimensões / Medidas")
-                or specs_map.get("Peso / Volume Líquido")
-                or specs_map.get("Dimensões / Medidas")
-                or "Padrão Oficial de Fábrica"
+            dim_equiv_extra = (
+                yield_info.get("dimensional_equiv")
+                or vtex_specs.get("Equivalência Dimensional / Capacidade")
+                or specs_map.get("Equivalência Dimensional / Capacidade")
+                or ""
             )
-            qtd_emb = (
-                vtex_specs.get("Quantidade por Embalagem")
-                or specs_map.get("Conteúdo da Embalagem")
-                or "Embalagem Comercial"
-            )
-            dim_summary = f"{peso_medida} • {qtd_emb}" if peso_medida != qtd_emb else peso_medida
+            if dim_equiv_extra and dim_equiv_extra != yield_val and dim_equiv_extra not in dim_summary:
+                supply_format_val = f"{dim_summary} ({dim_equiv_extra})"
+            else:
+                supply_format_val = dim_summary
+
+            hero_headline = peso_medida if peso_medida != "Padrão Oficial de Fábrica" else dim_summary
+            hero_subline = f"{qtd_emb} • Marca {brand_name}" if peso_medida != qtd_emb else f"Marca {brand_name} • Medição Padronizada"
 
             tech_param_label = "Parâmetro Técnico de Aplicação"
             tech_param_val = ""
             for cand_lbl in (
                 "Classificação Técnica",
                 "Necessita Temperagem?",
+                "Modo de Aplicação Técnica",
+                "Tipo de Inflagem Recomendada",
                 "Inflagem / Aplicação",
                 "Estabilidade Térmica",
                 "Solubilidade / Base Técnica",
                 "Material Principal",
+                "Uso Recomendado",
+                "Sabor / Tonalidade",
+                "Sabor / Cor / Tonalidade",
                 "Categoria Técnica",
+                "Departamento / Linha",
+                "Categoria VTEX",
             ):
                 if specs_map.get(cand_lbl):
                     tech_param_label = cand_lbl
                     tech_param_val = specs_map[cand_lbl]
                     break
             if not tech_param_val:
-                tech_param_val = (
-                    yield_info.get("gas_and_arch")
-                    or vtex_specs.get("Inflagem / Aplicação")
-                    or vtex_specs.get("Material")
-                    or "Desempenho calibrado para uso profissional e doméstico com alta estabilidade."
-                )
+                if yield_info.get("gas_and_arch"):
+                    tech_param_label = "Tipo de Inflagem Recomendada"
+                    tech_param_val = str(yield_info["gas_and_arch"])
+                else:
+                    for v_lbl in (
+                        "Modo de Aplicação Técnica",
+                        "Tipo de Inflagem Recomendada",
+                        "Inflagem / Aplicação",
+                        "Uso Recomendado",
+                        "Sabor / Cor / Tonalidade",
+                        "Sabor / Tonalidade",
+                        "Material",
+                        "Categoria VTEX",
+                    ):
+                        if vtex_specs.get(v_lbl):
+                            tech_param_label = v_lbl
+                            tech_param_val = str(vtex_specs[v_lbl])
+                            break
+            if not tech_param_val:
+                tech_param_val = "Desempenho calibrado para uso profissional e doméstico com alta estabilidade."
 
-            pill_code = f"SKU {sku_code}" if sku_code else f"Marca {brand_name}"
             thumb_html = ""
             if primary_img:
                 thumb_html = f"""
@@ -2108,8 +2217,8 @@ class HTMLBuilder:
               </div>
               <div class="brk-infog-hero-copy">
                 <span class="brk-infog-kicker">ESPECIFICAÇÃO COMERCIAL</span>
-                <strong class="brk-infog-headline">{dim_summary}</strong>
-                <span class="brk-infog-subline">Marca {brand_name} • Medição Padronizada</span>
+                <strong class="brk-infog-headline">{hero_headline}</strong>
+                <span class="brk-infog-subline">{hero_subline}</span>
               </div>
             </div>
           </div>
@@ -2126,7 +2235,7 @@ class HTMLBuilder:
                 <span class="brk-infog-metric-icon">{get_svg_icon('box', color=theme_color, size=13)}</span>
                 <span class="brk-infog-metric-label">Formato de Fornecimento & Medidas</span>
               </div>
-              <div class="brk-infog-metric-val">{dim_summary}</div>
+              <div class="brk-infog-metric-val">{supply_format_val}</div>
             </div>
             <div class="brk-infog-metric-card">
               <div class="brk-infog-metric-top">
@@ -2143,16 +2252,38 @@ class HTMLBuilder:
         </div>
       </div>"""
 
+        allergen_spec_keys = (
+            "Informação de Alergênicos (ANVISA)",
+            "Alerta de Alergênicos & Lactose (ANVISA)",
+            "Alerta de Alergênicos & Glúten (ANVISA)",
+            "Segurança Alimentar & Alergênicos (ANVISA)",
+            "Orientação de Alergênicos (ANVISA)",
+            "Segurança & Grau Alimentício",
+            "Segurança & Certificação",
+            "Segurança & Conformidade",
+            "Segurança & Material",
+        )
+        matched_allergen_key = ""
+        matched_allergen_val = ""
+        for a_key in allergen_spec_keys:
+            if specs_map.get(a_key):
+                matched_allergen_key = a_key
+                matched_allergen_val = specs_map[a_key]
+                break
+            if vtex_specs.get(a_key):
+                matched_allergen_key = a_key
+                matched_allergen_val = str(vtex_specs[a_key])
+                break
+
         allergen_label = str(
             allergen_info.get("label")
-            or specs_map.get("Segurança & Material")
+            or matched_allergen_key
             or "Orientação de Alergênicos & Segurança (ANVISA)"
         ).strip()
         allergen_val = str(
             allergen_info.get("value")
             or allergen_info.get("alerta_alergenicos")
-            or specs_map.get("Orientação de Alergênicos (ANVISA)")
-            or specs_map.get("Segurança & Material")
+            or matched_allergen_val
             or "Consulte sempre a listagem oficial de ingredientes, tabela nutricional e alérgenos impressa pelo fabricante no rótulo da embalagem original."
         ).strip()
         is_anvisa_food = (
@@ -2269,7 +2400,13 @@ class HTMLBuilder:
                 blocks = acts
 
         specs = enriched_data.get("specs", [])
-        care_tips = enriched_data.get("care_tips", "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar).")
+        is_ld_arch_care = str(archetype_id or "").startswith("ld_") or enriched_data.get("store_key") == "loja_doce"
+        default_care_tips = (
+            "Conservar na embalagem original fechada, em local seco, fresco e arejado, ao abrigo da luz solar direta."
+            if is_ld_arch_care
+            else "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar)."
+        )
+        care_tips = enriched_data.get("care_tips") or default_care_tips
 
         # Trava Estrita Anti-Zíper para Linhas Fusion, Hybrid, Gola Careca e Camisas de Botão
         t_low = (formatted_title or "").lower()
@@ -3577,7 +3714,12 @@ class HTMLBuilder:
                 blocks = acts
 
         specs = enriched_data.get("specs", [])
-        care_tips = enriched_data.get("care_tips", "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar).")
+        default_md_care = (
+            "Conservar na embalagem original fechada, em local seco, fresco e arejado, ao abrigo da luz solar direta."
+            if is_ld_md
+            else "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar)."
+        )
+        care_tips = enriched_data.get("care_tips") or default_md_care
 
         md_parts = []
         md_parts.append(f"# {formatted_title}\n")
