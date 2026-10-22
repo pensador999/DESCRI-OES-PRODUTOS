@@ -2136,6 +2136,239 @@ if (!brkHtml.includes('brk-desc-wrapper') || brkHtml.includes('vtex-infographic-
         res = subprocess.run(["node", "-e", js_script], cwd=BASE_DIR, capture_output=True, text=True, encoding="utf-8")
         self.assertEqual(res.returncode, 0, f"Falha na execução JS client-side: {res.stderr}")
 
+    def test_lojadoce_casestudy_tab_content_and_session_isolation(self):
+        """Valida a aba 📚 Estudo de Caso (btn-tab-casestudy / section-casestudy), conteúdo estratégico completo, zero menção a BRK e isolamento estrito na sessão fgh369."""
+        import shutil
+        import subprocess
+
+        idx_path = os.path.join(BASE_DIR, "index.html")
+        build_path = os.path.join(BASE_DIR, "build_modular_dist.py")
+        app_js_path = os.path.join(BASE_DIR, "js", "app.js")
+
+        with open(idx_path, "r", encoding="utf-8") as f_idx:
+            idx_html = f_idx.read()
+        with open(build_path, "r", encoding="utf-8") as f_bld:
+            build_py = f_bld.read()
+        with open(app_js_path, "r", encoding="utf-8") as f_app:
+            app_js = f_app.read()
+
+        # 1. Presença estrutural e paridade entre index.html e build_modular_dist.py
+        required_markers = [
+            'id="btn-tab-casestudy"',
+            "switchMainTab('tab-casestudy')",
+            "📚 Estudo de Caso",
+            'id="section-casestudy"',
+            "18.828",
+            "8.559",
+            "45,5%",
+            "10.269",
+            "54,5%",
+            "9.728",
+            "2.396",
+            "1.803",
+            "1.744",
+            "1.715",
+            "599",
+            "503",
+            "339",
+            "VTEX IO",
+            "99,2%",
+            "55,2%",
+            "CHOC COB CONF BARRA MEIO AMARGO 1,010KG",
+            "BISC WAFFER KIT KAT",
+            "BALAO LATEX LISO RED N.09 C/50",
+            "98,8%",
+            "MetaTagDescription",
+            "14,2%",
+            "LEITE COCO COQUIL 500ML UN",
+            "Chantilly Amélia Mix Supreme 1l UN",
+            "82,8%",
+            "SpecificationFilters",
+            "ANVISA",
+            "RDC",
+            "b2b_economics",
+            "2.853",
+            "6.276",
+        ]
+        for label, src in (("index.html", idx_html), ("build_modular_dist.py", build_py)):
+            for marker in required_markers:
+                self.assertIn(marker, src, f"Marcador obrigatório '{marker}' ausente em {label}")
+
+            # Extrair apenas o bloco <main id="section-casestudy">...</main> e garantir ZERO vazamento de BRK / Loja Doce / Shopify
+            m_sec = re.search(r'<main id="section-casestudy"[^>]*>(.*?)</main>', src, flags=re.S)
+            self.assertIsNotNone(m_sec, f"Seção #section-casestudy não encontrada em {label}")
+            sec_content = m_sec.group(1)
+            self.assertIsNone(
+                re.search(r"\b(?:brk|lojadoce|loja\s+doce|shopify)\b", sec_content, flags=re.I),
+                f"Vazamento de marca proibida dentro de #section-casestudy em {label}",
+            )
+
+        # 2. Funções em js/app.js e flex-wrap na barra de 5 abas
+        self.assertIn('tabId === "tab-casestudy"', app_js)
+        self.assertIn("function renderCaseStudyView(", app_js)
+        self.assertIn('btn-tab-casestudy', app_js)
+        self.assertIn('section-casestudy', app_js)
+        self.assertIn("resumo_economia_b2b", app_js)
+        self.assertIn("flex flex-wrap items-center gap-1 bg-slate-900/90", idx_html)
+        self.assertIn("flex flex-wrap items-center gap-1 bg-slate-900/90", build_py)
+
+        # 3. Teste de execução real em Node.js VM para o isolamento de sessão (fgh369 vs rex123, cards B2B e logoutBrkPortal)
+        if not shutil.which("node"):
+            return
+        js_isolation_test = """
+const fs = require('fs'), vm = require('vm');
+const appCode = fs.readFileSync('js/app.js', 'utf8');
+
+function makeClassList(initial = []) {
+  const set = new Set(initial);
+  return {
+    add: (...cls) => cls.forEach(c => set.add(c)),
+    remove: (...cls) => cls.forEach(c => set.delete(c)),
+    toggle: (c, force) => {
+      if (force === undefined) {
+        if (set.has(c)) { set.delete(c); return false; }
+        set.add(c); return true;
+      }
+      if (force) set.add(c); else set.delete(c);
+      return !!force;
+    },
+    contains: (c) => set.has(c)
+  };
+}
+
+const elements = {};
+function getEl(id) {
+  if (!elements[id]) {
+    const initClasses = (id === 'btn-tab-casestudy' || id === 'section-casestudy' || id === 'pill-store-lojadoce') ? ['hidden'] : [];
+    const elObj = {
+      id,
+      style: { display: (id === 'btn-tab-casestudy' || id === 'section-casestudy') ? 'none' : '' },
+      classList: makeClassList(initClasses),
+      children: [],
+      _html: '',
+      innerText: '',
+      value: '',
+      dataset: {},
+      appendChild: (ch) => { elObj.children.push(ch); },
+      querySelector: () => null,
+      querySelectorAll: () => []
+    };
+    Object.defineProperty(elObj, 'innerHTML', {
+      get() { return elObj._html; },
+      set(v) { elObj._html = v; if (v === '') elObj.children = []; }
+    });
+    elements[id] = elObj;
+  }
+  return elements[id];
+}
+
+['section-catalog', 'section-mass', 'section-moldes', 'section-analytics', 'section-casestudy',
+ 'btn-tab-catalog', 'btn-tab-mass', 'btn-tab-moldes', 'btn-tab-analytics', 'btn-tab-casestudy',
+ 'pill-store-fishing', 'pill-store-agro', 'pill-store-motors', 'pill-store-lojadoce',
+ 'casestudy-live-examples', 'products-grid', 'categories-rail', 'empty-state', 'search-input', 'mass-table-body'].forEach(getEl);
+
+const storeMap = {};
+const ldData = JSON.parse(fs.readFileSync('data/stores/loja_doce.json', 'utf8'));
+let modalOpenedCount = 0;
+
+const sandbox = {
+  window: {},
+  document: {
+    title: '',
+    body: { children: [], appendChild: () => {} },
+    addEventListener: () => {},
+    getElementById: (id) => getEl(id),
+    querySelector: () => null,
+    querySelectorAll: (sel) => {
+      if (sel === '.main-tab') {
+        return ['btn-tab-catalog', 'btn-tab-mass', 'btn-tab-moldes', 'btn-tab-analytics', 'btn-tab-casestudy'].map(getEl);
+      }
+      return [];
+    },
+    createElement: () => ({ style: {}, classList: makeClassList(), appendChild: () => {}, innerHTML: '' })
+  },
+  localStorage: {
+    getItem: (k) => storeMap[k] || null,
+    setItem: (k, v) => { storeMap[k] = String(v); },
+    removeItem: (k) => { delete storeMap[k]; }
+  },
+  StoreLoader: {
+    loadStore: async (k) => k === 'loja_doce' ? ldData : { products: [], categories: [] }
+  },
+  getSvgIcon: () => '<svg></svg>',
+  openProductModal: () => { modalOpenedCount++; },
+  switchModalMode: () => {},
+  fetch: async () => ({ ok: false }),
+  setTimeout: () => 1,
+  clearTimeout: () => {},
+  setInterval: () => 1,
+  clearInterval: () => {},
+  console
+};
+sandbox.window = sandbox;
+vm.createContext(sandbox);
+vm.runInContext(appCode, sandbox);
+
+(async () => {
+  // Caso A: Sessão BRK (rex123) -> Estudo de Caso deve estar 100% oculto e bloqueado (inclusive helpers)
+  sandbox.applySessionIsolation('brk');
+  if (!getEl('btn-tab-casestudy').classList.contains('hidden') || getEl('btn-tab-casestudy').style.display !== 'none') {
+    throw new Error('btn-tab-casestudy should be hidden in brk session');
+  }
+  if (!getEl('section-casestudy').classList.contains('hidden') || getEl('section-casestudy').style.display !== 'none') {
+    throw new Error('section-casestudy should be hidden in brk session');
+  }
+  sandbox.switchMainTab('tab-casestudy');
+  if (!getEl('section-casestudy').classList.contains('hidden')) {
+    throw new Error('switchMainTab(tab-casestudy) must be blocked when in brk session');
+  }
+  await sandbox.openCaseStudySampleBySku('619098', 'diff');
+  await sandbox.openCaseStudySampleByCategory('Confeitaria & Panificação', 'diff');
+  if (modalOpenedCount !== 0) {
+    throw new Error('openCaseStudySample* must not open modal when in brk session');
+  }
+
+  // Caso B: Sessão Loja Doce (fgh369) -> Botão visível, e ao clicar abre a seção Estudo de Caso e renderiza 4 cards com resumo_economia_b2b
+  sandbox.applySessionIsolation('loja_doce');
+  if (getEl('btn-tab-casestudy').classList.contains('hidden') || getEl('btn-tab-casestudy').style.display === 'none') {
+    throw new Error('btn-tab-casestudy should be visible in loja_doce session');
+  }
+  if (!getEl('section-casestudy').classList.contains('hidden')) {
+    throw new Error('section-casestudy should remain hidden until tab is clicked');
+  }
+
+  sandbox.switchMainTab('tab-casestudy');
+  if (getEl('section-casestudy').classList.contains('hidden') || getEl('section-casestudy').style.display === 'none') {
+    throw new Error('section-casestudy should be visible after switchMainTab(tab-casestudy) in loja_doce session');
+  }
+  await sandbox.renderCaseStudyView();
+  const renderedCards = getEl('casestudy-live-examples').children;
+  if (renderedCards.length !== 4) {
+    throw new Error('Expected 4 live example cards in #casestudy-live-examples, got ' + renderedCards.length);
+  }
+  if (!renderedCards[0].innerHTML.includes('a cada 100') && !renderedCards[0].innerHTML.includes('sai a apenas')) {
+    throw new Error('Card 1 B2B summary should include full B2B unit/100g economics, got: ' + renderedCards[0].innerHTML);
+  }
+  if (!/bal[aã]o/i.test(renderedCards[3].innerHTML)) {
+    throw new Error('Card 4 should select a Balao item from Artigos para Festas & Baloes');
+  }
+
+  // Caso C: Trocar Acesso (logoutBrkPortal) enquanto na aba tab-casestudy -> deve voltar para tab-catalog e ocultar tudo
+  sandbox.logoutBrkPortal();
+  if (!getEl('btn-tab-casestudy').classList.contains('hidden') || getEl('btn-tab-casestudy').style.display !== 'none') {
+    throw new Error('btn-tab-casestudy must be hidden after logoutBrkPortal');
+  }
+  if (!getEl('section-casestudy').classList.contains('hidden') || getEl('section-casestudy').style.display !== 'none') {
+    throw new Error('section-casestudy must be hidden after logoutBrkPortal');
+  }
+  if (getEl('section-catalog').classList.contains('hidden')) {
+    throw new Error('logoutBrkPortal while on tab-casestudy must return to tab-catalog');
+  }
+})().catch(e => { console.error(e); process.exit(1); });
+"""
+        res_iso = subprocess.run(["node", "-e", js_isolation_test], cwd=BASE_DIR, capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(res_iso.returncode, 0, f"Falha no teste JS de isolamento da aba Estudo de Caso: {res_iso.stderr}")
+
 
 def run_tests():
     suite = unittest.TestSuite()

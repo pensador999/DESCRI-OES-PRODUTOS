@@ -42,9 +42,9 @@
           </div>
         </div>
 
-        <!-- Abas de Navegação Principal (4 ABAS) + Trocar Acesso -->
-        <div class="flex items-center gap-2">
-          <div class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-xs">
+        <!-- Abas de Navegação Principal + Trocar Acesso -->
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="flex flex-wrap items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-xs">
             <button onclick="switchMainTab('tab-catalog')" id="btn-tab-catalog" class="main-tab active px-3 py-1.5 rounded-lg font-bold transition-all bg-slate-800 text-white flex items-center gap-1.5">
               <span>🛍️ Catálogo & Diagnóstico</span>
             </button>
@@ -58,6 +58,10 @@
             <button onclick="switchMainTab('tab-analytics')" id="btn-tab-analytics" class="main-tab px-3 py-1.5 rounded-lg font-bold transition-all text-slate-400 hover:text-white flex items-center gap-1.5">
               <span>📊 Análises & Monitoramento</span>
               <span class="bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded-full text-[10px] font-extrabold">08:00</span>
+            </button>
+            <button onclick="switchMainTab('tab-casestudy')" id="btn-tab-casestudy" class="main-tab hidden px-3 py-1.5 rounded-lg font-bold transition-all text-slate-400 hover:text-white flex items-center gap-1.5" style="display: none;">
+              <span>📚 Estudo de Caso</span>
+              <span class="bg-pink-500/20 text-pink-300 px-1.5 py-0.5 rounded-full text-[10px] font-extrabold">Guia VTEX</span>
             </button>
           </div>
           <button onclick="logoutBrkPortal()" title="Trocar credencial de acesso" class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 font-bold text-[11px] transition-all flex items-center gap-1">
@@ -419,6 +423,620 @@
         </table>
       </div>
     </div>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- SEÇÃO 5: ABA ESTUDO DE CASO (EXCLUSIVA CATÁLOGO VTEX)    -->
+  <!-- ======================================================== -->
+  <main id="section-casestudy" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8" style="display: none;">
+
+    <!-- HERO BANNER & NAVEGAÇÃO RÁPIDA DE ESTUDO -->
+    <div class="bg-gradient-to-r from-slate-950 via-pink-950 to-indigo-950 text-white p-7 rounded-3xl border border-pink-500/30 shadow-2xl space-y-5">
+      <div class="flex flex-wrap items-start justify-between gap-6">
+        <div class="space-y-2 max-w-3xl">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-[11px] font-extrabold uppercase tracking-wider border border-pink-400/30">
+              📚 Material Confidencial de Estudo &amp; Reunião Executiva
+            </span>
+            <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-mono font-bold border border-emerald-400/30">
+              Base Auditada: 18.828 SKUs VTEX (400 Amostrados em Profundidade)
+            </span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold font-heading tracking-tight">
+            Diagnóstico Estratégico 360°: Catálogo VTEX de Confeitaria, Festas &amp; Embalagens
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Guia completo de estudo estruturado com números reais extraídos da API <strong>VTEX Intelligent Search</strong>: radiografia de estoque e departamentos, pontos fortes atuais da operação, os <strong>6 gargalos críticos</strong> que drenam tráfego orgânico e conversão todos os dias, comparativo <strong>Antes vs. Depois</strong> das nossas 6 frentes de verticalização e roteiro prático de argumentação comercial.
+          </p>
+        </div>
+
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 min-w-[240px] space-y-2">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-pink-400 block">Resumo Executivo da Base</span>
+          <div class="flex justify-between text-xs"><span class="text-slate-400">Índice Total VTEX:</span><strong class="text-white font-mono">18.828 SKUs</strong></div>
+          <div class="flex justify-between text-xs"><span class="text-slate-400">Estoque Ativo Hoje:</span><strong class="text-emerald-400 font-mono">8.559 (45,5%)</strong></div>
+          <div class="flex justify-between text-xs"><span class="text-slate-400">Esgotados (Avise-me):</span><strong class="text-amber-400 font-mono">10.269 (54,5%)</strong></div>
+          <div class="flex justify-between text-xs"><span class="text-slate-400">MetaSEO Corrompida:</span><strong class="text-red-400 font-mono">98,8% (395/400)</strong></div>
+          <div class="flex justify-between text-xs"><span class="text-slate-400">Com Apenas 1 Foto:</span><strong class="text-amber-300 font-mono">82,8% (331/400)</strong></div>
+        </div>
+      </div>
+
+      <!-- Pílulas de Salto Rápido (Índice de Estudo) -->
+      <div class="pt-3 border-t border-white/10 flex flex-wrap items-center gap-2 text-xs">
+        <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mr-1">Ir para seção:</span>
+        <a href="#cs-sec-radiografia" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-pink-600 text-white font-bold transition-all">1. Radiografia (18.828 SKUs)</a>
+        <a href="#cs-sec-fortes" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-emerald-600 text-white font-bold transition-all">2. Pontos Fortes</a>
+        <a href="#cs-sec-gargalos" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-red-600 text-white font-bold transition-all">3. Os 6 Gargalos Críticos</a>
+        <a href="#cs-sec-solucoes" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-indigo-600 text-white font-bold transition-all">4. Antes vs. Depois (6 Soluções)</a>
+        <a href="#cs-sec-reuniao" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-amber-600 text-white font-bold transition-all">5. ROI Operacional &amp; FAQ</a>
+        <a href="#cs-sec-simulador" class="px-3 py-1.5 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-extrabold transition-all shadow-sm">⚡ Exemplos Reais Interativos</a>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 1. VISÃO GERAL & RADIOGRAFIA REAL DO CATÁLOGO VTEX       -->
+    <!-- ======================================================== -->
+    <section id="cs-sec-radiografia" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+        <div>
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-pink-600 block">Módulo de Estudo 01</span>
+          <h3 class="text-xl font-extrabold text-slate-900 font-heading">1. Visão Geral &amp; Radiografia Real do Catálogo VTEX (18.828 SKUs)</h3>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">Fonte: API Pública VTEX Intelligent Search</span>
+      </div>
+
+      <!-- 3 KPI Cards de Estoque -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div class="p-5 rounded-2xl bg-slate-900 text-white border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-400 uppercase">Total Publicado no Índice VTEX</span>
+            <span class="text-lg">📦</span>
+          </div>
+          <div class="text-3xl font-extrabold font-heading text-white">18.828 <span class="text-sm font-normal text-slate-400">SKUs</span></div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Todos os 18.828 produtos estão com status ativo de publicação no buscador e sitemap da VTEX, sendo rastreados diariamente pelo Googlebot.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold text-emerald-800 uppercase">Com Estoque Disponível Hoje</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900 text-[11px] font-extrabold">45,5% da Base</span>
+          </div>
+          <div class="text-3xl font-extrabold font-heading text-emerald-700">8.559 <span class="text-sm font-normal text-emerald-600">SKUs prontos p/ venda</span></div>
+          <p class="text-xs text-emerald-900 leading-relaxed">
+            São os itens que geram caixa imediato hoje. Representam a <strong>Prioridade Zero (Fase 1)</strong> de implantação porque cada melhoria de conversão impacta o faturamento no mesmo dia.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-amber-50 border border-amber-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold text-amber-800 uppercase">Esgotados Indexados ("Avise-me")</span>
+            <span class="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[11px] font-extrabold">54,5% da Base</span>
+          </div>
+          <div class="text-3xl font-extrabold font-heading text-amber-700">10.269 <span class="text-sm font-normal text-amber-600">SKUs sem saldo</span></div>
+          <p class="text-xs text-amber-900 leading-relaxed">
+            Mais da metade do site indexado no Google está sem estoque disponível. Sem descrição rica e sem SEO limpo, desperdiçam <em>Crawl Budget</em> e geram rejeição (bounce rate).
+          </p>
+        </div>
+      </div>
+
+      <!-- Distribuição por Departamento VTEX -->
+      <div class="space-y-3">
+        <h4 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Distribuição Real por Departamento na Árvore VTEX (8 Departamentos)</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+          <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-extrabold text-slate-900">🎈 Artigos para Festas</span>
+              <span class="font-mono font-extrabold text-pink-600">9.728 SKUs</span>
+            </div>
+            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-1"><div class="bg-pink-600 h-full" style="width: 51.7%"></div></div>
+            <span class="text-[11px] text-slate-500">51,7% do catálogo • Balões, velas, adereços, decoração temática</span>
+          </div>
+
+          <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-extrabold text-slate-900">🎂 Confeitaria</span>
+              <span class="font-mono font-extrabold text-pink-600">2.396 SKUs</span>
+            </div>
+            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-1"><div class="bg-pink-600 h-full" style="width: 12.7%"></div></div>
+            <span class="text-[11px] text-slate-500">12,7% do catálogo • Coberturas, chocolates, corantes, formas, bicos</span>
+          </div>
+
+          <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-extrabold text-slate-900">✏️ Papelaria</span>
+              <span class="font-mono font-extrabold text-indigo-600">1.803 SKUs</span>
+            </div>
+            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-1"><div class="bg-indigo-600 h-full" style="width: 9.6%"></div></div>
+            <span class="text-[11px] text-slate-500">9,6% do catálogo • Fitas, EVA, colas, tesouras, escolar e artesanato</span>
+          </div>
+
+          <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-extrabold text-slate-900">🥡 Embalagens &amp; Descartáveis</span>
+              <span class="font-mono font-extrabold text-blue-600">1.744 SKUs</span>
+            </div>
+            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-1"><div class="bg-blue-600 h-full" style="width: 9.3%"></div></div>
+            <span class="text-[11px] text-slate-500">9,3% do catálogo • Potes, bandejas, sacos celofane, copos, pratos</span>
+          </div>
+
+          <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-extrabold text-slate-900">🍫 Bomboniere</span>
+              <span class="font-mono font-extrabold text-amber-600">1.715 SKUs</span>
+            </div>
+            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-1"><div class="bg-amber-600 h-full" style="width: 9.1%"></div></div>
+            <span class="text-[11px] text-slate-500">9,1% do catálogo • Balas, gomas, marshmallows, chocolates, biscoitos</span>
+          </div>
+
+          <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-extrabold text-slate-900">🎁 Presentes</span>
+              <span class="font-mono font-extrabold text-emerald-600">599 SKUs</span>
+            </div>
+            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-1"><div class="bg-emerald-600 h-full" style="width: 3.2%"></div></div>
+            <span class="text-[11px] text-slate-500">3,2% do catálogo • Caixas MDF, sacolas presenteáveis, cestas, pelúcias</span>
+          </div>
+
+          <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-extrabold text-slate-900">🎄 Fim de Ano / Natal</span>
+              <span class="font-mono font-extrabold text-red-600">503 SKUs</span>
+            </div>
+            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-1"><div class="bg-red-600 h-full" style="width: 2.7%"></div></div>
+            <span class="text-[11px] text-slate-500">2,7% do catálogo • Panetones, formas natalinas, fitas e decoração</span>
+          </div>
+
+          <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-extrabold text-slate-900">🎃 Halloween</span>
+              <span class="font-mono font-extrabold text-orange-600">339 SKUs</span>
+            </div>
+            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden my-1"><div class="bg-orange-600 h-full" style="width: 1.8%"></div></div>
+            <span class="text-[11px] text-slate-500">1,8% do catálogo • Doces temáticos, baldes abóbora, decoração</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- 2. PONTOS FORTES ATUAIS DA OPERAÇÃO                      -->
+    <!-- ======================================================== -->
+    <section id="cs-sec-fortes" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+        <div>
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-600 block">Módulo de Estudo 02 • Elogio Estratégico</span>
+          <h3 class="text-xl font-extrabold text-slate-900 font-heading">2. Pontos Fortes Atuais da Operação (O que eles já têm de muito valioso)</h3>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">Base Sólida p/ Escalar</span>
+      </div>
+
+      <p class="text-xs text-slate-600 leading-relaxed">
+        <strong>Dica para a Reunião:</strong> Antes de apontar falhas técnicas, valorize o que a operação construiu. Eles têm o ativo mais difícil do varejo (sortimento profundo, preço competitivo de distribuidora e plataforma VTEX enterprise), mas estão com o "motor de vendas amarrado" por falta de engenharia de cadastro.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+        <div class="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-200 space-y-2">
+          <div class="text-2xl">🏢</div>
+          <h4 class="font-extrabold text-slate-900 text-sm">1. Plataforma Enterprise (VTEX IO)</h4>
+          <p class="text-slate-600 leading-relaxed">
+            Já possuem uma das plataformas mais robustas do mercado contratada e rodando, com motor nativo de busca inteligente (<em>VTEX Intelligent Search</em>), APIs REST abertas e checkout de alta estabilidade.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-200 space-y-2">
+          <div class="text-2xl">🛒</div>
+          <h4 class="font-extrabold text-slate-900 text-sm">2. Mix Gigante de Alto Cross-Sell (18,8 mil SKUs)</h4>
+          <p class="text-slate-600 leading-relaxed">
+            Poucas lojas no Brasil permitem que a confeiteira ou festeira compre <strong>no mesmo frete</strong> a barra de chocolate de 1kg, a forma de acetato, a forminha de brigadeiro, a caixa presenteável, a fita de cetim e o pacote de balões.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-200 space-y-2">
+          <div class="text-2xl">💰</div>
+          <h4 class="font-extrabold text-slate-900 text-sm">3. Preços Competitivos de Atacado / Distribuidora</h4>
+          <p class="text-slate-600 leading-relaxed">
+            Forte presença de embalagens econômicas e institucionais (barras de <code>1,01kg</code> e <code>2,05kg</code>, pacotes fechados <code>c/50</code> e <code>c/100</code>, displays <code>c/24</code>), altamente atrativas para transformadores B2B (boleiras, doceiras, buffets).
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-200 space-y-2">
+          <div class="text-2xl">📸</div>
+          <h4 class="font-extrabold text-slate-900 text-sm">4. CDN Nativo VTEX Rápido e 0% de Links Quebrados</h4>
+          <p class="text-slate-600 leading-relaxed">
+            Diferente de operações legadas com links externos expirados, <strong>100% dos 400 produtos auditados</strong> possuem foto frontal limpa em fundo branco hospedada no CDN de alta velocidade da própria VTEX (<code>0%</code> de erro 404).
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- 3. PONTOS FRACOS & OS 6 GARGALOS CRÍTICOS                -->
+    <!-- ======================================================== -->
+    <section id="cs-sec-gargalos" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+        <div>
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-red-600 block">Módulo de Estudo 03 • Onde Eles Perdem Dinheiro Todos os Dias</span>
+          <h3 class="text-xl font-extrabold text-slate-900 font-heading">3. Os 6 Gargalos Críticos Diagnosticados na Auditoria</h3>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-red-50 text-red-700 text-xs font-extrabold border border-red-200">Impacto Direto em SEO &amp; Conversão</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
+
+        <!-- Gargalo 1 -->
+        <div class="p-5 rounded-2xl border border-red-200 bg-red-50/30 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 rounded-lg bg-red-600 text-white font-extrabold text-[11px]">GARGALO 1 • TÍTULOS ERP</span>
+            <span class="font-mono font-extrabold text-red-700">99,2% CAIXA ALTA • 55,2% Abreviados</span>
+          </div>
+          <h4 class="text-sm font-extrabold text-slate-900">E-commerce falando a "Língua da Nota Fiscal / ERP"</h4>
+          <p class="text-slate-600 leading-relaxed">
+            Os nomes dos produtos foram importados diretamente do cadastro fiscal do ERP sem tratamento comercial: <strong>397 de 400 (99,2%)</strong> estão 100% em letras maiúsculas, <strong>221 de 400 (55,2%)</strong> usam abreviações truncadas de balcão, <strong>84,0%</strong> repetem a marca no final e dezenas vazam códigos internos (<code>REF:</code>, <code>C/</code>, <code>UN</code>).
+          </p>
+          <div class="p-3 rounded-xl bg-slate-900 text-slate-200 font-mono text-[11px] space-y-1">
+            <div class="text-red-400">❌ Na Loja Hoje: "CHOC COB CONF BARRA MEIO AMARGO 1,010KG"</div>
+            <div class="text-red-400">❌ Na Loja Hoje: "BISC WAFFER KIT KAT" | "BALAO LATEX LISO RED N.09 C/50"</div>
+            <div class="text-emerald-400">✅ Busca Real da Cliente: "Cobertura Fracionada de Chocolate Meio Amargo 1,01kg"</div>
+          </div>
+          <p class="text-[11px] text-red-900 font-semibold">
+            💥 <strong>Por que perde vendas:</strong> Ninguém digita <code>CHOC COB CONF</code> ou <code>BISC WAFFER</code> no Google ou na busca da loja. Isso derruba o ranqueamento orgânico e passa impressão de improviso no celular.
+          </p>
+        </div>
+
+        <!-- Gargalo 2 -->
+        <div class="p-5 rounded-2xl border border-red-200 bg-red-50/30 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 rounded-lg bg-red-600 text-white font-extrabold text-[11px]">GARGALO 2 • BUG GRAVE DE SEO</span>
+            <span class="font-mono font-extrabold text-red-700">98,8% Corrompidos (395 / 400)</span>
+          </div>
+          <h4 class="text-sm font-extrabold text-slate-900">HTML Bruto Vazando na <code>MetaTagDescription</code> pro Google</h4>
+          <p class="text-slate-600 leading-relaxed">
+            Na integração com a VTEX, injetaram o código HTML da descrição (<code>&lt;p&gt;O &lt;strong&gt;...</code>) dentro do campo de resumo SEO (<code>MetaTagDescription</code>). O filtro da VTEX remove os sinais <code>&lt; &gt;</code>, mas deixa as palavras <code>p</code>, <code>strong</code>, <code>br</code> e entidades HTML (<code>&amp;atilde;</code>, <code>&amp;eacute;</code>) coladas no texto!
+          </p>
+          <div class="p-3 rounded-xl bg-slate-900 text-slate-200 font-mono text-[11px] space-y-1">
+            <div class="text-amber-300">// O que o Google recebe em 98,8% das páginas da loja hoje:</div>
+            <div class="text-red-400">"p O strong Creme de Avel&amp;atilde; Com Cacau 1,01Kg HARALD /strong &amp;eacute; perfeito... /p"</div>
+            <div class="text-red-400">"p LEITE COCO COQUIL 500ML UN /p"</div>
+          </div>
+          <p class="text-[11px] text-red-900 font-semibold">
+            💥 <strong>Por que perde vendas:</strong> O snippet exibido no resultado de busca do Google fica ilegível e com aspecto de site quebrado, destruindo a Taxa de Clique Orgânica (CTR).
+          </p>
+        </div>
+
+        <!-- Gargalo 3 -->
+        <div class="p-5 rounded-2xl border border-amber-200 bg-amber-50/40 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 rounded-lg bg-amber-600 text-white font-extrabold text-[11px]">GARGALO 3 • DESCRIÇÕES RASAS</span>
+            <span class="font-mono font-extrabold text-amber-800">14,2% Eco ERP • 0% com Tabela</span>
+          </div>
+          <h4 class="text-sm font-extrabold text-slate-900">2.670 SKUs com "Eco de ERP" + 85,8% de Textos Genéricos</h4>
+          <p class="text-slate-600 leading-relaxed">
+            <strong>14,2% (57/400 — projetando ~2.670 SKUs na loja toda)</strong> não possuem descrição alguma além da repetição literal do título do ERP acrescido da sigla <code>UN</code>. Nos outros <strong>85,8%</strong>, há apenas um parágrafo corrido genéricos onde <strong>0% possuem tabela técnica (<code>&lt;table&gt;</code>)</strong> e <strong>22% sequer mencionam o peso ou medida</strong> do item.
+          </p>
+          <div class="p-3 rounded-xl bg-slate-900 text-slate-200 font-mono text-[11px] space-y-1">
+            <div class="text-red-400">❌ SKU 619098: "&lt;p&gt;LEITE COCO COQUIL 500ML UN&lt;/p&gt;" (5 palavras)</div>
+            <div class="text-red-400">❌ SKU 626797: "&lt;p&gt;Chantilly Amélia Mix Supreme 1l UN&lt;/p&gt;" (6 palavras)</div>
+          </div>
+          <p class="text-[11px] text-amber-900 font-semibold">
+            💥 <strong>Por que perde vendas:</strong> Sem ficha técnica estruturada, a compradora profissional fica insegura sobre tamanho, capacidade e aplicação e abandona o carrinho para pesquisar no concorrente.
+          </p>
+        </div>
+
+        <!-- Gargalo 4 -->
+        <div class="p-5 rounded-2xl border border-amber-200 bg-amber-50/40 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 rounded-lg bg-amber-600 text-white font-extrabold text-[11px]">GARGALO 4 • GALERIA &amp; DÚVIDAS TÉCNICAS</span>
+            <span class="font-mono font-extrabold text-amber-800">82,8% com Apenas 1 Foto</span>
+          </div>
+          <h4 class="text-sm font-extrabold text-slate-900">Pobreza Visual (1 Foto) + Falta de Orientação de Confeitaria e Festas</h4>
+          <p class="text-slate-600 leading-relaxed">
+            <strong>82,8% (331/400)</strong> têm somente 1 foto frontal da embalagem fechada (sem verso, sem tabela nutricional, sem foto de aplicação). Pior: o texto atual não responde às dúvidas técnicas que travam a compra:
+          </p>
+          <ul class="space-y-1 text-[11px] text-slate-700 list-disc pl-4">
+            <li><strong>Chocolates:</strong> É <em>Chocolate Nobre Puro</em> (exige temperagem 28°C–32°C) ou <em>Cobertura Fracionada</em> (derrete a 45°C–50°C sem choque térmico)?</li>
+            <li><strong>Corantes &amp; Recheios:</strong> É <em>Hidrossolúvel</em> (chantilly/glacê) ou <em>Lipossolúvel</em> (chocolate)? O recheio é <em>forneável</em>?</li>
+            <li><strong>Formas &amp; Forminhas:</strong> Forma <code>Nº 500</code> = casca de ovo de <code>500g</code>. Forminha <code>30x30x20mm</code> = <code>3,0 x 3,0 x 2,0 cm</code> (para doces de 15g–25g).</li>
+            <li><strong>Balões:</strong> Balão <code>Nº 9</code> = <code>~23 cm</code> inflado. Flutua com Gás Hélio? Quantos metros de arco rende o pacote c/50?</li>
+          </ul>
+        </div>
+
+        <!-- Gargalo 5 -->
+        <div class="p-5 rounded-2xl border border-indigo-200 bg-indigo-50/30 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-extrabold text-[11px]">GARGALO 5 • ARQUITETURA VTEX</span>
+            <span class="font-mono font-extrabold text-indigo-700">100% Sem Filtros • 100% Isolados</span>
+          </div>
+          <h4 class="text-sm font-extrabold text-slate-900"><code>SpecificationFilters = []</code> Vazio e Zero Variantes Agrupadas</h4>
+          <p class="text-slate-600 leading-relaxed">
+            <strong>100% dos produtos (400/400)</strong> estão com o objeto <code>SpecificationFilters</code> vazio na VTEX. Isso significa que os filtros laterais das páginas de categoria (filtrar por Peso 1kg, Tamanho Nº 9, Cor ou Quantidade no Pacote) estão desligados por falta de atributos estruturados. Além disso, <strong>100% dos itens possuem apenas 1 SKU por produto</strong>: 15 cores do mesmo balão ou corante viram 15 páginas separadas que canibalizam o SEO e dificultam a compra de várias cores.
+          </p>
+        </div>
+
+        <!-- Gargalo 6 -->
+        <div class="p-5 rounded-2xl border border-purple-200 bg-purple-50/30 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 rounded-lg bg-purple-700 text-white font-extrabold text-[11px]">GARGALO 6 • RISCO REGULATÓRIO</span>
+            <span class="font-mono font-extrabold text-purple-800">91% Sem Alerta de Alergênicos</span>
+          </div>
+          <h4 class="text-sm font-extrabold text-slate-900">Conformidade ANVISA RDC 26/2015 &amp; Segurança Alimentar</h4>
+          <p class="text-slate-600 leading-relaxed">
+            Em <strong>91% dos itens alimentícios</strong> (chocolates, biscoitos, wafers, compostos lácteos, confeitos), a página não exibe aviso estruturado de <strong>Alergênicos, Glúten e Lactose</strong> (RDC nº 26/2015 da ANVISA e Lei 10.674/2003). Da mesma forma, embalagens de contato direto com alimentos não destacam certificação de <strong>Grau Alimentício BPA Free / Atóxico</strong>.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- 4. COMO NÓS AJUDAMOS (AS 6 SOLUÇÕES: ANTES VS. DEPOIS)   -->
+    <!-- ======================================================== -->
+    <section id="cs-sec-solucoes" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+        <div>
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600 block">Módulo de Estudo 04 • A Nossa Entrega em Escala Industrial</span>
+          <h3 class="text-xl font-extrabold text-slate-900 font-heading">4. Como Nós Ajudamos na Prática (Comparativo Antes vs. Depois)</h3>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-extrabold border border-indigo-200">6 Motores Automatizados</span>
+      </div>
+
+      <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-900 text-white uppercase text-[10px] font-extrabold tracking-wider">
+            <tr>
+              <th class="p-4 w-48">Frente de Solução</th>
+              <th class="p-4 bg-red-950/60 text-red-200">❌ Antes (Como está na Loja Hoje)</th>
+              <th class="p-4 bg-emerald-950/60 text-emerald-200">✅ Depois (O Que Nosso Motor Gera Automaticamente)</th>
+              <th class="p-4 w-56">Ganho Comercial Direto</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 align-top">
+            <tr class="hover:bg-slate-50">
+              <td class="p-4 font-extrabold text-slate-900">1. Expansão Semântica de Títulos ERP</td>
+              <td class="p-4 text-red-700 font-mono text-[11px]">
+                "CHOC COB CONF BARRA MEIO AMARGO 1,010KG TOP HARALD"<br>
+                "BALAO LATEX LISO RED N.09 C/50"
+              </td>
+              <td class="p-4 text-emerald-800 font-semibold">
+                "Cobertura Fracionada de Chocolate Meio Amargo em Barra 1,01kg Top Harald"<br>
+                "Balão de Látex Liso Redondo Nº 9 com 50 Unidades"
+              </td>
+              <td class="p-4 text-slate-600">Destrava a busca interna da VTEX e indexa exatamente como a cliente pesquisa no Google.</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="p-4 font-extrabold text-slate-900">2. Sanitização Anti-Bug de SEO (UTF-8 Puro)</td>
+              <td class="p-4 text-red-700 font-mono text-[11px]">
+                MetaTagDescription com HTML vazando:<br>
+                "p O strong Creme de Avel&amp;atilde;... /strong" (98,8% afetados)
+              </td>
+              <td class="p-4 text-emerald-800 font-semibold">
+                <code>seo_title</code> (&le; 60 chars) + <code>seo_meta_description</code> (135–155 chars) 100% Plain Text UTF-8 limpo + Schema.org JSON-LD <code>Product</code>.
+              </td>
+              <td class="p-4 text-slate-600">Recupera imediatamente a Taxa de Clique (CTR) no Google com snippets limpos e persuasivos.</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="p-4 font-extrabold text-slate-900">3. Layout 3 Atos + Cards Infográficos (Anti-1-Foto)</td>
+              <td class="p-4 text-red-700">
+                82,8% têm apenas 1 foto. Descrições de 1 linha ("LEITE COCO 500ML UN") ou texto puro sem apelo visual.
+              </td>
+              <td class="p-4 text-emerald-800 font-semibold">
+                Ato 1 usa a foto oficial do CDN VTEX; Atos 2 e 3 renderizam <strong>Cards Infográficos HTML/CSS autônomos</strong> (Rendimento &amp; Medidas no Ato 2 + Segurança &amp; Conservação no Ato 3).
+              </td>
+              <td class="p-4 text-slate-600">Entrega experiência visual de marca D2C premium em 100% do catálogo <strong>sem precisar de estúdio fotográfico</strong>.</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="p-4 font-extrabold text-slate-900">4. Calculadora de Rendimento &amp; Conversão Dimensional</td>
+              <td class="p-4 text-red-700">
+                Apenas medidas cruas em milímetros ou polegadas (<code>30x30x20mm</code>, <code>N.09</code>, <code>1,01kg</code>) sem explicar quanto rende.
+              </td>
+              <td class="p-4 text-emerald-800 font-semibold">
+                Cálculo automático: <code>1,01kg</code> = <strong>~40 trufas de 25g ou 6 a 7 cascas de ovo de 150g</strong>; <code>30x30x20mm</code> = <strong>3,0 x 3,0 x 2,0 cm</strong>; Balão Nº 9 c/50 = <strong>~23 cm inflado / arco de 1,5m a 2m</strong>.
+              </td>
+              <td class="p-4 text-slate-600">Elimina a dúvida técnica da confeiteira/decoradora e aumenta a quantidade de pacotes por pedido.</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="p-4 font-extrabold text-slate-900">5. Inteligência Comercial B2B (<code>b2b_economics</code>)</td>
+              <td class="p-4 text-red-700">
+                Exibe apenas o preço cheio do pacote ou barra, obrigando a doceira a abrir a calculadora do celular.
+              </td>
+              <td class="p-4 text-emerald-800 font-semibold">
+                Calcula automaticamente o <strong>custo por unidade do pacote</strong> (ex: <code>R$ 0,24/un</code> no pacote c/50), <strong>custo por 100g/100ml</strong> e <strong>custo por trufa/porção produzida</strong>.
+              </td>
+              <td class="p-4 text-slate-600">Argumento matador para o público B2B (boleiras, doceiras e buffets) perceberem a margem de lucro.</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="p-4 font-extrabold text-slate-900">6. Conformidade ANVISA + <code>SpecificationFilters</code></td>
+              <td class="p-4 text-red-700">
+                91% sem alerta de alergênicos; 100% com <code>SpecificationFilters = []</code> (filtros laterais da VTEX mudos).
+              </td>
+              <td class="p-4 text-emerald-800 font-semibold">
+                Bloco estruturado ANVISA RDC 26/2015 / Grau Alimentício Atóxico + JSON pronto de <code>vtex_specifications</code> (Marca, Peso, Dimensões, Rendimento, Economia B2B).
+              </td>
+              <td class="p-4 text-slate-600">Segurança jurídica/regulatória e ativação imediata dos filtros inteligentes de navegação da VTEX.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- 5. GUIA DE BOLSO PARA REUNIÃO: ROI OPERACIONAL & FAQ     -->
+    <!-- ======================================================== -->
+    <section id="cs-sec-reuniao" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Coluna Esquerda (5 cols): Matemática do ROI Operacional + Roteiro -->
+      <div class="lg:col-span-5 bg-slate-900 text-white rounded-3xl border border-slate-800 p-6 sm:p-7 shadow-xl space-y-5 flex flex-col justify-between">
+        <div class="space-y-4">
+          <span class="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-extrabold uppercase tracking-wider border border-amber-500/30">
+            💡 Argumento Decisivo de Fechamento
+          </span>
+          <h3 class="text-xl font-extrabold font-heading text-white">
+            5. Por que eles NÃO conseguem fazer isso sozinhos manualmente?
+          </h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Na reunião, alguém pode perguntar: <em>"Mas a nossa equipe interna de cadastro não poderia ir arrumando isso aos poucos?"</em>. Mostre a matemática real do tempo humano:
+          </p>
+
+          <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 text-xs">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span class="text-slate-400">Tempo humano médio por SKU (pesquisar medidas, calcular rendimento, redigir 3 atos, tabela HTML, SEO e especificações):</span>
+              <strong class="text-amber-400 font-mono text-sm">20 min / SKU</strong>
+            </div>
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span class="text-slate-300">Para os <strong>8.559 SKUs ativos</strong> em estoque:</span>
+              <strong class="text-white font-mono">2.853 horas (~1,5 ano)</strong>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-slate-300">Para os <strong>18.828 SKUs totais</strong> publicados:</span>
+              <strong class="text-pink-400 font-mono">6.276 horas (&gt; 3 anos)</strong>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-emerald-950/50 border border-emerald-500/30 text-xs space-y-1.5">
+            <strong class="text-emerald-300 block">🚀 Conclusão Executiva para a Reunião:</strong>
+            <p class="text-slate-200 leading-relaxed">
+              Um analista dedicado 100% do tempo levaria de <strong>1,5 a 3 anos</strong> para fazer manualmente o que o nosso motor de engenharia semântica processa, calcula e audita em escala industrial com <strong>100% de precisão matemática e zero erro de HTML</strong>.
+            </p>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-800 space-y-2 text-xs">
+          <h4 class="font-extrabold text-pink-400 uppercase tracking-wider text-[11px]">🎯 Roteiro de Demonstração em 3 Passos (5 Minutos):</h4>
+          <ol class="list-decimal pl-4 space-y-1.5 text-slate-300">
+            <li><strong>Mostre o Diagnóstico Real:</strong> Apresente a radiografia dos 18.828 SKUs, o bug dos 98,8% na <code>MetaTagDescription</code> e os títulos em código de ERP.</li>
+            <li><strong>Abra 3 Exemplos no Comparador (Diff):</strong> Clique nos botões da seção abaixo para mostrar ao vivo um Chocolate/Cobertura, um Balão c/50 e um item "Eco de ERP".</li>
+            <li><strong>Mostre a Exportação Pronta p/ VTEX:</strong> Abra a aba <em>Geração em Massa</em> e mostre a planilha CSV/JSON já com <code>SEO_Title</code>, <code>SEO_Meta_Description</code>, <code>B2B_Unit_Economics</code> e <code>Body (HTML)</code>.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Coluna Direita (7 cols): FAQ de Objeções Técnicas e Comerciais -->
+      <div class="lg:col-span-7 bg-white rounded-3xl border border-slate-200 p-6 sm:p-7 shadow-sm space-y-4">
+        <div>
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600 block">Guia de Respostas Rápidas</span>
+          <h3 class="text-xl font-extrabold text-slate-900 font-heading">Perguntas &amp; Respostas para Objeções na Reunião (FAQ)</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Clique em cada pergunta para revisar a resposta técnica e comercial ideal.</p>
+        </div>
+
+        <div class="space-y-3 text-xs">
+          <details class="group rounded-2xl border border-slate-200 bg-slate-50/70 p-4 open:bg-white open:shadow-sm transition-all" open>
+            <summary class="font-extrabold text-slate-900 cursor-pointer flex items-center justify-between">
+              <span>1. "Se mudarmos o título para ficar amigável no site, vai bagunçar o meu ERP ou a Nota Fiscal?"</span>
+              <span class="text-pink-600 font-bold">▾</span>
+            </summary>
+            <p class="mt-2.5 text-slate-600 leading-relaxed border-t border-slate-100 pt-2.5">
+              <strong>Resposta:</strong> De forma alguma. Na arquitetura VTEX, o nome comercial exibido na vitrine (<code>Product Name</code> / <code>TitleTag</code>) e a descrição HTML (<code>Description</code>) são independentes da descrição fiscal da Nota Fiscal (NF-e) no ERP. Além disso, podemos atualizar inicialmente apenas a <strong>Descrição HTML (Modo B), o Título SEO, a Meta Description e os Atributos de Filtro</strong> via API/Planilha VTEX sem tocar na integração de estoque e preço do ERP.
+            </p>
+          </details>
+
+          <details class="group rounded-2xl border border-slate-200 bg-slate-50/70 p-4 open:bg-white open:shadow-sm transition-all" open>
+            <summary class="font-extrabold text-slate-900 cursor-pointer flex items-center justify-between">
+              <span>2. "82,8% dos nossos produtos só têm 1 foto. O layout de 3 Atos não vai ficar repetindo a mesma foto 3 vezes?"</span>
+              <span class="text-pink-600 font-bold">▾</span>
+            </summary>
+            <p class="mt-2.5 text-slate-600 leading-relaxed border-t border-slate-100 pt-2.5">
+              <strong>Resposta:</strong> Exatamente por isso desenvolvemos o <strong>Motor de Cards Infográficos Dinâmicos</strong>. Quando o produto tem apenas 1 foto no CDN VTEX, nós usamos a foto oficial apenas no Ato 1. No Ato 2, o motor desenha automaticamente em HTML/CSS puro um <strong>Infográfico de Rendimento, Medidas e Parâmetros Técnicos</strong>; e no Ato 3, desenha um <strong>Infográfico de Segurança Alimentar, Conservação e Procedência</strong>. Zero fotos repetidas e zero custo com fotógrafo.
+            </p>
+          </details>
+
+          <details class="group rounded-2xl border border-slate-200 bg-slate-50/70 p-4 open:bg-white open:shadow-sm transition-all">
+            <summary class="font-extrabold text-slate-900 cursor-pointer flex items-center justify-between">
+              <span>3. "Como esses textos e especificações entram na VTEX? É seguro?"</span>
+              <span class="text-pink-600 font-bold">▾</span>
+            </summary>
+            <p class="mt-2.5 text-slate-600 leading-relaxed border-t border-slate-100 pt-2.5">
+              <strong>Resposta:</strong> É 100% seguro e reversível. O nosso portal já exporta a planilha estruturada com o código SKU exato da VTEX e também gera o payload para atualização via <strong>VTEX Catalog API REST</strong> (<code>PUT /api/catalog/pvt/product/:id</code>). Todo o CSS é escopado sob o prefixo exclusivo <code>.vtex-desc-wrapper</code>, garantindo que nunca afete o cabeçalho, o menu ou o checkout da loja.
+            </p>
+          </details>
+
+          <details class="group rounded-2xl border border-slate-200 bg-slate-50/70 p-4 open:bg-white open:shadow-sm transition-all">
+            <summary class="font-extrabold text-slate-900 cursor-pointer flex items-center justify-between">
+              <span>4. "Temos 10.269 produtos esgotados e 8.559 em estoque. Por onde começamos?"</span>
+              <span class="text-pink-600 font-bold">▾</span>
+            </summary>
+            <p class="mt-2.5 text-slate-600 leading-relaxed border-t border-slate-100 pt-2.5">
+              <strong>Resposta:</strong> Recomendamos um rollout em <strong>2 Fases</strong>: na <strong>Fase 1 (Impacto Imediato de Caixa)</strong>, atualizamos os <strong>8.559 SKUs com estoque ativo</strong>, destravando conversão e ticket médio imediatamente. Na <strong>Fase 2 (Captura de Tráfego Orgânico)</strong>, atualizamos os <strong>10.269 SKUs esgotados</strong> que permanecem indexados no Google, limpando o bug de SEO para que tragam visitantes orgânicos e cadastros de reposição ("Avise-me").
+            </p>
+          </details>
+
+          <details class="group rounded-2xl border border-slate-200 bg-slate-50/70 p-4 open:bg-white open:shadow-sm transition-all">
+            <summary class="font-extrabold text-slate-900 cursor-pointer flex items-center justify-between">
+              <span>5. "Por que a Calculadora de Rendimento e Custo Unitário B2B aumenta tanto o ticket médio?"</span>
+              <span class="text-pink-600 font-bold">▾</span>
+            </summary>
+            <p class="mt-2.5 text-slate-600 leading-relaxed border-t border-slate-100 pt-2.5">
+              <strong>Resposta:</strong> Porque o público-alvo principal (confeiteiras, boleiras, doceiras e decoradoras de festa) compra insumo para revender. Quando a página mostra claramente que uma barra de <code>1,01kg</code> rende <strong>40 trufas de 25g</strong> a um custo de insumo de poucos centavos por unidade, ou que o pacote de forminhas sai a <strong>R$ 0,08 por unidade</strong>, a percepção de preço muda de "gasto" para "lucro por unidade produzida", incentivando a compra de múltiplos pacotes.
+            </p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- 6. SIMULADOR INTERATIVO DE CASOS REAIS (AO VIVO)         -->
+    <!-- ======================================================== -->
+    <section id="cs-sec-simulador" class="bg-gradient-to-br from-pink-50 via-white to-indigo-50 rounded-3xl border border-pink-200 p-6 sm:p-8 shadow-sm space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-pink-200/60 pb-4">
+        <div>
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-pink-600 block">Módulo Prático • Treine sua Demonstração ao Vivo</span>
+          <h3 class="text-xl font-extrabold text-slate-900 font-heading">6. Laboratório de Casos Reais do Catálogo (Clique para Abrir o Comparador Antes vs. Depois)</h3>
+          <p class="text-xs text-slate-600 mt-0.5">
+            Selecione qualquer um dos casos emblemáticos abaixo para abrir imediatamente o modal do produto no modo <strong>⚖️ Comparador (Diff)</strong> ou <strong>🚀 Modo B (3 Atos)</strong>.
+          </p>
+        </div>
+        <button onclick="switchMainTab('tab-catalog')" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold transition-all shadow-sm">
+          🛍️ Ir para os 400 Produtos Auditados →
+        </button>
+      </div>
+
+      <div id="casestudy-live-examples" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Preenchido dinamicamente por renderCaseStudyView() em js/app.js com fallback estático -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between space-y-3">
+          <div class="space-y-1.5">
+            <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold">Caso 1 • Eco de ERP (Sem Descrição)</span>
+            <h4 class="text-xs font-extrabold text-slate-900">Leite de Coco Coquil 500ml</h4>
+            <p class="text-[11px] text-slate-500">Na loja hoje: apenas <code>&lt;p&gt;LEITE COCO COQUIL 500ML UN&lt;/p&gt;</code>. Veja como ganha 3 Atos, rendimento em receitas e ficha técnica completa.</p>
+          </div>
+          <button onclick="openCaseStudySampleBySku('619098', 'diff')" class="w-full py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-xs font-extrabold transition-all">
+            ⚖️ Ver Antes vs. Depois
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between space-y-3">
+          <div class="space-y-1.5">
+            <span class="px-2 py-0.5 rounded-full bg-pink-100 text-pink-800 text-[10px] font-extrabold">Caso 2 • Confeitaria &amp; Termometria</span>
+            <h4 class="text-xs font-extrabold text-slate-900">Chantilly Amélia Mix Supreme 1L</h4>
+            <p class="text-[11px] text-slate-500">Demonstra orientação de batimento gelado (4°C a 8°C), calculadora de rendimento de bolos espatulados e economia por 100ml.</p>
+          </div>
+          <button onclick="openCaseStudySampleBySku('626797', 'diff')" class="w-full py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-xs font-extrabold transition-all">
+            ⚖️ Ver Antes vs. Depois
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between space-y-3">
+          <div class="space-y-1.5">
+            <span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold">Caso 3 • Bug de SEO + Chocolates</span>
+            <h4 class="text-xs font-extrabold text-slate-900">Cobertura / Creme / Chocolate</h4>
+            <p class="text-[11px] text-slate-500">Mostra a diferença entre Chocolate Nobre vs. Fracionado, cálculo de trufas de 25g e correção da MetaTagDescription corrompida.</p>
+          </div>
+          <button onclick="openCaseStudySampleByCategory('Confeitaria & Panificação', 'diff')" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold transition-all">
+            ⚖️ Abrir Exemplo de Confeitaria
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between space-y-3">
+          <div class="space-y-1.5">
+            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">Caso 4 • Festas &amp; Custo Unitário B2B</span>
+            <h4 class="text-xs font-extrabold text-slate-900">Artigos para Festas &amp; Balões</h4>
+            <p class="text-[11px] text-slate-500">Conversão de polegadas para centímetros, compatibilidade com Gás Hélio vs. Ar, metragem de arco e custo unitário por peça do pacote.</p>
+          </div>
+          <button onclick="openCaseStudySampleByCategory('Artigos para Festas & Balões', 'diff')" class="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition-all">
+            ⚖️ Abrir Exemplo de Festas
+          </button>
+        </div>
+      </div>
+    </section>
 
   </main>
 

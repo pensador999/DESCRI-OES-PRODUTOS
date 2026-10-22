@@ -35,6 +35,9 @@ function showToast(text) {
 
 // Navegação entre Abas Principais
 function switchMainTab(tabId) {
+  if (tabId === "tab-casestudy" && currentSessionMode !== "loja_doce" && currentStore !== "loja_doce") {
+    tabId = "tab-catalog";
+  }
   currentActiveTab = tabId;
   document.querySelectorAll(".main-tab").forEach(tab => {
     tab.classList.remove("active", "bg-slate-800", "text-white");
@@ -47,23 +50,41 @@ function switchMainTab(tabId) {
     activeBtn.classList.remove("text-slate-400");
   }
 
-  document.getElementById("section-catalog").classList.add("hidden");
-  document.getElementById("section-mass").classList.add("hidden");
-  document.getElementById("section-moldes").classList.add("hidden");
-  document.getElementById("section-analytics").classList.add("hidden");
+  const secCatalog = document.getElementById("section-catalog");
+  const secMass = document.getElementById("section-mass");
+  const secMoldes = document.getElementById("section-moldes");
+  const secAnalytics = document.getElementById("section-analytics");
+  const secCaseStudy = document.getElementById("section-casestudy");
+
+  if (secCatalog) secCatalog.classList.add("hidden");
+  if (secMass) secMass.classList.add("hidden");
+  if (secMoldes) secMoldes.classList.add("hidden");
+  if (secAnalytics) secAnalytics.classList.add("hidden");
+  if (secCaseStudy) {
+    secCaseStudy.classList.add("hidden");
+    secCaseStudy.style.display = "none";
+  }
 
   if (tabId === "tab-catalog") {
-    document.getElementById("section-catalog").classList.remove("hidden");
+    if (secCatalog) secCatalog.classList.remove("hidden");
     renderProducts();
   } else if (tabId === "tab-mass") {
-    document.getElementById("section-mass").classList.remove("hidden");
+    if (secMass) secMass.classList.remove("hidden");
     renderMassTable();
   } else if (tabId === "tab-moldes") {
-    document.getElementById("section-moldes").classList.remove("hidden");
+    if (secMoldes) secMoldes.classList.remove("hidden");
     renderMoldesCards();
   } else if (tabId === "tab-analytics") {
-    document.getElementById("section-analytics").classList.remove("hidden");
+    if (secAnalytics) secAnalytics.classList.remove("hidden");
     renderAnalyticsView();
+  } else if (tabId === "tab-casestudy") {
+    if (secCaseStudy) {
+      secCaseStudy.classList.remove("hidden");
+      secCaseStudy.style.display = "";
+    }
+    if (typeof renderCaseStudyView === "function") {
+      renderCaseStudyView();
+    }
   }
 }
 
@@ -541,6 +562,27 @@ function applySessionIsolation(mode) {
   document.querySelectorAll('[onclick*="Tampermonkey"]').forEach(btn => {
     btn.style.display = isLD ? "none" : "";
   });
+
+  // Isolamento estrito da aba Estudo de Caso (#btn-tab-casestudy / #section-casestudy):
+  // Visível APENAS quando logado na loja VTEX (senha fgh369 -> currentSessionMode === "loja_doce")
+  const btnTabCaseStudy = document.getElementById("btn-tab-casestudy");
+  const secCaseStudy = document.getElementById("section-casestudy");
+  if (btnTabCaseStudy) {
+    btnTabCaseStudy.classList.toggle("hidden", !isLD);
+    btnTabCaseStudy.style.display = isLD ? "inline-flex" : "none";
+  }
+  if (!isLD) {
+    if (secCaseStudy) {
+      secCaseStudy.classList.add("hidden");
+      secCaseStudy.style.display = "none";
+    }
+    if (currentActiveTab === "tab-casestudy") {
+      switchMainTab("tab-catalog");
+    }
+  } else if (secCaseStudy && currentActiveTab !== "tab-casestudy") {
+    secCaseStudy.classList.add("hidden");
+    secCaseStudy.style.display = "none";
+  }
 }
 
 // Alternador de Loja Assíncrono com Cache Universal e Reatividade Multi-Abas
@@ -665,6 +707,12 @@ async function switchStore(storeKey) {
     renderMoldesCards();
   } else if (currentActiveTab === "tab-analytics") {
     renderAnalyticsView();
+  } else if (currentActiveTab === "tab-casestudy") {
+    if (storeKey === "loja_doce") {
+      renderCaseStudyView();
+    } else {
+      switchMainTab("tab-catalog");
+    }
   }
 
   startLiveSync();
@@ -1975,9 +2023,159 @@ function unlockCurrentMachineByPin() {
 }
 
 function logoutBrkPortal() {
+  if (currentActiveTab === "tab-casestudy") {
+    switchMainTab("tab-catalog");
+  }
+  const btnTabCaseStudy = document.getElementById("btn-tab-casestudy");
+  const secCaseStudy = document.getElementById("section-casestudy");
+  if (btnTabCaseStudy) {
+    btnTabCaseStudy.classList.add("hidden");
+    btnTabCaseStudy.style.display = "none";
+  }
+  if (secCaseStudy) {
+    secCaseStudy.classList.add("hidden");
+    secCaseStudy.style.display = "none";
+  }
   localStorage.removeItem(BRK_AUTH_TOKEN_KEY);
   localStorage.removeItem("BRK_MACHINE_AUTHORIZED_TOKEN");
   renderPasswordLoginScreen();
+}
+
+// =========================================================================
+// ABA ESTUDO DE CASO (EXCLUSIVA SESSÃO VTEX fgh369)
+// =========================================================================
+async function renderCaseStudyView() {
+  if (currentSessionMode !== "loja_doce" && currentStore !== "loja_doce") {
+    switchMainTab("tab-catalog");
+    return;
+  }
+  if (!MASTER_PAYLOAD.stores["loja_doce"]) {
+    try {
+      MASTER_PAYLOAD.stores["loja_doce"] = await StoreLoader.loadStore("loja_doce");
+    } catch (e) {}
+  }
+  const ldStore = MASTER_PAYLOAD.stores["loja_doce"];
+  const prods = (ldStore && ldStore.products) || [];
+  const container = document.getElementById("casestudy-live-examples");
+  if (!container || prods.length === 0) return;
+
+  // Selecionar 4 exemplos reais emblemáticos do catálogo VTEX
+  const pEco = prods.find(p => String(p.sku || p.master_sku) === "619098")
+    || prods.find(p => p.status === "SEM_DESCRICAO")
+    || prods[0];
+  const pChantilly = prods.find(p => String(p.sku || p.master_sku) === "626797")
+    || prods.find(p => /chantilly|creme|cobertura|chocolate/i.test(p.title || "") && p !== pEco)
+    || prods[1];
+  const pChoc = prods.find(p => /cobertura|chocolate|avel/i.test(p.title || "") && p !== pEco && p !== pChantilly)
+    || prods.find(p => p.category === "Confeitaria & Panificação" && p !== pEco && p !== pChantilly)
+    || prods[2];
+  const pFesta = prods.find(p => p.category === "Artigos para Festas & Balões" && /\bbal[aã]o\b/i.test(p.title || "") && p !== pEco && p !== pChantilly && p !== pChoc)
+    || prods.find(p => p.category === "Artigos para Festas & Balões" && p !== pEco && p !== pChantilly && p !== pChoc)
+    || prods[3];
+
+  const cases = [
+    {
+      badge: "Caso 1 • Eco de ERP (14,2% da Loja)",
+      badgeCls: "bg-amber-100 text-amber-800",
+      prod: pEco,
+      note: "Na loja hoje possui apenas repetição do código ERP + 'UN'. Veja como recebe 3 Atos, infográficos e ficha técnica."
+    },
+    {
+      badge: "Caso 2 • Confeitaria & Rendimento",
+      badgeCls: "bg-pink-100 text-pink-800",
+      prod: pChantilly,
+      note: "Orientação técnica de temperatura/aplicação, calculadora de rendimento de porções e custo por 100g/100ml."
+    },
+    {
+      badge: "Caso 3 • Correção Bug SEO (98,8%)",
+      badgeCls: "bg-indigo-100 text-indigo-800",
+      prod: pChoc,
+      note: "Elimina tags HTML vazando na MetaTagDescription e adiciona alerta regulatório ANVISA RDC 26/2015."
+    },
+    {
+      badge: "Caso 4 • Festas & Custo Unitário B2B",
+      badgeCls: "bg-emerald-100 text-emerald-800",
+      prod: pFesta,
+      note: "Conversão de polegadas/mm para centímetros, metragem de decoração e cálculo de custo unitário no pacote."
+    }
+  ];
+
+  container.innerHTML = "";
+  cases.forEach(item => {
+    const p = item.prod;
+    if (!p) return;
+    const skuCode = String(p.master_sku || p.sku || "");
+    const imgUrl = (p.cdn_images && p.cdn_images[0]) || p.image || "https://placehold.co/200x200?text=VTEX";
+    const erpRaw = p.raw_erp_title || p.title || "";
+    const b2bSummary = (p.b2b_economics && (p.b2b_economics.resumo_economia_b2b || p.b2b_economics.value || p.b2b_economics.cost_per_unit || p.b2b_economics.cost_per_100g_ml || p.b2b_economics.unit_price_formatted)) || "Custo B2B Calculado";
+
+    const card = document.createElement("div");
+    card.className = "bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between space-y-3 hover:border-pink-400 transition-all";
+    card.innerHTML = `
+      <div class="space-y-2">
+        <div class="flex items-center justify-between gap-1">
+          <span class="px-2 py-0.5 rounded-full ${item.badgeCls} text-[10px] font-extrabold">${item.badge}</span>
+          <span class="text-[10px] font-mono font-bold text-slate-500">SKU ${skuCode}</span>
+        </div>
+        <div class="flex items-center gap-3 pt-1">
+          <img src="${imgUrl}" alt="" class="w-12 h-12 rounded-xl object-contain border border-slate-100 bg-slate-50 p-1 shrink-0" loading="lazy" />
+          <div class="min-w-0">
+            <div class="text-[10px] font-mono text-red-600 truncate" title="${erpRaw.replace(/"/g, '&quot;')}">Antes: ${erpRaw}</div>
+            <h4 class="text-xs font-extrabold text-slate-900 line-clamp-2 leading-snug">Depois: ${p.title}</h4>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-600 leading-relaxed">${item.note}</p>
+        <div class="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-[10px] font-bold text-emerald-700 line-clamp-2 leading-snug" title="${b2bSummary.replace(/"/g, '&quot;')}">
+          💡 B2B: ${b2bSummary}
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2 pt-1">
+        <button onclick="openCaseStudySampleBySku('${skuCode}', 'diff')" class="py-1.5 px-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-extrabold transition-all">
+          ⚖️ Comparar Diff
+        </button>
+        <button onclick="openCaseStudySampleBySku('${skuCode}', 'b')" class="py-1.5 px-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-[11px] font-extrabold transition-all">
+          🚀 Ver 3 Atos
+        </button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+async function openCaseStudySampleBySku(sku, mode = "diff") {
+  if (currentSessionMode !== "loja_doce" && currentStore !== "loja_doce") {
+    return;
+  }
+  if (!MASTER_PAYLOAD.stores["loja_doce"]) {
+    try {
+      MASTER_PAYLOAD.stores["loja_doce"] = await StoreLoader.loadStore("loja_doce");
+    } catch (e) {}
+  }
+  const prods = (MASTER_PAYLOAD.stores["loja_doce"] && MASTER_PAYLOAD.stores["loja_doce"].products) || [];
+  const target = prods.find(p => String(p.master_sku || p.sku) === String(sku)) || prods[0];
+  if (!target) return;
+  openProductModal(target);
+  if (mode && typeof switchModalMode === "function") {
+    switchModalMode(mode);
+  }
+}
+
+async function openCaseStudySampleByCategory(catName, mode = "diff") {
+  if (currentSessionMode !== "loja_doce" && currentStore !== "loja_doce") {
+    return;
+  }
+  if (!MASTER_PAYLOAD.stores["loja_doce"]) {
+    try {
+      MASTER_PAYLOAD.stores["loja_doce"] = await StoreLoader.loadStore("loja_doce");
+    } catch (e) {}
+  }
+  const prods = (MASTER_PAYLOAD.stores["loja_doce"] && MASTER_PAYLOAD.stores["loja_doce"].products) || [];
+  const target = prods.find(p => p.category === catName) || prods[0];
+  if (!target) return;
+  openProductModal(target);
+  if (mode && typeof switchModalMode === "function") {
+    switchModalMode(mode);
+  }
 }
 
 async function verifyMachineIPAccess() {
@@ -1999,5 +2197,6 @@ async function verifyMachineIPAccess() {
 document.addEventListener("DOMContentLoaded", () => {
   verifyMachineIPAccess();
 });
+
 
 
