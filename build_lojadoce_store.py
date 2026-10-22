@@ -95,6 +95,7 @@ def build_lojadoce_catalog():
             "raw_erp_title": raw_erp,
             "vendor": raw_vendor,
             "brand": raw_vendor,
+            "price": p.get("price") or "0.00",
             "category": canonical_cat,
             "vtex_category_path": vtex_cat_path,
             "tags": tags,
@@ -193,8 +194,9 @@ def build_lojadoce_catalog():
         p_out["narrative_blocks"] = narrative["narrative_blocks"]
         p_out["specs"] = narrative["specs"]
         p_out["care_tips"] = narrative["care_tips"]
-        # 4 Frentes de Verticalização VTEX
+        # 4 Frentes de Verticalização VTEX + Plano 2 (Economia B2B)
         p_out["yield_info"] = narrative.get("yield_info", {})
+        p_out["b2b_economics"] = narrative.get("b2b_economics", {})
         p_out["allergen_info"] = narrative.get("allergen_info", {})
         p_out["seo_title"] = narrative.get("seo_title", "")
         p_out["seo_meta_description"] = narrative.get("seo_meta_description", "")

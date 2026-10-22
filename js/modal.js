@@ -48,7 +48,9 @@ function renderVtexSeoAndSpecsPanel(product, isLojaDoce) {
   const seoDesc = product.seo_meta_description || "";
   const vtexSpecs = product.vtex_specifications || {};
   const yieldInfo = product.yield_info || {};
+  const b2bEconomics = product.b2b_economics || {};
   const allergenInfo = product.allergen_info || {};
+  const b2bSummary = b2bEconomics.resumo_economia_b2b || b2bEconomics.value || vtexSpecs["Economia & Custo Unitário (B2B)"] || "";
 
   const specEntries = Object.entries(vtexSpecs);
   const specsHtml = specEntries.map(([k, v]) => `
@@ -60,14 +62,15 @@ function renderVtexSeoAndSpecsPanel(product, isLojaDoce) {
 
   const safeSeoTitleAttr = String(seoTitle).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   const safeSeoDescAttr = String(seoDesc).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-  const safeSpecsJsonAttr = JSON.stringify(vtexSpecs).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  const vtexExportJson = Object.assign({}, vtexSpecs, b2bSummary ? { B2B_Unit_Economics: b2bSummary } : {});
+  const safeSpecsJsonAttr = JSON.stringify(vtexExportJson).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
   panel.className = "rounded-2xl border border-pink-200 bg-gradient-to-br from-pink-50/70 via-white to-rose-50/50 p-4 shadow-sm space-y-3 text-xs";
   panel.innerHTML = `
     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-pink-200/70 pb-2.5">
       <div class="flex items-center gap-2">
         <span class="px-2 py-0.5 rounded-md bg-pink-600 text-white font-extrabold text-[10px] uppercase tracking-wider">Auditoria VTEX 4 Frentes</span>
-        <span class="font-extrabold text-slate-900 text-xs">SEO Limpo (Anti-Bug VTEX), Calculadora de Rendimento, ANVISA & SpecificationFilters</span>
+        <span class="font-extrabold text-slate-900 text-xs">SEO Limpo (Anti-Bug VTEX), Calculadora de Rendimento, Economia B2B, ANVISA & SpecificationFilters</span>
       </div>
       <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full">✓ 100% Plain Text UTF-8</span>
     </div>
@@ -99,7 +102,7 @@ function renderVtexSeoAndSpecsPanel(product, isLojaDoce) {
         </div>
       </div>
 
-      <!-- Frentes 1, 3 e 4: Rendimento, ANVISA e VTEX Specifications -->
+      <!-- Frentes 1, 3, 4 e Plano 2: Rendimento, Economia B2B, ANVISA e VTEX Specifications -->
       <div class="bg-white rounded-xl border border-slate-200 p-3 space-y-2 flex flex-col justify-between">
         <div class="space-y-2">
           <div class="flex items-center justify-between">
@@ -112,6 +115,7 @@ function renderVtexSeoAndSpecsPanel(product, isLojaDoce) {
         </div>
 
         <div class="pt-2 border-t border-slate-100 space-y-1 text-[11px]">
+          ${b2bSummary ? `<div class="text-slate-700"><strong class="text-emerald-700">💰 Economia & Custo Unitário (B2B):</strong> ${String(b2bSummary).replace(/</g, "&lt;")}</div>` : ""}
           ${(yieldInfo.resumo_rendimento || yieldInfo.yield_estimate || yieldInfo.dimensional_equiv) ? `<div class="text-slate-700"><strong class="text-pink-700">📐 Rendimento / Equivalência:</strong> ${String(yieldInfo.resumo_rendimento || yieldInfo.yield_estimate || yieldInfo.dimensional_equiv).replace(/</g, "&lt;")}</div>` : ""}
           ${(allergenInfo.alerta_alergenicos || allergenInfo.value) ? `<div class="text-slate-700"><strong class="text-amber-700">🛡️ Segurança / Alergênicos:</strong> ${String(allergenInfo.alerta_alergenicos || allergenInfo.value).replace(/</g, "&lt;")}</div>` : ""}
         </div>
@@ -735,10 +739,11 @@ function downloadCurrentProductCSV() {
   if (!currentModalProduct) return;
   const isLojaDoce = isLojaDoceProduct(currentModalProduct);
   const html = document.getElementById("modal-source-code").textContent;
+  const b2bVal = (currentModalProduct.b2b_economics && (currentModalProduct.b2b_economics.resumo_economia_b2b || currentModalProduct.b2b_economics.value)) || (currentModalProduct.vtex_specifications && currentModalProduct.vtex_specifications["Economia & Custo Unitário (B2B)"]) || "";
   const row = isLojaDoce
     ? [
-        "SKU,Handle,Title,SEO_Title,SEO_Meta_Description,Body (HTML)",
-        `"${currentModalProduct.master_sku || currentModalProduct.id}","${currentModalProduct.handle}","${(currentModalProduct.title || '').replace(/"/g, '""')}","${(currentModalProduct.seo_title || '').replace(/"/g, '""')}","${(currentModalProduct.seo_meta_description || '').replace(/"/g, '""')}","${html.replace(/"/g, '""')}"`
+        "SKU,Handle,Title,SEO_Title,SEO_Meta_Description,B2B_Unit_Economics,Body (HTML)",
+        `"${currentModalProduct.master_sku || currentModalProduct.id}","${currentModalProduct.handle}","${(currentModalProduct.title || '').replace(/"/g, '""')}","${(currentModalProduct.seo_title || '').replace(/"/g, '""')}","${(currentModalProduct.seo_meta_description || '').replace(/"/g, '""')}","${String(b2bVal).replace(/"/g, '""')}","${html.replace(/"/g, '""')}"`
       ].join("\n")
     : [
         "Handle,Title,Body (HTML)",
@@ -3898,6 +3903,12 @@ function getProductModeBHTML(liveP) {
       specs = tmpl.base_specs.map(s => ({ label: s.label, value: s.default }));
     }
   }
+  if (isLojaDoce) {
+    const b2bClientVal = (liveP.b2b_economics && (liveP.b2b_economics.resumo_economia_b2b || liveP.b2b_economics.value)) || (liveP.vtex_specifications && liveP.vtex_specifications["Economia & Custo Unitário (B2B)"]) || "";
+    if (b2bClientVal && !specs.some(s => s && s.label === "Economia & Custo Unitário (B2B)")) {
+      specs.push({ label: "Economia & Custo Unitário (B2B)", value: b2bClientVal });
+    }
+  }
 
   // Ajuste inteligente do Prazo de Produção para Camisas C0 (Pronta entrega para _FULL e _OUT, 10 dias úteis para padrão)
   const isC0Shirt = (archetypeId === "uv_performance") ||
@@ -4161,6 +4172,7 @@ function getProductModeBHTML(liveP) {
 
   function buildClientLojaDoceInfographicCard(idx, archetypeId, themeColor, themeBg, prodObj, primaryImg, safeTitleAlt, mlTrackAttrsStr) {
     const yieldInfo = (prodObj && typeof prodObj.yield_info === "object" && prodObj.yield_info) ? prodObj.yield_info : {};
+    const b2bEconomics = (prodObj && typeof prodObj.b2b_economics === "object" && prodObj.b2b_economics) ? prodObj.b2b_economics : {};
     const allergenInfo = (prodObj && typeof prodObj.allergen_info === "object" && prodObj.allergen_info) ? prodObj.allergen_info : {};
     const vtexSpecs = (prodObj && typeof prodObj.vtex_specifications === "object" && prodObj.vtex_specifications) ? prodObj.vtex_specifications : {};
     const specsList = Array.isArray(specs) ? specs : [];
@@ -4345,6 +4357,22 @@ function getProductModeBHTML(liveP) {
         techParamVal = "Desempenho calibrado para uso profissional e doméstico com alta estabilidade.";
       }
 
+      const b2bEconVal = (
+        b2bEconomics.resumo_economia_b2b ||
+        b2bEconomics.value ||
+        vtexSpecs["Economia & Custo Unitário (B2B)"] ||
+        specsMap["Economia & Custo Unitário (B2B)"] ||
+        ""
+      );
+      const b2bMetricHtml = b2bEconVal ? `
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">${getSvgIcon('bolt', themeColor, 13)}</span>
+                <span class="brk-infog-metric-label">Economia & Custo Unitário (B2B)</span>
+              </div>
+              <div class="brk-infog-metric-val">${b2bEconVal}</div>
+            </div>` : "";
+
       const thumbHtml = primaryImg ? `
             <div class="brk-infog-thumb brk-stage-loupe" ${mlTrackAttrsStr}>
               <img src="${primaryImg}" alt="${safeTitleAlt} - Zoom de Especificação" class="brk-infog-crop-zoom" loading="lazy" referrerpolicy="no-referrer" />
@@ -4381,7 +4409,7 @@ function getProductModeBHTML(liveP) {
                 <span class="brk-infog-metric-label">Rendimento & Equivalência Prática</span>
               </div>
               <div class="brk-infog-metric-val">${yieldVal}</div>
-            </div>
+            </div>${b2bMetricHtml}
             <div class="brk-infog-metric-card">
               <div class="brk-infog-metric-top">
                 <span class="brk-infog-metric-icon">${getSvgIcon('box', themeColor, 13)}</span>

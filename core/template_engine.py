@@ -33,6 +33,7 @@ from core.lojadoce_engine import (
     classify_lojadoce_vtex_category,
     extract_lojadoce_attributes,
     calculate_lojadoce_yield_and_equivalence,
+    calculate_lojadoce_b2b_unit_economics,
     get_anvisa_allergen_and_safety_info,
     generate_lojadoce_seo_metadata,
     build_vtex_specifications,
@@ -4808,11 +4809,13 @@ class TemplateEngine:
             is_back_cover_360 = False
             cat_vtex = str(product.get("vtex_category_path") or product.get("product_type") or product.get("category") or "")
             raw_for_attrs = str(product.get("raw_erp_title") or title)
+            raw_ld_price = str(product.get("price") or (product.get("variants") and product.get("variants")[0].get("price")) or "")
             ld_attrs = extract_lojadoce_attributes(raw_for_attrs, formatted_title, brand_name, cat_vtex, str(sku))
             ld_yield = calculate_lojadoce_yield_and_equivalence(raw_for_attrs, formatted_title, ld_attrs, archetype_id)
+            ld_b2b = calculate_lojadoce_b2b_unit_economics(raw_ld_price, raw_for_attrs, formatted_title, ld_attrs, ld_yield, archetype_id)
             ld_allergen = get_anvisa_allergen_and_safety_info(raw_for_attrs, formatted_title, archetype_id, ld_attrs)
             ld_seo = generate_lojadoce_seo_metadata(formatted_title, brand_name, ld_attrs, archetype_id, ld_yield)
-            ld_vtex_specs = build_vtex_specifications(ld_attrs, archetype_id, ld_yield, ld_allergen)
+            ld_vtex_specs = build_vtex_specifications(ld_attrs, archetype_id, ld_yield, ld_allergen, b2b_economics=ld_b2b)
             new_specs = customize_lojadoce_narrative(
                 archetype_id=archetype_id,
                 formatted_title=formatted_title,
@@ -4824,12 +4827,15 @@ class TemplateEngine:
                 act2=act2,
                 act3=act3,
                 template=template,
+                price_str=raw_ld_price,
+                b2b_economics=ld_b2b,
             )
             ld_extra_payload = {
                 "seo_title": ld_seo["seo_title"],
                 "seo_meta_description": ld_seo["seo_meta_description"],
                 "vtex_specifications": ld_vtex_specs,
                 "yield_info": ld_yield,
+                "b2b_economics": ld_b2b,
                 "allergen_info": ld_allergen,
             }
 

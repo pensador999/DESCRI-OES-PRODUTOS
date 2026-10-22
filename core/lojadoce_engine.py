@@ -618,11 +618,13 @@ def detect_lojadoce_archetype(title: str, category: str = "", tags: Optional[Lis
         return "ld_confeitaria_ingredientes"
 
     # 4. Bomboniere — Chocolates de Consumo, Bombons, Wafers, Biscoitos & Panetones (antes de /salgadinhos)
-    if any(w in t for w in (
-        "bisc ", "biscoito", "wafer", "waffer", "kit kat", "bis lacta", "bis xtra", "bombom ", "choc baton",
-        "chocolate barra", "moedas ao leite", "doce de leite tablete", "doce de leite em pasta",
-        "panetone", "panettone", "chocottone"
-    )) or "/bomboniere/chocolate/" in c or "/bomboniere/doces/" in c:
+    if not any(x in t for x in ("maleta cx bombom", "emb para trufa", "caixa mdf", "cesta box")) and (
+        any(w in t for w in (
+            "bisc ", "biscoito", "wafer", "waffer", "kit kat", "bis lacta", "bis xtra", "bombom ", "choc baton",
+            "chocolate barra", "moedas ao leite", "doce de leite tablete", "doce de leite em pasta",
+            "panetone", "panettone", "chocottone"
+        )) or "/bomboniere/chocolate/" in c or "/bomboniere/doces/" in c
+    ):
         return "ld_bomboniere_chocolates"
 
     # 5. Bomboniere — Balas, Gomas, Marshmallows, Chicletes, Pirulitos & Salgadinhos
@@ -766,15 +768,28 @@ def extract_lojadoce_attributes(raw_title: str, formatted_title: str, brand: str
 
     # 3. Quantidade na Embalagem (ex: C/50UN, PC 24.0, CX 30, 80 FOLHAS, 12 CORES)
     pack_qty = "Unidade individual"
+    is_stapler_or_punch = any(w in f_low or w in t_up.lower() for w in ("grampeador", "perfurador"))
     m_pack = (
         re.search(r"((?:Pacote|Caixa)\s+com\s+\d+\s+Unidades)", formatted_title, re.I)
-        or re.search(r"(com\s+\d+\s+(?:Unidades|Folhas|Peças|Blocos))", formatted_title, re.I)
-        or re.search(r"\b(\d+\s+(?:Unidades|Folhas|Peças|Cores))\b", formatted_title, re.I)
+        or re.search(
+            r"(com\s+\d+\s+(?:Unidades|Peças|Blocos))" if is_stapler_or_punch else r"(com\s+\d+\s+(?:Unidades|Folhas|Peças|Blocos))",
+            formatted_title,
+            re.I,
+        )
+        or (
+            None
+            if is_stapler_or_punch
+            else re.search(r"\b(\d+\s+(?:Unidades|Folhas|Peças|Cores))\b", formatted_title, re.I)
+        )
     )
     if m_pack:
         pack_qty = m_pack.group(1)
         if pack_qty.lower().startswith("com "):
             pack_qty = "Embalagem " + pack_qty
+    elif "guardanapo" in f_low or "guard " in t_up.lower():
+        m_guard_qty = re.search(r"\b\d+(?:[.,]\d+)?\s*X\s*\d+(?:[.,]\d+)?\s*CM\s+(\d+)\b", t_up)
+        if m_guard_qty and int(m_guard_qty.group(1)) > 1:
+            pack_qty = f"Embalagem com {m_guard_qty.group(1)} Folhas"
 
     # 4. Material Principal detectado
     material = ""
@@ -977,8 +992,9 @@ def calculate_lojadoce_yield_and_equivalence(
             dimensional_equiv = f"Espessura/ponta de precisão de {m_single_mm.group(1)} mm"
 
     # 2. Chocolates, Coberturas, Recheios, Leite Condensado, Creme de Leite, Chantilly e Confeitos
+    is_granulado_or_confeito = any(g in f_low for g in ("granulado", "confeito", "flocos", "power ball", "coloreti"))
     if archetype_id == "ld_confeitaria_ingredientes":
-        if ("cobertura" in f_low or ("chocolate" in f_low and "pó" not in f_low and "po " not in f_low)) and base_unit == "g" and grams_or_ml >= 200:
+        if ("cobertura" in f_low or ("chocolate" in f_low and "pó" not in f_low and "po " not in f_low and not is_granulado_or_confeito)) and base_unit == "g" and grams_or_ml >= 200:
             trufas = max(1, int(round(grams_or_ml / 25.0)))
             cascas_250 = max(1, int(round(grams_or_ml / 250.0)))
             bombons_12 = max(1, int(round(grams_or_ml / 12.0)))
@@ -1053,7 +1069,7 @@ def calculate_lojadoce_yield_and_equivalence(
         elif "fermento" in f_low and base_unit == "g":
             bolos_ferm = max(1, int(round(grams_or_ml / 10.0)))
             yield_estimate = f"Rende aprox. {bolos_ferm} {'receita' if bolos_ferm == 1 else 'receitas'} de bolo caseiro/profissional (medida padrão de 10g / 1 colher de sopa por receita)"
-        elif ("granulado" in f_low or "confeito" in f_low or "power ball" in f_low or "coloreti" in f_low) and base_unit == "g" and grams_or_ml >= 50:
+        elif is_granulado_or_confeito and base_unit == "g" and grams_or_ml >= 50:
             doces_enrolados = max(1, int(round(grams_or_ml / 5.0)))
             yield_estimate = f"Rende a finalização de aprox. {doces_enrolados} brigadeiros/docinhos de festa (média de 5g de confeito por unidade)"
         elif ("açúcar" in f_low or "glacucar" in f_low or "glaçúcar" in f_low or "farinha" in f_low or "chocolate em pó" in f_low) and base_unit == "g" and grams_or_ml >= 150:
@@ -1161,7 +1177,11 @@ def calculate_lojadoce_yield_and_equivalence(
     # 5. Bomboniere, Embalagens, Caixas MDF, Sacolas e Demais Categorias
     if not yield_estimate:
         m_qty = re.search(r"(\d+)\s+(?:Unidades|Folhas|Peças|Blocos|Cores)", pack, re.I)
-        if m_qty and int(m_qty.group(1)) > 1:
+        if any(w in f_low for w in ("grampeador", "perfurador")):
+            m_cap_fls = re.search(r"\b(\d+)\s*(?:Folhas|FLS?)\b", f"{raw_title} {formatted_title}", re.I)
+            if m_cap_fls:
+                yield_estimate = f"Capacidade operacional para grampear/perfurar até {m_cap_fls.group(1)} folhas simultaneamente com precisão"
+        elif m_qty and int(m_qty.group(1)) > 1:
             q_n = int(m_qty.group(1))
             if archetype_id in ("ld_bomboniere_chocolates", "ld_bomboniere_balas_gomas"):
                 yield_estimate = f"Embalagem com {q_n} unidades — excelente rendimento para sacolinhas surpresa, festas e revenda unitária em PDV"
@@ -1363,14 +1383,299 @@ def generate_lojadoce_seo_metadata(
     }
 
 
+def _parse_brl_price(price_str: Any) -> float:
+    """Extrai o valor numérico float de strings de preço como 'R$ 49,90', 'R$ 1.249,90' ou '49.90'."""
+    if price_str is None:
+        return 0.0
+    if isinstance(price_str, (int, float)):
+        return max(0.0, float(price_str))
+    s = str(price_str).strip()
+    if not s:
+        return 0.0
+    m = re.search(r"(\d{1,3}(?:\.\d{3})+,\d+|\d+[.,]\d+|\d+)", s)
+    if not m:
+        return 0.0
+    token = m.group(1)
+    if "." in token and "," in token:
+        token = token.replace(".", "").replace(",", ".")
+    elif "," in token:
+        token = token.replace(",", ".")
+    try:
+        return max(0.0, float(token))
+    except ValueError:
+        return 0.0
+
+
+def _fmt_brl(val: float) -> str:
+    """Formata float em moeda brasileira padrão 'R$ X,XX'."""
+    v = max(0.0, float(val))
+    if 0 < v < 0.01:
+        v = 0.01
+    formatted = f"{v:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    return f"R$ {formatted}"
+
+
+def calculate_lojadoce_b2b_unit_economics(
+    price_str: Any,
+    raw_title: str,
+    formatted_title: str,
+    attrs: Optional[Dict[str, str]] = None,
+    yield_info: Optional[Dict[str, str]] = None,
+    archetype_id: str = "",
+) -> Dict[str, str]:
+    """
+    Plano 2 — Inteligência Comercial B2B (Cálculo Automático de Custo por Unidade / Porção / 100g):
+    Extrai o valor numérico de `price` e calcula métricas comerciais B2B reais e precisas:
+    - Quando `pack_qty` > 1 (pacote/caixa com múltiplas unidades/folhas): Custo por Unidade / Folha.
+    - Quando `weight_vol` > 0 (g/kg/ml/L): Custo por 100g / 100ml e, para Confeitaria e Bomboniere,
+      Custo Estimado por Porção / Trufa / Receita com base no rendimento de `yield_info`.
+    - Para itens unitários duráveis/decorativos/utensílios/presentes: Resumo econômico de custo unitário direto.
+    """
+    attrs_dict = attrs or {}
+    yield_dict = yield_info or {}
+    price_val = _parse_brl_price(price_str)
+    unit_price_formatted = _fmt_brl(price_val) if price_val > 0 else ""
+
+    f_low = (formatted_title or "").lower()
+    t_up = (raw_title or "").upper()
+    wv = str(attrs_dict.get("weight_vol") or "")
+    pack_str = str(attrs_dict.get("pack_qty") or "")
+    yield_est = str(yield_dict.get("yield_estimate") or "")
+
+    # 1. Detectar quantidade no pacote/caixa (pack_qty > 1)
+    is_stapler_or_punch = any(w in f_low or w in t_up.lower() for w in ("grampeador", "perfurador"))
+    combined_pack_txt = f"{pack_str} {formatted_title or ''}"
+    m_pack = re.search(
+        r"\b(\d+)\s*(Unidades|Peças|Pecas|Blocos|Cores|Unid|Und|Un)\b"
+        if is_stapler_or_punch
+        else r"\b(\d+)\s*(Unidades|Folhas|Peças|Pecas|Blocos|Cores|Unid|Und|Un)\b",
+        combined_pack_txt,
+        re.I,
+    )
+    qty_num = 1
+    unit_kind = "un"
+    if m_pack:
+        qty_num = int(m_pack.group(1))
+        unit_kind = m_pack.group(2).lower()
+    elif raw_title and not is_stapler_or_punch:
+        m_raw = (
+            re.search(r"\bC/\s*(\d+)\s*(FLS?|FOLHAS?|FO|F|PECAS?|PCS?|PC|BLOCOS?|UN|UNIDADES|UND|UNID)?\b", raw_title, re.I)
+            or re.search(r"\b(?:PC|CX)\s*(\d+)(?:\.0)?\b", raw_title, re.I)
+            or re.search(r"\b(\d+)\s*(FLS?|FOLHAS?|PECAS?|PCS|UN|UNID|UND)\b", raw_title, re.I)
+        )
+        if m_raw:
+            qty_num = int(m_raw.group(1))
+            unit_kind = (m_raw.group(2) or "un").lower() if m_raw.lastindex and m_raw.lastindex >= 2 else "un"
+        elif "guardanapo" in f_low or "guard " in t_up.lower():
+            m_guard_qty = re.search(r"\b\d+(?:[.,]\d+)?\s*X\s*\d+(?:[.,]\d+)?\s*CM\s+(\d+)\b", t_up)
+            if m_guard_qty and int(m_guard_qty.group(1)) > 1:
+                qty_num = int(m_guard_qty.group(1))
+                unit_kind = "folhas"
+
+    if unit_kind.startswith(("fl", "fo", "f")):
+        unit_singular = "folha"
+        unit_plural = "folhas"
+        short_unit = "folha"
+    else:
+        unit_singular = "unidade"
+        unit_plural = "unidades"
+        short_unit = "un"
+
+    # 2. Detectar peso ou volume líquido consumível (g / ml), excluindo capacidades nominais de formas/copos/embalagens e gramatura GSM de TNT
+    is_container_capacity_or_gsm = bool(
+        archetype_id in (
+            "ld_confeitaria_formas_utensilios",
+            "ld_embalagens_descartaveis",
+            "ld_presentes_caixas_sacolas",
+            "ld_papelaria_artesanato",
+        )
+        or any(
+            w in f_low or w in t_up.lower()
+            for w in ("forma ", "forminha", "embalagem", "copo ", "taça", "taca ", "pote ", "balde ", "tnt ")
+        )
+    )
+    if is_container_capacity_or_gsm:
+        grams_or_ml, base_unit = 0.0, ""
+    else:
+        grams_or_ml, base_unit = _parse_grams_or_ml(wv, f"{raw_title or ''} {formatted_title or ''}")
+
+    # Para displays/pacotes de bomboniere com unidades individuais de até 50g ou marcados como PC/CX (ex: 18g PC 24.0),
+    # o peso total da embalagem é qty_num * peso_unitario
+    total_grams_or_ml = grams_or_ml
+    if qty_num > 1 and grams_or_ml > 0:
+        if grams_or_ml <= 50.0 or bool(re.search(r"\b(?:PC|CX)\s*\d+", raw_title or "", re.I)):
+            total_grams_or_ml = grams_or_ml * qty_num
+
+    is_granulado_or_confeito = any(g in f_low for g in ("granulado", "confeito", "flocos", "power ball", "coloreti"))
+
+    cost_per_unit = ""
+    cost_per_100g_ml = ""
+    cost_per_portion = ""
+    resumo_economia_b2b = ""
+
+    if price_val > 0:
+        if total_grams_or_ml > 0 and base_unit in ("g", "ml"):
+            val_100 = (price_val / total_grams_or_ml) * 100.0
+            cost_per_100g_ml = f"{_fmt_brl(val_100)} a cada 100{base_unit}"
+
+        # Cálculo de custo por porção/trufa/receita para Confeitaria & Bomboniere
+        if grams_or_ml > 0 and archetype_id in (
+            "ld_confeitaria_ingredientes",
+            "ld_bomboniere_chocolates",
+            "ld_bomboniere_balas_gomas",
+        ):
+            if (
+                archetype_id == "ld_confeitaria_ingredientes"
+                and (
+                    "cobertura" in f_low
+                    or ("chocolate" in f_low and "pó" not in f_low and "po " not in t_up.lower() and not is_granulado_or_confeito)
+                )
+                and base_unit == "g"
+                and grams_or_ml >= 200
+            ):
+                porcoes_20g = grams_or_ml / 20.0
+                custo_20g = price_val / porcoes_20g
+                cost_per_portion = f"custo aproximado de {_fmt_brl(custo_20g)} por trufa/casquinha de 20g"
+            elif (
+                archetype_id == "ld_confeitaria_ingredientes"
+                and any(w in f_low for w in ("recheio", "doce de leite", "avelã", "nutella", "brigadeiro"))
+                and base_unit == "g"
+                and grams_or_ml >= 250
+            ):
+                m_trufas = re.search(r"(\d+)\s+trufas", yield_est, re.I)
+                n_trufas = int(m_trufas.group(1)) if m_trufas else max(1, int(round(grams_or_ml / 20.0)))
+                cost_per_portion = f"custo aproximado de {_fmt_brl(price_val / n_trufas)} por trufa/cone recheado de 20g"
+            elif (
+                archetype_id == "ld_confeitaria_ingredientes"
+                and ("leite condensado" in f_low or "leite cond" in t_up.lower())
+                and base_unit == "g"
+                and grams_or_ml >= 200
+            ):
+                m_brig = re.search(r"(\d+)\s+brigadeiros\s+de\s+festa", yield_est, re.I)
+                n_brig = int(m_brig.group(1)) if m_brig else max(1, int(round((grams_or_ml * 1.10) / 15.0)))
+                cost_per_portion = f"custo aproximado de {_fmt_brl(price_val / n_brig)} por brigadeiro de festa (15g)"
+            elif (
+                archetype_id == "ld_confeitaria_ingredientes"
+                and ("chantilly" in f_low or "chanty" in f_low)
+                and base_unit == "ml"
+                and grams_or_ml >= 150
+            ):
+                m_bolos = re.search(r"de\s+(\d+)\s+a\s+(\d+)\s+bolos", yield_est, re.I)
+                m_cup = re.search(r"até\s+(\d+)\s+cupcakes", yield_est, re.I)
+                if m_bolos:
+                    n_bolos = max(1, int(m_bolos.group(2)))
+                    cost_per_portion = f"custo aproximado de {_fmt_brl(price_val / n_bolos)} por bolo aro 20 cm confeitado"
+                elif m_cup:
+                    n_cup = max(1, int(m_cup.group(1)))
+                    cost_per_portion = f"custo aproximado de {_fmt_brl(price_val / n_cup)} por cupcake/sobremesa decorada"
+                else:
+                    porcoes_20ml = max(1.0, grams_or_ml / 20.0)
+                    cost_per_portion = f"custo aproximado de {_fmt_brl(price_val / porcoes_20ml)} por porção de 20ml"
+            else:
+                m_doces = re.search(r"(\d+)\s+(?:brigadeiros/docinhos|doces\s+finos)", yield_est, re.I)
+                m_fatias = re.search(r"de\s+(\d+)\s+a\s+(\d+)\s+fatias", yield_est, re.I)
+                m_porc25 = re.search(r"(\d+)\s+porções\s+de\s+25g", yield_est, re.I)
+                m_cup_pa = re.search(r"até\s+(\d+)\s+cupcakes", yield_est, re.I)
+                m_kg_cor = re.search(r"colore\s+até\s+(\d+)\s*kg", yield_est, re.I)
+                m_calda = re.search(r"Estabiliza\s+aprox\.\s+(\d+)\s+litros", yield_est, re.I)
+                m_rec = re.search(
+                    r"(\d+)\s+(?:a\s+(\d+)\s+)?(?:receitas?(?:\s+base)?|aplicações(?:/receitas)?|medidas\s+culinárias)",
+                    yield_est,
+                    re.I,
+                )
+                if m_doces:
+                    n_d = max(1, int(m_doces.group(1)))
+                    cost_per_portion = f"custo aproximado de {_fmt_brl(price_val / n_d)} por doce finalizado"
+                elif m_fatias:
+                    n_f = max(1, int(m_fatias.group(2)))
+                    cost_per_portion = f"custo aproximado de {_fmt_brl(price_val / n_f)} por fatia servida"
+                elif m_porc25:
+                    n_p25 = max(1, int(m_porc25.group(1)))
+                    cost_per_portion = f"custo aproximado de {_fmt_brl(price_val / n_p25)} por porção de 25g"
+                elif m_cup_pa:
+                    n_cpa = max(1, int(m_cup_pa.group(1)))
+                    cost_per_portion = f"custo aproximado de {_fmt_brl(price_val / n_cpa)} por cupcake/pirulito decorado"
+                elif m_kg_cor:
+                    n_kg = max(1, int(m_kg_cor.group(1)))
+                    cost_per_portion = f"custo aproximado de {_fmt_brl(price_val / n_kg)} por kg de receita/cobertura colorida"
+                elif m_calda:
+                    n_cal = max(1, int(m_calda.group(1)))
+                    cost_per_portion = f"custo aproximado de {_fmt_brl(price_val / n_cal)} por litro de calda/receita estabilizada"
+                elif m_rec:
+                    n_r = max(1, int(m_rec.group(2) or m_rec.group(1)))
+                    cost_per_portion = f"custo aproximado de {_fmt_brl(price_val / n_r)} por receita/aplicação"
+                elif grams_or_ml >= 20:
+                    porcoes_20 = max(1.0, grams_or_ml / 20.0)
+                    cost_per_portion = f"custo aproximado de {_fmt_brl(price_val / porcoes_20)} por porção de 20{base_unit}"
+                else:
+                    cost_per_portion = f"custo unitário de {_fmt_brl(price_val)} por unidade ({wv or f'{int(grams_or_ml)}{base_unit}'})"
+
+        # Composição da métrica comercial B2B principal
+        if qty_num > 1:
+            unit_cost_val = price_val / qty_num
+            unit_cost_str = _fmt_brl(unit_cost_val)
+            cost_per_unit = f"{unit_cost_str} / {short_unit}"
+            cost_per_portion = f"{unit_cost_str} por {unit_singular}"
+            if cost_per_100g_ml:
+                resumo_economia_b2b = (
+                    f"Pacote com {qty_num} {unit_plural} → sai a apenas {unit_cost_str} por {unit_singular} "
+                    f"({unit_price_formatted} na embalagem • {cost_per_100g_ml})"
+                )
+            else:
+                resumo_economia_b2b = (
+                    f"Pacote com {qty_num} {unit_plural} → sai a apenas {unit_cost_str} por {unit_singular} "
+                    f"({unit_price_formatted} na embalagem)"
+                )
+        elif grams_or_ml > 0:
+            cost_per_unit = f"{unit_price_formatted} / un"
+            if cost_per_portion:
+                resumo_economia_b2b = f"{unit_price_formatted} na embalagem ({cost_per_100g_ml} • {cost_per_portion})"
+            else:
+                resumo_economia_b2b = (
+                    f"{unit_price_formatted} na embalagem ({cost_per_100g_ml} • excelente rendimento para uso profissional e comercial)"
+                )
+        else:
+            cost_per_unit = f"{unit_price_formatted} / un"
+            resumo_economia_b2b = (
+                f"Investimento unitário de {unit_price_formatted} — excelente custo-benefício para uso profissional, revenda ou composição de kits"
+            )
+    else:
+        # Fallback caso price não tenha sido informado (ex: testes sintéticos sem preço)
+        if qty_num > 1:
+            cost_per_unit = f"Pacote c/ {qty_num} {short_unit}"
+            resumo_economia_b2b = (
+                f"Pacote com {qty_num} {unit_plural} — excelente diluição de custo por {unit_singular} para produção profissional, festas e revenda"
+            )
+        elif grams_or_ml > 0:
+            wv_disp = wv or f"{int(grams_or_ml)}{base_unit}"
+            resumo_economia_b2b = (
+                f"Embalagem de {wv_disp} — alto rendimento a cada 100{base_unit} e controle exato de custo por porção/receita"
+            )
+        else:
+            resumo_economia_b2b = (
+                "Investimento unitário — excelente custo-benefício para uso profissional, revenda ou composição de kits"
+            )
+
+    return {
+        "unit_price_formatted": unit_price_formatted,
+        "cost_per_unit": cost_per_unit,
+        "cost_per_100g_ml": cost_per_100g_ml,
+        "cost_per_portion": cost_per_portion,
+        "resumo_economia_b2b": resumo_economia_b2b,
+        "label": "Economia & Custo Unitário (B2B)",
+        "value": resumo_economia_b2b,
+    }
+
+
 def build_vtex_specifications(
     attrs: Dict[str, str],
     archetype_id: str,
     yield_info: Dict[str, str],
     allergen_info: Dict[str, str],
+    b2b_economics: Optional[Dict[str, str]] = None,
 ) -> Dict[str, str]:
     """
-    Frente 4 da Auditoria VTEX:
+    Frente 4 da Auditoria VTEX + Plano 2 (Economia B2B):
     Gera o dicionário estruturado de especificações técnicas pronto para alimentar os
     SpecificationFilters (filtros laterais e ficha técnica nativa) da plataforma VTEX.
     """
@@ -1390,6 +1695,10 @@ def build_vtex_specifications(
         vtex_specs["Equivalência Dimensional"] = yield_info["dimensional_equiv"]
     if yield_info.get("yield_estimate"):
         vtex_specs["Rendimento Estimado"] = yield_info["yield_estimate"]
+    if b2b_economics and (b2b_economics.get("resumo_economia_b2b") or b2b_economics.get("value")):
+        vtex_specs[b2b_economics.get("label", "Economia & Custo Unitário (B2B)")] = (
+            b2b_economics.get("resumo_economia_b2b") or b2b_economics.get("value") or ""
+        )
     if yield_info.get("gas_and_arch"):
         vtex_specs["Inflagem / Aplicação"] = yield_info["gas_and_arch"]
     if attrs.get("material"):
@@ -1412,15 +1721,25 @@ def customize_lojadoce_narrative(
     act2: Dict[str, Any],
     act3: Dict[str, Any],
     template: Dict[str, Any],
+    price_str: Any = "",
+    b2b_economics: Optional[Dict[str, str]] = None,
 ) -> List[Dict[str, str]]:
     """
     Verticaliza profundamente os 3 Atos, a Ficha Técnica e as Dicas de Conservação
     para cada subtipo de produto da Loja Doce usando os atributos reais extraídos do SKU,
-    incluindo Rendimento Prático, Equivalência Dimensional e Alerta de Alergênicos ANVISA.
+    incluindo Rendimento Prático, Equivalência Dimensional, Economia B2B e Alerta de Alergênicos ANVISA.
     """
     attrs = extract_lojadoce_attributes(raw_title, formatted_title, brand, category, sku)
     yield_info = calculate_lojadoce_yield_and_equivalence(raw_title, formatted_title, attrs, archetype_id)
     allergen_info = get_anvisa_allergen_and_safety_info(raw_title, formatted_title, archetype_id, attrs)
+    b2b_info = b2b_economics or calculate_lojadoce_b2b_unit_economics(
+        price_str=price_str,
+        raw_title=raw_title,
+        formatted_title=formatted_title,
+        attrs=attrs,
+        yield_info=yield_info,
+        archetype_id=archetype_id,
+    )
 
     f_low = formatted_title.lower()
     t_up = (raw_title or "").upper()
@@ -1433,6 +1752,7 @@ def customize_lojadoce_narrative(
     yield_est = yield_info.get("yield_estimate", "")
     dim_equiv = yield_info.get("dimensional_equiv", "")
     gas_arch = yield_info.get("gas_and_arch", "")
+    b2b_val = b2b_info.get("resumo_economia_b2b") or b2b_info.get("value") or ""
 
     specs: List[Dict[str, str]] = [
         {"label": "Marca / Fabricante", "value": f"{b_disp} (Produto 100% Original)"},
@@ -1449,6 +1769,8 @@ def customize_lojadoce_narrative(
         specs.append({"label": "Apresentação / Quantidade", "value": pack})
     if yield_est:
         specs.append({"label": "Rendimento Prático Estimado", "value": yield_est})
+    if b2b_val:
+        specs.append({"label": "Economia & Custo Unitário (B2B)", "value": b2b_val})
     if gas_arch:
         specs.append({"label": "Tipo de Inflagem Recomendada", "value": gas_arch})
     if mat:
@@ -1482,7 +1804,7 @@ def customize_lojadoce_narrative(
             specs.append({"label": "Classificação Técnica", "value": "Cobertura Fracionada (formulada com gordura vegetal selecionada — dispensa temperagem)"})
             specs.append({"label": "Necessita Temperagem?", "value": "Não (Cobertura Fracionada — derreteu entre 45°C e 50°C, usou)"})
             specs.append({"label": "Uso Recomendado", "value": "Banhos de trufas, pão de mel, cones trufados, bombons e moldes de Páscoa"})
-        elif "chocolate" in f_low and "pó" not in f_low and "po " not in t_up.lower():
+        elif "chocolate" in f_low and "pó" not in f_low and "po " not in t_up.lower() and not any(g in f_low for g in ("granulado", "confeito", "flocos", "power ball", "coloreti")):
             act1["tag"] = f"Chocolate Nobre Puro {b_disp} • Manteiga de Cacau"
             act1["title"] = "SABOR NOBRE AUTÊNTICO, DERRETIMENTO AVELUDADO E PADRÃO GOURMET"
             act1["desc_tmpl"] = (

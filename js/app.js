@@ -1098,7 +1098,7 @@ function downloadShopifyCSVBatch() {
   }
 
   const isLojaDoce = (currentStore === "loja_doce");
-  const rows = [isLojaDoce ? "SKU,Handle,Title,SEO_Title,SEO_Meta_Description,Body (HTML)" : "Handle,Title,Body (HTML)"];
+  const rows = [isLojaDoce ? "SKU,Handle,Title,SEO_Title,SEO_Meta_Description,B2B_Unit_Economics,Body (HTML)" : "Handle,Title,Body (HTML)"];
   selected.forEach(p => {
     let html = "";
     if (currentMassBatchMode === "mode_b_html") {
@@ -1110,7 +1110,8 @@ function downloadShopifyCSVBatch() {
       html = p.mode_a_html || p.original_body_html || "";
     }
     if (isLojaDoce) {
-      rows.push(`"${p.master_sku || p.id}","${p.handle}","${(p.title || '').replace(/"/g, '""')}","${(p.seo_title || '').replace(/"/g, '""')}","${(p.seo_meta_description || '').replace(/"/g, '""')}","${html.replace(/"/g, '""')}"`);
+      const b2bVal = (p.b2b_economics && (p.b2b_economics.resumo_economia_b2b || p.b2b_economics.value)) || (p.vtex_specifications && p.vtex_specifications["Economia & Custo Unitário (B2B)"]) || "";
+      rows.push(`"${p.master_sku || p.id}","${p.handle}","${(p.title || '').replace(/"/g, '""')}","${(p.seo_title || '').replace(/"/g, '""')}","${(p.seo_meta_description || '').replace(/"/g, '""')}","${String(b2bVal).replace(/"/g, '""')}","${html.replace(/"/g, '""')}"`);
     } else {
       rows.push(`"${p.handle}","${p.title.replace(/"/g, '""')}","${html.replace(/"/g, '""')}"`);
     }

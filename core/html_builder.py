@@ -2010,6 +2010,7 @@ class HTMLBuilder:
         - Ato 3 (idx == 2): Infográfico de Segurança Alimentar / ANVISA, Conservação & Procedência
         """
         yield_info = enriched_data.get("yield_info") if isinstance(enriched_data.get("yield_info"), dict) else {}
+        b2b_economics = enriched_data.get("b2b_economics") if isinstance(enriched_data.get("b2b_economics"), dict) else {}
         allergen_info = enriched_data.get("allergen_info") if isinstance(enriched_data.get("allergen_info"), dict) else {}
         vtex_specs = enriched_data.get("vtex_specifications") if isinstance(enriched_data.get("vtex_specifications"), dict) else {}
         specs_list = enriched_data.get("specs") if isinstance(enriched_data.get("specs"), list) else []
@@ -2191,6 +2192,24 @@ class HTMLBuilder:
             if not tech_param_val:
                 tech_param_val = "Desempenho calibrado para uso profissional e doméstico com alta estabilidade."
 
+            b2b_econ_val = (
+                b2b_economics.get("resumo_economia_b2b")
+                or b2b_economics.get("value")
+                or vtex_specs.get("Economia & Custo Unitário (B2B)")
+                or specs_map.get("Economia & Custo Unitário (B2B)")
+                or ""
+            )
+            b2b_metric_html = ""
+            if b2b_econ_val:
+                b2b_metric_html = f"""
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">{get_svg_icon('bolt', color=theme_color, size=13)}</span>
+                <span class="brk-infog-metric-label">Economia & Custo Unitário (B2B)</span>
+              </div>
+              <div class="brk-infog-metric-val">{b2b_econ_val}</div>
+            </div>"""
+
             thumb_html = ""
             if primary_img:
                 thumb_html = f"""
@@ -2229,7 +2248,7 @@ class HTMLBuilder:
                 <span class="brk-infog-metric-label">Rendimento & Equivalência Prática</span>
               </div>
               <div class="brk-infog-metric-val">{yield_val}</div>
-            </div>
+            </div>{b2b_metric_html}
             <div class="brk-infog-metric-card">
               <div class="brk-infog-metric-top">
                 <span class="brk-infog-metric-icon">{get_svg_icon('box', color=theme_color, size=13)}</span>

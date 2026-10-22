@@ -1712,10 +1712,12 @@ class TestLojaDoceVtexVerticalization(unittest.TestCase):
         self.assertEqual(rep.get("errors", 0), 0, f"Nenhuma violação semântica esperada, encontrado: {rep}")
 
     def test_vtex_four_verticalization_fronts(self):
-        """Testa as 4 Frentes de Verticalização da Auditoria VTEX (Calculadora, SEO Limpo, ANVISA e SpecificationFilters)."""
+        """Testa as 4 Frentes de Verticalização da Auditoria VTEX + Plano 2 (Economia B2B)."""
         from core.lojadoce_engine import (
+            format_lojadoce_title,
             extract_lojadoce_attributes,
             calculate_lojadoce_yield_and_equivalence,
+            calculate_lojadoce_b2b_unit_economics,
             get_anvisa_allergen_and_safety_info,
             generate_lojadoce_seo_metadata,
             build_vtex_specifications,
@@ -1732,6 +1734,20 @@ class TestLojaDoceVtexVerticalization(unittest.TestCase):
         self.assertIn("84 bombons", y_choc["yield_estimate"])
         self.assertIn("4 cascas de Ovo de Páscoa de 250g", y_choc["yield_estimate"])
 
+        # Plano 2A: Custo por 100g e por trufa/casquinha em Cobertura 1,01kg (R$ 49,90)
+        b2b_choc = calculate_lojadoce_b2b_unit_economics(
+            "R$ 49,90", raw_choc, fmt_choc, attrs_choc, y_choc, "ld_confeitaria_ingredientes"
+        )
+        self.assertEqual(b2b_choc["unit_price_formatted"], "R$ 49,90")
+        self.assertEqual(b2b_choc["cost_per_100g_ml"], "R$ 4,94 a cada 100g")
+        self.assertEqual(b2b_choc["cost_per_portion"], "custo aproximado de R$ 0,99 por trufa/casquinha de 20g")
+        self.assertIn(
+            "R$ 49,90 na embalagem (R$ 4,94 a cada 100g • custo aproximado de R$ 0,99 por trufa/casquinha de 20g)",
+            b2b_choc["resumo_economia_b2b"],
+        )
+        self.assertEqual(b2b_choc["label"], "Economia & Custo Unitário (B2B)")
+        self.assertEqual(b2b_choc["value"], b2b_choc["resumo_economia_b2b"])
+
         # Frente 1B: Balão Látex Nº 09 c/50 -> conversão polegadas para cm, gás hélio/ar e arco orgânico
         raw_bal9 = "BALAO LATEX LISO RED N.09 C/50 AZUL PIC PIC"
         fmt_bal9 = "Balão de Látex Liso Redondo Nº 09 com 50 Unidades Azul Pic Pic"
@@ -1742,6 +1758,62 @@ class TestLojaDoceVtexVerticalization(unittest.TestCase):
         self.assertIn("9 polegadas (aprox. 23 cm de diâmetro inflado)", y_bal9["dimensional_equiv"])
         self.assertIn("Gás Hélio", y_bal9["gas_and_arch"])
         self.assertIn("arco orgânico", y_bal9["yield_estimate"])
+
+        # Plano 2B: Pacote c/50 unidades (R$ 13,00 -> R$ 0,26 / un)
+        b2b_bal9 = calculate_lojadoce_b2b_unit_economics(
+            "R$ 13,00", raw_bal9, fmt_bal9, attrs_bal9, y_bal9, "ld_artigos_festa_decoracao"
+        )
+        self.assertEqual(b2b_bal9["cost_per_unit"], "R$ 0,26 / un")
+        self.assertIn("Pacote com 50 unidades → sai a apenas R$ 0,26 por unidade", b2b_bal9["resumo_economia_b2b"])
+
+        # Plano 2C: Item unitário durável sem gramatura (Caixa MDF / Caneca)
+        raw_mdf = "CAIXA MDF TAMPA SAPATO 15X15X8CM"
+        fmt_mdf = "Caixa MDF Tampa Sapato 15x15x8cm"
+        attrs_mdf = extract_lojadoce_attributes(raw_mdf, fmt_mdf, "LINHA OFICIAL", "/PRESENTES/CAIXAS MDF/", "900199")
+        y_mdf = calculate_lojadoce_yield_and_equivalence(raw_mdf, fmt_mdf, attrs_mdf, "ld_presentes_caixas_sacolas")
+        b2b_mdf = calculate_lojadoce_b2b_unit_economics(
+            "R$ 18,90", raw_mdf, fmt_mdf, attrs_mdf, y_mdf, "ld_presentes_caixas_sacolas"
+        )
+        self.assertEqual(b2b_mdf["cost_per_unit"], "R$ 18,90 / un")
+        self.assertEqual(
+            b2b_mdf["resumo_economia_b2b"],
+            "Investimento unitário de R$ 18,90 — excelente custo-benefício para uso profissional, revenda ou composição de kits",
+        )
+
+        # Plano 2D: Display c/24 unidades de 18g (peso total = 432g -> R$ 3,47 a cada 100g e R$ 0,62 / un)
+        raw_disp = "BALA DOCIGOMA CORACAO SORTIDA 18GR DOCILE PC 24.0"
+        fmt_disp = format_lojadoce_title(raw_disp, "DOCILE")
+        attrs_disp = extract_lojadoce_attributes(raw_disp, fmt_disp, "DOCILE", "/BOMBONIERE/BALAS/", "793298")
+        y_disp = calculate_lojadoce_yield_and_equivalence(raw_disp, fmt_disp, attrs_disp, "ld_bomboniere_balas_gomas")
+        b2b_disp = calculate_lojadoce_b2b_unit_economics(
+            "R$ 14,99", raw_disp, fmt_disp, attrs_disp, y_disp, "ld_bomboniere_balas_gomas"
+        )
+        self.assertEqual(b2b_disp["cost_per_unit"], "R$ 0,62 / un")
+        self.assertEqual(b2b_disp["cost_per_100g_ml"], "R$ 3,47 a cada 100g")
+        self.assertEqual(b2b_disp["cost_per_portion"], "R$ 0,62 por unidade")
+
+        # Plano 2E: Forma forneável 500g c/10 (capacidade nominal não deve gerar custo por 100g) e Grampeador 15FLS (capacidade de grampeamento não é pacote de folhas)
+        raw_forma_pan = "FORMA PAPEL FORNEAVEL PANETONE FIORI 500G 134X95MM C/10 UNIDADES SULFORMAS"
+        fmt_forma_pan = format_lojadoce_title(raw_forma_pan, "SULFORMAS")
+        attrs_forma_pan = extract_lojadoce_attributes(raw_forma_pan, fmt_forma_pan, "SULFORMAS", "/CONFEITARIA/FORMAS/", "974593")
+        y_forma_pan = calculate_lojadoce_yield_and_equivalence(raw_forma_pan, fmt_forma_pan, attrs_forma_pan, "ld_confeitaria_formas_utensilios")
+        b2b_forma_pan = calculate_lojadoce_b2b_unit_economics(
+            "R$ 19,90", raw_forma_pan, fmt_forma_pan, attrs_forma_pan, y_forma_pan, "ld_confeitaria_formas_utensilios"
+        )
+        self.assertEqual(b2b_forma_pan["cost_per_unit"], "R$ 1,99 / un")
+        self.assertEqual(b2b_forma_pan["cost_per_100g_ml"], "")
+        self.assertNotIn("a cada 100g", b2b_forma_pan["resumo_economia_b2b"])
+
+        raw_gramp = "GRAMPEADOR METALICO 15FLS CINZA YINS PAPER"
+        fmt_gramp = format_lojadoce_title(raw_gramp, "YINS PAPER")
+        attrs_gramp = extract_lojadoce_attributes(raw_gramp, fmt_gramp, "YINS PAPER", "/PAPELARIA/", "977789")
+        y_gramp = calculate_lojadoce_yield_and_equivalence(raw_gramp, fmt_gramp, attrs_gramp, "ld_papelaria_artesanato")
+        b2b_gramp = calculate_lojadoce_b2b_unit_economics(
+            "R$ 15,99", raw_gramp, fmt_gramp, attrs_gramp, y_gramp, "ld_papelaria_artesanato"
+        )
+        self.assertEqual(attrs_gramp["pack_qty"], "Unidade individual")
+        self.assertEqual(b2b_gramp["cost_per_unit"], "R$ 15,99 / un")
+        self.assertIn("Investimento unitário de R$ 15,99", b2b_gramp["resumo_economia_b2b"])
 
         # Frente 1C: Balão Nº 05 -> alerta técnico de que não flutua com gás hélio
         raw_bal5 = "BALAO LATEX RED N.05 C/50 BRANCO SAO ROQUE"
@@ -1796,15 +1868,17 @@ class TestLojaDoceVtexVerticalization(unittest.TestCase):
         self.assertIn("Grau Alimentício", anvisa_pkg["label"])
         self.assertIn("Livre de BPA", anvisa_pkg["value"])
 
-        # Frente 4: SpecificationFilters estruturados para VTEX
+        # Frente 4: SpecificationFilters estruturados para VTEX + Economia & Custo Unitário (B2B)
         vtex_specs = build_vtex_specifications(
             attrs=attrs_choc,
             archetype_id="ld_confeitaria_ingredientes",
             yield_info=y_choc,
             allergen_info=anvisa_food,
+            b2b_economics=b2b_choc,
         )
         self.assertIn("Marca", vtex_specs)
         self.assertIn("Rendimento Estimado", vtex_specs)
+        self.assertIn("Economia & Custo Unitário (B2B)", vtex_specs)
         self.assertIn("Alerta de Alergênicos & Lactose (ANVISA)", vtex_specs)
         self.assertTrue(bool(y_choc.get("resumo_rendimento")), "yield_info deve expor resumo_rendimento para o modal UI")
         self.assertTrue(bool(anvisa_food.get("alerta_alergenicos")), "allergen_info deve expor alerta_alergenicos para o modal UI")
@@ -1929,6 +2003,9 @@ class TestLojaDoceVtexVerticalization(unittest.TestCase):
                 )
                 self.assertIn("SEGURANÇA, CONSERVAÇÃO & PROCEDÊNCIA", html_b)
 
+            b2b_ec = p.get("b2b_economics") or {}
+            b2b_sp = json.dumps(b2b_ec, ensure_ascii=False)
+
             for field_name, content in (
                 ("mode_b_html", html_b),
                 ("mode_b_markdown", md_b),
@@ -1936,6 +2013,7 @@ class TestLojaDoceVtexVerticalization(unittest.TestCase):
                 ("seo_title", seo_t),
                 ("seo_meta_description", seo_d),
                 ("vtex_specifications", vtex_sp),
+                ("b2b_economics", b2b_sp),
             ):
                 up = content.upper()
                 self.assertNotIn("BRK", up, f"Vazamento de 'BRK' em {field_name} do SKU {sku}")
@@ -1946,6 +2024,19 @@ class TestLojaDoceVtexVerticalization(unittest.TestCase):
             self.assertLessEqual(len(seo_t), 60, f"SKU {sku} seo_title > 60 chars")
             self.assertTrue(bool(seo_d), f"SKU {sku} sem seo_meta_description")
             self.assertTrue(bool(p.get("vtex_specifications")), f"SKU {sku} sem vtex_specifications")
+            self.assertIn(
+                "Economia & Custo Unitário (B2B)",
+                p.get("vtex_specifications") or {},
+                f"SKU {sku} sem Economia & Custo Unitário (B2B) em vtex_specifications",
+            )
+            spec_labels = [s.get("label") for s in (p.get("specs") or []) if isinstance(s, dict)]
+            self.assertIn(
+                "Economia & Custo Unitário (B2B)",
+                spec_labels,
+                f"SKU {sku} sem Economia & Custo Unitário (B2B) em specs",
+            )
+            self.assertTrue(bool(b2b_ec.get("resumo_economia_b2b")), f"SKU {sku} sem resumo_economia_b2b")
+            self.assertTrue(bool(b2b_ec.get("unit_price_formatted")), f"SKU {sku} sem unit_price_formatted")
             self.assertTrue(bool(p.get("allergen_info")), f"SKU {sku} sem allergen_info")
             self.assertTrue(bool((p.get("allergen_info") or {}).get("alerta_alergenicos")), f"SKU {sku} sem alerta_alergenicos")
             self.assertTrue(bool((p.get("yield_info") or {}).get("resumo_rendimento")), f"SKU {sku} sem resumo_rendimento")
@@ -1963,6 +2054,8 @@ class TestLojaDoceVtexVerticalization(unittest.TestCase):
         self.assertNotIn("LOJA_DOCE_FGH369_AUTHORIZED", app_js)
         self.assertNotIn("lojadoce.com.br", app_js.lower())
         self.assertNotIn("lojadoce.com.br", modal_js.lower())
+        self.assertIn("B2B_Unit_Economics", app_js)
+        self.assertIn("B2B_Unit_Economics", modal_js)
         self.assertIn("function buildClientLojaDoceInfographicCard(", modal_js)
         self.assertIn("INFOGRÁFICO • RENDIMENTO & MEDIDAS", modal_js)
         self.assertIn("SEGURANÇA, CONSERVAÇÃO & PROCEDÊNCIA", modal_js)
