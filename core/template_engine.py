@@ -26,6 +26,12 @@ Preserva rigorosamente 100% dos dados técnicos reais da peça sem alucinar espe
 import re
 import unicodedata
 from typing import Dict, Any, List, Optional, Tuple
+from core.lojadoce_engine import (
+    LOJA_DOCE_ARCHETYPES,
+    format_lojadoce_title,
+    detect_lojadoce_archetype,
+    customize_lojadoce_narrative,
+)
 
 KNOWN_BRANDS = [
     'Rapala', 'Deyu', 'Marine Sports', 'Marine', 'Daisen', 'Albatroz', 
@@ -1126,8 +1132,9 @@ class TemplateEngine:
                 "care_tips": "Lavar à mão com água fria e sabão neutro. Não usar alvejante. Secar à sombra e não torcer."
             }
         }
+        self.templates.update(LOJA_DOCE_ARCHETYPES)
 
-    def detect_archetype(self, title: str, category: str = "", tags: List[str] = None, vendor: str = "", sku: str = "") -> str:
+    def detect_archetype(self, title: str, category: str = "", tags: List[str] = None, vendor: str = "", sku: str = "", store_key: str = "") -> str:
         """
         Detecta com máxima precisão o arquétipo correto do produto.
         O TÍTULO DO PRODUTO É SOBERANO: previne que coleções multi-categoria
@@ -1146,6 +1153,14 @@ class TemplateEngine:
         vend = _clean(vendor)
         sku_clean = (sku or "").upper().strip()
         text = f"{t} {cat} {vend} {tags_str} {sku_clean}"
+
+        # 0. Loja Doce (VTEX) — Classificação dedicada por Departamentos e Subtipos de Confeitaria / Bomboniere / Embalagens / Festas
+        if (
+            store_key == "loja_doce"
+            or (category or "").strip().startswith("/")
+            or any(d in cat for d in ("bomboniere", "confeitaria", "artigos para festas", "embalagens e descartaveis", "papelaria", "halloween mais feliz", "fim de ano"))
+        ):
+            return detect_lojadoce_archetype(title=t_raw, category=category, tags=tags, vendor=vendor, sku=sku)
 
         # 1. Aromatizantes Automotivos & Cuidados (Prioridade máxima para evitar que caiam em camisas)
         if any(w in t for w in ["aromatizante", "cheirinho", "difusor", "aromatizador", "odorizador", "little trees", "odor"]):
@@ -2832,6 +2847,7 @@ class TemplateEngine:
             "brk_fishing": {"color": "#0284c7", "bg": "#f0f9ff"}, # Azul Leve
             "brk_agro":    {"color": "#16a34a", "bg": "#f0fdf4"}, # Verde Leve
             "brk_motors":  {"color": "#f97316", "bg": "#fff7ed"}, # Laranja Leve
+            "loja_doce":   {"color": "#db2777", "bg": "#fdf2f8"}, # Rosa Confeitaria (Loja Doce VTEX)
         }
         
         if not store_key:
@@ -2841,6 +2857,13 @@ class TemplateEngine:
             t_low_store = title.lower()
             imgs_str_store = " ".join(str(u) for u in cdn_images).lower()
             if (
+                archetype_id.startswith("ld_")
+                or "lojadoce" in url
+                or "vteximg.com.br" in imgs_str_store
+                or (product.get("category") or "").strip().startswith("/")
+            ):
+                store_key = "loja_doce"
+            elif (
                 "agro" in url or "agro" in vendor_str or "agro" in category
                 or archetype_id == "agro_field"
                 or "0887/2083/4857" in imgs_str_store
@@ -4745,6 +4768,28 @@ class TemplateEngine:
                 act_obj["desc_tmpl"] = _adapt_store_vocab(act_obj.get("desc_tmpl", ""))
             for sp in new_specs:
                 sp["value"] = _adapt_store_vocab(sp.get("value", ""))
+
+        if store_key == "loja_doce" or archetype_id.startswith("ld_"):
+            raw_ld_brand = str(product.get("brand_name") or product.get("vendor") or "Loja Doce").strip()
+            formatted_title = format_lojadoce_title(title, raw_ld_brand)
+            brand_name = raw_ld_brand.title() if raw_ld_brand.isupper() and len(raw_ld_brand) > 3 else raw_ld_brand
+            origin_type = "producao_propria" if raw_ld_brand.upper() in ("LOJA DOCE", "LOJA DOCE IMPORT") else "revenda"
+            show_copyright = False
+            back_360_img = ""
+            is_back_cover_360 = False
+            cat_vtex = str(product.get("vtex_category_path") or product.get("product_type") or product.get("category") or "")
+            new_specs = customize_lojadoce_narrative(
+                archetype_id=archetype_id,
+                formatted_title=formatted_title,
+                raw_title=title,
+                brand=brand_name,
+                category=cat_vtex,
+                sku=str(sku),
+                act1=act1,
+                act2=act2,
+                act3=act3,
+                template=template,
+            )
 
         specs = new_specs
 

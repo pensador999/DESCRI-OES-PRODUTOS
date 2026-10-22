@@ -71,13 +71,15 @@ function switchMainTab(tabId) {
 const STORE_DOMAINS = {
   "brk_fishing": "www.brkfishing.com.br",
   "brk_agro": "www.brkagro.com.br",
-  "brk_motors": "www.brkmotors.com.br"
+  "brk_motors": "www.brkmotors.com.br",
+  "loja_doce": "www.lojadoce.com.br"
 };
 
 const STORE_COLOR_PALETTES = {
   "brk_fishing": { color: "#0284c7", bg: "#f0f9ff", name: "Azul Leve" },
   "brk_agro":    { color: "#16a34a", bg: "#f0fdf4", name: "Verde Leve" },
-  "brk_motors":  { color: "#f97316", bg: "#fff7ed", name: "Laranja Leve" }
+  "brk_motors":  { color: "#f97316", bg: "#fff7ed", name: "Laranja Leve" },
+  "loja_doce":   { color: "#db2777", bg: "#fdf2f8", name: "Rosa Confeitaria" }
 };
 
 let liveSyncIntervalSecs = 15;
@@ -144,6 +146,12 @@ async function performLiveSync(isManual = false) {
   if (syncIcon) syncIcon.classList.add("animate-spin");
 
   const storeKey = currentStore;
+  if (storeKey === "loja_doce") {
+    isSyncingNow = false;
+    if (syncIcon) syncIcon.classList.remove("animate-spin");
+    if (isManual) showToast("🍬 Loja Doce (VTEX): 400 produtos sincronizados e verticalizados da API Intelligent Search VTEX.");
+    return;
+  }
   const domain = STORE_DOMAINS[storeKey] || "www.brkfishing.com.br";
   const fetchUrl = `https://${domain}/products.json?limit=30&t=${Date.now()}`;
 
@@ -416,7 +424,8 @@ async function switchStore(storeKey) {
   const pillMap = {
     "brk_fishing": "pill-store-fishing",
     "brk_agro": "pill-store-agro",
-    "brk_motors": "pill-store-motors"
+    "brk_motors": "pill-store-motors",
+    "loja_doce": "pill-store-lojadoce"
   };
   const activePill = document.getElementById(pillMap[storeKey]);
   if (activePill) {
@@ -428,7 +437,8 @@ async function switchStore(storeKey) {
   const storeTitles = {
     "brk_fishing": "BRK Fishing",
     "brk_agro": "BRK Agro",
-    "brk_motors": "BRK Motors"
+    "brk_motors": "BRK Motors",
+    "loja_doce": "Loja Doce (VTEX)"
   };
   const titleElem = document.getElementById("store-title-text");
   if (titleElem) titleElem.innerText = storeTitles[storeKey];
@@ -678,7 +688,7 @@ function renderProducts() {
 
     if (searchQuery.trim() !== "") {
       const q = searchQuery.toLowerCase();
-      const matchTitle = (p.title || "").toLowerCase().includes(q);
+      const matchTitle = (p.title || "").toLowerCase().includes(q) || (p.raw_erp_title || "").toLowerCase().includes(q);
       const matchSku = (p.master_sku || "").toLowerCase().includes(q);
       const matchVariants = (p.variants_skus || []).some(v => v.toLowerCase().includes(q));
       if (!matchTitle && !matchSku && !matchVariants) return false;
@@ -751,6 +761,7 @@ function renderProducts() {
           <h3 class="text-xs font-bold text-slate-900 line-clamp-2 leading-snug group-hover:text-blue-600 transition-colors">
             ${p.title}
           </h3>
+          ${p.raw_erp_title && p.raw_erp_title !== p.title ? `<p class="text-[10px] text-slate-400 font-mono truncate" title="Título ERP original na VTEX: ${p.raw_erp_title.replace(/"/g, '&quot;')}">ERP: ${p.raw_erp_title}</p>` : ''}
         </div>
       </div>
 
@@ -1083,7 +1094,7 @@ function renderAuditTable() {
   tbody.innerHTML = "";
 
   let auditItems = [];
-  const storeTitles = { "brk_fishing": "Fishing", "brk_agro": "Agro", "brk_motors": "Motors" };
+  const storeTitles = { "brk_fishing": "Fishing", "brk_agro": "Agro", "brk_motors": "Motors", "loja_doce": "Loja Doce" };
 
   for (const [storeKey, sData] of Object.entries(MASTER_PAYLOAD.stores)) {
     if (!sData || !sData.products) continue;

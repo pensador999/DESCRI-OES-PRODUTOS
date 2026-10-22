@@ -191,6 +191,55 @@ QUICK_BADGES_BY_ARCHETYPE: Dict[str, List[Dict[str, str]]] = {
         {"icon": "box", "title": "Ideal para Presentear", "sub": "Para Todas as Idades"},
         {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Rastreamento Completo"},
     ],
+    # --- Loja Doce (VTEX - Confeitaria, Bomboniere, Embalagens, Festas, Presentes e Papelaria) ---
+    "ld_confeitaria_ingredientes": [
+        {"icon": "sparkle", "title": "Padrão Confeitaria Pro", "sub": "Estabilidade & Rendimento"},
+        {"icon": "shield", "title": "Textura Homogênea", "sub": "Fácil Incorporação"},
+        {"icon": "box", "title": "Embalagem Lacrada", "sub": "Lote Fresco de Fábrica"},
+        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Loja Doce"},
+    ],
+    "ld_confeitaria_formas_utensilios": [
+        {"icon": "shield", "title": "Padrão Profissional", "sub": "Acabamento de Precisão"},
+        {"icon": "bolt", "title": "Alta Estabilidade", "sub": "Padronização de Produção"},
+        {"icon": "sparkle", "title": "Apresentação Impecável", "sub": "Valoriza suas Receitas"},
+        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Loja Doce"},
+    ],
+    "ld_bomboniere_chocolates": [
+        {"icon": "sparkle", "title": "Sabor & Cremosidade", "sub": "Marca Original Consagrada"},
+        {"icon": "box", "title": "Lote Fresco & Lacrado", "sub": "Conservação Garantida"},
+        {"icon": "bolt", "title": "Alto Giro Comercial", "sub": "Ideal p/ Festas e Revenda"},
+        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Loja Doce"},
+    ],
+    "ld_bomboniere_balas_gomas": [
+        {"icon": "sparkle", "title": "Cores & Sabores Vivos", "sub": "Sucesso em Lembrancinhas"},
+        {"icon": "box", "title": "Pacote Econômico", "sub": "Alto Rendimento por Embalagem"},
+        {"icon": "shield", "title": "100% Original", "sub": "Procedência Direta da Marca"},
+        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Loja Doce"},
+    ],
+    "ld_embalagens_descartaveis": [
+        {"icon": "shield", "title": "Estrutura Firme", "sub": "Transporte e Exposição Seguros"},
+        {"icon": "box", "title": "Praticidade & Higiene", "sub": "Ideal para Delivery e Eventos"},
+        {"icon": "sparkle", "title": "Acabamento Limpo", "sub": "Valoriza seu Produto"},
+        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Loja Doce"},
+    ],
+    "ld_artigos_festa_decoracao": [
+        {"icon": "palette", "title": "Visual Vibrante", "sub": "Destaque na Decoração"},
+        {"icon": "sparkle", "title": "Acabamento Festivo", "sub": "Fácil Composição de Cenário"},
+        {"icon": "shield", "title": "Material Selecionado", "sub": "Durabilidade Durante o Evento"},
+        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Loja Doce"},
+    ],
+    "ld_presentes_caixas_sacolas": [
+        {"icon": "box", "title": "Estrutura Reforçada", "sub": "Proteção e Elegância"},
+        {"icon": "sparkle", "title": "Pronta para Presentear", "sub": "Valoriza Cestas e Kits"},
+        {"icon": "palette", "title": "Acabamento Premium", "sub": "Apresentação Sofisticada"},
+        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Loja Doce"},
+    ],
+    "ld_papelaria_artesanato": [
+        {"icon": "gear", "title": "Praticidade no Uso", "sub": "Rotina Escolar, Loja e Ateliê"},
+        {"icon": "shield", "title": "Qualidade Comprovada", "sub": "Desempenho Consistente"},
+        {"icon": "sparkle", "title": "Acabamento Preciso", "sub": "Ideal para Personalizados"},
+        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Loja Doce"},
+    ],
 }
 
 
@@ -385,6 +434,8 @@ class HTMLBuilder:
         return self._render_quick_badges(theme_color, badges)
 
     def _build_size_guide(self, theme_color: str, archetype_id: str, is_kids: bool, is_short_sleeve: bool, enriched_data: Dict[str, Any]) -> str:
+        if str(archetype_id or "").startswith("ld_"):
+            return ""
         title_low = (enriched_data.get("formatted_title") or enriched_data.get("title") or "").lower()
         sku_low = (enriched_data.get("sku") or enriched_data.get("master_sku") or "").lower()
 
@@ -1759,6 +1810,31 @@ class HTMLBuilder:
                 "zoom_act3": False,
             }
 
+        if str(archetype_id or "").startswith("ld_"):
+            if idx == 0:
+                return {
+                    "view_tag": "APRESENTAÇÃO • ATO 01",
+                    "icon": "sparkle",
+                    "label": "Apresentação Comercial & Embalagem Original",
+                    "pill": "Curadoria Loja Doce",
+                    "zoom_act3": False,
+                }
+            if idx == 1:
+                return {
+                    "view_tag": "ESPECIFICAÇÃO • ATO 02",
+                    "icon": "bolt",
+                    "label": "Rendimento, Composição & Padrão Profissional",
+                    "pill": "Alto Desempenho",
+                    "zoom_act3": False,
+                }
+            return {
+                "view_tag": "APLICAÇÃO • ATO 03",
+                "icon": "shield",
+                "label": "Acabamento & Praticidade na Rotina",
+                "pill": "Procedência Original",
+                "zoom_act3": False,
+            }
+
         if idx == 0:
             if is_split:
                 return {
@@ -2199,6 +2275,9 @@ class HTMLBuilder:
   </div>"""
 
         # 5. Template Completo Encapsulado (100% Autônomo e sem Font Awesome)
+        is_ld_arch = str(archetype_id or "").startswith("ld_")
+        trust_left_title = "Procedência 100% Original" if is_ld_arch else "Qualidade Oficial BRK"
+        trust_left_desc = f"Curadoria Oficial • Marca {brand_name}" if is_ld_arch else "Matérias-primas nobres testadas"
         full_html = f"""{brk_tracking_marker(enriched_data.get("sku") or enriched_data.get("master_sku") or enriched_data.get("id"), archetype_id)}
 <!-- BRK GROUP - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL SHOPIFY) -->
 <div class="brk-desc-wrapper">
@@ -2978,8 +3057,8 @@ class HTMLBuilder:
     <div class="brk-trust-item">
       <span class="brk-trust-svg">{get_svg_icon('shield', color=theme_color, size=24)}</span>
       <div>
-        <div class="brk-trust-title">Qualidade Oficial BRK</div>
-        <div class="brk-trust-desc">Matérias-primas nobres testadas</div>
+        <div class="brk-trust-title">{trust_left_title}</div>
+        <div class="brk-trust-desc">{trust_left_desc}</div>
       </div>
     </div>
     <div class="brk-trust-item">

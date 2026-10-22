@@ -100,6 +100,11 @@ const LiveAgent = (() => {
   async function refresh(force) {
     if (busy) return;
     const storeKey = currentStore;
+    if (storeKey === "loja_doce") {
+      setStatus("🍬 Catálogo VTEX (lojadoce.com.br) • 400 produtos auditados e verticalizados (18.828 SKUs na base VTEX)", "ok");
+      if (force && typeof showToast === "function") showToast("🍬 Loja Doce (VTEX): 400 produtos verticalizados prontos para inspeção.");
+      return;
+    }
     busy = true;
     const btn = el("btn-live-agent");
     if (btn) { btn.disabled = true; btn.classList.add("opacity-60"); }
@@ -155,8 +160,8 @@ const SkuSearch = (() => {
   let building = null;
   let lastResults = [];
 
-  const STORE_LABEL = { brk_fishing: "🎣 Fishing", brk_agro: "🚜 Agro", brk_motors: "🏁 Motors" };
-  const STORE_CLS = { brk_fishing: "bg-sky-100 text-sky-800", brk_agro: "bg-green-100 text-green-800", brk_motors: "bg-orange-100 text-orange-800" };
+  const STORE_LABEL = { brk_fishing: "🎣 Fishing", brk_agro: "🚜 Agro", brk_motors: "🏁 Motors", loja_doce: "🍬 Loja Doce" };
+  const STORE_CLS = { brk_fishing: "bg-sky-100 text-sky-800", brk_agro: "bg-green-100 text-green-800", brk_motors: "bg-orange-100 text-orange-800", loja_doce: "bg-pink-100 text-pink-800" };
 
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
 

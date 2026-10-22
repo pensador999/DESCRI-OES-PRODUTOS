@@ -68,7 +68,8 @@ def cmd_status(args):
     store_files = [
         ("brk_fishing", "BRK Fishing"),
         ("brk_agro", "BRK Agro"),
-        ("brk_motors", "BRK Motors")
+        ("brk_motors", "BRK Motors"),
+        ("loja_doce", "Loja Doce (VTEX)")
     ]
     total_products = 0
     for key, name in store_files:
@@ -140,7 +141,7 @@ def cmd_validate(args):
     """Agente Auditor de Conformidade Semântica: valida o Modo B de todo o catálogo"""
     from core.semantic_auditor import SemanticAuditor, load_store_products
     print("\n[🔎] Agente Auditor de Conformidade Semântica (Modo B)...")
-    stores = ["brk_fishing", "brk_agro", "brk_motors"] if args.store == "all" else [args.store]
+    stores = ["brk_fishing", "brk_agro", "brk_motors", "loja_doce"] if args.store == "all" else [args.store]
     auditor = SemanticAuditor()
     all_findings = []
     tot_err = tot_warn = 0
@@ -285,7 +286,7 @@ def main():
 
     # Comando validate
     p_val = subparsers.add_parser("validate", help="Agente Auditor de Conformidade Semântica do Modo B")
-    p_val.add_argument("--store", type=str, default="all", choices=["brk_fishing", "brk_agro", "brk_motors", "all"], help="Loja alvo")
+    p_val.add_argument("--store", type=str, default="all", choices=["brk_fishing", "brk_agro", "brk_motors", "loja_doce", "all"], help="Loja alvo")
     p_val.add_argument("--limit", type=int, default=None, help="Limite de produtos por loja")
     p_val.add_argument("--strict", action="store_true", default=False, help="Falha também com WARNINGs")
     p_val.set_defaults(func=cmd_validate)

@@ -43,6 +43,10 @@ NON_TEXTILE = {
     "drinkware_thermo", "accessories_car_care", "accessories_general",
     "books_publications", "eyewear_sunglasses",
     "footwear_sandals_boaonda", "closed_footwear_sneakers",
+    "ld_confeitaria_ingredientes", "ld_confeitaria_formas_utensilios",
+    "ld_bomboniere_chocolates", "ld_bomboniere_balas_gomas",
+    "ld_embalagens_descartaveis", "ld_artigos_festa_decoracao",
+    "ld_presentes_caixas_sacolas", "ld_papelaria_artesanato",
 }
 
 TEXTILE_RE = re.compile(
@@ -94,8 +98,9 @@ def _first(regex: "re.Pattern", text: str) -> Optional[str]:
 
 
 def _rule_textile_in_non_textile(arch: str, title: str, body: str) -> Optional[str]:
-    if arch == "accessories_general":
-        # camping/chaveiros podem ter poliéster ou zíper (barraca): só acusa o que é inequivocamente de camisa
+    if arch == "accessories_general" or str(arch or "").startswith("ld_"):
+        # camping/chaveiros e produtos Loja Doce (ex: capa vampiro c/ gola, porta níquel poliéster, saco confeitar algodão)
+        # só acusam o que é inequivocamente de camisa técnica (Dry Fit, FPU 50, pesponto, manga longa/curta, quick dry)
         return _first(TEXTILE_STRICT_RE, body)
     if arch in NON_TEXTILE:
         return _first(TEXTILE_RE, body)
@@ -217,7 +222,8 @@ class SemanticAuditor:
         vendor = prod.get("vendor", "")
         sku_code = prod.get("master_sku") or prod.get("sku") or (prod.get("variants_skus") and prod.get("variants_skus")[0]) or ""
         arch = self.engine.detect_archetype(
-            title, str(prod.get("product_type", "")), str(prod.get("tags", "")), vendor=vendor, sku=sku_code
+            title, str(prod.get("product_type", "")), str(prod.get("tags", "")),
+            vendor=vendor, sku=sku_code, store_key=store_key
         ) or prod.get("archetype_id")
         raw_imgs = prod.get("cdn_images") or prod.get("gallery") or [
             (i.get("src", i) if isinstance(i, dict) else i) for i in prod.get("images", [])

@@ -41,17 +41,19 @@ const StoreLoader = {
     const varName = `__STORE_${storeKey.toUpperCase()}`;
 
     // 2. Verificar se a variável global já foi pré-carregada
-    if (window[varName]) {
-      this.cache.stores[storeKey] = window[varName];
-      return window[varName];
+    const preloaded = window[varName] || (window.__STORE_CACHE && window.__STORE_CACHE[storeKey]);
+    if (preloaded) {
+      this.cache.stores[storeKey] = preloaded;
+      return preloaded;
     }
 
     // 3. Tentar carregar via injeção dinâmica de script (.js) - Funciona 100% no file:// e em http://
     try {
       await this.loadScript(`data/stores/${storeKey}.js?t=${Date.now()}`);
-      if (window[varName]) {
-        this.cache.stores[storeKey] = window[varName];
-        return window[varName];
+      const loaded = window[varName] || (window.__STORE_CACHE && window.__STORE_CACHE[storeKey]);
+      if (loaded) {
+        this.cache.stores[storeKey] = loaded;
+        return loaded;
       }
     } catch (scriptErr) {
       console.warn(`[StoreLoader] Script data/stores/${storeKey}.js não disponível, tentando fetch JSON:`, scriptErr);

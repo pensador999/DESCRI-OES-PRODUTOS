@@ -1649,9 +1649,69 @@ class TestBRKStudioVerticalization(unittest.TestCase):
         self.assertIn("Ajuste Anatômico no Rosto & Pescoço em Uso Real", html_t660)
 
 
+class TestLojaDoceVtexVerticalization(unittest.TestCase):
+    """Testes de verticalização de títulos ERP e descrições Modo B para a Loja Doce (VTEX)."""
+
+    def test_lojadoce_erp_title_verticalization(self):
+        from core.lojadoce_engine import format_lojadoce_title
+        t1 = format_lojadoce_title(
+            "ACUCAR CRISTAL AMARELO 400G MIX",
+            brand="MIX",
+        )
+        self.assertIn("Açúcar Cristal Amarelo", t1)
+        self.assertIn("400g", t1)
+        self.assertIn("Mix", t1)
+
+        t2 = format_lojadoce_title(
+            "BALAO LATEX LISO RED N.09 C/50 AZUL TURQUESA PIC PIC",
+            brand="PIC PIC",
+        )
+        self.assertIn("Balão", t2)
+        self.assertIn("Látex", t2)
+        self.assertIn("Redondo", t2)
+        self.assertIn("Nº 09", t2)
+        self.assertIn("com 50 Unidades", t2)
+
+    def test_lojadoce_archetype_and_html_compliance(self):
+        from core.template_engine import TemplateEngine
+        from core.html_builder import HTMLBuilder
+        from core.semantic_auditor import SemanticAuditor
+
+        te = TemplateEngine()
+        hb = HTMLBuilder()
+        auditor = SemanticAuditor()
+
+        prod = {
+            "id": 99001,
+            "master_sku": "37327-1",
+            "raw_erp_title": "PO P/DECORACAO DOURADO EGIPCIO 20G FAB!",
+            "title": "Pó para Decoração Dourado Egípcio 20g Fab!",
+            "vendor": "FAB!",
+            "category": "Confeitaria",
+            "vtex_categories": ["/Confeitaria/Corantes/Po para Decoracao/"],
+            "original_body_html": "O pó para decoração é um item essencial na confeitaria artística.",
+            "images": ["https://tfckoe.vtexassets.com/arquivos/ids/230829/37327-1.jpg"],
+        }
+        arch_id = te.detect_archetype(
+            prod["title"],
+            prod["category"],
+            prod["vtex_categories"],
+            store_key="loja_doce",
+        )
+        self.assertEqual(arch_id, "ld_confeitaria_ingredientes")
+        narrative = te.generate_narrative_from_template(prod, arch_id, prod["images"], store_key="loja_doce")
+        html = hb.build_shopify_html(narrative)
+        prod["archetype_id"] = arch_id
+        prod["mode_b_html"] = html
+        self.assertNotIn('<details class="brk-size-guide">', html)
+        self.assertIn("Padrão Confeitaria Pro", html)
+        rep = auditor.audit_products([prod], store_key="loja_doce")
+        self.assertEqual(rep.get("errors", 0), 0, f"Nenhuma violação semântica esperada, encontrado: {rep}")
+
+
 def run_tests():
     suite = unittest.TestSuite()
-    for case in (TestBRKRegressionGuardrails, TestSemanticConformity, TestLiveAgentAndTracking, TestTampermonkeyIntegration, TestProductDBApiAndDirectConnection, TestDeepFlowAuditGuardrails, TestBRKStudioVerticalization):
+    for case in (TestBRKRegressionGuardrails, TestSemanticConformity, TestLiveAgentAndTracking, TestTampermonkeyIntegration, TestProductDBApiAndDirectConnection, TestDeepFlowAuditGuardrails, TestBRKStudioVerticalization, TestLojaDoceVtexVerticalization):
         suite.addTests(unittest.TestLoader().loadTestsFromTestCase(case))
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)

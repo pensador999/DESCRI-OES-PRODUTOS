@@ -26,13 +26,20 @@ function openProductModal(product) {
 
   const openAdminBtn = document.getElementById("modal-open-admin-btn");
   if (openAdminBtn) {
-    const storeMap = {
-      "brk_fishing": "use-brk-fishing.myshopify.com",
-      "brk_agro": "use-brk-agro.myshopify.com",
-      "brk_motors": "use-brk-motors.myshopify.com"
-    };
-    const domain = storeMap[product.store_key || currentStore] || "use-brk-fishing.myshopify.com";
-    openAdminBtn.href = `https://${domain}/admin/products/${product.id}`;
+    const activeStore = product.store_key || currentStore;
+    if (activeStore === "loja_doce") {
+      openAdminBtn.href = product.url || `https://www.lojadoce.com.br/${product.handle || ''}/p`;
+      openAdminBtn.innerHTML = `<span>🍬 Ver na Loja VTEX ↗</span>`;
+    } else {
+      const storeMap = {
+        "brk_fishing": "use-brk-fishing.myshopify.com",
+        "brk_agro": "use-brk-agro.myshopify.com",
+        "brk_motors": "use-brk-motors.myshopify.com"
+      };
+      const domain = storeMap[activeStore] || "use-brk-fishing.myshopify.com";
+      openAdminBtn.href = `https://${domain}/admin/products/${product.id}`;
+      openAdminBtn.innerHTML = `<span>Abrir no Admin Shopify ↗</span>`;
+    }
   }
 
   const sourceBadge = document.getElementById("modal-source-badge");
@@ -1192,6 +1199,54 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "title": "Envio Rápido & Seguro",
       "sub": "Rastreamento Completo"
     }
+  ],
+  "ld_confeitaria_ingredientes": [
+    { "icon": "sparkle", "title": "Padrão Confeitaria Pro", "sub": "Rendimento & Estabilidade" },
+    { "icon": "shield", "title": "Lote Original Lacrado", "sub": "Validade e Procedência" },
+    { "icon": "palette", "title": "Textura & Cor Uniforme", "sub": "Acabamento de Vitrine" },
+    { "icon": "truck", "title": "Envio Protegido", "sub": "Embalagem Reforçada" }
+  ],
+  "ld_confeitaria_formas_utensilios": [
+    { "icon": "gear", "title": "Desenforme Preciso", "sub": "Geometria Sem Rebarbas" },
+    { "icon": "shield", "title": "Grau Alimentício", "sub": "Material Atóxico Certificado" },
+    { "icon": "sparkle", "title": "Padronização em Série", "sub": "Peso Uniforme por Cavidade" },
+    { "icon": "care", "title": "Fácil Higienização", "sub": "Superfície Lisa Antiaderente" }
+  ],
+  "ld_bomboniere_chocolates": [
+    { "icon": "sparkle", "title": "Sabor & Cremosidade", "sub": "Marcas Consagradas" },
+    { "icon": "shield", "title": "Armazenamento Climatizado", "sub": "Frescor Preservado" },
+    { "icon": "box", "title": "Pronto para Consumo/Revenda", "sub": "Embalagem Original" },
+    { "icon": "truck", "title": "Despacho Rápido", "sub": "Cuidado Térmico no Envio" }
+  ],
+  "ld_bomboniere_balas_gomas": [
+    { "icon": "sparkle", "title": "Alto Giro Comercial", "sub": "Sucesso em Festas e PDV" },
+    { "icon": "palette", "title": "Cores & Sabores Vibrantes", "sub": "Ideal para Lembrancinhas" },
+    { "icon": "shield", "title": "Pacote Lacrado de Fábrica", "sub": "Higiene e Conservação" },
+    { "icon": "box", "title": "Excelente Custo-Benefício", "sub": "Rendimento por Embalagem" }
+  ],
+  "ld_embalagens_descartaveis": [
+    { "icon": "shield", "title": "Fechamento Seguro", "sub": "Proteção no Transporte" },
+    { "icon": "sparkle", "title": "Apresentação Impecável", "sub": "Valoriza seu Produto" },
+    { "icon": "box", "title": "Material Virgem Atóxico", "sub": "Contato Seguro com Alimentos" },
+    { "icon": "bolt", "title": "Praticidade no Delivery", "sub": "Empilhamento Estável" }
+  ],
+  "ld_artigos_festa_decoracao": [
+    { "icon": "palette", "title": "Cores Vivas & Brilho", "sub": "Destaque na Mesa Principal" },
+    { "icon": "sparkle", "title": "Acabamento Fotogênico", "sub": "Cenário de Festa Completo" },
+    { "icon": "shield", "title": "Material Resistente", "sub": "Fácil Montagem e Fixação" },
+    { "icon": "truck", "title": "Pronta Entrega", "sub": "Envio Rápido Loja Doce" }
+  ],
+  "ld_presentes_caixas_sacolas": [
+    { "icon": "box", "title": "Estrutura Firme", "sub": "Papel/Cartão de Alta Gramatura" },
+    { "icon": "sparkle", "title": "Acabamento Presenteável", "sub": "Agrega Valor ao Produto" },
+    { "icon": "palette", "title": "Design Elegante", "sub": "Ideal para Kits e Cestas" },
+    { "icon": "bolt", "title": "Montagem Prática", "sub": "Vincos Precisos" }
+  ],
+  "ld_papelaria_artesanato": [
+    { "icon": "gear", "title": "Precisão & Praticidade", "sub": "Uso Escolar, Festa e Ateliê" },
+    { "icon": "shield", "title": "Alta Durabilidade", "sub": "Material Selecionado" },
+    { "icon": "sparkle", "title": "Acabamento Limpo", "sub": "Ideal para Personalizados" },
+    { "icon": "truck", "title": "Envio Rápido", "sub": "Catálogo Oficial Loja Doce" }
   ]
 };
 
@@ -1316,6 +1371,7 @@ ${itemsHtml}
 }
 
 function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortSleeve, liveP) {
+  if (String(archetypeId || "").startsWith("ld_")) return "";
   const tLow = (liveP.formatted_title || liveP.title || "").toLowerCase();
   const skuLow = (liveP.sku || liveP.master_sku || "").toLowerCase();
 
@@ -3351,8 +3407,8 @@ function getProductModeBHTML(liveP) {
     }
   }
 
-  const themeColor = liveP.theme_color || (resolvedStoreKey === "brk_agro" ? "#16a34a" : resolvedStoreKey === "brk_motors" ? "#f97316" : "#0284c7");
-  const themeBg = liveP.theme_bg || (resolvedStoreKey === "brk_agro" ? "#f0fdf4" : resolvedStoreKey === "brk_motors" ? "#fff7ed" : "#f0f9ff");
+  const themeColor = liveP.theme_color || (resolvedStoreKey === "loja_doce" ? "#db2777" : resolvedStoreKey === "brk_agro" ? "#16a34a" : resolvedStoreKey === "brk_motors" ? "#f97316" : "#0284c7");
+  const themeBg = liveP.theme_bg || (resolvedStoreKey === "loja_doce" ? "#fdf2f8" : resolvedStoreKey === "brk_agro" ? "#f0fdf4" : resolvedStoreKey === "brk_motors" ? "#fff7ed" : "#f0f9ff");
 
   const isApparel = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work", "pants_cargo_tactical"].includes(archetypeId);
   const isLure = (archetypeId === "fishing_lures");
