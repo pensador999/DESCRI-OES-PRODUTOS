@@ -498,24 +498,34 @@ def build_dist():
               <span>🏁 Motors</span>
               <span id="header-skus-motors" class="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300">{motors_skus_fmt} SKUs</span>
             </button>
+            <button onclick="switchStore('loja_doce')" id="pill-store-lojadoce" class="store-pill hidden px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 transition-all text-slate-400 hover:text-white">
+              <span>🍬 Catálogo Exclusivo</span>
+              <span id="header-skus-lojadoce" class="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300">18.828 SKUs</span>
+            </button>
           </div>
         </div>
 
-        <!-- Abas de Navegação Principal (4 ABAS) -->
-        <div class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-xs">
-          <button onclick="switchMainTab('tab-catalog')" id="btn-tab-catalog" class="main-tab active px-3 py-1.5 rounded-lg font-bold transition-all bg-slate-800 text-white flex items-center gap-1.5">
-            <span>🛍️ Catálogo & Diagnóstico</span>
-          </button>
-          <button onclick="switchMainTab('tab-mass')" id="btn-tab-mass" class="main-tab px-3 py-1.5 rounded-lg font-bold transition-all text-slate-400 hover:text-white flex items-center gap-1.5">
-            <span>⚡ Geração em Massa</span>
-            <span id="badge-mass-count" class="bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded-full text-[10px] font-extrabold">0</span>
-          </button>
-          <button onclick="switchMainTab('tab-moldes')" id="btn-tab-moldes" class="main-tab px-3 py-1.5 rounded-lg font-bold transition-all text-slate-400 hover:text-white flex items-center gap-1.5">
-            <span>📐 Moldes Mestres</span>
-          </button>
-          <button onclick="switchMainTab('tab-analytics')" id="btn-tab-analytics" class="main-tab px-3 py-1.5 rounded-lg font-bold transition-all text-slate-400 hover:text-white flex items-center gap-1.5">
-            <span>📊 Análises & Monitoramento</span>
-            <span class="bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded-full text-[10px] font-extrabold">08:00</span>
+        <!-- Abas de Navegação Principal (4 ABAS) + Trocar Acesso -->
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-xs">
+            <button onclick="switchMainTab('tab-catalog')" id="btn-tab-catalog" class="main-tab active px-3 py-1.5 rounded-lg font-bold transition-all bg-slate-800 text-white flex items-center gap-1.5">
+              <span>🛍️ Catálogo & Diagnóstico</span>
+            </button>
+            <button onclick="switchMainTab('tab-mass')" id="btn-tab-mass" class="main-tab px-3 py-1.5 rounded-lg font-bold transition-all text-slate-400 hover:text-white flex items-center gap-1.5">
+              <span>⚡ Geração em Massa</span>
+              <span id="badge-mass-count" class="bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded-full text-[10px] font-extrabold">0</span>
+            </button>
+            <button onclick="switchMainTab('tab-moldes')" id="btn-tab-moldes" class="main-tab px-3 py-1.5 rounded-lg font-bold transition-all text-slate-400 hover:text-white flex items-center gap-1.5">
+              <span>📐 Moldes Mestres</span>
+            </button>
+            <button onclick="switchMainTab('tab-analytics')" id="btn-tab-analytics" class="main-tab px-3 py-1.5 rounded-lg font-bold transition-all text-slate-400 hover:text-white flex items-center gap-1.5">
+              <span>📊 Análises & Monitoramento</span>
+              <span class="bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded-full text-[10px] font-extrabold">08:00</span>
+            </button>
+          </div>
+          <button onclick="logoutBrkPortal()" title="Trocar credencial de acesso" class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 font-bold text-[11px] transition-all flex items-center gap-1">
+            <span>🔒</span>
+            <span class="hidden sm:inline">Trocar Acesso</span>
           </button>
         </div>
       </div>
@@ -531,7 +541,7 @@ def build_dist():
               <span id="store-title-text">BRK Fishing</span>
               <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold uppercase">Vigilante Diário Ativo</span>
             </h1>
-            <p class="text-xs text-slate-400">Padronização de Descrições • Duplo Modo por SKU • Vercel Ready</p>
+            <p id="header-subtitle-text" class="text-xs text-slate-400">Padronização de Descrições • Duplo Modo por SKU • Vercel Ready</p>
           </div>
         </div>
 
@@ -704,6 +714,9 @@ def build_dist():
         <button onclick="executeMassBatch('mode_b_html')" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-lg transition-all flex items-center gap-2">
           <span>🚀 Gerar Lote: Modo B</span>
           <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">3 Atos Conversão</span>
+        </button>
+        <button onclick="downloadShopifyCSVBatch()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 rounded-xl text-xs font-extrabold shadow-lg transition-all flex items-center gap-2" title="Exportar planilha CSV com os produtos selecionados">
+          <span>📥 Baixar Planilha CSV</span>
         </button>
         <button onclick="sendSelectedMassToTampermonkey()" class="px-4 py-2.5 bg-purple-700 hover:bg-purple-800 text-white rounded-xl text-xs font-extrabold shadow-lg transition-all flex items-center gap-2" title="Enviar os produtos selecionados diretamente para o Assistente Tampermonkey no Chrome">
           <span>⚡ Fila Tampermonkey</span>
@@ -1050,6 +1063,7 @@ def build_dist():
   <script src="data/stores/brk_fishing.js?v={build_ver}"></script>
   <script defer src="data/stores/brk_agro.js?v={build_ver}"></script>
   <script defer src="data/stores/brk_motors.js?v={build_ver}"></script>
+  <script defer src="data/stores/loja_doce.js?v={build_ver}"></script>
   <script src="data/stores/moldes.js?v={build_ver}"></script>
   <script src="data/stores/analytics.js?v={build_ver}"></script>
   <script src="js/store_loader.js?v={build_ver}"></script>

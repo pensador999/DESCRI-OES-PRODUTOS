@@ -29,26 +29,29 @@ class HTMLReplacer:
             return True
         return bool(self.dead_regex.search(src))
 
-    def create_responsive_image_tag(self, cdn_url: str, alt_text: str) -> str:
+    def create_responsive_image_tag(self, cdn_url: str, alt_text: str, store_key: str = "brk_fishing") -> str:
         """
-        Gera uma tag de imagem responsiva encapsulada no padrão Shopify que não quebra layout.
+        Gera uma tag de imagem responsiva encapsulada que não quebra layout.
         """
+        cls_pfx = "vtex" if store_key == "loja_doce" else "brk"
         return (
-            f'<div class="brk-preserved-media" style="margin: 24px auto; text-align: center; max-width: 850px;">'
+            f'<div class="{cls_pfx}-preserved-media" style="margin: 24px auto; text-align: center; max-width: 850px;">'
             f'<img src="{cdn_url}" alt="{alt_text}" '
             f'style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 14px rgba(15,23,42,0.08); display: inline-block;" '
             f'loading="lazy" />'
             f'</div>'
         )
 
-    def replace_images_preserve_html(self, original_html: str, cdn_images: List[str], product_title: str) -> str:
+    def replace_images_preserve_html(self, original_html: str, cdn_images: List[str], product_title: str, store_key: str = "brk_fishing") -> str:
         """
-        Substitui imagens quebradas/externas pelas fotos oficiais do CDN Shopify.
+        Substitui imagens quebradas/externas pelas fotos oficiais do CDN.
         Mantém todo o texto original, listas, tabelas e cabeçalhos intactos.
         """
+        is_vtex = store_key == "loja_doce"
+        cls_pfx = "vtex" if is_vtex else "brk"
         if not original_html or not original_html.strip():
             # Se não havia HTML, gera estrutura básica com as fotos CDN
-            img_blocks = [self.create_responsive_image_tag(img, f"{product_title} - Foto {i+1}") for i, img in enumerate(cdn_images[:3])]
+            img_blocks = [self.create_responsive_image_tag(img, f"{product_title} - Foto {i+1}", store_key=store_key) for i, img in enumerate(cdn_images[:3])]
             return "\n".join(img_blocks)
 
         html = original_html.strip()
@@ -66,8 +69,9 @@ class HTMLReplacer:
             original_src = match.group(1).strip()
             orig_root = original_src.split("?")[0].lower()
             
-            # Se a imagem é morta ou externa fora do CDN Shopify
-            if self.is_dead_image(original_src) or ("cdn.shopify.com" not in original_src):
+            # Se a imagem é morta ou externa fora do CDN oficial
+            is_valid_cdn = ("vteximg.com.br" in original_src or "vtexassets.com" in original_src) if is_vtex else ("cdn.shopify.com" in original_src)
+            if self.is_dead_image(original_src) or not is_valid_cdn:
                 while cdn_idx < len(all_cdn):
                     new_src = all_cdn[cdn_idx]
                     cdn_idx += 1
@@ -75,7 +79,7 @@ class HTMLReplacer:
                     if new_root in seen_roots:
                         continue
                     seen_roots.add(new_root)
-                    return self.create_responsive_image_tag(new_src, f"{product_title} - Detalhe Oficial")
+                    return self.create_responsive_image_tag(new_src, f"{product_title} - Detalhe Oficial", store_key=store_key)
                 # Sem foto CDN substituta disponível, remove a tag quebrada/externa para não dar 404
                 return ""
             
@@ -97,7 +101,7 @@ class HTMLReplacer:
                 img_root = img.split("?")[0].lower()
                 if img_root not in seen_roots:
                     seen_roots.add(img_root)
-                    extra_imgs.append(self.create_responsive_image_tag(img, f"{product_title} - Galeria {i+1}"))
+                    extra_imgs.append(self.create_responsive_image_tag(img, f"{product_title} - Galeria {i+1}", store_key=store_key))
             if extra_imgs:
                 updated_html += "\n" + "\n".join(extra_imgs)
 
@@ -105,8 +109,13 @@ class HTMLReplacer:
         updated_html = re.sub(r'<p>\s*(?:&nbsp;|<br\s*/?>)?\s*</p>', '', updated_html, flags=re.IGNORECASE)
         
         # 4. Envolver com container seguro e isolado
-        wrapper = f"""<!-- BRK MODO A: CONTEUDO ORIGINAL PRESERVADO COM FOTOS OFICIAIS CDN SHOPIFY -->
-<div class="brk-original-preserved" style="max-width: 980px; margin: 0 auto; line-height: 1.6; color: #1e293b;">
+        header_comment = (
+            "<!-- VTEX MODO A: CONTEUDO ORIGINAL PRESERVADO COM FOTOS OFICIAIS CDN VTEX -->"
+            if is_vtex
+            else "<!-- BRK MODO A: CONTEUDO ORIGINAL PRESERVADO COM FOTOS OFICIAIS CDN SHOPIFY -->"
+        )
+        wrapper = f"""{header_comment}
+<div class="{cls_pfx}-original-preserved" style="max-width: 980px; margin: 0 auto; line-height: 1.6; color: #1e293b;">
 {updated_html}
 </div>"""
         return wrapper

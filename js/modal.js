@@ -7,9 +7,123 @@
 let currentModalProduct = null;
 let currentModalMode = "b"; // 'b', 'a', 'orig'
 
+function isLojaDoceProduct(product) {
+  if (!product) return (typeof currentStore !== "undefined" && currentStore === "loja_doce");
+  return (
+    product.store_key === "loja_doce" ||
+    (typeof currentStore !== "undefined" && currentStore === "loja_doce") ||
+    String(product.archetype_id || "").startsWith("ld_")
+  );
+}
+
+function copyTextHelper(text, labelMsg) {
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    if (typeof showToast === "function") {
+      showToast(`✅ ${labelMsg || "Texto"} copiado para a área de transferência!`);
+    }
+  }).catch(() => {});
+}
+
+function renderVtexSeoAndSpecsPanel(product, isLojaDoce) {
+  let panel = document.getElementById("modal-vtex-seo-specs-panel");
+  if (!isLojaDoce || !product) {
+    if (panel) panel.classList.add("hidden");
+    return;
+  }
+  if (!panel) {
+    const banner = document.getElementById("modal-mode-banner");
+    if (banner && banner.parentNode) {
+      panel = document.createElement("div");
+      panel.id = "modal-vtex-seo-specs-panel";
+      banner.parentNode.insertBefore(panel, banner.nextSibling);
+    }
+  }
+  if (!panel) return;
+  panel.classList.remove("hidden");
+
+  const rawErp = product.raw_erp_title || product.title || "";
+  const cleanTitle = product.title || "";
+  const seoTitle = product.seo_title || cleanTitle.slice(0, 60);
+  const seoDesc = product.seo_meta_description || "";
+  const vtexSpecs = product.vtex_specifications || {};
+  const yieldInfo = product.yield_info || {};
+  const allergenInfo = product.allergen_info || {};
+
+  const specEntries = Object.entries(vtexSpecs);
+  const specsHtml = specEntries.map(([k, v]) => `
+    <div class="bg-white border border-pink-100 rounded-lg px-2.5 py-1.5 flex flex-col justify-between">
+      <span class="text-[9px] uppercase font-extrabold text-pink-700 tracking-wider">${String(k).replace(/</g, "&lt;")}</span>
+      <span class="text-[11px] font-bold text-slate-800 truncate" title="${String(v).replace(/"/g, "&quot;")}">${String(v).replace(/</g, "&lt;")}</span>
+    </div>
+  `).join("");
+
+  const safeSeoTitleAttr = String(seoTitle).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  const safeSeoDescAttr = String(seoDesc).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  const safeSpecsJsonAttr = JSON.stringify(vtexSpecs).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
+  panel.className = "rounded-2xl border border-pink-200 bg-gradient-to-br from-pink-50/70 via-white to-rose-50/50 p-4 shadow-sm space-y-3 text-xs";
+  panel.innerHTML = `
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-pink-200/70 pb-2.5">
+      <div class="flex items-center gap-2">
+        <span class="px-2 py-0.5 rounded-md bg-pink-600 text-white font-extrabold text-[10px] uppercase tracking-wider">Auditoria VTEX 4 Frentes</span>
+        <span class="font-extrabold text-slate-900 text-xs">SEO Limpo (Anti-Bug VTEX), Calculadora de Rendimento, ANVISA & SpecificationFilters</span>
+      </div>
+      <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full">✓ 100% Plain Text UTF-8</span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <!-- Frente 2: SEO Title & Meta Description -->
+      <div class="bg-white rounded-xl border border-slate-200 p-3 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">1. Expansão de Título ERP → Vitrine</span>
+          <span class="text-[10px] font-mono text-pink-700 font-bold">Title Case Acentuado</span>
+        </div>
+        <div class="text-[11px] text-slate-500 line-through truncate" title="${String(rawErp).replace(/"/g, "&quot;")}">ERP Bruto: ${String(rawErp).replace(/</g, "&lt;")}</div>
+        <div class="text-xs font-extrabold text-slate-900">${String(cleanTitle).replace(/</g, "&lt;")}</div>
+
+        <div class="pt-1.5 border-t border-slate-100 space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase text-slate-600">SEO Title (&lt;title&gt; VTEX): <span class="text-emerald-700">${seoTitle.length}/60 chars</span></span>
+            <button type="button" onclick="copyTextHelper('${safeSeoTitleAttr}', 'SEO Title VTEX')" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[10px]">📋 Copiar</button>
+          </div>
+          <div class="p-1.5 rounded bg-slate-50 border border-slate-200 font-mono text-[11px] text-slate-800">${String(seoTitle).replace(/</g, "&lt;")}</div>
+        </div>
+
+        <div class="pt-1 border-t border-slate-100 space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase text-slate-600">Meta Description (Sem HTML): <span class="text-emerald-700">${seoDesc.length} chars</span></span>
+            <button type="button" onclick="copyTextHelper('${safeSeoDescAttr}', 'Meta Description VTEX')" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[10px]">📋 Copiar</button>
+          </div>
+          <div class="p-1.5 rounded bg-slate-50 border border-slate-200 text-[11px] text-slate-700 leading-snug">${String(seoDesc).replace(/</g, "&lt;")}</div>
+        </div>
+      </div>
+
+      <!-- Frentes 1, 3 e 4: Rendimento, ANVISA e VTEX Specifications -->
+      <div class="bg-white rounded-xl border border-slate-200 p-3 space-y-2 flex flex-col justify-between">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">2. Especificações Estruturadas VTEX (${specEntries.length} campos)</span>
+            <button type="button" onclick="copyTextHelper('${safeSpecsJsonAttr}', 'JSON de Especificações VTEX')" class="px-2 py-0.5 rounded bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-200 font-bold text-[10px]">📋 Copiar JSON VTEX</button>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-36 overflow-y-auto pr-1">
+            ${specsHtml}
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-100 space-y-1 text-[11px]">
+          ${(yieldInfo.resumo_rendimento || yieldInfo.yield_estimate || yieldInfo.dimensional_equiv) ? `<div class="text-slate-700"><strong class="text-pink-700">📐 Rendimento / Equivalência:</strong> ${String(yieldInfo.resumo_rendimento || yieldInfo.yield_estimate || yieldInfo.dimensional_equiv).replace(/</g, "&lt;")}</div>` : ""}
+          ${(allergenInfo.alerta_alergenicos || allergenInfo.value) ? `<div class="text-slate-700"><strong class="text-amber-700">🛡️ Segurança / Alergênicos:</strong> ${String(allergenInfo.alerta_alergenicos || allergenInfo.value).replace(/</g, "&lt;")}</div>` : ""}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function openProductModal(product) {
   currentModalProduct = product;
   currentModalMode = "b";
+  const isLojaDoce = isLojaDoceProduct(product);
 
   if (!product.mode_b_html && typeof getProductModeBHTML === "function") {
     product.mode_b_html = getProductModeBHTML(product);
@@ -19,18 +133,33 @@ function openProductModal(product) {
   }
 
   document.getElementById("modal-title").innerText = product.title;
-  document.getElementById("modal-store-badge").innerText = product.store_key ? product.store_key.replace('_', ' ').toUpperCase() : "BRK";
+  const storeBadge = document.getElementById("modal-store-badge");
+  if (storeBadge) {
+    if (isLojaDoce) {
+      storeBadge.innerText = "CATÁLOGO VTEX";
+      storeBadge.className = "px-2 py-0.5 rounded-md bg-pink-600 text-white font-bold text-[10px] uppercase tracking-wider";
+    } else {
+      storeBadge.innerText = product.store_key ? product.store_key.replace('_', ' ').toUpperCase() : "BRK";
+      storeBadge.className = "px-2 py-0.5 rounded-md bg-blue-600 text-white font-bold text-[10px] uppercase tracking-wider";
+    }
+  }
   document.getElementById("modal-sku-badge").innerText = "SKU: " + (product.master_sku || product.id);
   document.getElementById("modal-variants-badge").innerText = (product.variants_skus ? product.variants_skus.length : 1) + " Variantes Agrupadas";
   document.getElementById("modal-archetype-badge").innerText = product.archetype_name || "Molde Padrão";
 
+  const btnModeOrig = document.getElementById("btn-mode-orig");
+  if (btnModeOrig) {
+    btnModeOrig.innerHTML = isLojaDoce ? "<span>📋 Original (ERP VTEX)</span>" : "<span>❌ Original (Quebrado)</span>";
+  }
+
   const openAdminBtn = document.getElementById("modal-open-admin-btn");
   if (openAdminBtn) {
     const activeStore = product.store_key || currentStore;
-    if (activeStore === "loja_doce") {
-      openAdminBtn.href = product.url || `https://www.lojadoce.com.br/${product.handle || ''}/p`;
-      openAdminBtn.innerHTML = `<span>🍬 Ver na Loja VTEX ↗</span>`;
+    if (isLojaDoce || activeStore === "loja_doce") {
+      openAdminBtn.style.display = "none";
+      openAdminBtn.href = "#";
     } else {
+      openAdminBtn.style.display = "inline-flex";
       const storeMap = {
         "brk_fishing": "use-brk-fishing.myshopify.com",
         "brk_agro": "use-brk-agro.myshopify.com",
@@ -39,7 +168,30 @@ function openProductModal(product) {
       const domain = storeMap[activeStore] || "use-brk-fishing.myshopify.com";
       openAdminBtn.href = `https://${domain}/admin/products/${product.id}`;
       openAdminBtn.innerHTML = `<span>Abrir no Admin Shopify ↗</span>`;
+      openAdminBtn.title = "Abrir produto diretamente no Admin da Shopify desta loja específica";
     }
+  }
+
+  const saveDirectBtn = document.getElementById("modal-save-shopify-direct-btn");
+  if (saveDirectBtn) saveDirectBtn.style.display = isLojaDoce ? "none" : "inline-flex";
+
+  const syncPhotosBtn = document.getElementById("btn-sync-live-photos");
+  if (syncPhotosBtn) syncPhotosBtn.style.display = isLojaDoce ? "none" : "inline-flex";
+
+  const bunkerDetails = document.getElementById("bunker-linker-details");
+  if (bunkerDetails) bunkerDetails.style.display = isLojaDoce ? "none" : "";
+
+  const footerSkuInfo = document.getElementById("modal-footer-sku-info");
+  if (footerSkuInfo) {
+    footerSkuInfo.innerText = isLojaDoce
+      ? `SKU Mestre: ${product.master_sku || product.id} • Pronto para VTEX`
+      : `SKU Mestre: ${product.master_sku || product.id} • Pronto para Shopify`;
+  }
+
+  const footerCopyBtn = document.getElementById("modal-footer-copy-btn");
+  if (footerCopyBtn) {
+    const lbl = footerCopyBtn.querySelector(".copy-label");
+    if (lbl) lbl.innerText = isLojaDoce ? "Copiar Código HTML VTEX" : "Copiar Código HTML Shopify";
   }
 
   const sourceBadge = document.getElementById("modal-source-badge");
@@ -64,7 +216,7 @@ function openProductModal(product) {
     const rawImgs = (product.images && product.images.length > 0) ? product.images : (product.cdn_images || product.gallery || []);
     const imgs = sanitizeAndDedupClientImages(rawImgs, product.archetype_id, product.title);
     const countBadge = document.getElementById("modal-photos-count-badge");
-    if (countBadge) countBadge.innerText = imgs.length + " Foto(s) Oficiais";
+    if (countBadge) countBadge.innerText = imgs.length + (isLojaDoce ? " Foto(s) CDN VTEX" : " Foto(s) Oficiais");
     imgs.forEach((url, idx) => {
       const thumb = document.createElement("img");
       thumb.src = url;
@@ -76,6 +228,7 @@ function openProductModal(product) {
     });
   }
 
+  renderVtexSeoAndSpecsPanel(product, isLojaDoce);
   updateModalView();
   document.getElementById("product-modal").classList.remove("hidden");
 }
@@ -228,18 +381,30 @@ function updateModalView() {
   const sourceElem = document.getElementById("modal-source-code");
   const bannerDesc = document.getElementById("modal-mode-desc");
   const banner = document.getElementById("modal-mode-banner");
+  const isLojaDoce = isLojaDoceProduct(currentModalProduct);
+
+  if (banner) {
+    const rightPill = banner.querySelector("span:last-child");
+    if (rightPill && rightPill !== bannerDesc) {
+      rightPill.innerText = isLojaDoce ? "Pronto para VTEX" : "Pronto para Shopify";
+    }
+  }
 
   let htmlToShow = "";
   if (currentModalMode === "b") {
     if (typeof getProductModeBHTML === "function") {
-      currentModalProduct.mode_b_html = getProductModeBHTML(currentModalProduct);
+      if (!isLojaDoce || !currentModalProduct.mode_b_html || currentModalProduct.__bunkerOverride) {
+        currentModalProduct.mode_b_html = getProductModeBHTML(currentModalProduct);
+      }
     }
     htmlToShow = currentModalProduct.mode_b_html || "<p>HTML Modo B não disponível</p>";
     if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-emerald-50 border-emerald-200 text-emerald-800";
     if (bannerDesc) {
       const arch = currentModalProduct.archetype_id || "";
       const isHeadwear = ["caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy"].includes(arch);
-      if (isHeadwear) {
+      if (isLojaDoce) {
+        bannerDesc.innerHTML = "<strong>⭐ Modo B Oficial (Verticalização VTEX 100/100):</strong> Estrutura persuasiva em 3 Atos com Calculadora Automática de Rendimento/Medidas, Alerta ANVISA de Alergênicos, SEO Meta Tags limpas e Schema.org.";
+      } else if (isHeadwear) {
         bannerDesc.innerHTML = "<strong>⭐ Modo B Oficial (Novo Formato D2C Bonés & Chapéus):</strong> Grid de Detalhes 4x, Características & Cuidados, Seções Split (Produto Premium e Entrega Segura na Caixa BRK anti-deformação) e Schema.org SEO.";
       } else {
         bannerDesc.innerHTML = "<strong>⭐ Modo B Oficial (Novo Padrão BRK 100/100):</strong> Recomendado para colar na Shopify! Estrutura persuasiva em 3 Atos narrativos com Badges Rápidos no topo, Tabela de Medidas Expansível, Schema.org SEO e SVGs embutidos.";
@@ -248,20 +413,36 @@ function updateModalView() {
   } else if (currentModalMode === "a") {
     htmlToShow = currentModalProduct.mode_a_html || currentModalProduct.original_body_html || "<p>Sem HTML original</p>";
     if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-blue-50 border-blue-200 text-blue-800";
-    if (bannerDesc) bannerDesc.innerHTML = "<strong>Modo A Ativo (Preservação):</strong> 100% do texto e tabelas originais preservados com fotos trocadas por CDN Shopify oficial.";
+    if (bannerDesc) {
+      bannerDesc.innerHTML = isLojaDoce
+        ? "<strong>Modo A Ativo (Preservação):</strong> Texto original preservado com fotos vinculadas ao CDN VTEX oficial."
+        : "<strong>Modo A Ativo (Preservação):</strong> 100% do texto e tabelas originais preservados com fotos trocadas por CDN Shopify oficial.";
+    }
   } else if (currentModalMode === "orig") {
     htmlToShow = currentModalProduct.original_body_html || "<p class='text-slate-400 italic'>Este produto não continha descrição original cadastrada.</p>";
     if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-amber-50 border-amber-200 text-amber-900";
-    if (bannerDesc) bannerDesc.innerHTML = "<strong>⚠️ Conteúdo Legado Atual na Shopify:</strong> Exibe como a descrição está gravada hoje na loja (antiga, sem os novos badges, tabela expansível ou schema).";
+    if (bannerDesc) {
+      bannerDesc.innerHTML = isLojaDoce
+        ? "<strong>⚠️ Conteúdo Legado Atual na VTEX:</strong> Exibe como a descrição bruta do ERP está gravada hoje (curta, sem 3 Atos, sem calculadora de rendimento, sem alerta ANVISA ou schema)."
+        : "<strong>⚠️ Conteúdo Legado Atual na Shopify:</strong> Exibe como a descrição está gravada hoje na loja (antiga, sem os novos badges, tabela expansível ou schema).";
+    }
   } else if (currentModalMode === "diff") {
     if (typeof getProductModeBHTML === "function") {
-      currentModalProduct.mode_b_html = getProductModeBHTML(currentModalProduct);
+      if (!isLojaDoce || !currentModalProduct.mode_b_html || currentModalProduct.__bunkerOverride) {
+        currentModalProduct.mode_b_html = getProductModeBHTML(currentModalProduct);
+      }
     }
     const htmlB = currentModalProduct.mode_b_html || "<p>HTML Modo B não disponível</p>";
     const htmlA = currentModalProduct.mode_a_html || currentModalProduct.original_body_html || "<p class='text-slate-400 italic'>Sem descrição original prévia cadastrada.</p>";
 
     if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-indigo-50 border-indigo-200 text-indigo-900";
-    if (bannerDesc) bannerDesc.innerHTML = "<strong>Comparador Lado a Lado (Diff):</strong> Compare a versão original com a nova versão blindada 100/100 (com Badges Rápidos, 3 Atos, Tabela de Medidas e Schema SEO).";
+    if (bannerDesc) {
+      bannerDesc.innerHTML = isLojaDoce
+        ? "<strong>Comparador Lado a Lado (Diff VTEX):</strong> Compare o cadastro bruto do ERP com a nova versão verticalizada 100/100 (3 Atos, Calculadora de Rendimento, Alerta ANVISA e Schema SEO)."
+        : "<strong>Comparador Lado a Lado (Diff):</strong> Compare a versão original com a nova versão blindada 100/100 (com Badges Rápidos, 3 Atos, Tabela de Medidas e Schema SEO).";
+    }
+
+    const rightBadgeLabel = isLojaDoce ? "Novo Padrão Oficial VTEX" : "Novo Padrão Oficial BRK";
 
     htmlToShow = `
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
@@ -279,11 +460,11 @@ function updateModalView() {
         </div>
       </div>
 
-      <!-- Coluna Direita: Modo B Otimizado BRK -->
+      <!-- Coluna Direita: Modo B Otimizado -->
       <div class="border-2 border-emerald-300 rounded-2xl p-4 bg-emerald-50/30 shadow-sm flex flex-col">
         <div class="flex items-center justify-between pb-3 mb-4 border-b border-emerald-200">
           <div class="flex items-center gap-2">
-            <span class="px-2.5 py-1 rounded-md bg-emerald-600 text-white text-[11px] font-extrabold uppercase tracking-wider">Novo Padrão Oficial BRK</span>
+            <span class="px-2.5 py-1 rounded-md bg-emerald-600 text-white text-[11px] font-extrabold uppercase tracking-wider">${rightBadgeLabel}</span>
             <span class="text-xs text-emerald-800 font-bold">Modo B Blindado</span>
           </div>
           <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
@@ -430,6 +611,7 @@ function applyBunkerLinksToModal() {
 
   currentModalProduct.cdn_images = finalImgs;
   currentModalProduct.gallery = finalImgs;
+  currentModalProduct.__bunkerOverride = true;
   delete currentModalProduct.split_images;
   delete currentModalProduct.narrative_blocks;
   delete currentModalProduct.mode_b_markdown;
@@ -465,6 +647,7 @@ function applyBunkerLinksToModal() {
 function copyCurrentModalMarkdown(btnTrigger) {
   if (!currentModalProduct) return;
   const p = currentModalProduct;
+  const isLojaDoce = isLojaDoceProduct(p);
   const mdText = p.mode_b_markdown || buildClientModeBMarkdown(p);
   if (!mdText) {
     showToast("⚠️ Nenhum texto Markdown disponível.");
@@ -472,7 +655,7 @@ function copyCurrentModalMarkdown(btnTrigger) {
   }
 
   navigator.clipboard.writeText(mdText).then(() => {
-    showToast("Markdown copiado com sucesso! Pronto para documentação ou Shopify.");
+    showToast(isLojaDoce ? "Markdown copiado com sucesso! Pronto para documentação ou VTEX." : "Markdown copiado com sucesso! Pronto para documentação ou Shopify.");
 
     const buttons = [
       btnTrigger,
@@ -512,9 +695,10 @@ function copyCurrentModalHTML(btnTrigger) {
     showToast("⚠️ Nenhum código HTML encontrado para copiar.");
     return;
   }
+  const isLojaDoce = isLojaDoceProduct(currentModalProduct);
 
   navigator.clipboard.writeText(text).then(() => {
-    showToast("HTML copiado com sucesso! Pronto para colar no Shopify.");
+    showToast(isLojaDoce ? "HTML copiado com sucesso! Pronto para colar no Admin VTEX." : "HTML copiado com sucesso! Pronto para colar no Shopify.");
 
     const buttons = [
       btnTrigger,
@@ -546,20 +730,27 @@ function copyCurrentModalHTML(btnTrigger) {
   });
 }
 
-// Baixar CSV Individual Shopify
+// Baixar CSV Individual
 function downloadCurrentProductCSV() {
   if (!currentModalProduct) return;
+  const isLojaDoce = isLojaDoceProduct(currentModalProduct);
   const html = document.getElementById("modal-source-code").textContent;
-  const row = [
-    "Handle,Title,Body (HTML)",
-    `"${currentModalProduct.handle}","${currentModalProduct.title.replace(/"/g, '""')}","${html.replace(/"/g, '""')}"`
-  ].join("\n");
+  const row = isLojaDoce
+    ? [
+        "SKU,Handle,Title,SEO_Title,SEO_Meta_Description,Body (HTML)",
+        `"${currentModalProduct.master_sku || currentModalProduct.id}","${currentModalProduct.handle}","${(currentModalProduct.title || '').replace(/"/g, '""')}","${(currentModalProduct.seo_title || '').replace(/"/g, '""')}","${(currentModalProduct.seo_meta_description || '').replace(/"/g, '""')}","${html.replace(/"/g, '""')}"`
+      ].join("\n")
+    : [
+        "Handle,Title,Body (HTML)",
+        `"${currentModalProduct.handle}","${currentModalProduct.title.replace(/"/g, '""')}","${html.replace(/"/g, '""')}"`
+      ].join("\n");
 
   const blob = new Blob(["\uFEFF" + row], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `shopify_${currentModalProduct.handle}_desc_${currentModalMode}.csv`;
+  const pfx = isLojaDoce ? "vtex" : "shopify";
+  link.download = `${pfx}_${currentModalProduct.handle}_desc_${currentModalMode}.csv`;
   link.click();
   URL.revokeObjectURL(url);
   showToast("Planilha CSV individual baixada com sucesso!");
@@ -567,6 +758,19 @@ function downloadCurrentProductCSV() {
 
 // Helpers de Geração Dinâmica de Markdown e HTML no Cliente
 function resolveClientOriginAndTitle(liveP) {
+  if (isLojaDoceProduct(liveP)) {
+    const cleanTitle = String(liveP.formatted_title || liveP.title || "Produto Oficial")
+      .replace(/\b(?:BRK|Loja\s+Doce(?:\s+Import)?)\b/gi, "")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+    let bName = String(liveP.brand_name || liveP.vendor || "Linha Oficial").trim();
+    if (!bName || /^(?:brk|loja\s+doce(?:\s+import)?)$/i.test(bName)) {
+      bName = "Linha Oficial";
+    }
+    const oType = bName.toLowerCase() === "linha oficial" ? "producao_propria" : "revenda";
+    return { formattedTitle: cleanTitle, brandName: bName, originType: oType, showCopyright: false };
+  }
+
   const KNOWN_BRANDS = [
     'Rapala', 'Deyu', 'Marine Sports', 'Marine', 'Daisen', 'Albatroz', 
     'Boaonda', 'American Hat', 'Elber', 'Maruri', 'Daiwa', 'Shimano', 
@@ -640,6 +844,10 @@ function anyShirtWord(text) {
 }
 
 function buildClientModeBMarkdown(liveP) {
+  const isLojaDoce = isLojaDoceProduct(liveP);
+  if (isLojaDoce && liveP.mode_b_markdown && !liveP.__bunkerOverride) {
+    return liveP.mode_b_markdown;
+  }
   const originInfo = resolveClientOriginAndTitle(liveP);
   const formattedTitle = originInfo.formattedTitle;
   const brandName = originInfo.brandName;
@@ -661,9 +869,16 @@ function buildClientModeBMarkdown(liveP) {
     lines.push(`> **PRODUTO ORIGINAL**\n`);
   }
 
-  lines.push(`### Performance & Conforto`);
+  lines.push(isLojaDoce ? `### Apresentação & Rendimento` : `### Performance & Conforto`);
   if (img1) lines.push(`![${formattedTitle}](${img1})\n`);
-  lines.push(`Desenvolvido para oferecer máxima durabilidade e conforto térmico, o(a) ${formattedTitle} garante total liberdade de movimentos e proteção contínua.\n`);
+  if (isLojaDoce && liveP.narrative_blocks && liveP.narrative_blocks.length > 0) {
+    liveP.narrative_blocks.forEach((b, i) => {
+      if (i > 0) lines.push(`### ${b.title || b.tag || 'Destaque'}`);
+      lines.push(`${b.description || ''}\n`);
+    });
+  } else {
+    lines.push(`Desenvolvido para oferecer máxima durabilidade e conforto térmico, o(a) ${formattedTitle} garante total liberdade de movimentos e proteção contínua.\n`);
+  }
 
   if (liveP.specs && liveP.specs.length > 0) {
     lines.push(`### Ficha Técnica & Especificações`);
@@ -676,10 +891,14 @@ function buildClientModeBMarkdown(liveP) {
   }
 
   lines.push(`### Guia de Cuidados & Conservação`);
-  lines.push(`Lavar à mão ou em ciclo suave com sabão neutro. Secar à sombra (dispensa uso de ferro).\n`);
+  lines.push(`${liveP.care_tips || "Lavar à mão ou em ciclo suave com sabão neutro. Secar à sombra (dispensa uso de ferro)."}\n`);
 
   lines.push(`---`);
-  lines.push(`- **Qualidade Oficial BRK:** Matérias-primas nobres testadas`);
+  if (isLojaDoce) {
+    lines.push(`- **Procedência Oficial Garantida:** Lotes originais com controle rigoroso`);
+  } else {
+    lines.push(`- **Qualidade Oficial BRK:** Matérias-primas nobres testadas`);
+  }
   lines.push(`- **Envio Rápido & Seguro:** Rastreamento de ponta a ponta`);
 
   if (showCopyright) {
@@ -1201,52 +1420,52 @@ const QUICK_BADGES_BY_ARCHETYPE = {
     }
   ],
   "ld_confeitaria_ingredientes": [
-    { "icon": "sparkle", "title": "Padrão Confeitaria Pro", "sub": "Rendimento & Estabilidade" },
-    { "icon": "shield", "title": "Lote Original Lacrado", "sub": "Validade e Procedência" },
-    { "icon": "palette", "title": "Textura & Cor Uniforme", "sub": "Acabamento de Vitrine" },
-    { "icon": "truck", "title": "Envio Protegido", "sub": "Embalagem Reforçada" }
+    { "icon": "sparkle", "title": "Padrão Confeitaria Pro", "sub": "Estabilidade & Rendimento" },
+    { "icon": "shield", "title": "Textura Homogênea", "sub": "Fácil Incorporação" },
+    { "icon": "box", "title": "Embalagem Lacrada", "sub": "Lote Fresco de Fábrica" },
+    { "icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata" }
   ],
   "ld_confeitaria_formas_utensilios": [
-    { "icon": "gear", "title": "Desenforme Preciso", "sub": "Geometria Sem Rebarbas" },
-    { "icon": "shield", "title": "Grau Alimentício", "sub": "Material Atóxico Certificado" },
-    { "icon": "sparkle", "title": "Padronização em Série", "sub": "Peso Uniforme por Cavidade" },
-    { "icon": "care", "title": "Fácil Higienização", "sub": "Superfície Lisa Antiaderente" }
+    { "icon": "shield", "title": "Padrão Profissional", "sub": "Acabamento de Precisão" },
+    { "icon": "bolt", "title": "Alta Estabilidade", "sub": "Padronização de Produção" },
+    { "icon": "sparkle", "title": "Apresentação Impecável", "sub": "Valoriza suas Receitas" },
+    { "icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata" }
   ],
   "ld_bomboniere_chocolates": [
-    { "icon": "sparkle", "title": "Sabor & Cremosidade", "sub": "Marcas Consagradas" },
-    { "icon": "shield", "title": "Armazenamento Climatizado", "sub": "Frescor Preservado" },
-    { "icon": "box", "title": "Pronto para Consumo/Revenda", "sub": "Embalagem Original" },
-    { "icon": "truck", "title": "Despacho Rápido", "sub": "Cuidado Térmico no Envio" }
+    { "icon": "sparkle", "title": "Sabor & Cremosidade", "sub": "Marca Original Consagrada" },
+    { "icon": "box", "title": "Lote Fresco & Lacrado", "sub": "Conservação Garantida" },
+    { "icon": "bolt", "title": "Alto Giro Comercial", "sub": "Ideal p/ Festas e Revenda" },
+    { "icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata" }
   ],
   "ld_bomboniere_balas_gomas": [
-    { "icon": "sparkle", "title": "Alto Giro Comercial", "sub": "Sucesso em Festas e PDV" },
-    { "icon": "palette", "title": "Cores & Sabores Vibrantes", "sub": "Ideal para Lembrancinhas" },
-    { "icon": "shield", "title": "Pacote Lacrado de Fábrica", "sub": "Higiene e Conservação" },
-    { "icon": "box", "title": "Excelente Custo-Benefício", "sub": "Rendimento por Embalagem" }
+    { "icon": "sparkle", "title": "Cores & Sabores Vivos", "sub": "Sucesso em Lembrancinhas" },
+    { "icon": "box", "title": "Pacote Econômico", "sub": "Alto Rendimento por Embalagem" },
+    { "icon": "shield", "title": "100% Original", "sub": "Procedência Direta da Marca" },
+    { "icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata" }
   ],
   "ld_embalagens_descartaveis": [
-    { "icon": "shield", "title": "Fechamento Seguro", "sub": "Proteção no Transporte" },
-    { "icon": "sparkle", "title": "Apresentação Impecável", "sub": "Valoriza seu Produto" },
-    { "icon": "box", "title": "Material Virgem Atóxico", "sub": "Contato Seguro com Alimentos" },
-    { "icon": "bolt", "title": "Praticidade no Delivery", "sub": "Empilhamento Estável" }
+    { "icon": "shield", "title": "Estrutura Firme", "sub": "Transporte e Exposição Seguros" },
+    { "icon": "box", "title": "Praticidade & Higiene", "sub": "Ideal para Delivery e Eventos" },
+    { "icon": "sparkle", "title": "Acabamento Limpo", "sub": "Valoriza seu Produto" },
+    { "icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata" }
   ],
   "ld_artigos_festa_decoracao": [
-    { "icon": "palette", "title": "Cores Vivas & Brilho", "sub": "Destaque na Mesa Principal" },
-    { "icon": "sparkle", "title": "Acabamento Fotogênico", "sub": "Cenário de Festa Completo" },
-    { "icon": "shield", "title": "Material Resistente", "sub": "Fácil Montagem e Fixação" },
-    { "icon": "truck", "title": "Pronta Entrega", "sub": "Envio Rápido Loja Doce" }
+    { "icon": "palette", "title": "Visual Vibrante", "sub": "Destaque na Decoração" },
+    { "icon": "sparkle", "title": "Acabamento Festivo", "sub": "Fácil Composição de Cenário" },
+    { "icon": "shield", "title": "Material Selecionado", "sub": "Durabilidade Durante o Evento" },
+    { "icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata" }
   ],
   "ld_presentes_caixas_sacolas": [
-    { "icon": "box", "title": "Estrutura Firme", "sub": "Papel/Cartão de Alta Gramatura" },
-    { "icon": "sparkle", "title": "Acabamento Presenteável", "sub": "Agrega Valor ao Produto" },
-    { "icon": "palette", "title": "Design Elegante", "sub": "Ideal para Kits e Cestas" },
-    { "icon": "bolt", "title": "Montagem Prática", "sub": "Vincos Precisos" }
+    { "icon": "box", "title": "Estrutura Reforçada", "sub": "Proteção e Elegância" },
+    { "icon": "sparkle", "title": "Pronta para Presentear", "sub": "Valoriza Cestas e Kits" },
+    { "icon": "palette", "title": "Acabamento Premium", "sub": "Apresentação Sofisticada" },
+    { "icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata" }
   ],
   "ld_papelaria_artesanato": [
-    { "icon": "gear", "title": "Precisão & Praticidade", "sub": "Uso Escolar, Festa e Ateliê" },
-    { "icon": "shield", "title": "Alta Durabilidade", "sub": "Material Selecionado" },
-    { "icon": "sparkle", "title": "Acabamento Limpo", "sub": "Ideal para Personalizados" },
-    { "icon": "truck", "title": "Envio Rápido", "sub": "Catálogo Oficial Loja Doce" }
+    { "icon": "gear", "title": "Praticidade no Uso", "sub": "Rotina Escolar, Loja e Ateliê" },
+    { "icon": "shield", "title": "Qualidade Comprovada", "sub": "Desempenho Consistente" },
+    { "icon": "sparkle", "title": "Acabamento Preciso", "sub": "Ideal para Personalizados" },
+    { "icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata" }
   ]
 };
 
@@ -3363,6 +3582,9 @@ function selectClientCutleryActImages(cdnImages, title = "") {
 
 function getProductModeBHTML(liveP) {
   if (!liveP) return "";
+  if (isLojaDoceProduct(liveP) && liveP.mode_b_html && !liveP.__bunkerOverride) {
+    return liveP.mode_b_html;
+  }
   const originInfo = resolveClientOriginAndTitle(liveP);
   const formattedTitle = liveP.formatted_title || originInfo.formattedTitle;
   const brandName = liveP.brand_name || originInfo.brandName;
@@ -4074,7 +4296,10 @@ function getProductModeBHTML(liveP) {
   }
 
   // 5. Estrutura HTML Completa com CSS Embutido Responsivo
-  return `${buildClientTrackingMarker(liveP.master_sku || liveP.sku || liveP.id, archetypeId)}
+  const isLojaDoce = isLojaDoceProduct(liveP);
+  const trustTitle1 = isLojaDoce ? "Procedência Oficial Garantida" : "Qualidade Oficial BRK";
+  const trustDesc1 = isLojaDoce ? "Lotes originais com controle rigoroso" : "Matérias-primas nobres testadas";
+  let rawOutHtml = `${buildClientTrackingMarker(liveP.master_sku || liveP.sku || liveP.id, archetypeId)}
 <!-- BRK GROUP - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL SHOPIFY) -->
 <div class="brk-desc-wrapper">
   <style>
@@ -4826,13 +5051,13 @@ ${specsSection}
 
 ${sizeGuideHtml}
 
-  <!-- Selos de Confiança e Garantia BRK -->
+  <!-- Selos de Confiança e Garantia -->
   <div class="brk-desc-trust-bar">
     <div class="brk-trust-item">
       <span class="brk-trust-svg">${getSvgIcon('shield', themeColor, 24)}</span>
       <div>
-        <div class="brk-trust-title">Qualidade Oficial BRK</div>
-        <div class="brk-trust-desc">Matérias-primas nobres testadas</div>
+        <div class="brk-trust-title">${trustTitle1}</div>
+        <div class="brk-trust-desc">${trustDesc1}</div>
       </div>
     </div>
     <div class="brk-trust-item">
@@ -4849,23 +5074,35 @@ ${copyrightHtml}
 </div>
 
 ${schemaJsonLd}`;
+
+  if (isLojaDoce) {
+    rawOutHtml = rawOutHtml
+      .replace(/<!--\s*BRK-MODO-B/g, "<!-- VTEX-MODO-B")
+      .replace(/<!--\s*BRK GROUP[^>]*-->/g, "<!-- PADRAO OFICIAL VTEX - DESCRICAO VERTICALIZADA EM 3 ATOS -->")
+      .replace(/brk-/g, "vtex-")
+      .replace(/brk360_/g, "vtex360_")
+      .replace(/\b(?:BRK|Loja\s+Doce(?:\s+Import)?)\b/gi, "");
+  }
+  return rawOutHtml;
 }
 
 // Delegação global para Lupa Dinâmica Estilo Mercado Livre (acompanha o mouse em tempo real nos 3 Atos sem travar)
 if (typeof document !== "undefined" && !window.__BRK_ML_LOUPE_BOUND) {
   window.__BRK_ML_LOUPE_BOUND = true;
   const updateBrkStageCoords = (e, clientX, clientY) => {
-    const stage = e.target && e.target.closest ? e.target.closest(".brk-stage-loupe, .brk-stage-360, .brk-media-stage") : null;
+    const stage = e.target && e.target.closest
+      ? e.target.closest(".brk-stage-loupe, .brk-stage-360, .brk-media-stage, .vtex-stage-loupe, .vtex-stage-360, .vtex-media-stage")
+      : null;
     if (!stage) return;
     const r = stage.getBoundingClientRect();
     if (!r.width || !r.height) return;
     const x = Math.max(0, Math.min(100, ((clientX - r.left) / r.width) * 100)).toFixed(2) + "%";
     const y = Math.max(0, Math.min(100, ((clientY - r.top) / r.height) * 100)).toFixed(2) + "%";
-    const layers = stage.querySelectorAll(".brk-ml-zoom-layer");
+    const layers = stage.querySelectorAll(".brk-ml-zoom-layer, .vtex-ml-zoom-layer");
     for (let i = 0; i < layers.length; i++) {
       layers[i].style.backgroundPosition = x + " " + y;
     }
-    const cursor = stage.querySelector(".brk-ml-cursor");
+    const cursor = stage.querySelector(".brk-ml-cursor, .vtex-ml-cursor");
     if (cursor) {
       cursor.style.left = x;
       cursor.style.top = y;

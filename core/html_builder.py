@@ -36,7 +36,8 @@ def brk_tracking_marker(sku: str, archetype_id: str) -> str:
     """Comentario HTML invisivel de rastreio: <!-- BRK-MODO-B v1 | sku:X | molde:Y -->"""
     def clean(v):
         return re.sub(r"[^A-Za-z0-9_.\-]", "", str(v or ""))[:60].replace("--", "-")
-    return f"<!-- BRK-MODO-B v{MODO_B_VERSION} | sku:{clean(sku)} | molde:{clean(archetype_id)} -->"
+    prefix = "VTEX-MODO-B" if str(archetype_id or "").startswith("ld_") else "BRK-MODO-B"
+    return f"<!-- {prefix} v{MODO_B_VERSION} | sku:{clean(sku)} | molde:{clean(archetype_id)} -->"
 
 
 _TROCA = {"icon": "sparkle", "title": "Qualidade Oficial BRK", "sub": "Padrão 100% Garantido"}
@@ -191,54 +192,54 @@ QUICK_BADGES_BY_ARCHETYPE: Dict[str, List[Dict[str, str]]] = {
         {"icon": "box", "title": "Ideal para Presentear", "sub": "Para Todas as Idades"},
         {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Rastreamento Completo"},
     ],
-    # --- Loja Doce (VTEX - Confeitaria, Bomboniere, Embalagens, Festas, Presentes e Papelaria) ---
+    # --- Catálogo VTEX (Confeitaria, Bomboniere, Embalagens, Festas, Presentes e Papelaria) ---
     "ld_confeitaria_ingredientes": [
         {"icon": "sparkle", "title": "Padrão Confeitaria Pro", "sub": "Estabilidade & Rendimento"},
         {"icon": "shield", "title": "Textura Homogênea", "sub": "Fácil Incorporação"},
         {"icon": "box", "title": "Embalagem Lacrada", "sub": "Lote Fresco de Fábrica"},
-        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Loja Doce"},
+        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata"},
     ],
     "ld_confeitaria_formas_utensilios": [
         {"icon": "shield", "title": "Padrão Profissional", "sub": "Acabamento de Precisão"},
         {"icon": "bolt", "title": "Alta Estabilidade", "sub": "Padronização de Produção"},
         {"icon": "sparkle", "title": "Apresentação Impecável", "sub": "Valoriza suas Receitas"},
-        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Loja Doce"},
+        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata"},
     ],
     "ld_bomboniere_chocolates": [
         {"icon": "sparkle", "title": "Sabor & Cremosidade", "sub": "Marca Original Consagrada"},
         {"icon": "box", "title": "Lote Fresco & Lacrado", "sub": "Conservação Garantida"},
         {"icon": "bolt", "title": "Alto Giro Comercial", "sub": "Ideal p/ Festas e Revenda"},
-        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Loja Doce"},
+        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata"},
     ],
     "ld_bomboniere_balas_gomas": [
         {"icon": "sparkle", "title": "Cores & Sabores Vivos", "sub": "Sucesso em Lembrancinhas"},
         {"icon": "box", "title": "Pacote Econômico", "sub": "Alto Rendimento por Embalagem"},
         {"icon": "shield", "title": "100% Original", "sub": "Procedência Direta da Marca"},
-        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Loja Doce"},
+        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata"},
     ],
     "ld_embalagens_descartaveis": [
         {"icon": "shield", "title": "Estrutura Firme", "sub": "Transporte e Exposição Seguros"},
         {"icon": "box", "title": "Praticidade & Higiene", "sub": "Ideal para Delivery e Eventos"},
         {"icon": "sparkle", "title": "Acabamento Limpo", "sub": "Valoriza seu Produto"},
-        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Loja Doce"},
+        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata"},
     ],
     "ld_artigos_festa_decoracao": [
         {"icon": "palette", "title": "Visual Vibrante", "sub": "Destaque na Decoração"},
         {"icon": "sparkle", "title": "Acabamento Festivo", "sub": "Fácil Composição de Cenário"},
         {"icon": "shield", "title": "Material Selecionado", "sub": "Durabilidade Durante o Evento"},
-        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Loja Doce"},
+        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata"},
     ],
     "ld_presentes_caixas_sacolas": [
         {"icon": "box", "title": "Estrutura Reforçada", "sub": "Proteção e Elegância"},
         {"icon": "sparkle", "title": "Pronta para Presentear", "sub": "Valoriza Cestas e Kits"},
         {"icon": "palette", "title": "Acabamento Premium", "sub": "Apresentação Sofisticada"},
-        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Loja Doce"},
+        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata"},
     ],
     "ld_papelaria_artesanato": [
         {"icon": "gear", "title": "Praticidade no Uso", "sub": "Rotina Escolar, Loja e Ateliê"},
         {"icon": "shield", "title": "Qualidade Comprovada", "sub": "Desempenho Consistente"},
         {"icon": "sparkle", "title": "Acabamento Preciso", "sub": "Ideal para Personalizados"},
-        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Loja Doce"},
+        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata"},
     ],
 }
 
@@ -999,8 +1000,13 @@ class HTMLBuilder:
         import json
         import re
 
-        formatted_title = enriched_data.get("formatted_title") or enriched_data.get("title", "Produto BRK")
-        brand_name = enriched_data.get("brand_name", "BRK")
+        is_ld_schema = str(enriched_data.get("archetype_id") or "").startswith("ld_") or enriched_data.get("store_key") == "loja_doce"
+        default_title = "Produto Oficial" if is_ld_schema else "Produto BRK"
+        default_brand = "Linha Oficial" if is_ld_schema else "BRK"
+        formatted_title = enriched_data.get("formatted_title") or enriched_data.get("title", default_title)
+        brand_name = enriched_data.get("brand_name") or default_brand
+        if is_ld_schema and str(brand_name).upper() in ("BRK", "LOJA DOCE", "LOJA DOCE IMPORT"):
+            brand_name = "Linha Oficial"
         sku = str(enriched_data.get("sku") or enriched_data.get("master_sku") or enriched_data.get("id") or "")
         raw_price = str(enriched_data.get("price") or "0.00")
         clean_price = re.sub(r'[^\d,.]', '', raw_price).strip()
@@ -1017,7 +1023,8 @@ class HTMLBuilder:
             if d:
                 clean_d = re.sub(r'<[^>]+>', ' ', d)
                 desc_parts.append(" ".join(clean_d.split()))
-        short_desc = " ".join(desc_parts)[:280] if desc_parts else f"{formatted_title} oficial com qualidade e garantia BRK."
+        fallback_desc = f"{formatted_title} original com procedência garantida." if is_ld_schema else f"{formatted_title} oficial com qualidade e garantia BRK."
+        short_desc = " ".join(desc_parts)[:280] if desc_parts else fallback_desc
 
         block_imgs = [b.get("image") for b in blocks if isinstance(b, dict) and b.get("image")]
         raw_imgs = block_imgs or enriched_data.get("images") or enriched_data.get("cdn_images") or enriched_data.get("gallery") or []
@@ -1816,7 +1823,7 @@ class HTMLBuilder:
                     "view_tag": "APRESENTAÇÃO • ATO 01",
                     "icon": "sparkle",
                     "label": "Apresentação Comercial & Embalagem Original",
-                    "pill": "Curadoria Loja Doce",
+                    "pill": "Curadoria Oficial",
                     "zoom_act3": False,
                 }
             if idx == 1:
@@ -3076,13 +3083,28 @@ class HTMLBuilder:
 
 {schema_json_ld}
 """
+        if is_ld_arch or enriched_data.get("store_key") == "loja_doce":
+            full_html = full_html.replace(
+                "<!-- BRK GROUP - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL SHOPIFY) -->",
+                "<!-- DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL VTEX) -->",
+            )
+            full_html = full_html.replace(
+                "/* Rodapé de Confiança e Garantia BRK */",
+                "/* Rodapé de Confiança e Procedência Oficial */",
+            )
+            full_html = full_html.replace(
+                "<!-- Selos de Confiança e Garantia BRK -->",
+                "<!-- Selos de Confiança e Procedência Oficial -->",
+            )
+            full_html = full_html.replace("brk-", "vtex-").replace("brk360_", "vtex360_")
         return full_html.strip()
 
     def build_shopify_markdown(self, enriched_data: Dict[str, Any]) -> str:
         """
         Compila a descrição em Markdown limpo, sem tags HTML externas e sem Font Awesome.
         """
-        formatted_title = enriched_data.get("formatted_title") or enriched_data.get("title", "Produto BRK")
+        is_ld_md = str(enriched_data.get("archetype_id") or "").startswith("ld_") or enriched_data.get("store_key") == "loja_doce"
+        formatted_title = enriched_data.get("formatted_title") or enriched_data.get("title", "Produto Oficial" if is_ld_md else "Produto BRK")
         show_copyright = enriched_data.get("show_copyright", False)
         has_multiple_variations = enriched_data.get("has_multiple_variations", False)
         split_images = enriched_data.get("split_images")
@@ -3136,7 +3158,7 @@ class HTMLBuilder:
         title_low = (formatted_title or "").lower()
 
         # Tabela de medidas inteligente em Markdown
-        if is_kids:
+        if is_kids and not is_ld_md:
             md_parts.append("### 📐 Guia de Tamanhos Infantil (1 a 13 Anos | PP ao G2)\n")
             md_parts.append("| Idade / Tamanho | Tórax | Altura | Manga |")
             md_parts.append("| :--- | :--- | :--- | :--- |")
@@ -3152,7 +3174,7 @@ class HTMLBuilder:
             for r in k_rows:
                 md_parts.append(f"| **{r[0]}** | {r[1]} | {r[2]} | {r[3]} |")
             md_parts.append("\n*Medidas tiradas com a peça plana em cm. Em dúvida entre dois tamanhos, escolha o maior.*\n")
-        elif archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work") or any(w in title_low for w in ["camisa", "camiseta", "jersey", "baby look"]):
+        elif not is_ld_md and (archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work") or any(w in title_low for w in ["camisa", "camiseta", "jersey", "baby look"])):
             md_parts.append("### 📐 Tabela de Medidas Adulto (P ao EXG)\n")
             m_header = "Manga Curta" if is_short_sleeve else "Manga Longa"
             md_parts.append(f"| Tamanho | Tórax / Peito | Comprimento | {m_header} |")
@@ -3170,7 +3192,7 @@ class HTMLBuilder:
             for r in a_rows:
                 md_parts.append(f"| **{r[0]}** | {r[1]} | {r[2]} | {r[3]} |")
             md_parts.append("\n*Medidas tiradas com a peça plana em cm. Em dúvida entre dois tamanhos, escolha o maior.*\n")
-        elif archetype_id in ("pants_cargo_tactical", "overalls_workwear") or any(w in title_low for w in ["calça", "calca", "bermuda", "shorts"]):
+        elif not is_ld_md and (archetype_id in ("pants_cargo_tactical", "overalls_workwear") or any(w in title_low for w in ["calça", "calca", "bermuda", "shorts"])):
             md_parts.append("### 📐 Tabela de Medidas - Calças & Bermudas (38 ao 52)\n")
             md_parts.append("| Tamanho | Cintura | Quadril | Comprimento |")
             md_parts.append("| :--- | :--- | :--- | :--- |")
@@ -3187,7 +3209,7 @@ class HTMLBuilder:
             for r in p_rows:
                 md_parts.append(f"| **{r[0]}** | {r[1]} | {r[2]} | {r[3]} |")
             md_parts.append("\n*Medidas tiradas com a peça plana em cm.*\n")
-        elif archetype_id in ("footwear_sandals_boaonda", "closed_footwear_sneakers") or any(w in title_low for w in ["sandália", "sandalia", "babuche", "chinelo"]):
+        elif not is_ld_md and (archetype_id in ("footwear_sandals_boaonda", "closed_footwear_sneakers") or any(w in title_low for w in ["sandália", "sandalia", "babuche", "chinelo"])):
             md_parts.append("### 📐 Guia de Tamanhos de Calçados (Palmilha)\n")
             md_parts.append("| Numeração BR | Palmilha (cm) |")
             md_parts.append("| :--- | :--- |")
@@ -3205,10 +3227,16 @@ class HTMLBuilder:
         md_parts.append(f"{care_tips}\n")
 
         md_parts.append("---")
-        md_parts.append("- 🛡️ **Qualidade Oficial BRK:** Matérias-primas nobres testadas")
+        if is_ld_md:
+            b_md = enriched_data.get("brand_name") or "Linha Oficial"
+            if str(b_md).upper() in ("BRK", "LOJA DOCE", "LOJA DOCE IMPORT"):
+                b_md = "Linha Oficial"
+            md_parts.append(f"- 🛡️ **Procedência 100% Original:** Curadoria Oficial • Marca {b_md}")
+        else:
+            md_parts.append("- 🛡️ **Qualidade Oficial BRK:** Matérias-primas nobres testadas")
         md_parts.append("- 🚚 **Envio Rápido & Seguro:** Rastreamento de ponta a ponta")
 
-        if show_copyright:
+        if show_copyright and not is_ld_md:
             md_parts.append("\n> **Aviso de Propriedade Intelectual:** Nossas estampas são protegidas pela Lei de Direitos Autorais (Lei 9.610/98) a Reprodução não autorizada está sujeita às penalidades legais. Copiar é crime !\n")
 
         return "\n".join(md_parts).strip()

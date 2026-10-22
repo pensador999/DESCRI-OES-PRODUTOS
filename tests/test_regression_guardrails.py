@@ -1704,9 +1704,224 @@ class TestLojaDoceVtexVerticalization(unittest.TestCase):
         prod["archetype_id"] = arch_id
         prod["mode_b_html"] = html
         self.assertNotIn('<details class="brk-size-guide">', html)
+        self.assertNotIn('<details class="vtex-size-guide">', html)
         self.assertIn("Padrão Confeitaria Pro", html)
+        self.assertNotIn("BRK", html.upper())
+        self.assertNotIn("LOJA DOCE", html.upper())
         rep = auditor.audit_products([prod], store_key="loja_doce")
         self.assertEqual(rep.get("errors", 0), 0, f"Nenhuma violação semântica esperada, encontrado: {rep}")
+
+    def test_vtex_four_verticalization_fronts(self):
+        """Testa as 4 Frentes de Verticalização da Auditoria VTEX (Calculadora, SEO Limpo, ANVISA e SpecificationFilters)."""
+        from core.lojadoce_engine import (
+            extract_lojadoce_attributes,
+            calculate_lojadoce_yield_and_equivalence,
+            get_anvisa_allergen_and_safety_info,
+            generate_lojadoce_seo_metadata,
+            build_vtex_specifications,
+        )
+
+        # Frente 1A: Cobertura Fracionada 1,01kg -> rendimento em trufas/bombons/ovos
+        raw_choc = "COBERTURA FRACIONADA CHOC MEIO AMARGO 1,01KG HARALD TOP"
+        fmt_choc = "Cobertura Fracionada Chocolate Meio Amargo 1,01kg Harald Top"
+        attrs_choc = extract_lojadoce_attributes(raw_choc, fmt_choc, "HARALD", "/CONFEITARIA/CHOCOLATES/", "930249")
+        y_choc = calculate_lojadoce_yield_and_equivalence(
+            raw_choc, fmt_choc, attrs_choc, "ld_confeitaria_ingredientes"
+        )
+        self.assertIn("40 trufas", y_choc["yield_estimate"])
+        self.assertIn("84 bombons", y_choc["yield_estimate"])
+        self.assertIn("4 cascas de Ovo de Páscoa de 250g", y_choc["yield_estimate"])
+
+        # Frente 1B: Balão Látex Nº 09 c/50 -> conversão polegadas para cm, gás hélio/ar e arco orgânico
+        raw_bal9 = "BALAO LATEX LISO RED N.09 C/50 AZUL PIC PIC"
+        fmt_bal9 = "Balão de Látex Liso Redondo Nº 09 com 50 Unidades Azul Pic Pic"
+        attrs_bal9 = extract_lojadoce_attributes(raw_bal9, fmt_bal9, "PIC PIC", "/ARTIGOS PARA FESTAS/BALOES/", "900101")
+        y_bal9 = calculate_lojadoce_yield_and_equivalence(
+            raw_bal9, fmt_bal9, attrs_bal9, "ld_artigos_festa_decoracao"
+        )
+        self.assertIn("9 polegadas (aprox. 23 cm de diâmetro inflado)", y_bal9["dimensional_equiv"])
+        self.assertIn("Gás Hélio", y_bal9["gas_and_arch"])
+        self.assertIn("arco orgânico", y_bal9["yield_estimate"])
+
+        # Frente 1C: Balão Nº 05 -> alerta técnico de que não flutua com gás hélio
+        raw_bal5 = "BALAO LATEX RED N.05 C/50 BRANCO SAO ROQUE"
+        fmt_bal5 = "Balão de Látex Redondo Nº 05 com 50 Unidades Branco São Roque"
+        attrs_bal5 = extract_lojadoce_attributes(raw_bal5, fmt_bal5, "SAO ROQUE", "/ARTIGOS PARA FESTAS/BALOES/", "900102")
+        y_bal5 = calculate_lojadoce_yield_and_equivalence(
+            raw_bal5, fmt_bal5, attrs_bal5, "ld_artigos_festa_decoracao"
+        )
+        self.assertIn("5 polegadas (aprox. 13 cm de diâmetro inflado)", y_bal5["dimensional_equiv"])
+        self.assertIn("não flutua com gás hélio", y_bal5["gas_and_arch"])
+
+        # Frente 1D: Forminha 30x30x20mm -> conversão automática mm para cm
+        raw_form = "FORMINHA P/DOCES 4 PETALAS 30X30X20MM C/50 UNIDADES"
+        fmt_form = "Forminha para Doces 4 Pétalas 30x30x20mm com 50 Unidades"
+        attrs_form = extract_lojadoce_attributes(raw_form, fmt_form, "BWB", "/CONFEITARIA/FORMINHAS/", "900103")
+        y_form = calculate_lojadoce_yield_and_equivalence(
+            raw_form, fmt_form, attrs_form, "ld_confeitaria_formas_utensilios"
+        )
+        self.assertIn("3,0 x 3,0 x 2,0 cm", y_form["dimensional_equiv"])
+
+        # Frente 2: SEO Title (<= 60 chars) e Meta Description (100% texto puro sem HTML/entidades e sem BRK/Loja Doce)
+        seo = generate_lojadoce_seo_metadata(
+            formatted_title=fmt_choc,
+            brand="Harald",
+            attrs=attrs_choc,
+            archetype_id="ld_confeitaria_ingredientes",
+            yield_info=y_choc,
+        )
+        self.assertLessEqual(len(seo["seo_title"]), 60)
+        self.assertLessEqual(len(seo["seo_meta_description"]), 160)
+        self.assertGreaterEqual(len(seo["seo_meta_description"]), 80)
+        self.assertNotIn("<", seo["seo_meta_description"])
+        self.assertNotIn("&", seo["seo_meta_description"])
+        self.assertNotIn("BRK", seo["seo_title"].upper())
+        self.assertNotIn("LOJA DOCE", seo["seo_title"].upper())
+        self.assertNotIn("BRK", seo["seo_meta_description"].upper())
+        self.assertNotIn("LOJA DOCE", seo["seo_meta_description"].upper())
+
+        # Frente 3: Alerta ANVISA RDC 26/2015 para alimentos e Grau Alimentício Atóxico para embalagens/utensílios
+        anvisa_food = get_anvisa_allergen_and_safety_info(
+            raw_choc, fmt_choc, "ld_confeitaria_ingredientes", attrs_choc
+        )
+        self.assertIn("ANVISA", anvisa_food["label"])
+        self.assertIn("ALÉRGICOS", anvisa_food["value"])
+
+        anvisa_pkg = get_anvisa_allergen_and_safety_info(
+            "FORMA OVO PASCOA SIMPLES N.250 BWB",
+            "Forma para Ovo de Páscoa Simples Nº 250 BWB",
+            "ld_confeitaria_formas_utensilios",
+            attrs_form,
+        )
+        self.assertIn("Grau Alimentício", anvisa_pkg["label"])
+        self.assertIn("Livre de BPA", anvisa_pkg["value"])
+
+        # Frente 4: SpecificationFilters estruturados para VTEX
+        vtex_specs = build_vtex_specifications(
+            attrs=attrs_choc,
+            archetype_id="ld_confeitaria_ingredientes",
+            yield_info=y_choc,
+            allergen_info=anvisa_food,
+        )
+        self.assertIn("Marca", vtex_specs)
+        self.assertIn("Rendimento Estimado", vtex_specs)
+        self.assertIn("Alerta de Alergênicos & Lactose (ANVISA)", vtex_specs)
+        self.assertTrue(bool(y_choc.get("resumo_rendimento")), "yield_info deve expor resumo_rendimento para o modal UI")
+        self.assertTrue(bool(anvisa_food.get("alerta_alergenicos")), "allergen_info deve expor alerta_alergenicos para o modal UI")
+
+        # Frente 3B: Chocolate Nobre Puro (temperagem) vs Corante Hidrossolúvel em Gel
+        from core.template_engine import TemplateEngine
+        te = TemplateEngine()
+        prod_nobre = {
+            "sku": "990001",
+            "title": "Chocolate Branco Nobre Puro em Gotas 2kg Sicao",
+            "raw_erp_title": "CHOC BRANCO GOTAS 2KG SICAO",
+            "brand": "Sicao",
+            "category": "/CONFEITARIA/CHOCOLATES/",
+            "images": ["https://cdn.vtex.com/sicao.jpg"],
+        }
+        narr_nobre = te.generate_narrative_from_template(
+            prod_nobre, "ld_confeitaria_ingredientes", prod_nobre["images"], store_key="loja_doce"
+        )
+        narr_nobre_str = json.dumps(narr_nobre, ensure_ascii=False)
+        self.assertIn("Chocolate Nobre Puro", narr_nobre_str)
+        self.assertIn("temperagem", narr_nobre_str.lower())
+
+        prod_cor = {
+            "sku": "990002",
+            "title": "Corante Softgel 25g Vermelho Morango Mago",
+            "raw_erp_title": "CORANTE SOFTGEL 25G VERMELHO MORANGO MAGO",
+            "brand": "Mago",
+            "category": "/CONFEITARIA/CORANTES/",
+            "images": ["https://cdn.vtex.com/mago.jpg"],
+        }
+        narr_cor = te.generate_narrative_from_template(
+            prod_cor, "ld_confeitaria_ingredientes", prod_cor["images"], store_key="loja_doce"
+        )
+        narr_cor_str = json.dumps(narr_cor, ensure_ascii=False)
+        self.assertIn("Hidrossolúvel em Gel/Softgel", narr_cor_str)
+        self.assertIn("base hidrossolúvel em gel/softgel", narr_cor_str)
+
+        # Arquetipos de Panetone e Biscoito (não podem cair em festa ou balas/gomas)
+        from core.lojadoce_engine import detect_lojadoce_archetype
+        self.assertEqual(
+            detect_lojadoce_archetype("PANETONE C/FRUTAS 400G BAUDUCCO", "/NATAL/PANETONES/"),
+            "ld_bomboniere_chocolates",
+        )
+        self.assertEqual(
+            detect_lojadoce_archetype("BISC OREO 90G ORIGINAL", "/BOMBONIERE/BISCOITOS/SALGADINHOS/"),
+            "ld_bomboniere_chocolates",
+        )
+
+    def test_lojadoce_catalog_zero_brk_or_store_name_and_fgh369_isolation(self):
+        """Garante zero menções a BRK/Loja Doce nos 400 produtos compilados, 7 categorias VTEX e senha exclusiva fgh369."""
+        store_path = os.path.join(BASE_DIR, "data", "stores", "loja_doce.json")
+        self.assertTrue(os.path.exists(store_path), "data/stores/loja_doce.json deve existir")
+        with open(store_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        self.assertNotIn("LOJA DOCE", data["store"]["name"].upper())
+        self.assertNotIn("BRK", data["store"]["name"].upper())
+        prods = data.get("products", [])
+        self.assertEqual(len(prods), 400)
+
+        # Verifica distribuição nas 7 categorias VTEX oficiais (zero 'Acessórios Diversos')
+        cats = data.get("categories", [])
+        cat_names = [c.get("name") for c in cats] if isinstance(cats, list) else list(cats.keys())
+        cat_total = sum(c.get("count", 0) for c in cats) if isinstance(cats, list) else sum(cats.values())
+        self.assertNotIn("Acessórios Diversos", cat_names)
+        self.assertEqual(len(cat_names), 7)
+        self.assertEqual(cat_total, 400)
+
+        for p in prods:
+            sku = p.get("sku")
+            html_b = p.get("mode_b_html") or ""
+            html_a = p.get("mode_a_html") or ""
+            md_b = p.get("mode_b_markdown") or ""
+            seo_t = p.get("seo_title") or ""
+            seo_d = p.get("seo_meta_description") or ""
+            vtex_sp = json.dumps(p.get("vtex_specifications") or {}, ensure_ascii=False)
+
+            self.assertNotEqual(p.get("category"), "Acessórios Diversos", f"SKU {sku} caiu em Acessórios Diversos")
+            self.assertTrue(html_b.startswith("<!-- VTEX-MODO-B v2"), f"SKU {sku} deve usar marcador VTEX-MODO-B v2")
+            self.assertIn('class="vtex-desc-wrapper"', html_b)
+            self.assertNotIn("brk-", html_b, f"SKU {sku} nao pode ter classe CSS brk- no mode_b_html")
+            self.assertNotIn("brk-", html_a, f"SKU {sku} nao pode ter classe CSS brk- no mode_a_html")
+
+            for field_name, content in (
+                ("mode_b_html", html_b),
+                ("mode_b_markdown", md_b),
+                ("mode_a_html", html_a),
+                ("seo_title", seo_t),
+                ("seo_meta_description", seo_d),
+                ("vtex_specifications", vtex_sp),
+            ):
+                up = content.upper()
+                self.assertNotIn("BRK", up, f"Vazamento de 'BRK' em {field_name} do SKU {sku}")
+                self.assertNotIn("LOJA DOCE", up, f"Vazamento de 'Loja Doce' em {field_name} do SKU {sku}")
+                self.assertNotIn("SHOPIFY", up, f"Vazamento de 'Shopify' em {field_name} do SKU {sku}")
+
+            self.assertTrue(bool(seo_t), f"SKU {sku} sem seo_title")
+            self.assertLessEqual(len(seo_t), 60, f"SKU {sku} seo_title > 60 chars")
+            self.assertTrue(bool(seo_d), f"SKU {sku} sem seo_meta_description")
+            self.assertTrue(bool(p.get("vtex_specifications")), f"SKU {sku} sem vtex_specifications")
+            self.assertTrue(bool(p.get("allergen_info")), f"SKU {sku} sem allergen_info")
+            self.assertTrue(bool((p.get("allergen_info") or {}).get("alerta_alergenicos")), f"SKU {sku} sem alerta_alergenicos")
+            self.assertTrue(bool((p.get("yield_info") or {}).get("resumo_rendimento")), f"SKU {sku} sem resumo_rendimento")
+
+        # Verificar senha exclusiva fgh369, token unificado e ausência de lojadoce.com.br no js/app.js e js/modal.js
+        with open(os.path.join(BASE_DIR, "js", "app.js"), "r", encoding="utf-8") as f_app:
+            app_js = f_app.read()
+        with open(os.path.join(BASE_DIR, "js", "modal.js"), "r", encoding="utf-8") as f_modal:
+            modal_js = f_modal.read()
+        self.assertIn('const LOJADOCE_SYSTEM_PASSWORD = "fgh369"', app_js)
+        self.assertIn('const BRK_SYSTEM_PASSWORD = "rex123"', app_js)
+        self.assertIn("function applySessionIsolation(", app_js)
+        self.assertIn('applySessionIsolation("loja_doce")', app_js)
+        self.assertIn('applySessionIsolation("brk")', app_js)
+        self.assertNotIn("LOJA_DOCE_FGH369_AUTHORIZED", app_js)
+        self.assertNotIn("lojadoce.com.br", app_js.lower())
+        self.assertNotIn("lojadoce.com.br", modal_js.lower())
 
 
 def run_tests():
@@ -1721,3 +1936,4 @@ def run_tests():
 if __name__ == "__main__":
     success = run_tests()
     sys.exit(0 if success else 1)
+

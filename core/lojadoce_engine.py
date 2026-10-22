@@ -105,6 +105,7 @@ ACCENT_MAP: Dict[str, str] = {
     "MACA": "Maçã",
     "LIMAO": "Limão",
     "MARACUJA": "Maracujá",
+    "CABECA": "Cabeça",
 }
 
 LOWER_PARTICLES = {
@@ -113,6 +114,7 @@ LOWER_PARTICLES = {
 UPPER_ACRONYMS = {
     "MDF", "PP", "PET", "PVC", "TNT", "LED", "UHT", "3D", "4D", "3M", "BRW", "YDH", "VMP", "MB", "KAZ", "WEI", "LSC", "NC"
 }
+
 
 
 LOJA_DOCE_ARCHETYPES: Dict[str, Dict[str, Any]] = {
@@ -402,7 +404,7 @@ def format_lojadoce_title(raw_title: str, brand: str = "") -> str:
     s = raw_title.strip()
     s = s.replace(")", "")
     s = re.sub(r"\bREF\s*:?\s*[A-Z0-9-]+\s*$", "", s, flags=re.IGNORECASE).strip()
-    s = re.sub(r"\bLOJA\s+DOCE\s+IMPORT\s*$", "", s, flags=re.IGNORECASE).strip()
+    s = re.sub(r"\bLOJA\s+DOCE(?:\s+IMPORT)?\b", "", s, flags=re.IGNORECASE).strip()
 
     replacements = [
         (r"\bBISC\b", "BISCOITO"),
@@ -459,7 +461,10 @@ def format_lojadoce_title(raw_title: str, brand: str = "") -> str:
         (r"\bC/SERINGA\b", "COM SERINGA"),
         (r"\bC/LED\b", "COM LED"),
         (r"\bC/1\s+FURO\b", "COM 1 FURO"),
-        (r"\bC/\s*(\d+)\s*(?:UN|UNIDADES|UND)\b", r"COM \1 UNIDADES"),
+        (r"\bC/FRUTAS\b", "COM FRUTAS"),
+        (r"\bC/BOTAS\b", "COM BOTAS"),
+        (r"\bC/\s*(\d+)\s*(?:UN|UNIDADES|UND|UNID)\b", r"COM \1 UNIDADES"),
+        (r"\bC/\s*(\d+)\s*(?:PECAS|PCS|PC)\b", r"COM \1 PECAS"),
         (r"\bC/\s*(\d+)\s*(?:FLS?|FOLHAS?|FO|F)\b", r"COM \1 FOLHAS"),
         (r"\bC/\s*(\d+)\s*BLOCOS\b", r"COM \1 BLOCOS"),
         (r"\bC/\s*(\d+(?:,\d+)?M)\b", r"COM \1"),
@@ -467,7 +472,7 @@ def format_lojadoce_title(raw_title: str, brand: str = "") -> str:
         (r"\b(\d+)\s*PCS\b", r"COM \1 PECAS"),
         (r"\b(\d+)\s*FLS?\b", r"\1 FOLHAS"),
         (r"\b(\d+)\s*F\b", r"\1 FOLHAS"),
-        (r"\b(\d+)\s*UN\b", r"\1 UNIDADES"),
+        (r"\b(\d+)\s*(?:UN|UNID|UND)\b", r"\1 UNIDADES"),
         (r"\bPC\s*(\d+)(?:\.0)?\b", r"PACOTE COM \1 UNIDADES"),
         (r"\bCX\s*(\d+)(?:\.0)?\b", r"CAIXA COM \1 UNIDADES"),
         (r"\bPCT\s*(\d+)", r"PACOTE \1"),
@@ -542,6 +547,10 @@ def format_lojadoce_title(raw_title: str, brand: str = "") -> str:
     out_words: List[str] = []
     for idx, tok in enumerate(tokens):
         up = tok.upper()
+        if "/" in up and not re.match(r"^\d", up):
+            slash_parts = [ACCENT_MAP.get(p, p.capitalize()) for p in up.split("/")]
+            out_words.append("/".join(slash_parts))
+            continue
         if re.match(r"^\d+(?:[.,]\d+)?L$", up):
             out_words.append(up)
             continue
@@ -579,7 +588,6 @@ def detect_lojadoce_archetype(title: str, category: str = "", tags: Optional[Lis
     t = _norm(title)
     tags_str = " ".join(str(x) for x in (tags or [])) if isinstance(tags, (list, tuple)) else str(tags or "")
     c = _norm(f"{category} {tags_str}")
-    all_txt = f"{t} {c}"
 
     # 1. Papelaria & Escritório
     if "/papelaria/" in c or any(w in t for w in (
@@ -609,20 +617,21 @@ def detect_lojadoce_archetype(title: str, category: str = "", tags: Optional[Lis
     )) or ("/confeitaria/" in c and "/formas/" not in c and "/utensilios/" not in c):
         return "ld_confeitaria_ingredientes"
 
-    # 4. Bomboniere — Balas, Gomas, Marshmallows, Chicletes, Pirulitos & Salgadinhos
+    # 4. Bomboniere — Chocolates de Consumo, Bombons, Wafers, Biscoitos & Panetones (antes de /salgadinhos)
+    if any(w in t for w in (
+        "bisc ", "biscoito", "wafer", "waffer", "kit kat", "bis lacta", "bis xtra", "bombom ", "choc baton",
+        "chocolate barra", "moedas ao leite", "doce de leite tablete", "doce de leite em pasta",
+        "panetone", "panettone", "chocottone"
+    )) or "/bomboniere/chocolate/" in c or "/bomboniere/doces/" in c:
+        return "ld_bomboniere_chocolates"
+
+    # 5. Bomboniere — Balas, Gomas, Marshmallows, Chicletes, Pirulitos & Salgadinhos
     if any(w in t for w in (
         "bala ", "chicle ", "goma de mascar", "marshmallow", "maxmallow", "pirulito",
         "drops halls", "tubes twister", "gelatina fini", "gelatines", "salg skid",
         "coloreti", "ovo toys"
     )) or any(sub in c for sub in ("/balas/", "/chicletes", "/gomas e marshmallow/", "/salgadinhos")):
         return "ld_bomboniere_balas_gomas"
-
-    # 5. Bomboniere — Chocolates de Consumo, Bombons, Wafers & Biscoitos
-    if any(w in t for w in (
-        "bisc ", "biscoito", "kit kat", "bis lacta", "bis xtra", "bombom ", "choc baton",
-        "chocolate barra", "moedas ao leite", "doce de leite tablete", "doce de leite em pasta"
-    )) or "/bomboniere/chocolate/" in c or "/bomboniere/doces/" in c:
-        return "ld_bomboniere_chocolates"
 
     # 6. Embalagens Confeitaria, Copos, Pratos, Talheres & Guardanapos Descartáveis
     if any(w in t for w in (
@@ -644,6 +653,87 @@ def detect_lojadoce_archetype(title: str, category: str = "", tags: Optional[Lis
 
     # 8. Artigos para Festas, Balões, Fitas Decorativas & Sazonais (Halloween / Natal)
     return "ld_artigos_festa_decoracao"
+
+
+LOJA_DOCE_VTEX_CATEGORIES = (
+    "Confeitaria & Panificação",
+    "Bomboniere, Chocolates & Doces",
+    "Embalagens & Descartáveis",
+    "Artigos para Festas & Balões",
+    "Presentes, Caixas MDF & Sacolas",
+    "Papelaria & Artesanato",
+    "Sazonais, Halloween & Natal",
+)
+
+
+def classify_lojadoce_vtex_category(
+    title: str,
+    category_path: str = "",
+    archetype_id: str = "",
+    tags: Optional[List[str]] = None,
+) -> str:
+    """
+    Classifica qualquer produto da Loja Doce em uma das 7 categorias oficiais da vitrine VTEX:
+    - Confeitaria & Panificação
+    - Bomboniere, Chocolates & Doces
+    - Embalagens & Descartáveis
+    - Artigos para Festas & Balões
+    - Presentes, Caixas MDF & Sacolas
+    - Papelaria & Artesanato
+    - Sazonais, Halloween & Natal
+    """
+    if category_path in LOJA_DOCE_VTEX_CATEGORIES:
+        return category_path
+
+    def _norm(txt: str) -> str:
+        if not txt:
+            return ""
+        return "".join(c for c in unicodedata.normalize("NFKD", str(txt)) if not unicodedata.combining(c)).lower()
+
+    tags_str = " ".join(str(x) for x in (tags or [])) if isinstance(tags, (list, tuple)) else str(tags or "")
+    c_norm = _norm(f"{category_path} {tags_str}")
+    t_norm = _norm(title)
+
+    # 1. Árvore de departamento VTEX (soberana quando presente)
+    if any(k in c_norm for k in ("/halloween", "/fim de ano", "/sazonais", "/natal", "/pascoa")):
+        return "Sazonais, Halloween & Natal"
+    if "/confeitaria" in c_norm:
+        return "Confeitaria & Panificação"
+    if "/bomboniere" in c_norm:
+        return "Bomboniere, Chocolates & Doces"
+    if "/embalagens" in c_norm:
+        return "Embalagens & Descartáveis"
+    if "/artigos para festas" in c_norm:
+        return "Artigos para Festas & Balões"
+    if "/presentes" in c_norm:
+        return "Presentes, Caixas MDF & Sacolas"
+    if "/papelaria" in c_norm:
+        return "Papelaria & Artesanato"
+
+    # 2. Fallback por palavras-chave sazonais no título (exceto corante/essência de confeitaria)
+    if not any(w in t_norm for w in ("corante", "essencia")) and any(
+        w in t_norm for w in (
+            "halloween", "natal", "noel", "presepio", "panetone", "panettone", "colomba",
+            "vampiro", "bruxa", "fantasma", "esqueleto", "caveira", "zombie", "frankenstein",
+            "rena", "azevinho"
+        )
+    ):
+        return "Sazonais, Halloween & Natal"
+
+    # 3. Fallback por arquétipo
+    arch = archetype_id or detect_lojadoce_archetype(title=title, category=category_path, tags=tags)
+    arch_map = {
+        "ld_confeitaria_ingredientes": "Confeitaria & Panificação",
+        "ld_confeitaria_formas_utensilios": "Confeitaria & Panificação",
+        "ld_bomboniere_chocolates": "Bomboniere, Chocolates & Doces",
+        "ld_bomboniere_balas_gomas": "Bomboniere, Chocolates & Doces",
+        "ld_embalagens_descartaveis": "Embalagens & Descartáveis",
+        "ld_artigos_festa_decoracao": "Artigos para Festas & Balões",
+        "ld_presentes_caixas_sacolas": "Presentes, Caixas MDF & Sacolas",
+        "ld_papelaria_artesanato": "Papelaria & Artesanato",
+    }
+    return arch_map.get(arch, "Confeitaria & Panificação")
+
 
 
 def extract_lojadoce_attributes(raw_title: str, formatted_title: str, brand: str, category: str, sku: str) -> Dict[str, str]:
@@ -776,10 +866,16 @@ def extract_lojadoce_attributes(raw_title: str, formatted_title: str, brand: str
             flavor_or_color = label
             break
 
-    # 6. Departamento e Subcategoria VTEX limpa
+    # 6. Departamento e Subcategoria VTEX limpa (sem expor nome da loja)
     cat_parts = [p.strip().title() for p in (category or "").split("/") if p.strip()]
-    dept_name = cat_parts[0] if cat_parts else "Catálogo Loja Doce"
-    subcat_name = " > ".join(cat_parts[:3]) if cat_parts else "Linha Oficial Loja Doce"
+    dept_name = cat_parts[0] if cat_parts else "Catálogo Geral"
+    subcat_name = " > ".join(cat_parts[:3]) if cat_parts else "Linha Oficial"
+
+    raw_b = (brand or "").strip()
+    if not raw_b or raw_b.upper() in ("LOJA DOCE", "LOJA DOCE IMPORT", "BRK"):
+        clean_brand = "Linha Oficial"
+    else:
+        clean_brand = raw_b.title() if (raw_b.isupper() and len(raw_b) > 3) else raw_b
 
     return {
         "weight_vol": weight_vol,
@@ -790,8 +886,519 @@ def extract_lojadoce_attributes(raw_title: str, formatted_title: str, brand: str
         "dept_name": dept_name,
         "subcat_name": subcat_name,
         "sku": sku,
-        "brand": (brand or "Loja Doce").strip().title(),
+        "brand": clean_brand,
     }
+
+
+def _parse_grams_or_ml(weight_vol: str, raw_title: str) -> Tuple[float, str]:
+    """Retorna (valor_em_g_ou_ml, unidade_base 'g' | 'ml' | '')."""
+    txt = f"{weight_vol or ''} {raw_title or ''}".upper()
+    m = re.search(r"\b(\d+(?:[.,]\d+)?)\s*(KG|GR|G|ML|L)\b", txt)
+    if not m:
+        return 0.0, ""
+    val = float(m.group(1).replace(",", "."))
+    unit = m.group(2).upper()
+    if unit == "KG":
+        return val * 1000.0, "g"
+    if unit in ("G", "GR"):
+        return val, "g"
+    if unit == "L":
+        return val * 1000.0, "ml"
+    if unit == "ML":
+        return val, "ml"
+    return 0.0, ""
+
+
+def calculate_lojadoce_yield_and_equivalence(
+    raw_title: str,
+    formatted_title: str,
+    attrs: Dict[str, str],
+    archetype_id: str,
+) -> Dict[str, str]:
+    """
+    Frente 1 da Auditoria VTEX:
+    Calcula automaticamente o rendimento prático e a equivalência dimensional real (cm / polegadas / gramas)
+    para Chocolates/Coberturas, Leite Condensado/Recheios, Chantilly, Granulados, Formas Forneáveis,
+    Forminhas de Doces, Cake Boards, Embalagens e Balões de Látex/Metalizados.
+    """
+    t_up = (raw_title or "").upper()
+    f_low = (formatted_title or "").lower()
+    wv = attrs.get("weight_vol", "")
+    dim = attrs.get("dimensions", "")
+    pack = attrs.get("pack_qty", "")
+    grams_or_ml, base_unit = _parse_grams_or_ml(wv, raw_title)
+
+    yield_estimate = ""
+    dimensional_equiv = ""
+    gas_and_arch = ""
+
+    # 1. Conversão automática de medidas em milímetros (mm) / metros (m) para centímetros (cm)
+    m_mm3 = re.search(r"\b(\d+(?:[.,]\d+)?)\s*X\s*(\d+(?:[.,]\d+)?)\s*X\s*(\d+(?:[.,]\d+)?)\s*MM\b", t_up)
+    m_mm2_roll = re.search(r"\b(\d+(?:[.,]\d+)?)\s*MM\s*(?:X|\s+)\s*(\d+(?:[.,]\d+)?)\s*(M|MT|CM|MM)\b", t_up)
+    m_mm2_box = re.search(r"\b(\d+(?:[.,]\d+)?)\s*X\s*(\d+(?:[.,]\d+)?)\s*MM\b", t_up)
+    m_m_cm = re.search(r"\b(\d+(?:[.,]\d+)?)\s*M\s*X\s*(\d+(?:[.,]\d+)?)\s*CM\b", t_up)
+    m_cm_m = re.search(r"\b(\d+(?:[.,]\d+)?)\s*CM\s*X\s*(\d+(?:[.,]\d+)?)\s*M\b", t_up)
+    m_single_mm = re.search(r"\b(\d+(?:[.,]\d+)?)\s*MM\b", t_up)
+
+    if m_mm3:
+        d1 = float(m_mm3.group(1).replace(",", ".")) / 10.0
+        d2 = float(m_mm3.group(2).replace(",", ".")) / 10.0
+        d3 = float(m_mm3.group(3).replace(",", ".")) / 10.0
+        dimensional_equiv = (
+            f"{d1:.1f} x {d2:.1f} x {d3:.1f} cm (equivalente a {m_mm3.group(0).lower()})"
+            .replace(".", ",")
+        )
+    elif m_mm2_roll:
+        w_mm = float(m_mm2_roll.group(1).replace(",", "."))
+        w_cm = w_mm / 10.0
+        len_val = m_mm2_roll.group(2)
+        len_u = "m" if m_mm2_roll.group(3).upper() in ("M", "MT") else m_mm2_roll.group(3).lower()
+        dimensional_equiv = (
+            f"Largura de {w_cm:.1f} cm ({int(w_mm) if w_mm.is_integer() else w_mm} mm) x comprimento de {len_val}{len_u}"
+            .replace(".", ",")
+        )
+    elif m_mm2_box:
+        d1 = float(m_mm2_box.group(1).replace(",", ".")) / 10.0
+        d2 = float(m_mm2_box.group(2).replace(",", ".")) / 10.0
+        dimensional_equiv = f"{d1:.1f} x {d2:.1f} cm (equivalente a {m_mm2_box.group(0).lower()})".replace(".", ",")
+    elif m_m_cm:
+        m_val = m_m_cm.group(1)
+        cm_val = m_m_cm.group(2)
+        dimensional_equiv = f"Rolo/folha com {m_val} metros de comprimento x {cm_val} cm de largura"
+    elif m_cm_m:
+        cm_val = m_cm_m.group(1)
+        m_val = m_cm_m.group(2)
+        dimensional_equiv = f"Largura de {cm_val} cm x {m_val} metro(s) de comprimento"
+    elif m_single_mm:
+        mm_v = float(m_single_mm.group(1).replace(",", "."))
+        if mm_v >= 10.0:
+            dimensional_equiv = f"{mm_v / 10.0:.1f} cm (equivalente a {int(mm_v) if mm_v.is_integer() else mm_v} mm)".replace(".", ",")
+        else:
+            dimensional_equiv = f"Espessura/ponta de precisão de {m_single_mm.group(1)} mm"
+
+    # 2. Chocolates, Coberturas, Recheios, Leite Condensado, Creme de Leite, Chantilly e Confeitos
+    if archetype_id == "ld_confeitaria_ingredientes":
+        if ("cobertura" in f_low or ("chocolate" in f_low and "pó" not in f_low and "po " not in f_low)) and base_unit == "g" and grams_or_ml >= 200:
+            trufas = max(1, int(round(grams_or_ml / 25.0)))
+            cascas_250 = max(1, int(round(grams_or_ml / 250.0)))
+            bombons_12 = max(1, int(round(grams_or_ml / 12.0)))
+            yield_estimate = (
+                f"Rende aprox. {trufas} trufas/pães de mel banhados (25g), {bombons_12} bombons maciços (12g) "
+                f"ou {cascas_250} cascas de Ovo de Páscoa de 250g"
+            )
+        elif ("leite condensado" in f_low or "leite cond" in t_up.lower()) and base_unit == "g" and grams_or_ml >= 200:
+            brig_festa = max(1, int(round((grams_or_ml * 1.10) / 15.0)))
+            brig_gourmet = max(1, int(round((grams_or_ml * 1.10) / 25.0)))
+            yield_estimate = (
+                f"Rende aprox. {brig_festa} brigadeiros de festa (15g) ou {brig_gourmet} brigadeiros gourmet (25g) por embalagem ({wv})"
+            )
+        elif "creme de leite" in f_low and base_unit == "g" and grams_or_ml >= 150:
+            receitas_ganache = max(1, int(round(grams_or_ml / 200.0)))
+            yield_estimate = (
+                f"Rende {receitas_ganache} {'receita base' if receitas_ganache == 1 else 'receitas base'} de 200g para ganaches, mousses, estrogonofes e estabilização de brigadeiros gourmet ({wv})"
+            )
+        elif ("leite em pó" in f_low or "leite po" in t_up.lower()) and base_unit == "g" and grams_or_ml >= 150:
+            litros_leite = round((grams_or_ml / 130.0), 1)
+            receitas_docinho = max(1, int(round(grams_or_ml / 50.0)))
+            yield_estimate = (
+                f"Rende aprox. {str(litros_leite).replace('.', ',')} litros de leite reconstituído ou até {receitas_docinho} receitas/empanamentos de brigadeiro de Leite Ninho ({wv})"
+            )
+        elif ("leite de coco" in f_low or "leite integral" in f_low or "leite triângulo" in f_low) and base_unit == "ml" and grams_or_ml >= 200:
+            copos_200 = max(1, int(round(grams_or_ml / 200.0)))
+            yield_estimate = (
+                f"Rende {copos_200} medidas culinárias padrão de 200 ml para caldas de molhar bolo, massas, pudins e cremes ({wv})"
+            )
+        elif any(w in f_low for w in ("recheio", "doce de leite", "avelã", "nutella", "brigadeiro")) and base_unit == "g" and grams_or_ml >= 250:
+            trufas_rech = max(1, int(round(grams_or_ml / 20.0)))
+            camadas_bolo = max(1, int(round(grams_or_ml / 400.0)))
+            yield_estimate = (
+                f"Rende aprox. {trufas_rech} trufas/cones recheados (20g) ou {camadas_bolo} a {camadas_bolo + 1} camadas generosas em bolo aro 20 cm"
+            )
+        elif ("chantilly" in f_low or "chanty" in f_low) and base_unit == "ml" and grams_or_ml >= 150:
+            litros_batido = round((grams_or_ml / 1000.0) * 3.5, 1)
+            if grams_or_ml >= 500:
+                bolos_aro20 = max(1, int(round((grams_or_ml / 1000.0) * 2.5)))
+                yield_estimate = (
+                    f"Alto rendimento: {wv} rende até {str(litros_batido).replace('.', ',')} litros após batido (cobre e decora de {bolos_aro20} a {bolos_aro20 + 1} bolos aro 20 cm)"
+                )
+            else:
+                cupcakes_q = max(6, int(round((grams_or_ml / 200.0) * 12)))
+                yield_estimate = (
+                    f"Alto rendimento: {wv} rende até {str(litros_batido).replace('.', ',')} litro após batido (ideal para cobrir 1 bolo aro 15 cm ou decorar até {cupcakes_q} cupcakes/sobremesas)"
+                )
+        elif "pasta americana" in f_low and base_unit == "g" and grams_or_ml >= 100:
+            cupcakes_pa = max(6, int(round((grams_or_ml / 250.0) * 12)))
+            yield_estimate = (
+                f"Embalagem de {wv} modela de 15 a 25 apliques decorativos 3D ou reveste até {cupcakes_pa} cupcakes/pirulitos decorados"
+            )
+        elif "desmoldante" in f_low and base_unit == "ml" and grams_or_ml >= 100:
+            aplic_min = max(20, int(round(grams_or_ml * 0.20)))
+            aplic_max = max(30, int(round(grams_or_ml * 0.25)))
+            yield_estimate = f"Alto rendimento profissional: spray de {wv} rende de {aplic_min} a {aplic_max} aplicações em formas médias de bolo"
+        elif ("corante" in f_low or "pó para decoração" in f_low or "po p/decor" in t_up.lower()) and base_unit == "g" and grams_or_ml >= 2:
+            if "pó" in f_low or "po " in t_up.lower():
+                doces_finos = max(20, int(round(grams_or_ml * 16)))
+                yield_estimate = f"Alta concentração de brilho: {wv} finaliza aprox. {doces_finos} doces finos/trufas ou 2 a 3 bolos espatulados"
+            else:
+                gotas_aprox = max(50, int(round(grams_or_ml * 20)))
+                kg_base = max(1, int(round(grams_or_ml / 5.0)))
+                yield_estimate = f"Pigmentação superconcentrada: {wv} (aprox. {gotas_aprox} gotas) colore até {kg_base} kg de chantilly, glacê ou pasta americana"
+        elif "essência" in f_low or "essencia" in t_up.lower():
+            rec_min = max(6, int(round((grams_or_ml or 30.0) / 5.0)))
+            rec_max = max(10, int(round((grams_or_ml or 30.0) / 3.0)))
+            yield_estimate = f"Aroma concentrado: frasco de {wv or '30ml'} aromatiza de {rec_min} a {rec_max} receitas de massas, trufas, recheios ou panetones"
+        elif "liga neutra" in f_low and base_unit == "g":
+            litros_calda = max(1, int(round(grams_or_ml / 10.0)))
+            yield_estimate = f"Estabiliza aprox. {litros_calda} litros de calda base para sorvetes, geladinhos gourmet e picolés (dosagem padrão de 10g por litro)"
+        elif "fermento" in f_low and base_unit == "g":
+            bolos_ferm = max(1, int(round(grams_or_ml / 10.0)))
+            yield_estimate = f"Rende aprox. {bolos_ferm} {'receita' if bolos_ferm == 1 else 'receitas'} de bolo caseiro/profissional (medida padrão de 10g / 1 colher de sopa por receita)"
+        elif ("granulado" in f_low or "confeito" in f_low or "power ball" in f_low or "coloreti" in f_low) and base_unit == "g" and grams_or_ml >= 50:
+            doces_enrolados = max(1, int(round(grams_or_ml / 5.0)))
+            yield_estimate = f"Rende a finalização de aprox. {doces_enrolados} brigadeiros/docinhos de festa (média de 5g de confeito por unidade)"
+        elif ("açúcar" in f_low or "glacucar" in f_low or "glaçúcar" in f_low or "farinha" in f_low or "chocolate em pó" in f_low) and base_unit == "g" and grams_or_ml >= 150:
+            porcoes = max(1, int(round(grams_or_ml / 50.0)))
+            yield_estimate = f"Rende aprox. {porcoes} aplicações/receitas padrão de 50g na confeitaria ({wv})"
+
+    # 3. Formas Forneáveis, Forminhas de Doces, Bicos, Papel Manteiga e Cake Boards
+    elif archetype_id == "ld_confeitaria_formas_utensilios":
+        if "panetone" in f_low or "colomba" in f_low or "forneável" in f_low or "forneavel" in f_low:
+            if any(k in t_up for k in ("500G", "N.500", "Nº 500", "N 500")):
+                cap_str = "Capacidade nominal para 500g de massa (Panetone/Colomba Tradicional Grande)"
+                dimensional_equiv = f"{dimensional_equiv} — {cap_str}" if dimensional_equiv else cap_str
+            elif any(k in t_up for k in ("400G", "N.400", "Nº 400", "N 400")):
+                cap_str = "Capacidade nominal para 400g a 500g de massa (Panetone Padrão)"
+                dimensional_equiv = f"{dimensional_equiv} — {cap_str}" if dimensional_equiv else cap_str
+            elif any(k in t_up for k in ("250G", "N.250", "Nº 250", "N 250")):
+                cap_str = "Capacidade nominal para 250g de massa (Panetone Médio)"
+                dimensional_equiv = f"{dimensional_equiv} — {cap_str}" if dimensional_equiv else cap_str
+            elif any(k in t_up for k in ("100G", "N.100", "Nº 100", "N 100", "MINI")):
+                cap_str = "Capacidade nominal para 100g de massa (Mini Panetone / Lembrancinha)"
+                dimensional_equiv = f"{dimensional_equiv} — {cap_str}" if dimensional_equiv else cap_str
+            else:
+                dimensional_equiv = dimensional_equiv or f"Forma forneável padronizada{f' ({dim})' if dim else ''} pronta para assamento direto sem untar"
+            m_qty = re.search(r"(\d+)\s+Unidades", pack, re.I)
+            if m_qty:
+                yield_estimate = f"Produz {m_qty.group(1)} unidades assadas e prontas para vitrine por pacote"
+        elif "forminha" in f_low or "fundo para doces" in f_low:
+            if "nº 5" in f_low or "nº 05" in f_low or "n.5" in t_up.lower():
+                dimensional_equiv = dimensional_equiv or "Padrão Nº 5 (base aprox. 3,3 cm) — ideal para brigadeiros e beijinhos de festa de 12g a 18g"
+            elif "nº 4" in f_low or "nº 04" in f_low or "n.4" in t_up.lower():
+                dimensional_equiv = dimensional_equiv or "Padrão Nº 4 (base aprox. 3,7 cm) — ideal para brigadeiros gourmet, trufas e bombons de 20g a 30g"
+            elif "nº 0" in f_low or "n.0" in t_up.lower():
+                dimensional_equiv = dimensional_equiv or "Padrão Gourmet / Empadinha — ideal para doces finos grandes e salgados de festa"
+            elif dimensional_equiv:
+                dimensional_equiv = f"{dimensional_equiv} — ideal para doces finos, trufas e brigadeiros gourmet de 15g a 25g"
+            m_qty = re.search(r"(\d+)\s+Unidades", pack, re.I)
+            if m_qty:
+                yield_estimate = f"Acomoda {m_qty.group(1)} doces padronizados para mesas de festa e encomendas"
+        elif "cake board" in f_low or "tabuleiro" in f_low or "disco bolo" in f_low:
+            m_diam = re.search(r"\b(\d+)\s*CM\b", t_up)
+            if m_diam:
+                d_cm = int(m_diam.group(1))
+                aro_min = max(10, d_cm - 6)
+                aro_max = max(12, d_cm - 4)
+                dimensional_equiv = f"Diâmetro real de {d_cm} cm — recomendado para bolos de aro {aro_min} cm a {aro_max} cm (margem técnica de segurança)"
+        elif "papel manteiga" in f_low:
+            yield_estimate = "Rolo econômico para forrar múltiplas assadeiras, formas de bolo e bancadas de chocolate sem grudar"
+        elif "bico" in f_low:
+            dimensional_equiv = dimensional_equiv or "Encaixe profissional compatível com sacos de confeitar e adaptadores grandes/padrão"
+            yield_estimate = "Utensílio permanente reutilizável em inox para acabamento contínuo em bolos e cupcakes"
+
+    # 4. Balões de Látex e Metalizados (Polegadas ↔ cm + Gás Hélio/Ar + Arco de Balões)
+    elif archetype_id == "ld_artigos_festa_decoracao" and ("balão" in f_low or "balao" in f_low):
+        m_qty = re.search(r"(\d+)\s+Unidades", pack, re.I)
+        qty_num = int(m_qty.group(1)) if m_qty else 1
+        is_met = "metalizado" in f_low or "balao met" in t_up.lower()
+
+        if is_met:
+            m_pol = re.search(r"\b(\d+)\s*POLEGADAS\b", f_low, re.I)
+            m_cm = re.search(r"\b(\d+)\s*CM\b", t_up)
+            if m_pol:
+                pol = int(m_pol.group(1))
+                cm_eq = int(round(pol * 2.54))
+                dimensional_equiv = f"{pol} polegadas (aprox. {cm_eq} cm de altura)"
+                gas_and_arch = (
+                    "Inflagem com Ar normal (bomba manual/canudo) para fixação em varetas, painéis e arranjos"
+                    if pol < 18 else
+                    "Compatível com Gás Hélio (flutua) ou Ar normal com válvula autosselante"
+                )
+            elif m_cm:
+                cm_v = int(m_cm.group(1))
+                pol_eq = int(round(cm_v / 2.54))
+                dimensional_equiv = f"{cm_v} cm (equivalente a aprox. {pol_eq} polegadas)"
+                gas_and_arch = (
+                    "Inflagem com Ar normal (bomba manual/canudo)"
+                    if cm_v < 45 else
+                    "Compatível com Gás Hélio (flutua) ou Ar normal com válvula autosselante"
+                )
+            else:
+                dimensional_equiv = "Tamanho decorativo padrão de festa com válvula autosselante"
+                gas_and_arch = "Compatível com Ar normal ou Gás Hélio (conforme dimensão do modelo)"
+        else:
+            # Balão de Látex por numeração (Nº 5, Nº 7, Nº 9, Nº 12, Nº 16)
+            m_num = re.search(r"(?:Nº\s*0?|BALAO\s+|LISO\s+0?)(\d+(?:[.,]\d+)?)\b", f_low, re.I) or re.search(r"\bN\.?\s*0?(\d+)\b", t_up)
+            b_num = float(m_num.group(1).replace(",", ".")) if m_num else 9.0
+            cm_inflated = int(round(b_num * 2.54))
+            b_lbl = f"{int(b_num)}" if b_num.is_integer() else str(b_num).replace(".", ",")
+            dimensional_equiv = f"Tamanho Nº {b_lbl} — {b_lbl} polegadas (aprox. {cm_inflated} cm de diâmetro inflado)"
+            if b_num <= 5.5:
+                gas_and_arch = "Inflagem exclusiva com Ar normal (não flutua com gás hélio) — ideal para detalhes de arcos orgânicos e mini guirlandas"
+            elif b_num <= 7.5:
+                arch_m = round((qty_num / 40.0) * 1.0, 1) if qty_num >= 20 else 0
+                gas_and_arch = "Inflagem recomendada com Ar normal (alta resistência para arcos, colunas e telas)"
+                if arch_m > 0:
+                    yield_estimate = f"Pacote com {qty_num} unidades monta aprox. {str(arch_m).replace('.', ',')} m a {str(round(arch_m * 1.25, 1)).replace('.', ',')} m lineares de arco de balões"
+            else:
+                arch_m = round((qty_num / 36.0) * 1.0, 1) if qty_num >= 15 else 0
+                gas_and_arch = "Compatível com Gás Hélio (flutuação plena) ou Ar normal (bomba manual / compressor de balões)"
+                if arch_m > 0:
+                    yield_estimate = (
+                        f"Pacote com {qty_num} unidades monta aprox. {str(arch_m).replace('.', ',')} m a {str(round(arch_m * 1.25, 1)).replace('.', ',')} m lineares "
+                        f"de arco orgânico (cerca de {max(1, qty_num // 4)} clusters de 4 balões)"
+                    )
+
+    # 5. Bomboniere, Embalagens, Caixas MDF, Sacolas e Demais Categorias
+    if not yield_estimate:
+        m_qty = re.search(r"(\d+)\s+(?:Unidades|Folhas|Peças|Blocos|Cores)", pack, re.I)
+        if m_qty and int(m_qty.group(1)) > 1:
+            q_n = int(m_qty.group(1))
+            if archetype_id in ("ld_bomboniere_chocolates", "ld_bomboniere_balas_gomas"):
+                yield_estimate = f"Embalagem com {q_n} unidades — excelente rendimento para sacolinhas surpresa, festas e revenda unitária em PDV"
+            else:
+                yield_estimate = f"Rendimento de {q_n} unidades/folhas por embalagem para produção padronizada, eventos ou organização"
+        elif ("panetone" in f_low or "panettone" in f_low) and base_unit == "g" and grams_or_ml >= 300:
+            fatias_min = max(6, int(round(grams_or_ml / 65.0)))
+            fatias_max = max(8, int(round(grams_or_ml / 50.0)))
+            yield_estimate = f"Rende de {fatias_min} a {fatias_max} fatias generosas ({wv}) para ceias, cafés especiais e cestas de Natal"
+        elif base_unit == "g" and grams_or_ml >= 150 and archetype_id in ("ld_bomboniere_chocolates", "ld_bomboniere_balas_gomas"):
+            porcoes_25 = max(1, int(round(grams_or_ml / 25.0)))
+            yield_estimate = f"Rende aprox. {porcoes_25} porções de 25g para mesa de guloseimas, lembrancinhas ou consumo ({wv})"
+        elif archetype_id in ("ld_bomboniere_chocolates", "ld_bomboniere_balas_gomas"):
+            yield_estimate = f"Porção individual prática{f' ({wv})' if wv else ''} pronta para consumo imediato, lembrancinhas de festa, cestas ou display de PDV"
+        elif archetype_id == "ld_embalagens_descartaveis":
+            if "2kg" in f_low or "p56" in f_low:
+                yield_estimate = "Capacidade para acondicionar bolos e tortas confeitadas de até 2 kg (aros de 20 cm a 24 cm)"
+            elif "1,7kg" in f_low or "p50" in f_low:
+                yield_estimate = "Capacidade para acondicionar bolos e tortas de até 1,7 kg (aros de 18 cm a 22 cm)"
+            elif "g35" in f_low:
+                yield_estimate = "Capacidade ideal para bolos redondos médios e tortas de até 1,2 kg"
+            elif "g16" in f_low or "6 doces" in f_low:
+                yield_estimate = "Acomoda 6 cupcakes ou doces gourmet em cavidades individuais protetoras"
+            elif wv:
+                yield_estimate = f"Capacidade volumétrica nominal de {wv} por unidade para serviço seguro de bebidas ou sobremesas"
+            else:
+                yield_estimate = "Acondicionamento individual seguro para transporte, vitrine de confeitaria e delivery"
+
+    if not dimensional_equiv and dim:
+        dimensional_equiv = f"Dimensões nominais de fábrica: {dim}"
+
+    resumo_parts = [p for p in (yield_estimate, dimensional_equiv, gas_and_arch) if p]
+    resumo_rendimento = " | ".join(resumo_parts) if resumo_parts else "Padrão dimensional e rendimento oficial de fábrica"
+
+    return {
+        "yield_estimate": yield_estimate,
+        "dimensional_equiv": dimensional_equiv,
+        "gas_and_arch": gas_and_arch,
+        "resumo_rendimento": resumo_rendimento,
+    }
+
+
+def get_anvisa_allergen_and_safety_info(
+    raw_title: str,
+    formatted_title: str,
+    archetype_id: str,
+    attrs: Dict[str, str],
+) -> Dict[str, str]:
+    """
+    Frente 3 da Auditoria VTEX:
+    Retorna orientação técnica e alerta de segurança alimentar / alergênicos (Padrão ANVISA RDC 26/2015)
+    para produtos comestíveis e selo de Grau Alimentício Atóxico (BPA Free) para utensílios e embalagens.
+    """
+    f_low = (formatted_title or "").lower()
+    t_up = (raw_title or "").upper()
+
+    if archetype_id in ("ld_confeitaria_ingredientes", "ld_bomboniere_chocolates", "ld_bomboniere_balas_gomas"):
+        if any(w in f_low for w in ("biscoito", "wafer", "kit kat", "bis ", "oreo", "farinha de trigo", "panetone", "panettone", "salgadinho")):
+            val = "CONTÉM GLÚTEN. Alérgicos: contém derivados de trigo, soja e leite (lactose), podendo conter traços de ovos, amendoim, avelã e castanhas conforme lote do fabricante (RDC 26/2015)."
+            return {
+                "label": "Alerta de Alergênicos & Glúten (ANVISA)",
+                "value": val,
+                "alerta_alergenicos": val,
+            }
+        if any(w in f_low for w in ("chocolate", "cobertura", "bombom", "leite", "chantilly", "chanty", "avelã", "nutella", "recheio", "doce de leite", "brigadeiro", "moça", "laka", "baton", "coloreti", "power ball")):
+            gluten_note = "Pode conter glúten (verificar rotulagem do fabricante)." if any(w in f_low for w in ("power ball", "crocante", "flocos", "bombom")) else "Consulte a presença de glúten no rótulo oficial."
+            val = f"ALÉRGICOS: Contém derivados de leite (lactose) e derivados de soja; pode conter traços de oleaginosas. {gluten_note} (Padrão ANVISA RDC 26/2015)."
+            return {
+                "label": "Alerta de Alergênicos & Lactose (ANVISA)",
+                "value": val,
+                "alerta_alergenicos": val,
+            }
+        if any(w in f_low for w in ("corante", "pó para decoração", "essência", "desmoldante", "fermento", "liga neutra")):
+            val = "Insumo de grau alimentício regulamentado pela ANVISA. Verificar na embalagem original a declaração específica de alergênicos, glúten e dosagem máxima recomendada."
+            return {
+                "label": "Segurança Alimentar & Alergênicos (ANVISA)",
+                "value": val,
+                "alerta_alergenicos": val,
+            }
+        val = "Produto alimentício lacrado de fábrica. Conferir na embalagem original a lista atualizada de ingredientes, corantes, glúten e alérgicos (ANVISA RDC 26/2015)."
+        return {
+            "label": "Informação de Alergênicos (ANVISA)",
+            "value": val,
+            "alerta_alergenicos": val,
+        }
+
+    if archetype_id in ("ld_confeitaria_formas_utensilios", "ld_embalagens_descartaveis"):
+        val = "Material atóxico de grau alimentício (Livre de BPA / Celulose virgem selecionada), inodoro e seguro para contato com alimentos conforme normas da ANVISA."
+        return {
+            "label": "Segurança & Grau Alimentício",
+            "value": val,
+            "alerta_alergenicos": val,
+        }
+
+    if archetype_id == "ld_artigos_festa_decoracao" and ("balão" in f_low or "balao" in t_up.lower()):
+        val = "Produto certificado para uso festivo. Recomenda-se inflar com bomba manual ou compressor e manter supervisão de um adulto durante o uso por crianças."
+        return {
+            "label": "Segurança & Certificação",
+            "value": val,
+            "alerta_alergenicos": val,
+        }
+
+    val = "Produto não perecível, atóxico e de procedência original garantida. Manter em local seco e fora do alcance de crianças pequenas quando contiver partes destacáveis."
+    return {
+        "label": "Segurança & Conformidade",
+        "value": val,
+        "alerta_alergenicos": val,
+    }
+
+
+def generate_lojadoce_seo_metadata(
+    formatted_title: str,
+    brand: str,
+    attrs: Dict[str, str],
+    archetype_id: str,
+    yield_info: Optional[Dict[str, str]] = None,
+) -> Dict[str, str]:
+    """
+    Frente 2 da Auditoria VTEX (Anti-Bug Meta Tag VTEX):
+    Gera `seo_title` (<= 60 caracteres) e `seo_meta_description` (135 a 155 caracteres)
+    100% em texto puro UTF-8, sem tags HTML (<style>, <div>) e sem entidades HTML (&aacute;, &nbsp;).
+    """
+    clean_title = re.sub(r"<[^>]+>", "", formatted_title or "").strip()
+    clean_title = re.sub(r"&[a-zA-Z0-9#]+;", "", clean_title).strip()
+    clean_title = re.sub(r"\b(?:BRK|Loja\s+Doce(?:\s+Import)?)\b", "", clean_title, flags=re.I).strip()
+    clean_title = " ".join(clean_title.split())
+
+    b_disp = (attrs.get("brand") or brand or "Linha Oficial").strip()
+    if b_disp.upper() in ("LOJA DOCE", "LOJA DOCE IMPORT", "BRK"):
+        b_disp = "Linha Oficial"
+
+    # 1. SEO Title <= 60 caracteres
+    seo_title = clean_title
+    if len(seo_title) > 60:
+        words = seo_title.split()
+        acc: List[str] = []
+        for w in words:
+            cand = " ".join(acc + [w])
+            if len(cand) <= 60:
+                acc.append(w)
+            else:
+                break
+        seo_title = " ".join(acc) if acc else seo_title[:60].strip()
+    elif b_disp != "Linha Oficial" and b_disp.lower() not in seo_title.lower():
+        cand = f"{seo_title} | {b_disp}"
+        if len(cand) <= 60:
+            seo_title = cand
+
+    # 2. SEO Meta Description (135 a 155 caracteres, texto puro UTF-8)
+    wv = attrs.get("weight_vol", "")
+    dim = attrs.get("dimensions", "")
+    pack = attrs.get("pack_qty", "")
+    yi = (yield_info or {}).get("yield_estimate") or (yield_info or {}).get("dimensional_equiv") or ""
+
+    detail_bits: List[str] = []
+    if wv and wv.lower() not in clean_title.lower():
+        detail_bits.append(wv)
+    if dim and dim.lower() not in clean_title.lower():
+        detail_bits.append(dim)
+    if pack and pack != "Unidade individual" and pack.lower() not in clean_title.lower():
+        detail_bits.append(pack)
+    if yi:
+        short_yi = yi.split("(")[0].strip()
+        if len(short_yi) <= 55:
+            detail_bits.append(short_yi)
+
+    cat_benefit = {
+        "ld_confeitaria_ingredientes": "Alto rendimento, estabilidade e procedência original para confeitaria e receitas.",
+        "ld_confeitaria_formas_utensilios": "Padrão profissional, grau alimentício atóxico e acabamento impecável na confeitaria.",
+        "ld_bomboniere_chocolates": "Sabor original consagrado, lote fresco lacrado e alto giro para festas e revenda.",
+        "ld_bomboniere_balas_gomas": "Cores vibrantes, sabor intenso e pacote econômico para lembrancinhas e eventos.",
+        "ld_embalagens_descartaveis": "Estrutura firme de grau alimentício, higiene e apresentação impecável no delivery.",
+        "ld_artigos_festa_decoracao": "Cores vivas, alta durabilidade e destaque visual para decoração de festas e eventos.",
+        "ld_presentes_caixas_sacolas": "Acabamento reforçado e apresentação sofisticada para presentes, cestas e kits.",
+        "ld_papelaria_artesanato": "Qualidade comprovada, precisão e durabilidade para escola, escritório e ateliê.",
+    }.get(archetype_id, "Qualidade comprovada, procedência original e pronta entrega imediata.")
+
+    extra_str = f" ({', '.join(detail_bits[:2])})" if detail_bits else ""
+    base_meta = f"Compre {clean_title}{extra_str}. {cat_benefit} Envio rápido e seguro!"
+    base_meta = re.sub(r"<[^>]+>", "", base_meta)
+    base_meta = re.sub(r"&[a-zA-Z0-9#]+;", "", base_meta)
+    base_meta = " ".join(base_meta.split())
+
+    if len(base_meta) > 155:
+        cut = base_meta[:154]
+        if " " in cut:
+            cut = cut.rsplit(" ", 1)[0].rstrip(".,;:-")
+        while cut.split() and cut.split()[-1].lower() in LOWER_PARTICLES | {"Envio".lower(), "rápido".lower()}:
+            cut = " ".join(cut.split()[:-1]).rstrip(".,;:-")
+        base_meta = cut + "."
+    elif len(base_meta) < 130:
+        pad = " Produto 100% original com nota fiscal e pronta entrega."
+        if len(base_meta) + len(pad) <= 155:
+            base_meta = base_meta + pad
+
+    return {
+        "seo_title": seo_title,
+        "seo_meta_description": base_meta,
+    }
+
+
+def build_vtex_specifications(
+    attrs: Dict[str, str],
+    archetype_id: str,
+    yield_info: Dict[str, str],
+    allergen_info: Dict[str, str],
+) -> Dict[str, str]:
+    """
+    Frente 4 da Auditoria VTEX:
+    Gera o dicionário estruturado de especificações técnicas pronto para alimentar os
+    SpecificationFilters (filtros laterais e ficha técnica nativa) da plataforma VTEX.
+    """
+    vtex_specs: Dict[str, str] = {
+        "Marca": attrs.get("brand") or "Linha Oficial",
+        "Departamento VTEX": attrs.get("dept_name") or "Catálogo Geral",
+        "Categoria VTEX": attrs.get("subcat_name") or "Linha Oficial",
+        "Código SKU": str(attrs.get("sku") or ""),
+    }
+    if attrs.get("weight_vol"):
+        vtex_specs["Peso / Volume"] = attrs["weight_vol"]
+    if attrs.get("pack_qty"):
+        vtex_specs["Quantidade por Embalagem"] = attrs["pack_qty"]
+    if attrs.get("dimensions"):
+        vtex_specs["Dimensões / Medidas"] = attrs["dimensions"]
+    if yield_info.get("dimensional_equiv"):
+        vtex_specs["Equivalência Dimensional"] = yield_info["dimensional_equiv"]
+    if yield_info.get("yield_estimate"):
+        vtex_specs["Rendimento Estimado"] = yield_info["yield_estimate"]
+    if yield_info.get("gas_and_arch"):
+        vtex_specs["Inflagem / Aplicação"] = yield_info["gas_and_arch"]
+    if attrs.get("material"):
+        vtex_specs["Material"] = attrs["material"]
+    if attrs.get("flavor_or_color"):
+        vtex_specs["Sabor / Cor / Tonalidade"] = attrs["flavor_or_color"]
+    if allergen_info.get("value"):
+        vtex_specs[allergen_info.get("label", "Segurança / Alergênicos")] = allergen_info["value"]
+    return vtex_specs
 
 
 def customize_lojadoce_narrative(
@@ -808,9 +1415,13 @@ def customize_lojadoce_narrative(
 ) -> List[Dict[str, str]]:
     """
     Verticaliza profundamente os 3 Atos, a Ficha Técnica e as Dicas de Conservação
-    para cada subtipo de produto da Loja Doce usando os atributos reais extraídos do SKU.
+    para cada subtipo de produto da Loja Doce usando os atributos reais extraídos do SKU,
+    incluindo Rendimento Prático, Equivalência Dimensional e Alerta de Alergênicos ANVISA.
     """
     attrs = extract_lojadoce_attributes(raw_title, formatted_title, brand, category, sku)
+    yield_info = calculate_lojadoce_yield_and_equivalence(raw_title, formatted_title, attrs, archetype_id)
+    allergen_info = get_anvisa_allergen_and_safety_info(raw_title, formatted_title, archetype_id, attrs)
+
     f_low = formatted_title.lower()
     t_up = (raw_title or "").upper()
     b_disp = attrs["brand"]
@@ -819,6 +1430,9 @@ def customize_lojadoce_narrative(
     pack = attrs["pack_qty"]
     mat = attrs["material"]
     fc = attrs["flavor_or_color"]
+    yield_est = yield_info.get("yield_estimate", "")
+    dim_equiv = yield_info.get("dimensional_equiv", "")
+    gas_arch = yield_info.get("gas_and_arch", "")
 
     specs: List[Dict[str, str]] = [
         {"label": "Marca / Fabricante", "value": f"{b_disp} (Produto 100% Original)"},
@@ -829,8 +1443,14 @@ def customize_lojadoce_narrative(
         specs.append({"label": "Peso Líquido / Volume", "value": wv})
     if dim:
         specs.append({"label": "Dimensões / Medidas", "value": dim})
+    if dim_equiv:
+        specs.append({"label": "Equivalência Dimensional / Capacidade", "value": dim_equiv})
     if pack:
         specs.append({"label": "Apresentação / Quantidade", "value": pack})
+    if yield_est:
+        specs.append({"label": "Rendimento Prático Estimado", "value": yield_est})
+    if gas_arch:
+        specs.append({"label": "Tipo de Inflagem Recomendada", "value": gas_arch})
     if mat:
         specs.append({"label": "Material Principal", "value": mat})
     if fc:
@@ -844,13 +1464,13 @@ def customize_lojadoce_narrative(
             act1["title"] = "DERRETIMENTO RÁPIDO, BRILHO ESPELHADO E PRATICIDADE SEM TEMPERAGEM"
             act1["desc_tmpl"] = (
                 f"Desenvolvida para garantir agilidade e acabamento impecável na confeitaria, a {{title}} "
-                f"possui formulação fracionada {fmt_choc} que dispensa o choque térmico (temperagem). "
-                f"Basta derreter para obter excelente fluidez, secagem rápida e casquinhas finas, crocantes e brilhantes."
+                f"possui formulação fracionada {fmt_choc} que, diferente do chocolate nobre tradicional, dispensa o choque térmico (temperagem). "
+                f"Basta derreter entre 45°C e 50°C (em banho-maria ou micro-ondas em potência média de 30 em 30 segundos) para obter excelente fluidez, secagem rápida e casquinhas finas, crocantes e brilhantes."
             )
-            act2["tag"] = "Rendimento & Aplicações"
+            act2["tag"] = "Rendimento Prático & Aplicações"
             act2["title"] = "IDEAL PARA BANHAR TRUFAS, PÃO DE MEL, CONES, FRUTAS E MOLDAR OVOS"
             act2["desc_tmpl"] = (
-                f"Com rendimento superior{f' na embalagem de {wv}' if wv else ''}, proporciona cobertura uniforme sem bolhas "
+                f"Com rendimento superior{f' na embalagem de {wv} ({yield_est.lower()})' if yield_est else (f' na embalagem de {wv}' if wv else '')}, proporciona cobertura uniforme sem bolhas "
                 f"e excelente contração no molde para desenforme fácil de bombons, cascas recheadas, pirulitos de chocolate e decorações."
             )
             act3["tag"] = f"Padrão Profissional {b_disp}"
@@ -859,9 +1479,26 @@ def customize_lojadoce_narrative(
                 f"Mantém o brilho e a firmeza da cobertura por muito mais tempo após cristalizada, garantindo segurança "
                 f"na exposição em vitrines, encomendas de festas e transporte no delivery."
             )
-            specs.append({"label": "Necessita Temperagem?", "value": "Não (Cobertura Fracionada — derreteu, usou)"})
-            specs.append({"label": "Uso Recomendado", "value": "Banhos de trufas, pão de mel, cones trufados, bombons e moldes"})
-        elif "recheio" in f_low or "nutella" in f_low or "brigadeiro" in f_low or "doce de leite" in f_low:
+            specs.append({"label": "Classificação Técnica", "value": "Cobertura Fracionada (formulada com gordura vegetal selecionada — dispensa temperagem)"})
+            specs.append({"label": "Necessita Temperagem?", "value": "Não (Cobertura Fracionada — derreteu entre 45°C e 50°C, usou)"})
+            specs.append({"label": "Uso Recomendado", "value": "Banhos de trufas, pão de mel, cones trufados, bombons e moldes de Páscoa"})
+        elif "chocolate" in f_low and "pó" not in f_low and "po " not in t_up.lower():
+            act1["tag"] = f"Chocolate Nobre Puro {b_disp} • Manteiga de Cacau"
+            act1["title"] = "SABOR NOBRE AUTÊNTICO, DERRETIMENTO AVELUDADO E PADRÃO GOURMET"
+            act1["desc_tmpl"] = (
+                f"Elaborado com manteiga de cacau pura e seleção rigorosa de cacau, o {{title}} é um Chocolate Nobre verdadeiro "
+                f"que entrega derretimento aveludado na boca, aroma profundo e brilho acetinado incomparável para alta confeitaria e chocolateria."
+            )
+            act2["tag"] = "Orientação Técnica de Temperagem & Ganaches"
+            act2["title"] = "TEMPERAGEM PARA MOLDAGEM DE OVOS/BOMBONS OU USO DIRETO EM GANACHES"
+            act2["desc_tmpl"] = (
+                f"Por ser Chocolate Nobre (e não cobertura fracionada), requer temperagem (choque térmico entre 28°C e 32°C após derretimento a 45°C) "
+                f"quando utilizado para moldar cascas de Ovos de Páscoa, bombons e tabletes com contração e snap perfeitos. "
+                f"Para ganaches nobres, trufas, brigadeiros gourmet e mousses, basta derreter e incorporar ao creme{f' ({yield_est.lower()})' if yield_est else ''}."
+            )
+            specs.append({"label": "Classificação Técnica", "value": "Chocolate Nobre Puro (formulado com manteiga de cacau — requer temperagem para moldagem)"})
+            specs.append({"label": "Necessita Temperagem?", "value": "Sim para moldagem de cascas/bombons (choque térmico 28°C–32°C); Não para ganaches e recheios"})
+        elif "recheio" in f_low or "nutella" in f_low or "brigadeiro" in f_low or "doce de leite" in f_low or "leite condensado" in f_low:
             is_forn = "forneável" in f_low or "forneavel" in f_low
             act1["tag"] = "Recheio Forneável & Estável" if is_forn else f"Cremosidade & Sabor {b_disp}"
             act1["title"] = (
@@ -872,38 +1509,57 @@ def customize_lojadoce_narrative(
             act1["desc_tmpl"] = (
                 f"O {{title}} entrega sabor intenso e textura perfeitamente estruturada para uso imediato na confeitaria. "
                 + (
-                    "Sua tecnologia forneável suporta altas temperaturas de forno em pizzas, croissants, tortas, churros e folhados sem ressecar e sem escapar da massa."
+                    "Sua tecnologia forneável suporta altas temperaturas de forno em pizzas, croissants, tortas, churros e folhados sem ressecar, sem ferver e sem escapar da massa."
                     if is_forn else
-                    "Pronto para aplicar com saco de confeitar ou espátula em bolos de festa, tortas, copos da felicidade, cones trufados e sobremesas gourmet."
+                    "Ideal para ponto de brigadeiro, bico de confeitar ou aplicação direta com espátula em bolos de festa, tortas, copos da felicidade, cones trufados e sobremesas gourmet."
                 )
             )
-            act2["tag"] = "Produtividade na Cozinha"
-            act2["title"] = "PADRONIZAÇÃO DE RECEITAS E ECONOMIA DE TEMPO DE FOGÃO"
+            act2["tag"] = "Produtividade & Rendimento na Cozinha"
+            act2["title"] = "PADRONIZAÇÃO DE RECEITAS E ALTO RENDIMENTO POR EMBALAGEM"
             act2["desc_tmpl"] = (
-                f"Elimina etapas demoradas de cozimento e garante que todas as suas encomendas tenham exatamente o mesmo padrão "
-                f"de ponto, brilho e dulçor{f' com a embalagem de {wv}' if wv else ''}."
+                f"Garante que todas as suas encomendas tenham exatamente o mesmo padrão de ponto, brilho e dulçor"
+                f"{f' ({yield_est})' if yield_est else (f' com a embalagem de {wv}' if wv else '')}."
             )
+            if is_forn:
+                specs.append({"label": "Estabilidade Térmica", "value": "Forneável (suporta assamento em forno doméstico e industrial sem ferver ou vazar)"})
         elif "chantilly" in f_low or "chanty" in f_low:
             act1["tag"] = f"Alto Rendimento & Ponto Firme • {b_disp}"
             act1["title"] = "PONTO PERFEITO PARA BICO DE CONFEITAR E ALISAMENTO DE BOLOS"
             act1["desc_tmpl"] = (
                 f"Referência absoluta entre confeiteiras, o {{title}} triplica de volume no batimento e atinge textura cremosa, "
-                f"porosa zero e altamente estável para espatulagem lisa, rosetas, babados e trabalhos de bico de alta precisão."
+                f"porosidade zero e alta estabilidade para espatulagem lisa, rosetas, babados e trabalhos de bico de alta precisão."
             )
-            act2["tag"] = "Estabilidade Térmica & Versatilidade"
+            act2["tag"] = "Estabilidade Térmica & Rendimento"
             act2["title"] = "EXCELENTE RESISTÊNCIA EM BANCADA E ACEITAÇÃO DE CORANTES E SABORIZANTES"
             act2["desc_tmpl"] = (
-                "Aceita coloração intensa com corantes em gel sem perder o ponto, além de ser a base ideal para o preparo de "
+                f"{f'{yield_est}. ' if yield_est else ''}Aceita coloração intensa com corantes hidrossolúveis em gel sem perder o ponto, além de ser a base ideal para o preparo de "
                 "chantininho, mousses aeradas, recheios trufados e coberturas de sobremesas."
             )
-            template["care_tips"] = "Conservar em local seco e fresco (não congelar antes de bater). Antes do preparo, resfriar em geladeira entre 4°C e 8°C por pelo menos 12 horas para atingir o rendimento e ponto ideais."
+            template["care_tips"] = "Conservar em local seco e fresco (não congelar antes de bater). Antes do preparo, resfriar em geladeira entre 4°C e 8°C por pelo menos 12 horas e bater em velocidade média para atingir o rendimento máximo."
         elif "corante" in f_low or "pó para decoração" in f_low or "po p/decor" in t_up.lower():
+            is_po = "pó" in f_low or "po " in t_up.lower()
             act1["tag"] = f"Alta Pigmentação & Acabamento • {b_disp}"
             act1["title"] = "CORES INTENSAS E FIDELIDADE DE TOM SEM ALTERAR A CONSISTÊNCIA DA RECEITA"
             act1["desc_tmpl"] = (
-                f"Formulado com alta concentração de pigmentos alimentícios, o {{title}} atinge tonalidades vivas e uniformes "
-                f"utilizando poucas gotas ou gramas, sem desandar o ponto do chantilly, glacê real, pasta americana ou massas."
+                f"Formulado com alta concentração de pigmentos para confeitaria artística, o {{title}} atinge tonalidades vivas e uniformes "
+                + (
+                    "podendo ser aplicado a seco com pincel macio sobre chocolates, pasta americana e doces finos, ou diluído em álcool de cereais/solução alcoólica para pintura metálica e bombinha borrifadora."
+                    if is_po else
+                    "com base hidrossolúvel em gel/softgel superconcentrada: utiliza poucas gotas para dispersão imediata sem desandar o ponto do chantilly, chantininho, glacê real, merengue, pasta americana ou massas (para chocolate derretido puro, recomenda-se linha lipossolúvel específica)."
+                )
             )
+            specs.append({
+                "label": "Solubilidade / Base Técnica",
+                "value": (
+                    "Pó decorativo micronizado não tóxico (aplicação a seco ou diluído em álcool de cereais)"
+                    if is_po else
+                    "Hidrossolúvel em Gel/Softgel concentrado (ideal para chantilly, glacê, pasta americana e massas; não lipossolúvel)"
+                ),
+            })
+            specs.append({
+                "label": "Modo de Aplicação Técnica",
+                "value": "Aplicação superficial a seco com pincel ou diluído para borrifador/aerógrafo" if is_po else "Dosagem gradual direta em chantilly, glacê, pasta americana e massas",
+            })
         elif "desmoldante" in f_low:
             act1["tag"] = f"Liberação Perfeita sem Resíduos • {b_disp}"
             act1["title"] = "DESENFORME IMPECÁVEL DE BOLOS COMPLEXOS SEM USAR FARINHA E MANTEIGA"
@@ -913,17 +1569,17 @@ def customize_lojadoce_narrative(
             )
 
     elif archetype_id == "ld_confeitaria_formas_utensilios":
-        if "panetone" in f_low or "forneável" in f_low:
+        if "panetone" in f_low or "colomba" in f_low or "forneável" in f_low:
             act1["tag"] = f"Papel Forneável Especial • {b_disp}"
             act1["title"] = "VAI DIRETO AO FORNO SEM UNTAR E VALORIZA A APRESENTAÇÃO DO PANETONE"
             act1["desc_tmpl"] = (
-                f"Confeccionada em papel forneável de grau alimentício{f' nas medidas {dim}' if dim else ''}, a {{title}} "
+                f"Confeccionada em papel forneável de grau alimentício{f' ({dim_equiv})' if dim_equiv else (f' nas medidas {dim}' if dim else '')}, a {{title}} "
                 f"suporta o crescimento e o forneamento da massa com distribuição homogênea de calor e base microperfurada de respiro."
             )
             act2["tag"] = "Do Forno para a Vitrine"
             act2["title"] = "ESTRUTURA FIRME QUE NÃO DEFORMA E DISPENSA DESENFORME"
             act2["desc_tmpl"] = (
-                f"Sua parede estruturada mantém o formato cilíndrico clássico durante e após o assamento, permitindo embalar e "
+                f"Sua parede estruturada mantém o formato clássico durante e após o assamento, permitindo embalar e "
                 f"comercializar o produto diretamente na própria forma decorada ({pack})."
             )
         elif "cake board" in f_low or "tabuleiro" in f_low or "disco bolo" in f_low:
@@ -931,20 +1587,20 @@ def customize_lojadoce_narrative(
             act1["title"] = "BASE ESTRUTURADA QUE EVITA RACHADURAS NO TRANSPORTE DE BOLOS"
             act1["desc_tmpl"] = (
                 f"Projetado para suportar o peso de bolos confeitados e recheados sem envergar, o {{title}} "
-                f"{f'com medidas {dim} ' if dim else ''}garante estabilidade total durante a espatulagem na bailarina, refrigeração e entrega."
+                f"{f'({dim_equiv}) ' if dim_equiv else (f'com medidas {dim} ' if dim else '')}garante estabilidade total durante a espatulagem na bailarina, refrigeração e entrega."
             )
-            act2["tag"] = "Acabamento Branco Higiênico"
+            act2["tag"] = "Acabamento Higiênico Grau Alimentício"
             act2["title"] = "SUPERFÍCIE LAMINADA DE FÁCIL LIMPEZA QUE DESTACA A DECORAÇÃO"
             act2["desc_tmpl"] = (
-                "Revestimento superior que facilita a limpeza do rodapé do bolo com espátula ou pano úmido após o trabalho de bico, "
+                "Revestimento superior impermeável que facilita a limpeza do rodapé do bolo com espátula ou pano úmido após o trabalho de bico, "
                 "conferindo apresentação limpa e profissional."
             )
         elif "forminha" in f_low or "fundo para doces" in f_low:
             act1["tag"] = f"Mesa de Doces Impecável • {b_disp}"
             act1["title"] = "ACABAMENTO DELICADO E PADRONIZADO PARA BRIGADEIROS E DOCES FINOS"
             act1["desc_tmpl"] = (
-                f"A {{title}} ({pack}) acomoda brigadeiros, beijinhos, camafeus e trufas com elegância e higiene, "
-                f"destacando as cores da mesa principal em aniversários, casamentos e encomendas."
+                f"A {{title}} ({pack}) acomoda brigadeiros, beijinhos, camafeus e trufas com elegância e higiene"
+                f"{f' — {dim_equiv}' if dim_equiv else ''}, destacando as cores da mesa principal em aniversários, casamentos e encomendas."
             )
 
     elif archetype_id == "ld_presentes_caixas_sacolas":
@@ -985,18 +1641,25 @@ def customize_lojadoce_narrative(
                 "ELASTICIDADE SUPERIOR, CORES INTENSAS E ALTA DURABILIDADE EM ARCOS"
             )
             act1["desc_tmpl"] = (
-                f"O {{title}} é escolha certeira de decoradores para criar painéis, buquês e arcos desconstruídos. "
+                f"O {{title}}{f' ({dim_equiv})' if dim_equiv else ''} é escolha certeira de decoradores para criar painéis, buquês e arcos desconstruídos. "
                 + (
-                    "Possui acabamento metalizado refletivo que mantém o formato cheio por longo período com ar ou gás hélio."
+                    f"Possui acabamento metalizado refletivo que mantém o formato cheio por longo período ({gas_arch})."
                     if is_met else
-                    f"Produzido em látex de alta resistência ({pack}) que infla no formato correto, garantindo brilho uniforme e menor índice de estouro."
+                    f"Produzido em látex biodegradável de alta resistência ({pack}) que infla no formato correto, garantindo brilho uniforme e menor índice de estouro."
                 )
             )
+            if yield_est or gas_arch:
+                act2["tag"] = "Rendimento em Arcos & Inflagem"
+                act2["title"] = "MEDIDA PADRONIZADA PARA ARCOS ORGÂNICOS, GUIRLANDAS E BUQUÊS"
+                act2["desc_tmpl"] = (
+                    f"{f'{yield_est}. ' if yield_est else ''}{f'{gas_arch}. ' if gas_arch else ''}"
+                    "Excelente retenção de ar para manter a decoração impecável do início ao fim da comemoração."
+                )
         elif "fita" in f_low or "fitilho" in f_low or "laço" in f_low:
             act1["tag"] = f"Laços & Acabamentos Decorativos • {b_disp}"
             act1["title"] = "CAIMENTO IMPECÁVEL PARA LAÇOS, ÁRVORES DE NATAL, GUIRLANDAS E EMBALAGENS"
             act1["desc_tmpl"] = (
-                f"Com medidas de {dim if dim else 'alto rendimento'}, a {{title}} proporciona acabamento sofisticado "
+                f"Com medidas de {dim_equiv if dim_equiv else (dim if dim else 'alto rendimento')}, a {{title}} proporciona acabamento sofisticado "
                 + (
                     "com bordas aramadas que permitem moldar laços volumosos que não murcham na decoração natalina ou em cestas."
                     if "aramada" in f_low else
@@ -1004,4 +1667,9 @@ def customize_lojadoce_narrative(
                 )
             )
 
+    if allergen_info:
+        specs.append({"label": allergen_info["label"], "value": allergen_info["value"]})
+
     return specs
+
+

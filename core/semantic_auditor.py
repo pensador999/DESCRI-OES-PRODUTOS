@@ -62,7 +62,7 @@ UPPER_BODY_RE = re.compile(r"\bmangas?\b|\bgola\b|colarinho", re.IGNORECASE)
 ZIPPER_RE = re.compile(r"z[ií]per", re.IGNORECASE)
 NEGATED_ZIPPER_RE = re.compile(r"sem\s+z[ií]per(?:es)?", re.IGNORECASE)
 ROD_RE = re.compile(r"\bvaras?\b", re.IGNORECASE)
-BADGE_TITLE_RE = re.compile(r'brk-badge-title">([^<]+)<')
+BADGE_TITLE_RE = re.compile(r'(?:brk|vtex)-badge-title">([^<]+)<')
 
 GENERIC_BADGE_TITLES = {"Qualidade Oficial", "Acabamento Premium", "Envio Rápido & Seguro", "Garantia Oficial BRK"}
 
@@ -120,7 +120,7 @@ def _rule_dryfit_in_cotton_shirt(arch: str, title: str, body: str) -> Optional[s
 
 
 def _rule_size_guide_in_non_wearable(arch: str, title: str, body: str) -> Optional[str]:
-    if arch not in SIZE_GUIDE_OK and '<details class="brk-size-guide"' in body:
+    if arch not in SIZE_GUIDE_OK and ('<details class="brk-size-guide"' in body or '<details class="vtex-size-guide"' in body):
         return "tabela de medidas <details class=brk-size-guide>"
     return None
 
@@ -166,9 +166,17 @@ def _rule_hand_glove_slot_and_caption(arch: str, title: str, body: str) -> Optio
                 return f"Foto humanizada de mãos/luva posicionada em {slot_name}: {u.split('/')[-1].split('?')[0]}"
     act3_urls = url_re.findall(act3_html)
     if any(TemplateEngine._is_hand_glove_photo(u) for u in act3_urls):
-        m_info = re.search(r'brk-media-info-left">.*?<span>([^<]+)</span>', act3_html, re.S)
+        m_info = re.search(r'(?:brk|vtex)-media-info-left">.*?<span>([^<]+)</span>', act3_html, re.S)
         if m_info and "gola" in m_info.group(1).lower():
             return f"Infobar do Ato 03 menciona 'Gola' em foto exclusiva de mãos/dedeira: {m_info.group(1)}"
+    return None
+
+
+def _rule_no_brk_or_store_name_in_lojadoce(arch: str, title: str, body: str) -> Optional[str]:
+    if str(arch or "").startswith("ld_"):
+        m = re.search(r"\b(?:brk|loja\s+doce)\b", body, re.IGNORECASE)
+        if m:
+            return f"Menção proibida em ambiente isolado VTEX: {m.group(0)}"
     return None
 
 
@@ -201,6 +209,9 @@ RULES: List[Dict[str, Any]] = [
     {"id": "foto_mao_dedeira_em_slot_ou_legenda_errada", "severity": "ERROR",
      "desc": "Foto humanizada de mãos/dedeira no Ato 01/02 ou com legenda mencionando Gola no Ato 03",
      "check": _rule_hand_glove_slot_and_caption},
+    {"id": "vazamento_brk_ou_nome_loja_em_vtex", "severity": "ERROR",
+     "desc": "Mencao a BRK ou ao nome da loja no HTML de produto do ambiente isolado VTEX",
+     "check": _rule_no_brk_or_store_name_in_lojadoce},
 ]
 
 
