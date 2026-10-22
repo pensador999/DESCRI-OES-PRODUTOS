@@ -1865,13 +1865,26 @@ class TestLojaDoceVtexVerticalization(unittest.TestCase):
         prods = data.get("products", [])
         self.assertEqual(len(prods), 400)
 
-        # Verifica distribuição nas 7 categorias VTEX oficiais (zero 'Acessórios Diversos')
+        # Verifica distribuição nas 7 categorias VTEX oficiais (zero 'Acessórios Diversos') e fotos reais nas coleções
         cats = data.get("categories", [])
         cat_names = [c.get("name") for c in cats] if isinstance(cats, list) else list(cats.keys())
         cat_total = sum(c.get("count", 0) for c in cats) if isinstance(cats, list) else sum(cats.values())
         self.assertNotIn("Acessórios Diversos", cat_names)
         self.assertEqual(len(cat_names), 7)
         self.assertEqual(cat_total, 400)
+        for c in cats:
+            self.assertTrue(str(c.get("sample_image", "")).startswith("https://"), f"Coleção {c.get('name')} sem sample_image válido")
+            self.assertTrue(str(c.get("thumb", "")).startswith("https://"), f"Coleção {c.get('name')} sem thumb válido")
+            self.assertTrue(str(c.get("image", "")).startswith("https://"), f"Coleção {c.get('name')} sem image válido")
+
+        # Verifica matemática dos contadores: Quebradas (0) + Sem Descrição/Eco ERP (57) + Saudáveis (343) == 400
+        broken_cnt = sum(1 for p in prods if p.get("status") == "IMAGENS_QUEBRADAS")
+        empty_cnt = sum(1 for p in prods if p.get("status") == "SEM_DESCRICAO")
+        healthy_cnt = sum(1 for p in prods if p.get("status") == "SAUDAVEL")
+        self.assertEqual(broken_cnt, 0)
+        self.assertEqual(empty_cnt, 57)
+        self.assertEqual(healthy_cnt, 343)
+        self.assertEqual(broken_cnt + empty_cnt + healthy_cnt, 400)
 
         for p in prods:
             sku = p.get("sku")

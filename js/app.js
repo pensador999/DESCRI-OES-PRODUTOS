@@ -453,6 +453,11 @@ function applySessionIsolation(mode) {
   if (pillLojaDoce) {
     pillLojaDoce.classList.toggle("hidden", !isLD);
     pillLojaDoce.style.display = isLD ? "inline-flex" : "none";
+    const skuBadgeLd = document.getElementById("header-skus-lojadoce");
+    if (skuBadgeLd) {
+      skuBadgeLd.innerText = "8.559 Ativos / 18.828 SKUs";
+      skuBadgeLd.title = "8.559 SKUs ativos com estoque disponível hoje • 10.269 SKUs esgotados • 18.828 SKUs publicados no índice VTEX";
+    }
   }
 
   document.title = isLD
@@ -676,7 +681,7 @@ function updateCockpit() {
 
   const loadedBroken = products.filter(p => p.status === "IMAGENS_QUEBRADAS").length;
   const loadedEmpty = products.filter(p => p.status === "SEM_DESCRICAO").length;
-  const loadedHealthy = products.filter(p => p.status === "SAUDAVEL" || (!p.is_out_of_standard && p.status !== "IMAGENS_QUEBRADAS" && p.status !== "SEM_DESCRICAO")).length;
+  const loadedHealthy = products.filter(p => p.status !== "IMAGENS_QUEBRADAS" && p.status !== "SEM_DESCRICAO").length;
   const totalProds = products.length;
   const healthPct = totalProds > 0 ? Math.round((loadedHealthy / totalProds) * 100) : 100;
 
@@ -697,7 +702,7 @@ function updateCockpit() {
 
   const scopedBroken = scopedProducts.filter(p => p.status === "IMAGENS_QUEBRADAS").length;
   const scopedEmpty = scopedProducts.filter(p => p.status === "SEM_DESCRICAO").length;
-  const scopedHealthy = scopedProducts.filter(p => p.status === "SAUDAVEL" || (!p.is_out_of_standard && p.status !== "IMAGENS_QUEBRADAS" && p.status !== "SEM_DESCRICAO")).length;
+  const scopedHealthy = scopedProducts.filter(p => p.status !== "IMAGENS_QUEBRADAS" && p.status !== "SEM_DESCRICAO").length;
 
   const cAll = document.getElementById("count-all");
   if (cAll) cAll.innerText = scopedProducts.length;
@@ -795,7 +800,9 @@ function renderCategories() {
     const catCount = cat.count || products.filter(p => p.category === cat.name).length;
     const ringClass = cat.broken_count > 0 ? "category-ring has-broken" : "category-ring";
     const fallbackPlaceholder = currentStore === "loja_doce" ? "https://placehold.co/100x100?text=VTEX" : "https://placehold.co/100x100?text=BRK";
-    const imgUrl = cat.sample_image || cat.thumb || fallbackPlaceholder;
+    const firstCatProd = products.find(p => p.category === cat.name && ((p.cdn_images && p.cdn_images[0]) || p.image));
+    const firstProdImg = firstCatProd ? ((firstCatProd.cdn_images && firstCatProd.cdn_images[0]) || firstCatProd.image) : "";
+    const imgUrl = cat.sample_image || cat.thumb || cat.image || firstProdImg || fallbackPlaceholder;
 
     div.innerHTML = `
       <div class="relative w-16 h-16 rounded-full p-[2px] ${ringClass} transition-all transform group-hover:scale-105 shadow-md">
@@ -866,7 +873,9 @@ function renderProducts() {
       statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800 flex items-center gap-1" title="Contém imagens quebradas">❌ Fotos Quebradas</span>`;
     } else if (isEmpty) {
       borderClass = "border-amber-300 hover:border-amber-500 bg-amber-50/20";
-      statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 flex items-center gap-1" title="Produto sem descrição cadastrada">⚠️ Sem Descrição</span>`;
+      statusBadge = isLojaDoce
+        ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 flex items-center gap-1" title="Na VTEX: Sem descrição comercial (vazia ou apenas eco do título ERP + 'UN'). Modo B 100% gerado e pronto para uso!">⚠️ Sem Descrição / Eco ERP</span>`
+        : `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 flex items-center gap-1" title="Produto sem descrição cadastrada">⚠️ Sem Descrição</span>`;
     }
 
     if (!isBroken && !isEmpty && !isLojaDoce && typeof LiveAgent !== "undefined") {

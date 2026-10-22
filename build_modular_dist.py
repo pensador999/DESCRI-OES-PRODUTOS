@@ -500,7 +500,7 @@ def build_dist():
             </button>
             <button onclick="switchStore('loja_doce')" id="pill-store-lojadoce" class="store-pill hidden px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 transition-all text-slate-400 hover:text-white">
               <span>🍬 Catálogo Exclusivo</span>
-              <span id="header-skus-lojadoce" class="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300">18.828 SKUs</span>
+              <span id="header-skus-lojadoce" class="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300" title="8.559 SKUs ativos com estoque disponível hoje • 10.269 SKUs esgotados • 18.828 SKUs publicados no índice VTEX">8.559 Ativos / 18.828 SKUs</span>
             </button>
           </div>
         </div>

@@ -132,6 +132,24 @@ def build_lojadoce_catalog():
             else '<p style="color:#94a3b8;font-style:italic;">Produto sem descrição cadastrada no ERP VTEX.</p>'
         )
 
+        # Auditar a descrição original da VTEX (Vazia / Eco de ERP vs. Descrição Completa)
+        plain_desc = re.sub(r"<[^>]+>", " ", raw_body).strip()
+        plain_desc = re.sub(r"\s+", " ", plain_desc)
+        word_count = len(plain_desc.split()) if plain_desc else 0
+        is_erp_echo = bool(
+            not plain_desc
+            or len(plain_desc) < 120
+            or word_count < 20
+            or re.search(r"\b(?:0?1?\s*UN|UNID)\s*$", plain_desc, re.IGNORECASE)
+        )
+        status = "SEM_DESCRICAO" if is_erp_echo else "SAUDAVEL"
+        is_out_of_standard = is_erp_echo
+        issues = (
+            [f"Sem descrição comercial na VTEX (vazia ou apenas repetição do código ERP: {word_count} palavras)"]
+            if is_erp_echo
+            else []
+        )
+
         # Auditar semanticamente o produto gerado
         findings = auditor.audit_html(archetype_id, narrative["formatted_title"], mode_b_html)
         if findings:
@@ -153,6 +171,12 @@ def build_lojadoce_catalog():
         p_out["product_type"] = canonical_cat
         p_out["tags"] = tags
         p_out["store_key"] = "loja_doce"
+        p_out["status"] = status
+        p_out["is_out_of_standard"] = is_out_of_standard
+        p_out["word_count"] = word_count
+        p_out["issues"] = issues
+        p_out["broken_images_count"] = 0
+        p_out["broken_urls"] = []
         p_out["archetype"] = archetype_id
         p_out["archetype_id"] = archetype_id
         p_out["archetype_name"] = arch_info["name"]
@@ -193,22 +217,32 @@ def build_lojadoce_catalog():
         raise RuntimeError("Falha de auditoria semântica em produtos VTEX.")
 
     # Reconstruir metadados de loja anonimizados (sem "Loja Doce" ou "BRK")
+    empty_total = sum(1 for ep in enriched_products if ep.get("status") == "SEM_DESCRICAO")
     store_meta = dict(existing_data.get("store", {}))
     store_meta["name"] = "Catálogo Oficial (VTEX)"
     store_meta["domain"] = "catalogo.vtex.oficial"
     store_meta["platform"] = "vtex"
     store_meta["total_scanned"] = len(enriched_products)
     store_meta["total_catalog_vtex"] = 18828
+    store_meta["total_active_in_stock_vtex"] = 8559
+    store_meta["total_out_of_stock_vtex"] = 10269
     store_meta["total_skus"] = len(enriched_products)
     store_meta["total_products"] = len(enriched_products)
+    store_meta["broken_skus"] = 0
+    store_meta["out_of_standard_prods"] = empty_total
+    store_meta["out_of_standard_skus"] = empty_total
 
     cat_counts = {}
+    cat_empty_counts = {}
     cat_first_img = {}
     for ep in enriched_products:
         c_name = ep.get("category") or "Confeitaria & Panificação"
         cat_counts[c_name] = cat_counts.get(c_name, 0) + 1
-        if c_name not in cat_first_img and ep.get("image"):
-            cat_first_img[c_name] = ep["image"]
+        if ep.get("status") == "SEM_DESCRICAO":
+            cat_empty_counts[c_name] = cat_empty_counts.get(c_name, 0) + 1
+        ep_img = ep.get("image") or (ep.get("cdn_images") or [None])[0]
+        if c_name not in cat_first_img and ep_img:
+            cat_first_img[c_name] = ep_img
 
     existing_cats = existing_data.get("categories", [])
     updated_cats = []
@@ -217,16 +251,32 @@ def build_lojadoce_catalog():
             c_copy = dict(c_obj)
             c_nm = c_copy.get("name", "")
             c_copy["count"] = cat_counts.get(c_nm, 0)
-            if not c_copy.get("image") and c_nm in cat_first_img:
-                c_copy["image"] = cat_first_img[c_nm]
+            c_copy["total_skus"] = cat_counts.get(c_nm, 0)
+            c_copy["broken_count"] = 0
+            c_copy["broken_skus"] = 0
+            c_copy["empty_count"] = cat_empty_counts.get(c_nm, 0)
+            c_copy["out_of_standard_skus"] = cat_empty_counts.get(c_nm, 0)
+            rep_img = cat_first_img.get(c_nm) or c_copy.get("image") or c_copy.get("sample_image") or c_copy.get("thumb") or ""
+            c_copy["image"] = rep_img
+            c_copy["sample_image"] = rep_img
+            c_copy["thumb"] = rep_img
             updated_cats.append(c_copy)
     else:
         for idx_c, (c_nm, cnt) in enumerate(cat_counts.items()):
+            rep_img = cat_first_img.get(c_nm, "")
             updated_cats.append({
                 "id": f"cat_{idx_c}",
                 "name": c_nm,
+                "title": c_nm,
                 "count": cnt,
-                "image": cat_first_img.get(c_nm, ""),
+                "total_skus": cnt,
+                "broken_count": 0,
+                "broken_skus": 0,
+                "empty_count": cat_empty_counts.get(c_nm, 0),
+                "out_of_standard_skus": cat_empty_counts.get(c_nm, 0),
+                "image": rep_img,
+                "sample_image": rep_img,
+                "thumb": rep_img,
             })
 
     output_payload = {
