@@ -1992,6 +1992,238 @@ class HTMLBuilder:
             "zoom_act3": False,
         }
 
+    def _build_lojadoce_infographic_card(
+        self,
+        idx: int,
+        archetype_id: str,
+        theme_color: str,
+        theme_bg: str,
+        enriched_data: Dict[str, Any],
+        primary_img: str,
+        safe_title_alt: str,
+        ml_track_attrs: str,
+    ) -> str:
+        """
+        Gera o Card Visual Infográfico 100% HTML/CSS + SVG inline para Atos sem foto dedicada
+        no catálogo VTEX (eliminando blocos sem imagem e mantendo os 3 Atos com coluna visual).
+        - Ato 2 (idx == 1): Infográfico Técnico de Rendimento, Medidas & Parâmetros de Trabalho
+        - Ato 3 (idx == 2): Infográfico de Segurança Alimentar / ANVISA, Conservação & Procedência
+        """
+        yield_info = enriched_data.get("yield_info") if isinstance(enriched_data.get("yield_info"), dict) else {}
+        allergen_info = enriched_data.get("allergen_info") if isinstance(enriched_data.get("allergen_info"), dict) else {}
+        vtex_specs = enriched_data.get("vtex_specifications") if isinstance(enriched_data.get("vtex_specifications"), dict) else {}
+        specs_list = enriched_data.get("specs") if isinstance(enriched_data.get("specs"), list) else []
+        specs_map = {str(s.get("label", "")).strip(): str(s.get("value", "")).strip() for s in specs_list if isinstance(s, dict)}
+
+        brand_name = str(
+            enriched_data.get("brand_name")
+            or vtex_specs.get("Marca")
+            or specs_map.get("Marca / Fabricante")
+            or "Original"
+        ).strip()
+        sku_code = str(
+            enriched_data.get("sku")
+            or enriched_data.get("master_sku")
+            or vtex_specs.get("Código SKU")
+            or specs_map.get("Código SKU")
+            or ""
+        ).strip()
+        care_tips = str(
+            enriched_data.get("care_tips")
+            or "Conservar na embalagem original fechada, em local seco, fresco e arejado, ao abrigo da luz solar direta."
+        ).strip()
+
+        if idx == 1:
+            yield_val = (
+                yield_info.get("yield_estimate")
+                or yield_info.get("dimensional_equiv")
+                or vtex_specs.get("Rendimento Estimado")
+                or vtex_specs.get("Equivalência Dimensional")
+                or specs_map.get("Rendimento Estimado")
+                or specs_map.get("Equivalência Dimensional")
+                or yield_info.get("resumo_rendimento")
+                or "Dimensionamento otimizado para padronização de receitas, montagem e controle exato de custo por unidade produzida."
+            )
+            peso_medida = (
+                vtex_specs.get("Peso / Volume")
+                or vtex_specs.get("Dimensões / Medidas")
+                or specs_map.get("Peso / Volume Líquido")
+                or specs_map.get("Dimensões / Medidas")
+                or "Padrão Oficial de Fábrica"
+            )
+            qtd_emb = (
+                vtex_specs.get("Quantidade por Embalagem")
+                or specs_map.get("Conteúdo da Embalagem")
+                or "Embalagem Comercial"
+            )
+            dim_summary = f"{peso_medida} • {qtd_emb}" if peso_medida != qtd_emb else peso_medida
+
+            tech_param_label = "Parâmetro Técnico de Aplicação"
+            tech_param_val = ""
+            for cand_lbl in (
+                "Classificação Técnica",
+                "Necessita Temperagem?",
+                "Inflagem / Aplicação",
+                "Estabilidade Térmica",
+                "Solubilidade / Base Técnica",
+                "Material Principal",
+                "Categoria Técnica",
+            ):
+                if specs_map.get(cand_lbl):
+                    tech_param_label = cand_lbl
+                    tech_param_val = specs_map[cand_lbl]
+                    break
+            if not tech_param_val:
+                tech_param_val = (
+                    yield_info.get("gas_and_arch")
+                    or vtex_specs.get("Inflagem / Aplicação")
+                    or vtex_specs.get("Material")
+                    or "Desempenho calibrado para uso profissional e doméstico com alta estabilidade."
+                )
+
+            pill_code = f"SKU {sku_code}" if sku_code else f"Marca {brand_name}"
+            thumb_html = ""
+            if primary_img:
+                thumb_html = f"""
+            <div class="brk-infog-thumb brk-stage-loupe" {ml_track_attrs}>
+              <img src="{primary_img}" alt="{safe_title_alt} - Zoom de Especificação" class="brk-infog-crop-zoom" loading="lazy" referrerpolicy="no-referrer" />
+              <div class="brk-ml-zoom-layer" style="background-image: url('{primary_img}');"></div>
+              <span class="brk-infog-thumb-badge">Zoom 2.4x</span>
+            </div>"""
+
+            return f"""<div class="brk-desc-media brk-media-card brk-infographic-card">
+        <div class="brk-infog-header">
+          <span class="brk-infog-head-left">{get_svg_icon('ruler', color=theme_color, size=14)} <span>INFOGRÁFICO • RENDIMENTO & MEDIDAS</span></span>
+          <span class="brk-infog-head-pill">{pill_code}</span>
+        </div>
+        <div class="brk-infog-stage">
+          <div class="brk-infog-hero">{thumb_html}
+            <div class="brk-infog-diagram">
+              <div class="brk-infog-svg-badge">
+                <svg width="38" height="38" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <rect x="4" y="10" width="40" height="28" rx="6" fill="{theme_bg}" stroke="{theme_color}" stroke-width="2.5"/>
+                  <path d="M12 18V26M18 18V23M24 18V28M30 18V23M36 18V26" stroke="{theme_color}" stroke-width="2.5" stroke-linecap="round"/>
+                  <circle cx="24" cy="31" r="2.5" fill="{theme_color}"/>
+                </svg>
+              </div>
+              <div class="brk-infog-hero-copy">
+                <span class="brk-infog-kicker">ESPECIFICAÇÃO COMERCIAL</span>
+                <strong class="brk-infog-headline">{dim_summary}</strong>
+                <span class="brk-infog-subline">Marca {brand_name} • Medição Padronizada</span>
+              </div>
+            </div>
+          </div>
+          <div class="brk-infog-metrics">
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">{get_svg_icon('ruler', color=theme_color, size=13)}</span>
+                <span class="brk-infog-metric-label">Rendimento & Equivalência Prática</span>
+              </div>
+              <div class="brk-infog-metric-val">{yield_val}</div>
+            </div>
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">{get_svg_icon('box', color=theme_color, size=13)}</span>
+                <span class="brk-infog-metric-label">Formato de Fornecimento & Medidas</span>
+              </div>
+              <div class="brk-infog-metric-val">{dim_summary}</div>
+            </div>
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">{get_svg_icon('gear', color=theme_color, size=13)}</span>
+                <span class="brk-infog-metric-label">{tech_param_label}</span>
+              </div>
+              <div class="brk-infog-metric-val">{tech_param_val}</div>
+            </div>
+          </div>
+        </div>
+        <div class="brk-media-infobar">
+          <span class="brk-media-info-left">{get_svg_icon('ruler', color=theme_color, size=14)} <span>Infográfico de Rendimento & Dimensionamento</span></span>
+          <span class="brk-media-info-pill">Ficha Dimensional</span>
+        </div>
+      </div>"""
+
+        allergen_label = str(
+            allergen_info.get("label")
+            or specs_map.get("Segurança & Material")
+            or "Orientação de Alergênicos & Segurança (ANVISA)"
+        ).strip()
+        allergen_val = str(
+            allergen_info.get("value")
+            or allergen_info.get("alerta_alergenicos")
+            or specs_map.get("Orientação de Alergênicos (ANVISA)")
+            or specs_map.get("Segurança & Material")
+            or "Consulte sempre a listagem oficial de ingredientes, tabela nutricional e alérgenos impressa pelo fabricante no rótulo da embalagem original."
+        ).strip()
+        is_anvisa_food = (
+            "anvisa" in allergen_label.lower()
+            or "alerg" in allergen_label.lower()
+            or archetype_id in ("ld_chocolates_coberturas", "ld_confeitaria_ingredientes")
+        )
+        seal_kicker = "CONFORMIDADE REGULATÓRIA • RDC 26/2015" if is_anvisa_food else "CONFORMIDADE TÉCNICA • USO SEGURO"
+        seal_headline = "Padrão ANVISA & Rotulagem Oficial" if is_anvisa_food else "Grau Alimentício & Atóxico Certificado"
+        seal_pill = "Padrão ANVISA" if is_anvisa_food else "Grau Alimentício"
+
+        thumb_html_act3 = ""
+        if primary_img:
+            thumb_html_act3 = f"""
+            <div class="brk-infog-thumb brk-stage-loupe" {ml_track_attrs}>
+              <img src="{primary_img}" alt="{safe_title_alt} - Inspeção de Embalagem e Lote" class="brk-infog-crop-macro" loading="lazy" referrerpolicy="no-referrer" />
+              <div class="brk-ml-zoom-layer" style="background-image: url('{primary_img}');"></div>
+              <span class="brk-infog-thumb-badge">Inspeção 2.4x</span>
+            </div>"""
+
+        return f"""<div class="brk-desc-media brk-media-card brk-infographic-card">
+        <div class="brk-infog-header">
+          <span class="brk-infog-head-left">{get_svg_icon('shield', color=theme_color, size=14)} <span>SEGURANÇA, CONSERVAÇÃO & PROCEDÊNCIA</span></span>
+          <span class="brk-infog-head-pill">{seal_pill}</span>
+        </div>
+        <div class="brk-infog-stage">
+          <div class="brk-infog-hero">{thumb_html_act3}
+            <div class="brk-infog-diagram">
+              <div class="brk-infog-svg-badge">
+                <svg width="38" height="38" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M24 4L40 11V23C40 33.4 33.1 41.9 24 45C14.9 41.9 8 33.4 8 23V11L24 4Z" fill="{theme_bg}" stroke="{theme_color}" stroke-width="2.5" stroke-linejoin="round"/>
+                  <path d="M17.5 24.5L22 29L31 19.5" stroke="{theme_color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="brk-infog-hero-copy">
+                <span class="brk-infog-kicker">{seal_kicker}</span>
+                <strong class="brk-infog-headline">{seal_headline}</strong>
+                <span class="brk-infog-subline">Marca {brand_name} • Lote Original Lacrado</span>
+              </div>
+            </div>
+          </div>
+          <div class="brk-infog-metrics">
+            <div class="brk-infog-metric-card brk-infog-metric-alert">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">{get_svg_icon('shield', color='#b45309', size=13)}</span>
+                <span class="brk-infog-metric-label">{allergen_label}</span>
+              </div>
+              <div class="brk-infog-metric-val">{allergen_val}</div>
+            </div>
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">{get_svg_icon('care', color=theme_color, size=13)}</span>
+                <span class="brk-infog-metric-label">Protocolo de Conservação & Armazenamento</span>
+              </div>
+              <div class="brk-infog-metric-val">{care_tips}</div>
+            </div>
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">{get_svg_icon('check', color=theme_color, size=13)}</span>
+                <span class="brk-infog-metric-label">Garantia de Procedência & Integridade</span>
+              </div>
+              <div class="brk-infog-metric-val">Fornecido em embalagem primária original {brand_name}, lacrada de fábrica com identificação visível de lote e validade.</div>
+            </div>
+          </div>
+        </div>
+        <div class="brk-media-infobar">
+          <span class="brk-media-info-left">{get_svg_icon('shield', color=theme_color, size=14)} <span>Conformidade ANVISA & Protocolo de Conservação</span></span>
+          <span class="brk-media-info-pill">Procedência Original</span>
+        </div>
+      </div>"""
+
     def build_shopify_html(self, enriched_data: Dict[str, Any]) -> str:
         """
         Compila a descrição em HTML no padrão verticalizado BRK, 100% autônomo com SVGs inline estilo Font Awesome.
@@ -2100,6 +2332,12 @@ class HTMLBuilder:
         raw_uid = str(enriched_data.get("id") or enriched_data.get("sku") or enriched_data.get("master_sku") or "brk")
         uid_base = re.sub(r"[^A-Za-z0-9]", "", raw_uid)[:16] or "brk"
         is_shirt_arch_main = archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work")
+        is_ld_arch_main = str(archetype_id or "").startswith("ld_") or enriched_data.get("store_key") == "loja_doce"
+        primary_ld_img = (
+            (blocks[0].get("image") if len(blocks) > 0 and isinstance(blocks[0], dict) else "")
+            or ((enriched_data.get("images") or [""])[0] if isinstance(enriched_data.get("images"), list) and enriched_data.get("images") else "")
+            or str(enriched_data.get("image") or "")
+        )
         act2_img_candidate = (blocks[1].get("image") if len(blocks) > 1 and isinstance(blocks[1], dict) else "") or ""
         ml_track_attrs = (
             'onmousemove="var r=this.getBoundingClientRect(),'
@@ -2210,6 +2448,17 @@ class HTMLBuilder:
           <span class="brk-media-info-pill">{info_meta['pill']}</span>
         </div>
       </div>"""
+            elif is_ld_arch_main:
+                media_html = self._build_lojadoce_infographic_card(
+                    idx=idx,
+                    archetype_id=archetype_id,
+                    theme_color=theme_color,
+                    theme_bg=theme_bg,
+                    enriched_data=enriched_data,
+                    primary_img=primary_ld_img,
+                    safe_title_alt=safe_title_alt,
+                    ml_track_attrs=ml_track_attrs,
+                )
             else:
                 media_html = ""
 
@@ -2671,6 +2920,199 @@ class HTMLBuilder:
       max-height: 380px;
     }}
 
+    /* Card Visual Infográfico Autônomo (Rendimento, Medidas & Segurança ANVISA) */
+    .brk-infographic-card {{
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+    }}
+    .brk-infog-header {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 14px;
+      background: {theme_bg};
+      border-bottom: 1px solid {theme_color}28;
+    }}
+    .brk-infog-head-left {{
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #0f172a;
+      min-width: 0;
+    }}
+    .brk-infog-head-left span {{
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }}
+    .brk-infog-head-pill {{
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 800;
+      color: {theme_color};
+      background: #ffffff;
+      border: 1px solid {theme_color}38;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+    }}
+    .brk-infog-stage {{
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }}
+    .brk-infog-hero {{
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+    }}
+    .brk-infog-thumb {{
+      position: relative;
+      width: 112px;
+      min-height: 104px;
+      flex-shrink: 0;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+    }}
+    .brk-infog-thumb img {{
+      width: 100%;
+      height: 96px;
+      object-fit: contain;
+      border-radius: 8px;
+      transition: transform 0.3s ease;
+    }}
+    .brk-infog-thumb img.brk-infog-crop-zoom {{
+      transform: scale(1.22);
+      transform-origin: 50% 45%;
+    }}
+    .brk-infog-thumb img.brk-infog-crop-macro {{
+      transform: scale(1.28);
+      transform-origin: 50% 60%;
+    }}
+    .brk-infog-thumb-badge {{
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      z-index: 3;
+      background: rgba(15, 23, 42, 0.82);
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 9999px;
+      pointer-events: none;
+    }}
+    .brk-infog-diagram {{
+      flex: 1;
+      min-width: 0;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+    }}
+    .brk-infog-svg-badge {{
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: {theme_bg};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }}
+    .brk-infog-hero-copy {{
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      gap: 2px;
+    }}
+    .brk-infog-kicker {{
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: {theme_color};
+    }}
+    .brk-infog-headline {{
+      font-size: 13px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.25;
+    }}
+    .brk-infog-subline {{
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.25;
+    }}
+    .brk-infog-metrics {{
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }}
+    .brk-infog-metric-card {{
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-left: 3px solid {theme_color};
+      border-radius: 10px;
+      padding: 9px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }}
+    .brk-infog-metric-card.brk-infog-metric-alert {{
+      background: #fffbeb;
+      border-color: #fde68a;
+      border-left: 3px solid #d97706;
+    }}
+    .brk-infog-metric-top {{
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }}
+    .brk-infog-metric-icon {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }}
+    .brk-infog-metric-label {{
+      font-size: 10.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: #334155;
+    }}
+    .brk-infog-metric-card.brk-infog-metric-alert .brk-infog-metric-label {{
+      color: #92400e;
+    }}
+    .brk-infog-metric-val {{
+      font-size: 12px;
+      line-height: 1.45;
+      color: #1e293b;
+      font-weight: 600;
+    }}
+    .brk-infog-metric-card.brk-infog-metric-alert .brk-infog-metric-val {{
+      color: #78350f;
+    }}
+
     .brk-desc-text {{
       flex: 1.15;
       min-width: 0;
@@ -2987,6 +3429,17 @@ class HTMLBuilder:
         flex-direction: row;
         gap: 8px;
       }}
+      .brk-infog-hero {{
+        flex-direction: column;
+        gap: 8px;
+      }}
+      .brk-infog-thumb {{
+        width: 100%;
+        min-height: 120px;
+      }}
+      .brk-infog-thumb img {{
+        height: 110px;
+      }}
       .brk-media-infobar {{
         padding: 8px 10px;
         font-size: 10.5px;
@@ -3095,6 +3548,11 @@ class HTMLBuilder:
             full_html = full_html.replace(
                 "<!-- Selos de Confiança e Garantia BRK -->",
                 "<!-- Selos de Confiança e Procedência Oficial -->",
+            )
+            full_html = re.sub(
+                r"\s*\.brk-desc-block\.brk-desc-block-text-only\s*\{[^}]*\}",
+                "",
+                full_html,
             )
             full_html = full_html.replace("brk-", "vtex-").replace("brk360_", "vtex360_")
         return full_html.strip()

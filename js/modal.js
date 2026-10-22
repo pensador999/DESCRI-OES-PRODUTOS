@@ -4112,6 +4112,219 @@ function getProductModeBHTML(liveP) {
     return { view_tag: "DETALHE TÉCNICO • ATO 03", icon: "shield", label: "Acabamento de Precisão & Componentes", pill: "Rigor Oficial BRK", zoom_act3: false };
   }
 
+  function buildClientLojaDoceInfographicCard(idx, archetypeId, themeColor, themeBg, prodObj, primaryImg, safeTitleAlt, mlTrackAttrsStr) {
+    const yieldInfo = (prodObj && typeof prodObj.yield_info === "object" && prodObj.yield_info) ? prodObj.yield_info : {};
+    const allergenInfo = (prodObj && typeof prodObj.allergen_info === "object" && prodObj.allergen_info) ? prodObj.allergen_info : {};
+    const vtexSpecs = (prodObj && typeof prodObj.vtex_specifications === "object" && prodObj.vtex_specifications) ? prodObj.vtex_specifications : {};
+    const specsList = Array.isArray(specs) ? specs : [];
+    const specsMap = {};
+    specsList.forEach(s => {
+      if (s && s.label) specsMap[String(s.label).trim()] = String(s.value || "").trim();
+    });
+
+    const brandLabel = String(
+      prodObj.brand_name || vtexSpecs["Marca"] || specsMap["Marca / Fabricante"] || brandName || "Original"
+    ).trim();
+    const skuCode = String(
+      prodObj.sku || prodObj.master_sku || vtexSpecs["Código SKU"] || specsMap["Código SKU"] || ""
+    ).trim();
+    const careTipsVal = String(
+      careTips || "Conservar na embalagem original fechada, em local seco, fresco e arejado, ao abrigo da luz solar direta."
+    ).trim();
+
+    if (idx === 1) {
+      const yieldVal = (
+        yieldInfo.yield_estimate ||
+        yieldInfo.dimensional_equiv ||
+        vtexSpecs["Rendimento Estimado"] ||
+        vtexSpecs["Equivalência Dimensional"] ||
+        specsMap["Rendimento Estimado"] ||
+        specsMap["Equivalência Dimensional"] ||
+        yieldInfo.resumo_rendimento ||
+        "Dimensionamento otimizado para padronização de receitas, montagem e controle exato de custo por unidade produzida."
+      );
+      const pesoMedida = (
+        vtexSpecs["Peso / Volume"] ||
+        vtexSpecs["Dimensões / Medidas"] ||
+        specsMap["Peso / Volume Líquido"] ||
+        specsMap["Dimensões / Medidas"] ||
+        "Padrão Oficial de Fábrica"
+      );
+      const qtdEmb = (
+        vtexSpecs["Quantidade por Embalagem"] ||
+        specsMap["Conteúdo da Embalagem"] ||
+        "Embalagem Comercial"
+      );
+      const dimSummary = (pesoMedida !== qtdEmb) ? `${pesoMedida} • ${qtdEmb}` : pesoMedida;
+
+      let techParamLabel = "Parâmetro Técnico de Aplicação";
+      let techParamVal = "";
+      const candLabels = [
+        "Classificação Técnica",
+        "Necessita Temperagem?",
+        "Inflagem / Aplicação",
+        "Estabilidade Térmica",
+        "Solubilidade / Base Técnica",
+        "Material Principal",
+        "Categoria Técnica"
+      ];
+      for (let i = 0; i < candLabels.length; i++) {
+        const cLbl = candLabels[i];
+        if (specsMap[cLbl]) {
+          techParamLabel = cLbl;
+          techParamVal = specsMap[cLbl];
+          break;
+        }
+      }
+      if (!techParamVal) {
+        techParamVal = (
+          yieldInfo.gas_and_arch ||
+          vtexSpecs["Inflagem / Aplicação"] ||
+          vtexSpecs["Material"] ||
+          "Desempenho calibrado para uso profissional e doméstico com alta estabilidade."
+        );
+      }
+
+      const pillCode = skuCode ? `SKU ${skuCode}` : `Marca ${brandLabel}`;
+      const thumbHtml = primaryImg ? `
+            <div class="brk-infog-thumb brk-stage-loupe" ${mlTrackAttrsStr}>
+              <img src="${primaryImg}" alt="${safeTitleAlt} - Zoom de Especificação" class="brk-infog-crop-zoom" loading="lazy" referrerpolicy="no-referrer" />
+              <div class="brk-ml-zoom-layer" style="background-image: url('${primaryImg}');"></div>
+              <span class="brk-infog-thumb-badge">Zoom 2.4x</span>
+            </div>` : "";
+
+      return `<div class="brk-desc-media brk-media-card brk-infographic-card">
+        <div class="brk-infog-header">
+          <span class="brk-infog-head-left">${getSvgIcon('ruler', themeColor, 14)} <span>INFOGRÁFICO • RENDIMENTO & MEDIDAS</span></span>
+          <span class="brk-infog-head-pill">${pillCode}</span>
+        </div>
+        <div class="brk-infog-stage">
+          <div class="brk-infog-hero">${thumbHtml}
+            <div class="brk-infog-diagram">
+              <div class="brk-infog-svg-badge">
+                <svg width="38" height="38" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <rect x="4" y="10" width="40" height="28" rx="6" fill="${themeBg}" stroke="${themeColor}" stroke-width="2.5"/>
+                  <path d="M12 18V26M18 18V23M24 18V28M30 18V23M36 18V26" stroke="${themeColor}" stroke-width="2.5" stroke-linecap="round"/>
+                  <circle cx="24" cy="31" r="2.5" fill="${themeColor}"/>
+                </svg>
+              </div>
+              <div class="brk-infog-hero-copy">
+                <span class="brk-infog-kicker">ESPECIFICAÇÃO COMERCIAL</span>
+                <strong class="brk-infog-headline">${dimSummary}</strong>
+                <span class="brk-infog-subline">Marca ${brandLabel} • Medição Padronizada</span>
+              </div>
+            </div>
+          </div>
+          <div class="brk-infog-metrics">
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">${getSvgIcon('ruler', themeColor, 13)}</span>
+                <span class="brk-infog-metric-label">Rendimento & Equivalência Prática</span>
+              </div>
+              <div class="brk-infog-metric-val">${yieldVal}</div>
+            </div>
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">${getSvgIcon('box', themeColor, 13)}</span>
+                <span class="brk-infog-metric-label">Formato de Fornecimento & Medidas</span>
+              </div>
+              <div class="brk-infog-metric-val">${dimSummary}</div>
+            </div>
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">${getSvgIcon('gear', themeColor, 13)}</span>
+                <span class="brk-infog-metric-label">${techParamLabel}</span>
+              </div>
+              <div class="brk-infog-metric-val">${techParamVal}</div>
+            </div>
+          </div>
+        </div>
+        <div class="brk-media-infobar">
+          <span class="brk-media-info-left">${getSvgIcon('ruler', themeColor, 14)} <span>Infográfico de Rendimento & Dimensionamento</span></span>
+          <span class="brk-media-info-pill">Ficha Dimensional</span>
+        </div>
+      </div>`;
+    }
+
+    const allergenLabel = String(
+      allergenInfo.label || specsMap["Segurança & Material"] || "Orientação de Alergênicos & Segurança (ANVISA)"
+    ).trim();
+    const allergenVal = String(
+      allergenInfo.value ||
+      allergenInfo.alerta_alergenicos ||
+      specsMap["Orientação de Alergênicos (ANVISA)"] ||
+      specsMap["Segurança & Material"] ||
+      "Consulte sempre a listagem oficial de ingredientes, tabela nutricional e alérgenos impressa pelo fabricante no rótulo da embalagem original."
+    ).trim();
+    const isAnvisaFood = (
+      allergenLabel.toLowerCase().includes("anvisa") ||
+      allergenLabel.toLowerCase().includes("alerg") ||
+      archetypeId === "ld_chocolates_coberturas" ||
+      archetypeId === "ld_confeitaria_ingredientes"
+    );
+    const sealKicker = isAnvisaFood ? "CONFORMIDADE REGULATÓRIA • RDC 26/2015" : "CONFORMIDADE TÉCNICA • USO SEGURO";
+    const sealHeadline = isAnvisaFood ? "Padrão ANVISA & Rotulagem Oficial" : "Grau Alimentício & Atóxico Certificado";
+    const sealPill = isAnvisaFood ? "Padrão ANVISA" : "Grau Alimentício";
+
+    const thumbHtmlAct3 = primaryImg ? `
+            <div class="brk-infog-thumb brk-stage-loupe" ${mlTrackAttrsStr}>
+              <img src="${primaryImg}" alt="${safeTitleAlt} - Inspeção de Embalagem e Lote" class="brk-infog-crop-macro" loading="lazy" referrerpolicy="no-referrer" />
+              <div class="brk-ml-zoom-layer" style="background-image: url('${primaryImg}');"></div>
+              <span class="brk-infog-thumb-badge">Inspeção 2.4x</span>
+            </div>` : "";
+
+    return `<div class="brk-desc-media brk-media-card brk-infographic-card">
+        <div class="brk-infog-header">
+          <span class="brk-infog-head-left">${getSvgIcon('shield', themeColor, 14)} <span>SEGURANÇA, CONSERVAÇÃO & PROCEDÊNCIA</span></span>
+          <span class="brk-infog-head-pill">${sealPill}</span>
+        </div>
+        <div class="brk-infog-stage">
+          <div class="brk-infog-hero">${thumbHtmlAct3}
+            <div class="brk-infog-diagram">
+              <div class="brk-infog-svg-badge">
+                <svg width="38" height="38" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M24 4L40 11V23C40 33.4 33.1 41.9 24 45C14.9 41.9 8 33.4 8 23V11L24 4Z" fill="${themeBg}" stroke="${themeColor}" stroke-width="2.5" stroke-linejoin="round"/>
+                  <path d="M17.5 24.5L22 29L31 19.5" stroke="${themeColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="brk-infog-hero-copy">
+                <span class="brk-infog-kicker">${sealKicker}</span>
+                <strong class="brk-infog-headline">${sealHeadline}</strong>
+                <span class="brk-infog-subline">Marca ${brandLabel} • Lote Original Lacrado</span>
+              </div>
+            </div>
+          </div>
+          <div class="brk-infog-metrics">
+            <div class="brk-infog-metric-card brk-infog-metric-alert">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">${getSvgIcon('shield', '#b45309', 13)}</span>
+                <span class="brk-infog-metric-label">${allergenLabel}</span>
+              </div>
+              <div class="brk-infog-metric-val">${allergenVal}</div>
+            </div>
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">${getSvgIcon('care', themeColor, 13)}</span>
+                <span class="brk-infog-metric-label">Protocolo de Conservação & Armazenamento</span>
+              </div>
+              <div class="brk-infog-metric-val">${careTipsVal}</div>
+            </div>
+            <div class="brk-infog-metric-card">
+              <div class="brk-infog-metric-top">
+                <span class="brk-infog-metric-icon">${getSvgIcon('check', themeColor, 13)}</span>
+                <span class="brk-infog-metric-label">Garantia de Procedência & Integridade</span>
+              </div>
+              <div class="brk-infog-metric-val">Fornecido em embalagem primária original ${brandLabel}, lacrada de fábrica com identificação visível de lote e validade.</div>
+            </div>
+          </div>
+        </div>
+        <div class="brk-media-infobar">
+          <span class="brk-media-info-left">${getSvgIcon('shield', themeColor, 14)} <span>Conformidade ANVISA & Protocolo de Conservação</span></span>
+          <span class="brk-media-info-pill">Procedência Original</span>
+        </div>
+      </div>`;
+  }
+
   const rawUid = String(liveP.id || liveP.master_sku || liveP.sku || "brk");
   const uidBase = rawUid.replace(/[^A-Za-z0-9]/g, "").slice(0, 16) || "brk";
   const isShirtArchMain = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archetypeId);
@@ -4212,6 +4425,8 @@ function getProductModeBHTML(liveP) {
           <span class="brk-media-info-pill">${infoMeta.pill}</span>
         </div>
       </div>`;
+    } else if (isLojaDoce) {
+      mediaHtml = buildClientLojaDoceInfographicCard(idx, archetypeId, themeColor, themeBg, liveP, img1 || "", safeTitleAlt, mlTrackAttrs);
     }
 
     let varNoticeHtml = "";
@@ -4673,6 +4888,197 @@ function getProductModeBHTML(liveP) {
     .brk-desc-media-split .brk-split-item img {
       max-height: 380px;
     }
+    .brk-infographic-card {
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+    }
+    .brk-infog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 14px;
+      background: ${themeBg};
+      border-bottom: 1px solid ${themeColor}28;
+    }
+    .brk-infog-head-left {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #0f172a;
+      min-width: 0;
+    }
+    .brk-infog-head-left span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .brk-infog-head-pill {
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 800;
+      color: ${themeColor};
+      background: #ffffff;
+      border: 1px solid ${themeColor}38;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+    }
+    .brk-infog-stage {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+    .brk-infog-hero {
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+    }
+    .brk-infog-thumb {
+      position: relative;
+      width: 112px;
+      min-height: 104px;
+      flex-shrink: 0;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+    }
+    .brk-infog-thumb img {
+      width: 100%;
+      height: 96px;
+      object-fit: contain;
+      border-radius: 8px;
+      transition: transform 0.3s ease;
+    }
+    .brk-infog-thumb img.brk-infog-crop-zoom {
+      transform: scale(1.22);
+      transform-origin: 50% 45%;
+    }
+    .brk-infog-thumb img.brk-infog-crop-macro {
+      transform: scale(1.28);
+      transform-origin: 50% 60%;
+    }
+    .brk-infog-thumb-badge {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      z-index: 3;
+      background: rgba(15, 23, 42, 0.82);
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 9999px;
+      pointer-events: none;
+    }
+    .brk-infog-diagram {
+      flex: 1;
+      min-width: 0;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+    }
+    .brk-infog-svg-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: ${themeBg};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .brk-infog-hero-copy {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      gap: 2px;
+    }
+    .brk-infog-kicker {
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: ${themeColor};
+    }
+    .brk-infog-headline {
+      font-size: 13px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.25;
+    }
+    .brk-infog-subline {
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.25;
+    }
+    .brk-infog-metrics {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .brk-infog-metric-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-left: 3px solid ${themeColor};
+      border-radius: 10px;
+      padding: 9px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .brk-infog-metric-card.brk-infog-metric-alert {
+      background: #fffbeb;
+      border-color: #fde68a;
+      border-left: 3px solid #d97706;
+    }
+    .brk-infog-metric-top {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .brk-infog-metric-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .brk-infog-metric-label {
+      font-size: 10.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: #334155;
+    }
+    .brk-infog-metric-card.brk-infog-metric-alert .brk-infog-metric-label {
+      color: #92400e;
+    }
+    .brk-infog-metric-val {
+      font-size: 12px;
+      line-height: 1.45;
+      color: #1e293b;
+      font-weight: 600;
+    }
+    .brk-infog-metric-card.brk-infog-metric-alert .brk-infog-metric-val {
+      color: #78350f;
+    }
     .brk-desc-text {
       flex: 1.15;
       min-width: 0;
@@ -4979,6 +5385,17 @@ function getProductModeBHTML(liveP) {
         flex-direction: row;
         gap: 8px;
       }
+      .brk-infog-hero {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .brk-infog-thumb {
+        width: 100%;
+        min-height: 120px;
+      }
+      .brk-infog-thumb img {
+        height: 110px;
+      }
       .brk-media-infobar {
         padding: 8px 10px;
         font-size: 10.5px;
@@ -5077,6 +5494,7 @@ ${schemaJsonLd}`;
 
   if (isLojaDoce) {
     rawOutHtml = rawOutHtml
+      .replace(/\s*\.brk-desc-block\.brk-desc-block-text-only\s*\{[^}]*\}/g, "")
       .replace(/<!--\s*BRK-MODO-B/g, "<!-- VTEX-MODO-B")
       .replace(/<!--\s*BRK GROUP[^>]*-->/g, "<!-- PADRAO OFICIAL VTEX - DESCRICAO VERTICALIZADA EM 3 ATOS -->")
       .replace(/brk-/g, "vtex-")
