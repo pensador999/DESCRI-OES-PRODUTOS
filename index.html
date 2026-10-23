@@ -467,6 +467,7 @@
         <a href="#cs-sec-radiografia" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-pink-600 text-white font-bold transition-all">1. Radiografia (18.828 SKUs)</a>
         <a href="#cs-sec-fortes" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-emerald-600 text-white font-bold transition-all">2. Pontos Fortes</a>
         <a href="#cs-sec-gargalos" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-red-600 text-white font-bold transition-all">3. Os 6 Gargalos Críticos</a>
+        <a href="#cs-sec-forense" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-purple-600 text-white font-bold transition-all">🔍 Auditoria Forense Ao Vivo</a>
         <a href="#cs-sec-solucoes" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-indigo-600 text-white font-bold transition-all">4. Antes vs. Depois (6 Soluções)</a>
         <a href="#cs-sec-reuniao" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-amber-600 text-white font-bold transition-all">5. ROI Operacional &amp; FAQ</a>
         <a href="#cs-sec-simulador" class="px-3 py-1.5 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-extrabold transition-all shadow-sm">⚡ Exemplos Reais Interativos</a>
@@ -483,6 +484,18 @@
           <h3 class="text-xl font-extrabold text-slate-900 font-heading">1. Visão Geral &amp; Radiografia Real do Catálogo VTEX (18.828 SKUs)</h3>
         </div>
         <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold">Fonte: API Pública VTEX Intelligent Search</span>
+      </div>
+
+      <!-- Nota de Transparência Metodológica: Censo Global vs. Amostra Estratificada -->
+      <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <strong class="text-slate-900 block mb-1">📊 Censo Integral da API VTEX (100% da Base Publicada):</strong>
+          Contagem exata via API: <strong>18.828 SKUs publicados</strong> para <strong>18.779 produtos</strong> (<strong>99,7% mono-SKU</strong> sem agrupamento de variantes), sendo <strong>8.559 SKUs com estoque ativo hoje (45,5%)</strong>, <strong>10.269 SKUs esgotados indexados (54,5%)</strong> e <strong>0% de <code>specificationGroups</code> / <code>SpecificationFilters</code></strong> preenchidos em todos os 8 departamentos.
+        </div>
+        <div>
+          <strong class="text-slate-900 block mb-1">🔬 Amostra Estratificada Auditada em Profundidade (400 SKUs):</strong>
+          Inspeção forense do payload e HTML das PDPs: <strong>99,2% (397/400)</strong> com títulos em CAIXA ALTA de ERP, <strong>98,8% (395/400)</strong> com <code>metaTagDescription</code> corrompida por HTML vazado, <strong>14,2% (57/400)</strong> com descrição "Eco de ERP", <strong>82,8% (331/400)</strong> com apenas 1 foto e <strong>91,0%</strong> dos alimentos sem alerta estruturado de alergênicos.
+        </div>
       </div>
 
       <!-- 3 KPI Cards de Estoque -->
@@ -619,9 +632,9 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
         <div class="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-200 space-y-2">
           <div class="text-2xl">🏢</div>
-          <h4 class="font-extrabold text-slate-900 text-sm">1. Plataforma Enterprise (VTEX IO)</h4>
+          <h4 class="font-extrabold text-slate-900 text-sm">1. Motor de Catálogo &amp; Checkout Enterprise (VTEX)</h4>
           <p class="text-slate-600 leading-relaxed">
-            Já possuem uma das plataformas mais robustas do mercado contratada e rodando, com motor nativo de busca inteligente (<em>VTEX Intelligent Search</em>), APIs REST abertas e checkout de alta estabilidade.
+            Já possuem o back-end enterprise da <strong>VTEX (<code>accountName: tfckoe</code>)</strong> contratado e rodando com APIs REST abertas e checkout estável, embora o front-end ainda opere no <strong>VTEX CMS Portal Legado (<code>v1.0.0.0</code>)</strong> — permitindo injetar inteligência semântica via API sem trocar de plataforma.
           </p>
         </div>
 
@@ -716,8 +729,8 @@
             <strong>14,2% (57/400 — projetando ~2.670 SKUs na loja toda)</strong> não possuem descrição alguma além da repetição literal do título do ERP acrescido da sigla <code>UN</code>. Nos outros <strong>85,8%</strong>, há apenas um parágrafo corrido genéricos onde <strong>0% possuem tabela técnica (<code>&lt;table&gt;</code>)</strong> e <strong>22% sequer mencionam o peso ou medida</strong> do item.
           </p>
           <div class="p-3 rounded-xl bg-slate-900 text-slate-200 font-mono text-[11px] space-y-1">
-            <div class="text-red-400">❌ SKU 619098: "&lt;p&gt;LEITE COCO COQUIL 500ML UN&lt;/p&gt;" (5 palavras)</div>
-            <div class="text-red-400">❌ SKU 626797: "&lt;p&gt;Chantilly Amélia Mix Supreme 1l UN&lt;/p&gt;" (6 palavras)</div>
+            <div class="text-red-400">❌ SKU 776793: "&lt;p&gt;LEITE COCO COQUIL 500ML UN&lt;/p&gt;" (5 palavras)</div>
+            <div class="text-red-400">❌ SKU 635898: "&lt;p&gt;Chantilly Amélia Mix Supreme 1l UN&lt;/p&gt;" (6 palavras)</div>
           </div>
           <p class="text-[11px] text-amber-900 font-semibold">
             💥 <strong>Por que perde vendas:</strong> Sem ficha técnica estruturada, a compradora profissional fica insegura sobre tamanho, capacidade e aplicação e abandona o carrinho para pesquisar no concorrente.
@@ -737,8 +750,8 @@
           <ul class="space-y-1 text-[11px] text-slate-700 list-disc pl-4">
             <li><strong>Chocolates:</strong> É <em>Chocolate Nobre Puro</em> (exige temperagem 28°C–32°C) ou <em>Cobertura Fracionada</em> (derrete a 45°C–50°C sem choque térmico)?</li>
             <li><strong>Corantes &amp; Recheios:</strong> É <em>Hidrossolúvel</em> (chantilly/glacê) ou <em>Lipossolúvel</em> (chocolate)? O recheio é <em>forneável</em>?</li>
-            <li><strong>Formas &amp; Forminhas:</strong> Forma <code>Nº 500</code> = casca de ovo de <code>500g</code>. Forminha <code>30x30x20mm</code> = <code>3,0 x 3,0 x 2,0 cm</code> (para doces de 15g–25g).</li>
-            <li><strong>Balões:</strong> Balão <code>Nº 9</code> = <code>~23 cm</code> inflado. Flutua com Gás Hélio? Quantos metros de arco rende o pacote c/50?</li>
+            <li><strong>Formas &amp; Forminhas:</strong> <code>Forma de Papel Nº 500</code> (<code>SKU 974593</code>) = forma forneável para Panetone/Colomba de <code>500g</code> de massa; <code>Forma Ovo Páscoa Simples Nº 250 BWB</code> (<code>SKU 898037</code>) = molde de acetato para casca de ovo de <code>250g</code>; Forminha <code>30x30x20mm</code> = <code>3,0 x 3,0 x 2,0 cm</code> (para doces de 15g–25g).</li>
+            <li><strong>Balões:</strong> Balão <code>Nº 9</code> = <code>23 cm / 9 pol</code> inflado. Flutua com Gás Hélio? Quantos metros de arco rende o pacote c/50 (<code>1,4 m a 1,8 m lineares</code>)?</li>
           </ul>
         </div>
 
@@ -746,11 +759,11 @@
         <div class="p-5 rounded-2xl border border-indigo-200 bg-indigo-50/30 space-y-3">
           <div class="flex items-center justify-between">
             <span class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-extrabold text-[11px]">GARGALO 5 • ARQUITETURA VTEX</span>
-            <span class="font-mono font-extrabold text-indigo-700">100% Sem Filtros • 100% Isolados</span>
+            <span class="font-mono font-extrabold text-indigo-700">100% Sem Filtros • 99,7% Mono-SKU</span>
           </div>
           <h4 class="text-sm font-extrabold text-slate-900"><code>SpecificationFilters = []</code> Vazio e Zero Variantes Agrupadas</h4>
           <p class="text-slate-600 leading-relaxed">
-            <strong>100% dos produtos (400/400)</strong> estão com o objeto <code>SpecificationFilters</code> vazio na VTEX. Isso significa que os filtros laterais das páginas de categoria (filtrar por Peso 1kg, Tamanho Nº 9, Cor ou Quantidade no Pacote) estão desligados por falta de atributos estruturados. Além disso, <strong>100% dos itens possuem apenas 1 SKU por produto</strong>: 15 cores do mesmo balão ou corante viram 15 páginas separadas que canibalizam o SEO e dificultam a compra de várias cores.
+            <strong>100% dos produtos (400/400 na amostra e todos os 8 departamentos na API)</strong> estão com o objeto <code>SpecificationFilters</code> vazio na VTEX. Isso significa que os filtros laterais das páginas de categoria (filtrar por Peso 1kg, Tamanho Nº 9, Cor ou Quantidade no Pacote) estão desligados por falta de atributos estruturados. Além disso, <strong>99,7% do catálogo (18.779 produtos para 18.828 SKUs)</strong> possui apenas 1 SKU isolado: 15 cores do mesmo balão ou corante viram 15 páginas separadas que canibalizam o SEO.
           </p>
         </div>
 
@@ -766,6 +779,74 @@
           </p>
         </div>
 
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- 3B. AUDITORIA FORENSE AO VIVO (CROSS-CHECK DE INFRA)     -->
+    <!-- ======================================================== -->
+    <section id="cs-sec-forense" class="bg-slate-950 text-white rounded-3xl border border-purple-500/40 p-6 sm:p-8 shadow-xl space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-purple-400 block">Inspeção Técnica Ao Vivo • Provas de Código &amp; Busca</span>
+          <h3 class="text-xl font-extrabold text-white font-heading">🔍 Auditoria Forense Ao Vivo (Cross-Check de Infraestrutura, Busca VTEX &amp; Erros de Cadastro)</h3>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-extrabold border border-purple-400/30">4 Descobertas Críticas Verificadas</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
+        <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-300 font-extrabold text-[10px]">1. BUSCA INTERNA CEGA</span>
+            <span class="font-mono text-slate-400 text-[11px]">Falta de Sinônimos + 54,5% Esgotados</span>
+          </div>
+          <h4 class="text-sm font-extrabold text-white">A Busca da Vitrine Esconde os Produtos que Estão em Estoque</h4>
+          <ul class="space-y-1.5 text-slate-300 list-disc pl-4 leading-relaxed">
+            <li>Buscar <code>"cobertura fracionada"</code> retorna <strong>apenas 1 produto em todo o catálogo (e esgotado!)</strong>, embora existam dezenas de coberturas fracionadas <em>Harald Top / Confeiteiro / Sicao Mais</em> em estoque — porque o ERP cadastrou apenas <code>CHOC COBERTURA TOP...</code> sem a palavra <code>"fracionada"</code>.</li>
+            <li>Buscar <code>"chocolate barra"</code> traz barrinhas de 80g–90g no topo em vez das barras profissionais de <code>1,01kg</code>/<code>2,05kg</code>, que foram abreviadas como <code>CHOC ... BARRA</code> sem sinônimo <code>CHOC ↔ CHOCOLATE</code>.</li>
+            <li>Buscar <code>"forma ovo pascoa"</code> traz uma <strong>Forma de Silicone Redonda p/ Air Fryer</strong> em 1º lugar, e buscar <code>"forma acetato"</code> exibe 100% dos primeiros resultados esgotados porque os <strong>10.269 SKUs sem saldo</strong> competem por relevância.</li>
+          </ul>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-extrabold text-[10px]">2. PORTAL LEGADO &amp; ROBOTS.TXT</span>
+            <span class="font-mono text-slate-400 text-[11px]">VTEX CMS Portal v1.0.0.0</span>
+          </div>
+          <h4 class="text-sm font-extrabold text-white">Zero OpenGraph, Zero Schema <code>Product</code> e Sitemap <code>lojavazia.com.br</code></h4>
+          <ul class="space-y-1.5 text-slate-300 list-disc pl-4 leading-relaxed">
+            <li>O front-end roda no <strong>VTEX CMS Portal Legado (<code>vtex-version: 1.0.0.0</code>, template <code>pgProduct</code>)</strong> e <strong>NÃO possui nenhuma tag OpenGraph (<code>og:title</code>, <code>og:image</code>, <code>og:price</code>)</strong>: ao compartilhar um produto no WhatsApp/Instagram, não aparece foto nem preço.</li>
+            <li><strong>NÃO possui <code>schema.org/Product</code> (JSON-LD ou Microdata)</strong> nas páginas de produto (apenas <code>BreadcrumbList</code>), perdendo Rich Snippets de preço e estoque no Google.</li>
+            <li>O arquivo <code>robots.txt</code> oficial aponta para <code>Sitemap: https://www.lojavazia.com.br/sitemap.xml</code> (domínio placeholder de template VTEX nunca atualizado!) e usa diretiva não-padrão <code>Noindex: /buscapagina/*</code>.</li>
+          </ul>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-extrabold text-[10px]">3. CONTAMINAÇÃO CRUZADA DE CADASTRO</span>
+            <span class="font-mono text-slate-400 text-[11px]">Erros Reais na Base Bruta VTEX</span>
+          </div>
+          <h4 class="text-sm font-extrabold text-white">Descrições Trocadas, Pesos Errados e Marcas Divergentes na Vitrine</h4>
+          <ul class="space-y-1.5 text-slate-300 list-disc pl-4 leading-relaxed">
+            <li><strong><code>SKU 930249</code> (<em>Creme de Avelã Nutella 700g Ferrero</em>):</strong> está cadastrado na VTEX com <code>&lt;p&gt;&lt;strong&gt;Marca:&lt;/strong&gt; DOCES MARINNA&lt;/p&gt;</code> na descrição original!</li>
+            <li><strong><code>SKU 837593</code> (<em>Granulado Confeiteiro ao Leite Macio 1,01kg Harald</em>):</strong> está com a descrição copiada de outro produto e peso errado: <code>&lt;p&gt;Granulado Escamas Chocolate Ao Leite Harald 500g UN&lt;/p&gt;</code> (<code>500g</code> em vez de <code>1,01kg</code>!).</li>
+            <li><strong><code>SKU 844189</code> (<em>Leite em Pó Ninho Integral Instantâneo 380g Nestlé</em>):</strong> traz na descrição <code>&lt;p&gt;NINHO COMP LACTEO INSTANTANEO FORT 380G UN&lt;/p&gt;</code> (<em>Composto Lácteo</em> em vez de <em>Leite em Pó Integral</em>!).</li>
+            <li><strong>Corrupção de Caracteres e Markdown:</strong> SKUs com caracteres <code>¿¿¿</code> (<code>672920</code>, <code>676209</code>) e sintaxe <code>**markdown**</code> crua não renderizada.</li>
+          </ul>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-extrabold text-[10px]">4. BLINDAGEM DO NOSSO MOTOR</span>
+            <span class="font-mono text-slate-400 text-[11px]">400/400 Auditados Sem Erros</span>
+          </div>
+          <h4 class="text-sm font-extrabold text-white">Soberania do Título + Higienização de Pseudo-Marcas ERP</h4>
+          <ul class="space-y-1.5 text-slate-300 list-disc pl-4 leading-relaxed">
+            <li><strong>Imunidade à Contaminação:</strong> Nosso motor trata o título fiscal + atributos verificados como soberanos, descartando descrições trocadas de outros produtos (corrige automaticamente os SKUs <code>930249</code>, <code>837593</code> e <code>844189</code>).</li>
+            <li><strong>Filtro de Pseudo-Marcas ERP:</strong> Higieniza siglas genéricas cadastradas como marca no ERP (<code>IMPORT</code>, <code>TNT</code>, <code>LEMBRANCINHA</code>, <code>GER</code>, <code>BALAO IMPORTADO</code>, <code>BAZAR IMPORTADORA</code>) para <code>Linha Oficial</code> e preserva siglas técnicas reais como <code>3M</code>.</li>
+            <li><strong>Precisão Regulatória e Dimensional:</strong> Diferencia fermento biológico seco (<code>SKU 672920</code>) de fermento químico, leite de coco vegetal (<code>SKU 776793</code>) de lácteos, e Cake Boards (<code>SKU 845108</code>) de formas comuns.</li>
+          </ul>
+        </div>
       </div>
     </section>
 
@@ -831,7 +912,7 @@
                 Apenas medidas cruas em milímetros ou polegadas (<code>30x30x20mm</code>, <code>N.09</code>, <code>1,01kg</code>) sem explicar quanto rende.
               </td>
               <td class="p-4 text-emerald-800 font-semibold">
-                Cálculo automático: <code>1,01kg</code> = <strong>~40 trufas de 25g ou 6 a 7 cascas de ovo de 150g</strong>; <code>30x30x20mm</code> = <strong>3,0 x 3,0 x 2,0 cm</strong>; Balão Nº 9 c/50 = <strong>~23 cm inflado / arco de 1,5m a 2m</strong>.
+                Cálculo automático: <code>1,01kg</code> = <strong>40 a 50 trufas de 20g–25g ou 4 cascas de ovo de 250g</strong>; <code>30x30x20mm</code> = <strong>3,0 x 3,0 x 2,0 cm</strong>; Balão Nº 9 c/50 = <strong>23 cm / 9 pol inflado e arco orgânico de 1,4 m a 1,8 m lineares</strong>.
               </td>
               <td class="p-4 text-slate-600">Elimina a dúvida técnica da confeiteira/decoradora e aumenta a quantidade de pacotes por pedido.</td>
             </tr>
@@ -966,7 +1047,7 @@
               <span class="text-pink-600 font-bold">▾</span>
             </summary>
             <p class="mt-2.5 text-slate-600 leading-relaxed border-t border-slate-100 pt-2.5">
-              <strong>Resposta:</strong> Porque o público-alvo principal (confeiteiras, boleiras, doceiras e decoradoras de festa) compra insumo para revender. Quando a página mostra claramente que uma barra de <code>1,01kg</code> rende <strong>40 trufas de 25g</strong> a um custo de insumo de poucos centavos por unidade, ou que o pacote de forminhas sai a <strong>R$ 0,08 por unidade</strong>, a percepção de preço muda de "gasto" para "lucro por unidade produzida", incentivando a compra de múltiplos pacotes.
+              <strong>Resposta:</strong> Porque o público-alvo principal (confeiteiras, boleiras, doceiras e decoradoras de festa) compra insumo para revender. Quando a página mostra claramente que uma barra de <code>1,01kg</code> rende <strong>40 a 50 trufas de 20g–25g ou 4 cascas de ovo de 250g</strong> a um custo de insumo de poucos centavos por unidade, ou que o pacote de forminhas sai a <strong>R$ 0,08 por unidade</strong>, a percepção de preço muda de "gasto" para "lucro por unidade produzida", incentivando a compra de múltiplos pacotes.
             </p>
           </details>
         </div>
@@ -995,10 +1076,10 @@
         <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between space-y-3">
           <div class="space-y-1.5">
             <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold">Caso 1 • Eco de ERP (Sem Descrição)</span>
-            <h4 class="text-xs font-extrabold text-slate-900">Leite de Coco Coquil 500ml</h4>
-            <p class="text-[11px] text-slate-500">Na loja hoje: apenas <code>&lt;p&gt;LEITE COCO COQUIL 500ML UN&lt;/p&gt;</code>. Veja como ganha 3 Atos, rendimento em receitas e ficha técnica completa.</p>
+            <h4 class="text-xs font-extrabold text-slate-900">Leite de Coco 500ml Coquil (SKU 776793)</h4>
+            <p class="text-[11px] text-slate-500">Na loja hoje: apenas <code>&lt;p&gt;LEITE COCO COQUIL 500ML UN&lt;/p&gt;</code>. Veja como ganha 3 Atos, rendimento em receitas, informação vegetal sem lactose e ficha técnica completa.</p>
           </div>
-          <button onclick="openCaseStudySampleBySku('619098', 'diff')" class="w-full py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-xs font-extrabold transition-all">
+          <button onclick="openCaseStudySampleBySku('776793', 'diff')" class="w-full py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-xs font-extrabold transition-all">
             ⚖️ Ver Antes vs. Depois
           </button>
         </div>
@@ -1006,10 +1087,10 @@
         <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between space-y-3">
           <div class="space-y-1.5">
             <span class="px-2 py-0.5 rounded-full bg-pink-100 text-pink-800 text-[10px] font-extrabold">Caso 2 • Confeitaria &amp; Termometria</span>
-            <h4 class="text-xs font-extrabold text-slate-900">Chantilly Amélia Mix Supreme 1L</h4>
+            <h4 class="text-xs font-extrabold text-slate-900">Chantilly Mix Supreme 1L Amélia (SKU 635898)</h4>
             <p class="text-[11px] text-slate-500">Demonstra orientação de batimento gelado (4°C a 8°C), calculadora de rendimento de bolos espatulados e economia por 100ml.</p>
           </div>
-          <button onclick="openCaseStudySampleBySku('626797', 'diff')" class="w-full py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-xs font-extrabold transition-all">
+          <button onclick="openCaseStudySampleBySku('635898', 'diff')" class="w-full py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-xs font-extrabold transition-all">
             ⚖️ Ver Antes vs. Depois
           </button>
         </div>

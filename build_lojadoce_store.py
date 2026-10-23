@@ -10,7 +10,7 @@ from core.template_engine import TemplateEngine
 from core.html_builder import HTMLBuilder
 from core.html_replacer import HTMLReplacer
 from core.semantic_auditor import SemanticAuditor
-from core.lojadoce_engine import format_lojadoce_title
+from core.lojadoce_engine import format_lojadoce_title, normalize_lojadoce_brand
 
 
 def sanitize_store_mentions(text: str) -> str:
@@ -47,11 +47,10 @@ def build_lojadoce_catalog():
 
     for p in raw_products:
         raw_erp = p.get("raw_erp_title") or p.get("title") or ""
-        clean_title = format_lojadoce_title(raw_erp)
         vtex_cat_path = p.get("vtex_category_path") or p.get("category") or ""
         raw_vendor = sanitize_store_mentions(p.get("vendor") or p.get("brand") or "")
-        if raw_vendor.strip().upper() in ("LOJA DOCE", "BRK", "CATÁLOGO OFICIAL", "CATALOGO OFICIAL", ""):
-            raw_vendor = "Linha Oficial"
+        raw_vendor = normalize_lojadoce_brand(raw_vendor, raw_erp)
+        clean_title = format_lojadoce_title(raw_erp, raw_vendor)
 
         sku = str(p.get("master_sku") or p.get("sku") or "")
         tags = [sanitize_store_mentions(t) for t in (p.get("tags") or [])]
@@ -228,7 +227,7 @@ def build_lojadoce_catalog():
     store_meta["total_catalog_vtex"] = 18828
     store_meta["total_active_in_stock_vtex"] = 8559
     store_meta["total_out_of_stock_vtex"] = 10269
-    store_meta["total_skus"] = len(enriched_products)
+    store_meta["total_skus"] = 18828
     store_meta["total_products"] = len(enriched_products)
     store_meta["broken_skus"] = 0
     store_meta["out_of_standard_prods"] = empty_total

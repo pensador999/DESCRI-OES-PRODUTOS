@@ -1282,14 +1282,14 @@ async function renderAnalyticsView() {
     const totalSkus = (ldData && ldData.store && ldData.store.total_skus) || 18828;
 
     const sentinelRun = document.getElementById("sentinel-last-run");
-    if (sentinelRun) sentinelRun.innerText = `Catálogo VTEX Auditado (${totalP} Produtos Amostrados / ${totalSkus.toLocaleString('pt-BR')} SKUs)`;
+    if (sentinelRun) sentinelRun.innerText = `18.828 SKUs Publicados • 8.559 em Estoque • ${totalP} Auditados`;
 
     const analyticsSec = document.getElementById("section-analytics");
     if (analyticsSec) {
       const topBannerTitle = analyticsSec.querySelector("h2");
       const topBannerDesc = analyticsSec.querySelector("p.text-slate-300");
       const topBannerPill = analyticsSec.querySelector("span.bg-emerald-500\\/20");
-      if (topBannerPill) topBannerPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Auditoria VTEX 360° • 4 Frentes Aplicadas`;
+      if (topBannerPill) topBannerPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Auditoria VTEX 360° • 18.828 SKUs Publicados • 8.559 em Estoque • 400 Auditados`;
       if (topBannerTitle) topBannerTitle.innerText = "Painel de Auditoria Técnica & Verticalização VTEX";
       if (topBannerDesc) {
         topBannerDesc.innerText = "Diagnóstico completo do catálogo VTEX: Expansão Semântica de Títulos ERP, Sanitização de MetaDescription (100% Plain Text sem HTML), Calculadora Automática de Rendimento/Equivalência, Alerta ANVISA de Alergênicos e SpecificationFilters.";
@@ -1300,18 +1300,30 @@ async function renderAnalyticsView() {
     const cardFishingTitle = document.querySelector("#stat-fishing-health")?.parentElement?.querySelector("span:first-child");
     if (cardFishingTitle) {
       cardFishingTitle.className = "text-xs font-extrabold text-pink-700 bg-pink-50 px-2.5 py-1 rounded-xl";
-      cardFishingTitle.innerText = "📐 Frente 1 & Títulos ERP";
+      cardFishingTitle.innerText = "📐 Gargalos do Catálogo VTEX (ERP / 1 Foto / SEO)";
     }
     const elHealth1 = document.getElementById("stat-fishing-health");
     if (elHealth1) elHealth1.innerText = "100%";
     const elSkus1 = document.getElementById("stat-fishing-skus");
-    if (elSkus1) elSkus1.innerText = `${totalP} produtos (${totalSkus.toLocaleString('pt-BR')} SKUs VTEX)`;
+    if (elSkus1) {
+      if (elSkus1.previousElementSibling) elSkus1.previousElementSibling.innerText = "Censo Global VTEX:";
+      elSkus1.innerText = `18.828 SKUs Publicados • 8.559 em Estoque • ${totalP} Auditados`;
+    }
     const elBroken1 = document.getElementById("stat-fishing-broken");
-    if (elBroken1) elBroken1.innerText = "0 fotos quebradas";
+    if (elBroken1) {
+      if (elBroken1.previousElementSibling) elBroken1.previousElementSibling.innerText = "Títulos ERP / 1 Foto:";
+      elBroken1.innerText = "99,2% CAIXA ALTA • 82,8% com 1 foto";
+    }
     const elEmpty1 = document.getElementById("stat-fishing-empty");
-    if (elEmpty1) elEmpty1.innerText = "0 sem descrição";
+    if (elEmpty1) {
+      if (elEmpty1.previousElementSibling) elEmpty1.previousElementSibling.innerText = "Descrições Eco de ERP:";
+      elEmpty1.innerText = "14,2% (57/400) corrigidos";
+    }
     const elFixes1 = document.getElementById("stat-fishing-fixes");
-    if (elFixes1) elFixes1.innerText = `${totalP} com Calculadora & Título Expandido`;
+    if (elFixes1) {
+      if (elFixes1.previousElementSibling) elFixes1.previousElementSibling.innerText = "Verticalização Aplicada:";
+      elFixes1.innerText = `${totalP} com Calculadora & Título Expandido`;
+    }
     const elBar1 = document.getElementById("bar-fishing-health");
     if (elBar1) elBar1.style.width = "100%";
 
@@ -1323,31 +1335,55 @@ async function renderAnalyticsView() {
     const elHealth2 = document.getElementById("stat-agro-health");
     if (elHealth2) elHealth2.innerText = "100%";
     const elSkus2 = document.getElementById("stat-agro-skus");
-    if (elSkus2) elSkus2.innerText = `${totalP} SEO Titles (≤ 60 chars)`;
+    if (elSkus2) {
+      if (elSkus2.previousElementSibling) elSkus2.previousElementSibling.innerText = "Títulos SEO Gerados:";
+      elSkus2.innerText = `${totalP} SEO Titles (≤ 60 chars)`;
+    }
     const elBroken2 = document.getElementById("stat-agro-broken");
-    if (elBroken2) elBroken2.innerText = "0 tags HTML na MetaDescription";
+    if (elBroken2) {
+      if (elBroken2.previousElementSibling) elBroken2.previousElementSibling.innerText = "Vazamento HTML MetaSEO:";
+      elBroken2.innerText = "0 tags HTML na MetaDescription (98,8% corrigidos)";
+    }
     const elEmpty2 = document.getElementById("stat-agro-empty");
-    if (elEmpty2) elEmpty2.innerText = "0 entidades HTML cruas";
+    if (elEmpty2) {
+      if (elEmpty2.previousElementSibling) elEmpty2.previousElementSibling.innerText = "Entidades HTML Cruas:";
+      elEmpty2.innerText = "0 entidades HTML cruas";
+    }
     const elFixes2 = document.getElementById("stat-agro-fixes");
-    if (elFixes2) elFixes2.innerText = `${totalP} Meta Descriptions 100% Plain UTF-8`;
+    if (elFixes2) {
+      if (elFixes2.previousElementSibling) elFixes2.previousElementSibling.innerText = "Snippets UTF-8 Puros:";
+      elFixes2.innerText = `${totalP} Meta Descriptions 100% Plain UTF-8`;
+    }
     const elBar2 = document.getElementById("bar-agro-health");
     if (elBar2) elBar2.style.width = "100%";
 
     const cardMotorsTitle = document.querySelector("#stat-motors-health")?.parentElement?.querySelector("span:first-child");
     if (cardMotorsTitle) {
       cardMotorsTitle.className = "text-xs font-extrabold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-xl";
-      cardMotorsTitle.innerText = "🛡️ Frentes 3 & 4: ANVISA + Specs";
+      cardMotorsTitle.innerText = "🛡️ Padronização 3 Atos + Infográficos + B2B + ANVISA";
     }
     const elHealth3 = document.getElementById("stat-motors-health");
     if (elHealth3) elHealth3.innerText = "100%";
     const elSkus3 = document.getElementById("stat-motors-skus");
-    if (elSkus3) elSkus3.innerText = "8 Arquétipos Verticais VTEX";
+    if (elSkus3) {
+      if (elSkus3.previousElementSibling) elSkus3.previousElementSibling.innerText = "Arquitetura Semântica:";
+      elSkus3.innerText = "8 Arquétipos Verticais VTEX + Economia B2B";
+    }
     const elBroken3 = document.getElementById("stat-motors-broken");
-    if (elBroken3) elBroken3.innerText = "0 sem Alerta ANVISA / Grau Alimentício";
+    if (elBroken3) {
+      if (elBroken3.previousElementSibling) elBroken3.previousElementSibling.innerText = "Conformidade ANVISA:";
+      elBroken3.innerText = "0 sem Alerta ANVISA RDC 26/2015 / Grau Alimentício";
+    }
     const elEmpty3 = document.getElementById("stat-motors-empty");
-    if (elEmpty3) elEmpty3.innerText = "0 sem SpecificationFilters";
+    if (elEmpty3) {
+      if (elEmpty3.previousElementSibling) elEmpty3.previousElementSibling.innerText = "Filtros VTEX:";
+      elEmpty3.innerText = "0 sem SpecificationFilters";
+    }
     const elFixes3 = document.getElementById("stat-motors-fixes");
-    if (elFixes3) elFixes3.innerText = `${totalP} fichas estruturadas VTEX prontas`;
+    if (elFixes3) {
+      if (elFixes3.previousElementSibling) elFixes3.previousElementSibling.innerText = "Fichas Técnicas VTEX:";
+      elFixes3.innerText = `${totalP} fichas estruturadas VTEX prontas`;
+    }
     const elBar3 = document.getElementById("bar-motors-health");
     if (elBar3) elBar3.style.width = "100%";
 
@@ -2060,16 +2096,18 @@ async function renderCaseStudyView() {
   if (!container || prods.length === 0) return;
 
   // Selecionar 4 exemplos reais emblemáticos do catálogo VTEX
-  const pEco = prods.find(p => String(p.sku || p.master_sku) === "619098")
+  const pEco = prods.find(p => String(p.sku || p.master_sku) === "776793")
     || prods.find(p => p.status === "SEM_DESCRICAO")
     || prods[0];
-  const pChantilly = prods.find(p => String(p.sku || p.master_sku) === "626797")
+  const pChantilly = prods.find(p => String(p.sku || p.master_sku) === "635898")
     || prods.find(p => /chantilly|creme|cobertura|chocolate/i.test(p.title || "") && p !== pEco)
     || prods[1];
-  const pChoc = prods.find(p => /cobertura|chocolate|avel/i.test(p.title || "") && p !== pEco && p !== pChantilly)
+  const pChoc = prods.find(p => String(p.sku || p.master_sku) === "930249")
+    || prods.find(p => /cobertura|chocolate|avel/i.test(p.title || "") && p !== pEco && p !== pChantilly)
     || prods.find(p => p.category === "Confeitaria & Panificação" && p !== pEco && p !== pChantilly)
     || prods[2];
-  const pFesta = prods.find(p => p.category === "Artigos para Festas & Balões" && /\bbal[aã]o\b/i.test(p.title || "") && p !== pEco && p !== pChantilly && p !== pChoc)
+  const pFesta = prods.find(p => String(p.sku || p.master_sku) === "866559")
+    || prods.find(p => p.category === "Artigos para Festas & Balões" && /\bbal[aã]o\b/i.test(p.title || "") && p !== pEco && p !== pChantilly && p !== pChoc)
     || prods.find(p => p.category === "Artigos para Festas & Balões" && p !== pEco && p !== pChantilly && p !== pChoc)
     || prods[3];
 

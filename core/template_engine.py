@@ -29,6 +29,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from core.lojadoce_engine import (
     LOJA_DOCE_ARCHETYPES,
     format_lojadoce_title,
+    normalize_lojadoce_brand,
     detect_lojadoce_archetype,
     classify_lojadoce_vtex_category,
     extract_lojadoce_attributes,
@@ -4797,20 +4798,16 @@ class TemplateEngine:
         ld_extra_payload: Dict[str, Any] = {}
         if store_key == "loja_doce" or archetype_id.startswith("ld_"):
             raw_ld_brand = str(product.get("brand_name") or product.get("vendor") or "").strip()
-            formatted_title = format_lojadoce_title(str(product.get("raw_erp_title") or title), raw_ld_brand)
-            if not raw_ld_brand or raw_ld_brand.upper() in ("LOJA DOCE", "LOJA DOCE IMPORT", "BRK"):
-                brand_name = "Linha Oficial"
-                origin_type = "producao_propria"
-            else:
-                brand_name = raw_ld_brand.title() if (raw_ld_brand.isupper() and len(raw_ld_brand) > 3) else raw_ld_brand
-                origin_type = "revenda"
+            raw_for_attrs = str(product.get("raw_erp_title") or title)
+            brand_name = normalize_lojadoce_brand(raw_ld_brand, raw_for_attrs)
+            formatted_title = format_lojadoce_title(raw_for_attrs, brand_name)
+            origin_type = "producao_propria" if brand_name == "Linha Oficial" else "revenda"
             show_copyright = False
             back_360_img = ""
             is_back_cover_360 = False
             cat_vtex = str(product.get("vtex_category_path") or product.get("product_type") or product.get("category") or "")
-            raw_for_attrs = str(product.get("raw_erp_title") or title)
             raw_ld_price = str(product.get("price") or (product.get("variants") and product.get("variants")[0].get("price")) or "")
-            ld_attrs = extract_lojadoce_attributes(raw_for_attrs, formatted_title, brand_name, cat_vtex, str(sku))
+            ld_attrs = extract_lojadoce_attributes(raw_for_attrs, formatted_title, brand_name, cat_vtex, str(sku), archetype_id=archetype_id)
             ld_yield = calculate_lojadoce_yield_and_equivalence(raw_for_attrs, formatted_title, ld_attrs, archetype_id)
             ld_b2b = calculate_lojadoce_b2b_unit_economics(raw_ld_price, raw_for_attrs, formatted_title, ld_attrs, ld_yield, archetype_id)
             ld_allergen = get_anvisa_allergen_and_safety_info(raw_for_attrs, formatted_title, archetype_id, ld_attrs)

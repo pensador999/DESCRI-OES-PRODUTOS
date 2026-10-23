@@ -2171,7 +2171,14 @@ if (!brkHtml.includes('brk-desc-wrapper') || brkHtml.includes('vtex-infographic-
             "599",
             "503",
             "339",
-            "VTEX IO",
+            "VTEX CMS Portal Legado",
+            "776793",
+            "635898",
+            "974593",
+            "898037",
+            "lojavazia.com.br",
+            "DOCES MARINNA",
+            "cobertura fracionada",
             "99,2%",
             "55,2%",
             "CHOC COB CONF BARRA MEIO AMARGO 1,010KG",
@@ -2368,6 +2375,110 @@ vm.runInContext(appCode, sandbox);
 """
         res_iso = subprocess.run(["node", "-e", js_isolation_test], cwd=BASE_DIR, capture_output=True, text=True, encoding="utf-8")
         self.assertEqual(res_iso.returncode, 0, f"Falha no teste JS de isolamento da aba Estudo de Caso: {res_iso.stderr}")
+
+    def test_lojadoce_forensic_deep_fixes(self):
+        """
+        Garante que todas as correções cirúrgicas de precisão semântica, dimensional,
+        regulatória (ANVISA RDC 26/2015), B2B e higienização de marcas ERP estão ativas
+        em data/stores/loja_doce.json, index.html e js/app.js.
+        """
+        store_path = os.path.join(BASE_DIR, "data", "stores", "loja_doce.json")
+        with open(store_path, "r", encoding="utf-8") as f:
+            ld_data = json.load(f)
+
+        self.assertEqual(ld_data["store"]["total_skus"], 18828)
+        products = ld_data["products"]
+        self.assertEqual(len(products), 400)
+        by_sku = {str(p.get("master_sku") or p.get("sku")): p for p in products}
+
+        # 1. Zero alimentos com Polipropileno / PET Cristal ou campo Material em vtex_specifications
+        food_archs = {"ld_confeitaria_ingredientes", "ld_bomboniere_chocolates", "ld_bomboniere_balas_gomas"}
+        for p in products:
+            if p.get("archetype_id") in food_archs:
+                specs = p.get("vtex_specifications", {})
+                self.assertNotIn("Material", specs, f"Alimento SKU {p.get('sku')} não deve ter Material em vtex_specifications")
+                self.assertNotIn("Polipropileno", p.get("mode_b_html", ""), f"Alimento SKU {p.get('sku')} com Polipropileno indevido")
+                self.assertNotIn("PET Cristal", p.get("mode_b_html", ""), f"Alimento SKU {p.get('sku')} com PET Cristal indevido")
+
+        # Verificar falsos positivos de word boundaries corrigidos
+        for sku_forminha in ("974605", "974621", "974617", "975446", "975413", "975545", "902681"):
+            self.assertNotIn("PET Cristal", by_sku[sku_forminha]["mode_b_html"])
+        self.assertNotIn("Polipropileno", by_sku["968221"]["mode_b_html"])
+        self.assertNotIn("Polipropileno", by_sku["968413"]["mode_b_html"])
+        self.assertIn("Espuma acrílica adesiva", by_sku["978944"]["vtex_specifications"].get("Material", ""))
+
+        # 2. Alertas regulatórios ANVISA RDC 26/2015 precisos
+        p_coco = by_sku["776793"]
+        self.assertIn("origem vegetal", p_coco["allergen_info"]["value"])
+        self.assertIn("isento de lactose", p_coco["allergen_info"]["value"])
+        self.assertNotIn("Contém derivados de leite", p_coco["allergen_info"]["value"])
+
+        for sku_cocoa in ("510726", "843124", "850684"):
+            self.assertIn("traços de leite/lactose devido ao compartilhamento", by_sku[sku_cocoa]["allergen_info"]["value"])
+            self.assertNotIn("Contém derivados de leite (lactose)", by_sku[sku_cocoa]["allergen_info"]["value"])
+
+        for sku_avela in ("930249", "792805"):
+            self.assertIn("CONTÉM AVELÃS E DERIVADOS DE LEITE E SOJA", by_sku[sku_avela]["allergen_info"]["value"])
+
+        self.assertIn("CONTÉM AMÊNDOAS", by_sku["840446"]["allergen_info"]["value"])
+        self.assertIn("DERIVADOS DE LEITE E SOJA", by_sku["840446"]["allergen_info"]["value"])
+        self.assertIn("Não contém glúten", by_sku["774674"]["allergen_info"]["value"])
+        self.assertNotIn("Contém trigo", by_sku["774674"]["allergen_info"]["value"])
+        self.assertIn("CONTÉM TRIGO E DERIVADOS. CONTÉM GLÚTEN.", by_sku["701556"]["allergen_info"]["value"])
+        self.assertNotIn("Contém derivados de leite", by_sku["701556"]["allergen_info"]["value"])
+
+        # 3. Cake Boards, Balões, Bomba Manual e Dimensões Decimais
+        p_cb = by_sku["845108"]
+        self.assertIn("diâmetro real de 30 cm", p_cb["yield_info"]["resumo_rendimento"])
+        self.assertIn("24 cm a 26 cm", p_cb["yield_info"]["resumo_rendimento"])
+        self.assertIn("35 a 45 fatias", p_cb["yield_info"]["resumo_rendimento"])
+
+        p_pump = by_sku["845657"]
+        self.assertIn("Inflagem manual", p_pump["yield_info"]["resumo_rendimento"])
+        self.assertNotIn("23 cm", p_pump["yield_info"]["resumo_rendimento"])
+
+        p_foil = by_sku["855743"]
+        self.assertIn("47,5 cm x 59,5 cm", p_foil["yield_info"]["resumo_rendimento"])
+
+        self.assertIn("13 cm", by_sku["670332"]["yield_info"]["resumo_rendimento"])
+        self.assertIn("18 cm", by_sku["6378"]["yield_info"]["resumo_rendimento"])
+        self.assertIn("40 cm", by_sku["735957"]["yield_info"]["resumo_rendimento"])
+
+        # 4. Marca 3M, Fermento Biológico, Agendas/Blocos e Pseudo-Marcas ERP
+        p_3m = by_sku["978880"]
+        self.assertEqual(p_3m["vendor"], "3M")
+        self.assertIn("3M", p_3m["title"])
+        self.assertNotIn("3m", p_3m["title"].split())
+        self.assertNotIn("Dimensões", p_3m["vtex_specifications"])
+        self.assertIn("Unidade individual (50 folhas internas)", p_3m["vtex_specifications"]["Quantidade por Embalagem"])
+        self.assertNotIn("Pacote com 50", p_3m["b2b_economics"]["value"])
+
+        p_agenda = by_sku["985610"]
+        self.assertIn("80 folhas internas", p_agenda["vtex_specifications"]["Quantidade por Embalagem"])
+        self.assertNotIn("Pacote com 80", p_agenda["b2b_economics"]["value"])
+
+        p_yeast = by_sku["672920"]
+        self.assertIn("30g de fermento biológico fresco", p_yeast["yield_info"]["resumo_rendimento"])
+        self.assertIn("500g a 1kg de farinha", p_yeast["yield_info"]["resumo_rendimento"])
+
+        forbidden_brands = {"IMPORT", "TNT", "LEMBRANCINHA", "LEMBRANCINHAS", "GER", "BALAO IMPORTADO", "BAZAR IMPORTADORA", "CATÁLOGO OFICIAL IMPORT"}
+        for p in products:
+            self.assertNotIn(p.get("vendor", "").strip().upper(), forbidden_brands)
+            self.assertNotIn(p.get("vtex_specifications", {}).get("Marca", "").strip().upper(), forbidden_brands)
+
+        # 5. Botões interativos em index.html e textos de #section-analytics em js/app.js
+        with open(os.path.join(BASE_DIR, "index.html"), "r", encoding="utf-8") as f_idx:
+            idx_html = f_idx.read()
+        self.assertIn("openCaseStudySampleBySku('776793', 'diff')", idx_html)
+        self.assertIn("openCaseStudySampleBySku('635898', 'diff')", idx_html)
+        self.assertNotIn("openCaseStudySampleBySku('619098'", idx_html)
+        self.assertNotIn("openCaseStudySampleBySku('626797'", idx_html)
+
+        with open(os.path.join(BASE_DIR, "js", "app.js"), "r", encoding="utf-8") as f_app:
+            app_js = f_app.read()
+        self.assertIn("18.828 SKUs Publicados • 8.559 em Estoque", app_js)
+        self.assertIn("Gargalos do Catálogo VTEX (ERP / 1 Foto / SEO)", app_js)
+        self.assertIn("Padronização 3 Atos + Infográficos + B2B + ANVISA", app_js)
 
 
 def run_tests():
