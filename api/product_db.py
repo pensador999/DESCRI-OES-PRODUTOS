@@ -30,8 +30,7 @@ _CACHED_STORES = {}
 ALLOWED_STORES = {
     "brk_fishing": "brk_fishing.json",
     "brk_agro": "brk_agro.json",
-    "brk_motors": "brk_motors.json",
-    "loja_doce": "loja_doce.json"
+    "brk_motors": "brk_motors.json"
 }
 
 STORE_SLUG_MAP = {
@@ -40,9 +39,7 @@ STORE_SLUG_MAP = {
     "brkmotors25": "brk_motors",
     "brk_fishing": "brk_fishing",
     "brk_agro": "brk_agro",
-    "brk_motors": "brk_motors",
-    "loja_doce": "loja_doce",
-    "lojadoce": "loja_doce"
+    "brk_motors": "brk_motors"
 }
 
 def get_base_dir():
@@ -77,7 +74,6 @@ def evaluate_guideline_compliance(p: dict, store_key: str = "brk_fishing") -> tu
         "brk_fishing": ("#0284c7", "#00a8ff"),
         "brk_agro": ("#15803d", "#22c55e", "#16a34a"),
         "brk_motors": ("#ea580c", "#f97316"),
-        "loja_doce": ("#db2777", "#ec4899"),
     }.get(store_key, ("#0284c7", "#00a8ff"))
 
     violations = []
@@ -517,7 +513,6 @@ def ensure_mode_b_html(p: dict, store_key: str = "brk_fishing") -> str:
         "brk_fishing": ("#0284c7", "#00a8ff"),
         "brk_agro": ("#15803d", "#22c55e", "#16a34a"),
         "brk_motors": ("#ea580c", "#f97316"),
-        "loja_doce": ("#db2777", "#ec4899"),
     }.get(store_key, ("#0284c7", "#00a8ff"))
 
     # Se já tem o formato oficial correspondente e atualizado (Fase 5/6/7/8), verifica saúde de imagens e reaproveita

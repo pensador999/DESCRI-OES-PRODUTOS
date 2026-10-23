@@ -26,21 +26,6 @@ Preserva rigorosamente 100% dos dados técnicos reais da peça sem alucinar espe
 import re
 import unicodedata
 from typing import Dict, Any, List, Optional, Tuple
-from core.lojadoce_engine import (
-    LOJA_DOCE_ARCHETYPES,
-    format_lojadoce_title,
-    normalize_lojadoce_brand,
-    detect_lojadoce_archetype,
-    classify_lojadoce_vtex_category,
-    extract_lojadoce_attributes,
-    calculate_lojadoce_yield_and_equivalence,
-    calculate_lojadoce_b2b_unit_economics,
-    get_anvisa_allergen_and_safety_info,
-    generate_lojadoce_seo_metadata,
-    build_vtex_specifications,
-    customize_lojadoce_narrative,
-)
-
 
 KNOWN_BRANDS = [
     'Rapala', 'Deyu', 'Marine Sports', 'Marine', 'Daisen', 'Albatroz', 
@@ -1141,9 +1126,8 @@ class TemplateEngine:
                 "care_tips": "Lavar à mão com água fria e sabão neutro. Não usar alvejante. Secar à sombra e não torcer."
             }
         }
-        self.templates.update(LOJA_DOCE_ARCHETYPES)
 
-    def detect_archetype(self, title: str, category: str = "", tags: List[str] = None, vendor: str = "", sku: str = "", store_key: str = "") -> str:
+    def detect_archetype(self, title: str, category: str = "", tags: List[str] = None, vendor: str = "", sku: str = "") -> str:
         """
         Detecta com máxima precisão o arquétipo correto do produto.
         O TÍTULO DO PRODUTO É SOBERANO: previne que coleções multi-categoria
@@ -1162,14 +1146,6 @@ class TemplateEngine:
         vend = _clean(vendor)
         sku_clean = (sku or "").upper().strip()
         text = f"{t} {cat} {vend} {tags_str} {sku_clean}"
-
-        # 0. Loja Doce (VTEX) — Classificação dedicada por Departamentos e Subtipos de Confeitaria / Bomboniere / Embalagens / Festas
-        if (
-            store_key == "loja_doce"
-            or (category or "").strip().startswith("/")
-            or any(d in cat for d in ("bomboniere", "confeitaria", "artigos para festas", "embalagens e descartaveis", "papelaria", "halloween mais feliz", "fim de ano"))
-        ):
-            return detect_lojadoce_archetype(title=t_raw, category=category, tags=tags, vendor=vendor, sku=sku)
 
         # 1. Aromatizantes Automotivos & Cuidados (Prioridade máxima para evitar que caiam em camisas)
         if any(w in t for w in ["aromatizante", "cheirinho", "difusor", "aromatizador", "odorizador", "little trees", "odor"]):
@@ -1356,28 +1332,11 @@ class TemplateEngine:
 
         return "uv_performance"
 
-    def classify_store_category(
-        self,
-        title: str,
-        archetype_id: str,
-        store_key: str = "brk_fishing",
-        tags: List[str] = None,
-        sku: str = "",
-        product_type: str = "",
-        category: str = "",
-    ) -> str:
+    def classify_store_category(self, title: str, archetype_id: str, store_key: str = "brk_fishing", tags: List[str] = None, sku: str = "") -> str:
         """
         Classifica o produto em uma Coleção/Categoria oficial da loja com base no arquétipo soberano,
         garantindo zero contaminação entre Camisas, Bonés, Bandanas, Óculos, Botinas e Equipamentos.
         """
-        if store_key == "loja_doce" or str(archetype_id or "").startswith("ld_"):
-            return classify_lojadoce_vtex_category(
-                title=title,
-                category_path=category or product_type,
-                archetype_id=archetype_id,
-                tags=tags,
-            )
-
         t_low = (title or "").lower()
         sku_low = (sku or "").lower()
         tags_str = " ".join(tags or []).lower() if isinstance(tags, list) else str(tags or "").lower()
@@ -2873,7 +2832,6 @@ class TemplateEngine:
             "brk_fishing": {"color": "#0284c7", "bg": "#f0f9ff"}, # Azul Leve
             "brk_agro":    {"color": "#16a34a", "bg": "#f0fdf4"}, # Verde Leve
             "brk_motors":  {"color": "#f97316", "bg": "#fff7ed"}, # Laranja Leve
-            "loja_doce":   {"color": "#db2777", "bg": "#fdf2f8"}, # Rosa Confeitaria (Loja Doce VTEX)
         }
         
         if not store_key:
@@ -2883,13 +2841,6 @@ class TemplateEngine:
             t_low_store = title.lower()
             imgs_str_store = " ".join(str(u) for u in cdn_images).lower()
             if (
-                archetype_id.startswith("ld_")
-                or "lojadoce" in url
-                or "vteximg.com.br" in imgs_str_store
-                or (product.get("category") or "").strip().startswith("/")
-            ):
-                store_key = "loja_doce"
-            elif (
                 "agro" in url or "agro" in vendor_str or "agro" in category
                 or archetype_id == "agro_field"
                 or "0887/2083/4857" in imgs_str_store
@@ -4795,47 +4746,6 @@ class TemplateEngine:
             for sp in new_specs:
                 sp["value"] = _adapt_store_vocab(sp.get("value", ""))
 
-        ld_extra_payload: Dict[str, Any] = {}
-        if store_key == "loja_doce" or archetype_id.startswith("ld_"):
-            raw_ld_brand = str(product.get("brand_name") or product.get("vendor") or "").strip()
-            raw_for_attrs = str(product.get("raw_erp_title") or title)
-            brand_name = normalize_lojadoce_brand(raw_ld_brand, raw_for_attrs)
-            formatted_title = format_lojadoce_title(raw_for_attrs, brand_name)
-            origin_type = "producao_propria" if brand_name == "Linha Oficial" else "revenda"
-            show_copyright = False
-            back_360_img = ""
-            is_back_cover_360 = False
-            cat_vtex = str(product.get("vtex_category_path") or product.get("product_type") or product.get("category") or "")
-            raw_ld_price = str(product.get("price") or (product.get("variants") and product.get("variants")[0].get("price")) or "")
-            ld_attrs = extract_lojadoce_attributes(raw_for_attrs, formatted_title, brand_name, cat_vtex, str(sku), archetype_id=archetype_id)
-            ld_yield = calculate_lojadoce_yield_and_equivalence(raw_for_attrs, formatted_title, ld_attrs, archetype_id)
-            ld_b2b = calculate_lojadoce_b2b_unit_economics(raw_ld_price, raw_for_attrs, formatted_title, ld_attrs, ld_yield, archetype_id)
-            ld_allergen = get_anvisa_allergen_and_safety_info(raw_for_attrs, formatted_title, archetype_id, ld_attrs)
-            ld_seo = generate_lojadoce_seo_metadata(formatted_title, brand_name, ld_attrs, archetype_id, ld_yield)
-            ld_vtex_specs = build_vtex_specifications(ld_attrs, archetype_id, ld_yield, ld_allergen, b2b_economics=ld_b2b)
-            new_specs = customize_lojadoce_narrative(
-                archetype_id=archetype_id,
-                formatted_title=formatted_title,
-                raw_title=raw_for_attrs,
-                brand=brand_name,
-                category=cat_vtex,
-                sku=str(sku),
-                act1=act1,
-                act2=act2,
-                act3=act3,
-                template=template,
-                price_str=raw_ld_price,
-                b2b_economics=ld_b2b,
-            )
-            ld_extra_payload = {
-                "seo_title": ld_seo["seo_title"],
-                "seo_meta_description": ld_seo["seo_meta_description"],
-                "vtex_specifications": ld_vtex_specs,
-                "yield_info": ld_yield,
-                "b2b_economics": ld_b2b,
-                "allergen_info": ld_allergen,
-            }
-
         specs = new_specs
 
         source_type = "sibling_template" if sibling_info else "archetype_specialized"
@@ -4884,10 +4794,7 @@ class TemplateEngine:
 
         sku = str(product.get("sku") or product.get("master_sku") or product.get("id") or "")
         handle = str(product.get("handle") or "")
-        if store_key == "loja_doce" or archetype_id.startswith("ld_"):
-            vendor = brand_name
-        else:
-            vendor = str(product.get("vendor") or brand_name or "BRK")
+        vendor = str(product.get("vendor") or brand_name or "BRK")
         price = str(product.get("price") or (product.get("variants") and product.get("variants")[0].get("price")) or "0.00")
 
         details_grid = [dict(d) for d in template["details_grid"]] if template.get("details_grid") else None
@@ -4903,7 +4810,7 @@ class TemplateEngine:
             for idx, item in enumerate(details_grid[:4]):
                 item["img"] = hw_imgs[idx]
 
-        result_payload = {
+        return {
             "title": formatted_title,
             "formatted_title": formatted_title,
             "brand_name": brand_name,
@@ -4941,6 +4848,3 @@ class TemplateEngine:
             "specs": specs,
             "care_tips": template.get("care_tips", "Lavar com sabão neutro e secar à sombra.")
         }
-        if ld_extra_payload:
-            result_payload.update(ld_extra_payload)
-        return result_payload

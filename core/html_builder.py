@@ -36,8 +36,7 @@ def brk_tracking_marker(sku: str, archetype_id: str) -> str:
     """Comentario HTML invisivel de rastreio: <!-- BRK-MODO-B v1 | sku:X | molde:Y -->"""
     def clean(v):
         return re.sub(r"[^A-Za-z0-9_.\-]", "", str(v or ""))[:60].replace("--", "-")
-    prefix = "VTEX-MODO-B" if str(archetype_id or "").startswith("ld_") else "BRK-MODO-B"
-    return f"<!-- {prefix} v{MODO_B_VERSION} | sku:{clean(sku)} | molde:{clean(archetype_id)} -->"
+    return f"<!-- BRK-MODO-B v{MODO_B_VERSION} | sku:{clean(sku)} | molde:{clean(archetype_id)} -->"
 
 
 _TROCA = {"icon": "sparkle", "title": "Qualidade Oficial BRK", "sub": "Padrão 100% Garantido"}
@@ -191,55 +190,6 @@ QUICK_BADGES_BY_ARCHETYPE: Dict[str, List[Dict[str, str]]] = {
         {"icon": "care", "title": "Capa Colorida Laminada", "sub": "Papel Resistente"},
         {"icon": "box", "title": "Ideal para Presentear", "sub": "Para Todas as Idades"},
         {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Rastreamento Completo"},
-    ],
-    # --- Catálogo VTEX (Confeitaria, Bomboniere, Embalagens, Festas, Presentes e Papelaria) ---
-    "ld_confeitaria_ingredientes": [
-        {"icon": "sparkle", "title": "Padrão Confeitaria Pro", "sub": "Estabilidade & Rendimento"},
-        {"icon": "shield", "title": "Textura Homogênea", "sub": "Fácil Incorporação"},
-        {"icon": "box", "title": "Embalagem Lacrada", "sub": "Lote Fresco de Fábrica"},
-        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata"},
-    ],
-    "ld_confeitaria_formas_utensilios": [
-        {"icon": "shield", "title": "Padrão Profissional", "sub": "Acabamento de Precisão"},
-        {"icon": "bolt", "title": "Alta Estabilidade", "sub": "Padronização de Produção"},
-        {"icon": "sparkle", "title": "Apresentação Impecável", "sub": "Valoriza suas Receitas"},
-        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata"},
-    ],
-    "ld_bomboniere_chocolates": [
-        {"icon": "sparkle", "title": "Sabor & Cremosidade", "sub": "Marca Original Consagrada"},
-        {"icon": "box", "title": "Lote Fresco & Lacrado", "sub": "Conservação Garantida"},
-        {"icon": "bolt", "title": "Alto Giro Comercial", "sub": "Ideal p/ Festas e Revenda"},
-        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata"},
-    ],
-    "ld_bomboniere_balas_gomas": [
-        {"icon": "sparkle", "title": "Cores & Sabores Vivos", "sub": "Sucesso em Lembrancinhas"},
-        {"icon": "box", "title": "Pacote Econômico", "sub": "Alto Rendimento por Embalagem"},
-        {"icon": "shield", "title": "100% Original", "sub": "Procedência Direta da Marca"},
-        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata"},
-    ],
-    "ld_embalagens_descartaveis": [
-        {"icon": "shield", "title": "Estrutura Firme", "sub": "Transporte e Exposição Seguros"},
-        {"icon": "box", "title": "Praticidade & Higiene", "sub": "Ideal para Delivery e Eventos"},
-        {"icon": "sparkle", "title": "Acabamento Limpo", "sub": "Valoriza seu Produto"},
-        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata"},
-    ],
-    "ld_artigos_festa_decoracao": [
-        {"icon": "palette", "title": "Visual Vibrante", "sub": "Destaque na Decoração"},
-        {"icon": "sparkle", "title": "Acabamento Festivo", "sub": "Fácil Composição de Cenário"},
-        {"icon": "shield", "title": "Material Selecionado", "sub": "Durabilidade Durante o Evento"},
-        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata"},
-    ],
-    "ld_presentes_caixas_sacolas": [
-        {"icon": "box", "title": "Estrutura Reforçada", "sub": "Proteção e Elegância"},
-        {"icon": "sparkle", "title": "Pronta para Presentear", "sub": "Valoriza Cestas e Kits"},
-        {"icon": "palette", "title": "Acabamento Premium", "sub": "Apresentação Sofisticada"},
-        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata"},
-    ],
-    "ld_papelaria_artesanato": [
-        {"icon": "gear", "title": "Praticidade no Uso", "sub": "Rotina Escolar, Loja e Ateliê"},
-        {"icon": "shield", "title": "Qualidade Comprovada", "sub": "Desempenho Consistente"},
-        {"icon": "sparkle", "title": "Acabamento Preciso", "sub": "Ideal para Personalizados"},
-        {"icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata"},
     ],
 }
 
@@ -435,8 +385,6 @@ class HTMLBuilder:
         return self._render_quick_badges(theme_color, badges)
 
     def _build_size_guide(self, theme_color: str, archetype_id: str, is_kids: bool, is_short_sleeve: bool, enriched_data: Dict[str, Any]) -> str:
-        if str(archetype_id or "").startswith("ld_"):
-            return ""
         title_low = (enriched_data.get("formatted_title") or enriched_data.get("title") or "").lower()
         sku_low = (enriched_data.get("sku") or enriched_data.get("master_sku") or "").lower()
 
@@ -1000,13 +948,8 @@ class HTMLBuilder:
         import json
         import re
 
-        is_ld_schema = str(enriched_data.get("archetype_id") or "").startswith("ld_") or enriched_data.get("store_key") == "loja_doce"
-        default_title = "Produto Oficial" if is_ld_schema else "Produto BRK"
-        default_brand = "Linha Oficial" if is_ld_schema else "BRK"
-        formatted_title = enriched_data.get("formatted_title") or enriched_data.get("title", default_title)
-        brand_name = enriched_data.get("brand_name") or default_brand
-        if is_ld_schema and str(brand_name).upper() in ("BRK", "LOJA DOCE", "LOJA DOCE IMPORT"):
-            brand_name = "Linha Oficial"
+        formatted_title = enriched_data.get("formatted_title") or enriched_data.get("title", "Produto BRK")
+        brand_name = enriched_data.get("brand_name", "BRK")
         sku = str(enriched_data.get("sku") or enriched_data.get("master_sku") or enriched_data.get("id") or "")
         raw_price = str(enriched_data.get("price") or "0.00")
         clean_price = re.sub(r'[^\d,.]', '', raw_price).strip()
@@ -1023,8 +966,7 @@ class HTMLBuilder:
             if d:
                 clean_d = re.sub(r'<[^>]+>', ' ', d)
                 desc_parts.append(" ".join(clean_d.split()))
-        fallback_desc = f"{formatted_title} original com procedência garantida." if is_ld_schema else f"{formatted_title} oficial com qualidade e garantia BRK."
-        short_desc = " ".join(desc_parts)[:280] if desc_parts else fallback_desc
+        short_desc = " ".join(desc_parts)[:280] if desc_parts else f"{formatted_title} oficial com qualidade e garantia BRK."
 
         block_imgs = [b.get("image") for b in blocks if isinstance(b, dict) and b.get("image")]
         raw_imgs = block_imgs or enriched_data.get("images") or enriched_data.get("cdn_images") or enriched_data.get("gallery") or []
@@ -1817,31 +1759,6 @@ class HTMLBuilder:
                 "zoom_act3": False,
             }
 
-        if str(archetype_id or "").startswith("ld_"):
-            if idx == 0:
-                return {
-                    "view_tag": "APRESENTAÇÃO • ATO 01",
-                    "icon": "sparkle",
-                    "label": "Apresentação Comercial & Embalagem Original",
-                    "pill": "Curadoria Oficial",
-                    "zoom_act3": False,
-                }
-            if idx == 1:
-                return {
-                    "view_tag": "ESPECIFICAÇÃO • ATO 02",
-                    "icon": "bolt",
-                    "label": "Rendimento, Composição & Padrão Profissional",
-                    "pill": "Alto Desempenho",
-                    "zoom_act3": False,
-                }
-            return {
-                "view_tag": "APLICAÇÃO • ATO 03",
-                "icon": "shield",
-                "label": "Acabamento & Praticidade na Rotina",
-                "pill": "Procedência Original",
-                "zoom_act3": False,
-            }
-
         if idx == 0:
             if is_split:
                 return {
@@ -1992,388 +1909,6 @@ class HTMLBuilder:
             "zoom_act3": False,
         }
 
-    def _build_lojadoce_infographic_card(
-        self,
-        idx: int,
-        archetype_id: str,
-        theme_color: str,
-        theme_bg: str,
-        enriched_data: Dict[str, Any],
-        primary_img: str,
-        safe_title_alt: str,
-        ml_track_attrs: str,
-    ) -> str:
-        """
-        Gera o Card Visual Infográfico 100% HTML/CSS + SVG inline para Atos sem foto dedicada
-        no catálogo VTEX (eliminando blocos sem imagem e mantendo os 3 Atos com coluna visual).
-        - Ato 2 (idx == 1): Infográfico Técnico de Rendimento, Medidas & Parâmetros de Trabalho
-        - Ato 3 (idx == 2): Infográfico de Segurança Alimentar / ANVISA, Conservação & Procedência
-        """
-        yield_info = enriched_data.get("yield_info") if isinstance(enriched_data.get("yield_info"), dict) else {}
-        b2b_economics = enriched_data.get("b2b_economics") if isinstance(enriched_data.get("b2b_economics"), dict) else {}
-        allergen_info = enriched_data.get("allergen_info") if isinstance(enriched_data.get("allergen_info"), dict) else {}
-        vtex_specs = enriched_data.get("vtex_specifications") if isinstance(enriched_data.get("vtex_specifications"), dict) else {}
-        specs_list = enriched_data.get("specs") if isinstance(enriched_data.get("specs"), list) else []
-        specs_map = {str(s.get("label", "")).strip(): str(s.get("value", "")).strip() for s in specs_list if isinstance(s, dict)}
-
-        brand_name = str(
-            enriched_data.get("brand_name")
-            or vtex_specs.get("Marca")
-            or specs_map.get("Marca / Fabricante")
-            or "Original"
-        ).strip()
-        sku_code = str(
-            enriched_data.get("sku")
-            or enriched_data.get("master_sku")
-            or vtex_specs.get("Código de Referência (SKU)")
-            or vtex_specs.get("Código SKU")
-            or specs_map.get("Código de Referência (SKU)")
-            or specs_map.get("Código SKU")
-            or ""
-        ).strip()
-        care_tips = str(
-            enriched_data.get("care_tips")
-            or "Conservar na embalagem original fechada, em local seco, fresco e arejado, ao abrigo da luz solar direta."
-        ).strip()
-
-        peso_medida = (
-            vtex_specs.get("Peso Líquido / Volume")
-            or vtex_specs.get("Peso / Volume")
-            or vtex_specs.get("Dimensões / Medidas")
-            or specs_map.get("Peso Líquido / Volume")
-            or specs_map.get("Peso / Volume Líquido")
-            or specs_map.get("Dimensões / Medidas")
-            or "Padrão Oficial de Fábrica"
-        )
-        qtd_emb = (
-            vtex_specs.get("Apresentação / Quantidade")
-            or vtex_specs.get("Quantidade por Embalagem")
-            or specs_map.get("Apresentação / Quantidade")
-            or specs_map.get("Conteúdo da Embalagem")
-            or "Embalagem Comercial"
-        )
-        dim_summary = f"{peso_medida} • {qtd_emb}" if peso_medida != qtd_emb else peso_medida
-        pill_code = f"SKU {sku_code}" if sku_code else f"Marca {brand_name}"
-
-        if idx == 0:
-            cat_val = (
-                vtex_specs.get("Categoria VTEX")
-                or specs_map.get("Departamento / Linha")
-                or specs_map.get("Categoria Técnica")
-                or "Confeitaria, Festas & Embalagens"
-            )
-            uso_val = (
-                specs_map.get("Uso Recomendado")
-                or specs_map.get("Modo de Aplicação Técnica")
-                or vtex_specs.get("Uso Recomendado")
-                or "Pronto para uso profissional e doméstico com padrão de fábrica."
-            )
-            return f"""<div class="brk-desc-media brk-media-card brk-infographic-card">
-        <div class="brk-infog-header">
-          <span class="brk-infog-head-left">{get_svg_icon('sparkle', color=theme_color, size=14)} <span>APRESENTAÇÃO • FICHA COMERCIAL & ORIGEM</span></span>
-          <span class="brk-infog-head-pill">{pill_code}</span>
-        </div>
-        <div class="brk-infog-stage">
-          <div class="brk-infog-hero">
-            <div class="brk-infog-diagram">
-              <div class="brk-infog-svg-badge">
-                <svg width="38" height="38" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <rect x="6" y="8" width="36" height="32" rx="6" fill="{theme_bg}" stroke="{theme_color}" stroke-width="2.5"/>
-                  <path d="M14 18H34M14 25H28M14 32H22" stroke="{theme_color}" stroke-width="2.5" stroke-linecap="round"/>
-                </svg>
-              </div>
-              <div class="brk-infog-hero-copy">
-                <span class="brk-infog-kicker">IDENTIFICAÇÃO OFICIAL DO ITEM</span>
-                <strong class="brk-infog-headline">Marca {brand_name} • {peso_medida}</strong>
-                <span class="brk-infog-subline">{qtd_emb} • {pill_code}</span>
-              </div>
-            </div>
-          </div>
-          <div class="brk-infog-metrics">
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">{get_svg_icon('box', color=theme_color, size=13)}</span>
-                <span class="brk-infog-metric-label">Apresentação Comercial & Embalagem</span>
-              </div>
-              <div class="brk-infog-metric-val">{dim_summary}</div>
-            </div>
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">{get_svg_icon('sparkle', color=theme_color, size=13)}</span>
-                <span class="brk-infog-metric-label">Departamento & Linha Oficial</span>
-              </div>
-              <div class="brk-infog-metric-val">{cat_val}</div>
-            </div>
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">{get_svg_icon('check', color=theme_color, size=13)}</span>
-                <span class="brk-infog-metric-label">Aplicação & Indicação Principal</span>
-              </div>
-              <div class="brk-infog-metric-val">{uso_val}</div>
-            </div>
-          </div>
-        </div>
-        <div class="brk-media-infobar">
-          <span class="brk-media-info-left">{get_svg_icon('sparkle', color=theme_color, size=14)} <span>Apresentação Comercial & Embalagem Original</span></span>
-          <span class="brk-media-info-pill">Curadoria Oficial</span>
-        </div>
-      </div>"""
-
-        if idx == 1:
-            yield_val = (
-                yield_info.get("yield_estimate")
-                or yield_info.get("dimensional_equiv")
-                or vtex_specs.get("Rendimento Prático Estimado")
-                or vtex_specs.get("Rendimento Estimado")
-                or vtex_specs.get("Equivalência Dimensional / Capacidade")
-                or vtex_specs.get("Equivalência Dimensional")
-                or specs_map.get("Rendimento Prático Estimado")
-                or specs_map.get("Rendimento Estimado")
-                or specs_map.get("Equivalência Dimensional / Capacidade")
-                or specs_map.get("Equivalência Dimensional")
-                or yield_info.get("resumo_rendimento")
-                or "Dimensionamento otimizado para padronização de receitas, montagem e controle exato de custo por unidade produzida."
-            )
-            dim_equiv_extra = (
-                yield_info.get("dimensional_equiv")
-                or vtex_specs.get("Equivalência Dimensional / Capacidade")
-                or specs_map.get("Equivalência Dimensional / Capacidade")
-                or ""
-            )
-            if dim_equiv_extra and dim_equiv_extra != yield_val and dim_equiv_extra not in dim_summary:
-                supply_format_val = f"{dim_summary} ({dim_equiv_extra})"
-            else:
-                supply_format_val = dim_summary
-
-            hero_headline = peso_medida if peso_medida != "Padrão Oficial de Fábrica" else dim_summary
-            hero_subline = f"{qtd_emb} • Marca {brand_name}" if peso_medida != qtd_emb else f"Marca {brand_name} • Medição Padronizada"
-
-            tech_param_label = "Parâmetro Técnico de Aplicação"
-            tech_param_val = ""
-            for cand_lbl in (
-                "Classificação Técnica",
-                "Necessita Temperagem?",
-                "Modo de Aplicação Técnica",
-                "Tipo de Inflagem Recomendada",
-                "Inflagem / Aplicação",
-                "Estabilidade Térmica",
-                "Solubilidade / Base Técnica",
-                "Material Principal",
-                "Uso Recomendado",
-                "Sabor / Tonalidade",
-                "Sabor / Cor / Tonalidade",
-                "Categoria Técnica",
-                "Departamento / Linha",
-                "Categoria VTEX",
-            ):
-                if specs_map.get(cand_lbl):
-                    tech_param_label = cand_lbl
-                    tech_param_val = specs_map[cand_lbl]
-                    break
-            if not tech_param_val:
-                if yield_info.get("gas_and_arch"):
-                    tech_param_label = "Tipo de Inflagem Recomendada"
-                    tech_param_val = str(yield_info["gas_and_arch"])
-                else:
-                    for v_lbl in (
-                        "Modo de Aplicação Técnica",
-                        "Tipo de Inflagem Recomendada",
-                        "Inflagem / Aplicação",
-                        "Uso Recomendado",
-                        "Sabor / Cor / Tonalidade",
-                        "Sabor / Tonalidade",
-                        "Material",
-                        "Categoria VTEX",
-                    ):
-                        if vtex_specs.get(v_lbl):
-                            tech_param_label = v_lbl
-                            tech_param_val = str(vtex_specs[v_lbl])
-                            break
-            if not tech_param_val:
-                tech_param_val = "Desempenho calibrado para uso profissional e doméstico com alta estabilidade."
-
-            b2b_econ_val = (
-                b2b_economics.get("resumo_economia_b2b")
-                or b2b_economics.get("value")
-                or vtex_specs.get("Economia & Custo Unitário (B2B)")
-                or specs_map.get("Economia & Custo Unitário (B2B)")
-                or ""
-            )
-            b2b_metric_html = ""
-            if b2b_econ_val:
-                b2b_metric_html = f"""
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">{get_svg_icon('bolt', color=theme_color, size=13)}</span>
-                <span class="brk-infog-metric-label">Economia & Custo Unitário (B2B)</span>
-              </div>
-              <div class="brk-infog-metric-val">{b2b_econ_val}</div>
-            </div>"""
-
-            thumb_html = ""
-            if primary_img:
-                thumb_html = f"""
-            <div class="brk-infog-thumb brk-stage-loupe" {ml_track_attrs}>
-              <img src="{primary_img}" alt="{safe_title_alt} - Zoom de Especificação" class="brk-infog-crop-zoom" loading="lazy" referrerpolicy="no-referrer" />
-              <div class="brk-ml-zoom-layer" style="background-image: url('{primary_img}');"></div>
-              <span class="brk-infog-thumb-badge">Zoom 2.4x</span>
-            </div>"""
-
-            return f"""<div class="brk-desc-media brk-media-card brk-infographic-card">
-        <div class="brk-infog-header">
-          <span class="brk-infog-head-left">{get_svg_icon('ruler', color=theme_color, size=14)} <span>INFOGRÁFICO • RENDIMENTO & MEDIDAS</span></span>
-          <span class="brk-infog-head-pill">{pill_code}</span>
-        </div>
-        <div class="brk-infog-stage">
-          <div class="brk-infog-hero">{thumb_html}
-            <div class="brk-infog-diagram">
-              <div class="brk-infog-svg-badge">
-                <svg width="38" height="38" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <rect x="4" y="10" width="40" height="28" rx="6" fill="{theme_bg}" stroke="{theme_color}" stroke-width="2.5"/>
-                  <path d="M12 18V26M18 18V23M24 18V28M30 18V23M36 18V26" stroke="{theme_color}" stroke-width="2.5" stroke-linecap="round"/>
-                  <circle cx="24" cy="31" r="2.5" fill="{theme_color}"/>
-                </svg>
-              </div>
-              <div class="brk-infog-hero-copy">
-                <span class="brk-infog-kicker">ESPECIFICAÇÃO COMERCIAL</span>
-                <strong class="brk-infog-headline">{hero_headline}</strong>
-                <span class="brk-infog-subline">{hero_subline}</span>
-              </div>
-            </div>
-          </div>
-          <div class="brk-infog-metrics">
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">{get_svg_icon('ruler', color=theme_color, size=13)}</span>
-                <span class="brk-infog-metric-label">Rendimento & Equivalência Prática</span>
-              </div>
-              <div class="brk-infog-metric-val">{yield_val}</div>
-            </div>{b2b_metric_html}
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">{get_svg_icon('box', color=theme_color, size=13)}</span>
-                <span class="brk-infog-metric-label">Formato de Fornecimento & Medidas</span>
-              </div>
-              <div class="brk-infog-metric-val">{supply_format_val}</div>
-            </div>
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">{get_svg_icon('gear', color=theme_color, size=13)}</span>
-                <span class="brk-infog-metric-label">{tech_param_label}</span>
-              </div>
-              <div class="brk-infog-metric-val">{tech_param_val}</div>
-            </div>
-          </div>
-        </div>
-        <div class="brk-media-infobar">
-          <span class="brk-media-info-left">{get_svg_icon('ruler', color=theme_color, size=14)} <span>Infográfico de Rendimento & Dimensionamento</span></span>
-          <span class="brk-media-info-pill">Ficha Dimensional</span>
-        </div>
-      </div>"""
-
-        allergen_spec_keys = (
-            "Informação de Alergênicos (ANVISA)",
-            "Alerta de Alergênicos & Lactose (ANVISA)",
-            "Alerta de Alergênicos & Glúten (ANVISA)",
-            "Segurança Alimentar & Alergênicos (ANVISA)",
-            "Orientação de Alergênicos (ANVISA)",
-            "Segurança & Grau Alimentício",
-            "Segurança & Certificação",
-            "Segurança & Conformidade",
-            "Segurança & Material",
-        )
-        matched_allergen_key = ""
-        matched_allergen_val = ""
-        for a_key in allergen_spec_keys:
-            if specs_map.get(a_key):
-                matched_allergen_key = a_key
-                matched_allergen_val = specs_map[a_key]
-                break
-            if vtex_specs.get(a_key):
-                matched_allergen_key = a_key
-                matched_allergen_val = str(vtex_specs[a_key])
-                break
-
-        allergen_label = str(
-            allergen_info.get("label")
-            or matched_allergen_key
-            or "Orientação de Alergênicos & Segurança (ANVISA)"
-        ).strip()
-        allergen_val = str(
-            allergen_info.get("value")
-            or allergen_info.get("alerta_alergenicos")
-            or matched_allergen_val
-            or "Consulte sempre a listagem oficial de ingredientes, tabela nutricional e alérgenos impressa pelo fabricante no rótulo da embalagem original."
-        ).strip()
-        is_anvisa_food = (
-            "anvisa" in allergen_label.lower()
-            or "alerg" in allergen_label.lower()
-            or archetype_id in ("ld_chocolates_coberturas", "ld_confeitaria_ingredientes")
-        )
-        seal_kicker = "CONFORMIDADE REGULATÓRIA • RDC 26/2015" if is_anvisa_food else "CONFORMIDADE TÉCNICA • USO SEGURO"
-        seal_headline = "Padrão ANVISA & Rotulagem Oficial" if is_anvisa_food else "Grau Alimentício & Atóxico Certificado"
-        seal_pill = "Padrão ANVISA" if is_anvisa_food else "Grau Alimentício"
-
-        thumb_html_act3 = ""
-        if primary_img:
-            thumb_html_act3 = f"""
-            <div class="brk-infog-thumb brk-stage-loupe" {ml_track_attrs}>
-              <img src="{primary_img}" alt="{safe_title_alt} - Inspeção de Embalagem e Lote" class="brk-infog-crop-macro" loading="lazy" referrerpolicy="no-referrer" />
-              <div class="brk-ml-zoom-layer" style="background-image: url('{primary_img}');"></div>
-              <span class="brk-infog-thumb-badge">Inspeção 2.4x</span>
-            </div>"""
-
-        return f"""<div class="brk-desc-media brk-media-card brk-infographic-card">
-        <div class="brk-infog-header">
-          <span class="brk-infog-head-left">{get_svg_icon('shield', color=theme_color, size=14)} <span>SEGURANÇA, CONSERVAÇÃO & PROCEDÊNCIA</span></span>
-          <span class="brk-infog-head-pill">{seal_pill}</span>
-        </div>
-        <div class="brk-infog-stage">
-          <div class="brk-infog-hero">{thumb_html_act3}
-            <div class="brk-infog-diagram">
-              <div class="brk-infog-svg-badge">
-                <svg width="38" height="38" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M24 4L40 11V23C40 33.4 33.1 41.9 24 45C14.9 41.9 8 33.4 8 23V11L24 4Z" fill="{theme_bg}" stroke="{theme_color}" stroke-width="2.5" stroke-linejoin="round"/>
-                  <path d="M17.5 24.5L22 29L31 19.5" stroke="{theme_color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </div>
-              <div class="brk-infog-hero-copy">
-                <span class="brk-infog-kicker">{seal_kicker}</span>
-                <strong class="brk-infog-headline">{seal_headline}</strong>
-                <span class="brk-infog-subline">Marca {brand_name} • Lote Original Lacrado</span>
-              </div>
-            </div>
-          </div>
-          <div class="brk-infog-metrics">
-            <div class="brk-infog-metric-card brk-infog-metric-alert">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">{get_svg_icon('shield', color='#b45309', size=13)}</span>
-                <span class="brk-infog-metric-label">{allergen_label}</span>
-              </div>
-              <div class="brk-infog-metric-val">{allergen_val}</div>
-            </div>
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">{get_svg_icon('care', color=theme_color, size=13)}</span>
-                <span class="brk-infog-metric-label">Protocolo de Conservação & Armazenamento</span>
-              </div>
-              <div class="brk-infog-metric-val">{care_tips}</div>
-            </div>
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">{get_svg_icon('check', color=theme_color, size=13)}</span>
-                <span class="brk-infog-metric-label">Garantia de Procedência & Integridade</span>
-              </div>
-              <div class="brk-infog-metric-val">Fornecido em embalagem primária original {brand_name}, lacrada de fábrica com identificação visível de lote e validade.</div>
-            </div>
-          </div>
-        </div>
-        <div class="brk-media-infobar">
-          <span class="brk-media-info-left">{get_svg_icon('shield', color=theme_color, size=14)} <span>Conformidade ANVISA & Protocolo de Conservação</span></span>
-          <span class="brk-media-info-pill">Procedência Original</span>
-        </div>
-      </div>"""
-
     def build_shopify_html(self, enriched_data: Dict[str, Any]) -> str:
         """
         Compila a descrição em HTML no padrão verticalizado BRK, 100% autônomo com SVGs inline estilo Font Awesome.
@@ -2419,13 +1954,7 @@ class HTMLBuilder:
                 blocks = acts
 
         specs = enriched_data.get("specs", [])
-        is_ld_arch_care = str(archetype_id or "").startswith("ld_") or enriched_data.get("store_key") == "loja_doce"
-        default_care_tips = (
-            "Conservar na embalagem original fechada, em local seco, fresco e arejado, ao abrigo da luz solar direta."
-            if is_ld_arch_care
-            else "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar)."
-        )
-        care_tips = enriched_data.get("care_tips") or default_care_tips
+        care_tips = enriched_data.get("care_tips", "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar).")
 
         # Trava Estrita Anti-Zíper para Linhas Fusion, Hybrid, Gola Careca e Camisas de Botão
         t_low = (formatted_title or "").lower()
@@ -2488,12 +2017,6 @@ class HTMLBuilder:
         raw_uid = str(enriched_data.get("id") or enriched_data.get("sku") or enriched_data.get("master_sku") or "brk")
         uid_base = re.sub(r"[^A-Za-z0-9]", "", raw_uid)[:16] or "brk"
         is_shirt_arch_main = archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work")
-        is_ld_arch_main = str(archetype_id or "").startswith("ld_") or enriched_data.get("store_key") == "loja_doce"
-        primary_ld_img = (
-            (blocks[0].get("image") if len(blocks) > 0 and isinstance(blocks[0], dict) else "")
-            or ((enriched_data.get("images") or [""])[0] if isinstance(enriched_data.get("images"), list) and enriched_data.get("images") else "")
-            or str(enriched_data.get("image") or "")
-        )
         act2_img_candidate = (blocks[1].get("image") if len(blocks) > 1 and isinstance(blocks[1], dict) else "") or ""
         ml_track_attrs = (
             'onmousemove="var r=this.getBoundingClientRect(),'
@@ -2604,17 +2127,6 @@ class HTMLBuilder:
           <span class="brk-media-info-pill">{info_meta['pill']}</span>
         </div>
       </div>"""
-            elif is_ld_arch_main:
-                media_html = self._build_lojadoce_infographic_card(
-                    idx=idx,
-                    archetype_id=archetype_id,
-                    theme_color=theme_color,
-                    theme_bg=theme_bg,
-                    enriched_data=enriched_data,
-                    primary_img=primary_ld_img,
-                    safe_title_alt=safe_title_alt,
-                    ml_track_attrs=ml_track_attrs,
-                )
             else:
                 media_html = ""
 
@@ -2687,9 +2199,6 @@ class HTMLBuilder:
   </div>"""
 
         # 5. Template Completo Encapsulado (100% Autônomo e sem Font Awesome)
-        is_ld_arch = str(archetype_id or "").startswith("ld_")
-        trust_left_title = "Procedência 100% Original" if is_ld_arch else "Qualidade Oficial BRK"
-        trust_left_desc = f"Curadoria Oficial • Marca {brand_name}" if is_ld_arch else "Matérias-primas nobres testadas"
         full_html = f"""{brk_tracking_marker(enriched_data.get("sku") or enriched_data.get("master_sku") or enriched_data.get("id"), archetype_id)}
 <!-- BRK GROUP - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL SHOPIFY) -->
 <div class="brk-desc-wrapper">
@@ -3076,199 +2585,6 @@ class HTMLBuilder:
       max-height: 380px;
     }}
 
-    /* Card Visual Infográfico Autônomo (Rendimento, Medidas & Segurança ANVISA) */
-    .brk-infographic-card {{
-      display: flex;
-      flex-direction: column;
-      background: #ffffff;
-    }}
-    .brk-infog-header {{
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding: 10px 14px;
-      background: {theme_bg};
-      border-bottom: 1px solid {theme_color}28;
-    }}
-    .brk-infog-head-left {{
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 10.5px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      color: #0f172a;
-      min-width: 0;
-    }}
-    .brk-infog-head-left span {{
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }}
-    .brk-infog-head-pill {{
-      flex-shrink: 0;
-      font-size: 10px;
-      font-weight: 800;
-      color: {theme_color};
-      background: #ffffff;
-      border: 1px solid {theme_color}38;
-      padding: 2px 8px;
-      border-radius: 9999px;
-      text-transform: uppercase;
-    }}
-    .brk-infog-stage {{
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-    }}
-    .brk-infog-hero {{
-      display: flex;
-      align-items: stretch;
-      gap: 12px;
-    }}
-    .brk-infog-thumb {{
-      position: relative;
-      width: 112px;
-      min-height: 104px;
-      flex-shrink: 0;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 4px;
-    }}
-    .brk-infog-thumb img {{
-      width: 100%;
-      height: 96px;
-      object-fit: contain;
-      border-radius: 8px;
-      transition: transform 0.3s ease;
-    }}
-    .brk-infog-thumb img.brk-infog-crop-zoom {{
-      transform: scale(1.22);
-      transform-origin: 50% 45%;
-    }}
-    .brk-infog-thumb img.brk-infog-crop-macro {{
-      transform: scale(1.28);
-      transform-origin: 50% 60%;
-    }}
-    .brk-infog-thumb-badge {{
-      position: absolute;
-      bottom: 5px;
-      right: 5px;
-      z-index: 3;
-      background: rgba(15, 23, 42, 0.82);
-      color: #ffffff;
-      font-size: 9px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 9999px;
-      pointer-events: none;
-    }}
-    .brk-infog-diagram {{
-      flex: 1;
-      min-width: 0;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 10px 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
-    }}
-    .brk-infog-svg-badge {{
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      background: {theme_bg};
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }}
-    .brk-infog-hero-copy {{
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      gap: 2px;
-    }}
-    .brk-infog-kicker {{
-      font-size: 9.5px;
-      font-weight: 800;
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
-      color: {theme_color};
-    }}
-    .brk-infog-headline {{
-      font-size: 13px;
-      font-weight: 800;
-      color: #0f172a;
-      line-height: 1.25;
-    }}
-    .brk-infog-subline {{
-      font-size: 11px;
-      color: #64748b;
-      line-height: 1.25;
-    }}
-    .brk-infog-metrics {{
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }}
-    .brk-infog-metric-card {{
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-left: 3px solid {theme_color};
-      border-radius: 10px;
-      padding: 9px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }}
-    .brk-infog-metric-card.brk-infog-metric-alert {{
-      background: #fffbeb;
-      border-color: #fde68a;
-      border-left: 3px solid #d97706;
-    }}
-    .brk-infog-metric-top {{
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }}
-    .brk-infog-metric-icon {{
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }}
-    .brk-infog-metric-label {{
-      font-size: 10.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      color: #334155;
-    }}
-    .brk-infog-metric-card.brk-infog-metric-alert .brk-infog-metric-label {{
-      color: #92400e;
-    }}
-    .brk-infog-metric-val {{
-      font-size: 12px;
-      line-height: 1.45;
-      color: #1e293b;
-      font-weight: 600;
-    }}
-    .brk-infog-metric-card.brk-infog-metric-alert .brk-infog-metric-val {{
-      color: #78350f;
-    }}
-
     .brk-desc-text {{
       flex: 1.15;
       min-width: 0;
@@ -3585,17 +2901,6 @@ class HTMLBuilder:
         flex-direction: row;
         gap: 8px;
       }}
-      .brk-infog-hero {{
-        flex-direction: column;
-        gap: 8px;
-      }}
-      .brk-infog-thumb {{
-        width: 100%;
-        min-height: 120px;
-      }}
-      .brk-infog-thumb img {{
-        height: 110px;
-      }}
       .brk-media-infobar {{
         padding: 8px 10px;
         font-size: 10.5px;
@@ -3673,8 +2978,8 @@ class HTMLBuilder:
     <div class="brk-trust-item">
       <span class="brk-trust-svg">{get_svg_icon('shield', color=theme_color, size=24)}</span>
       <div>
-        <div class="brk-trust-title">{trust_left_title}</div>
-        <div class="brk-trust-desc">{trust_left_desc}</div>
+        <div class="brk-trust-title">Qualidade Oficial BRK</div>
+        <div class="brk-trust-desc">Matérias-primas nobres testadas</div>
       </div>
     </div>
     <div class="brk-trust-item">
@@ -3692,33 +2997,13 @@ class HTMLBuilder:
 
 {schema_json_ld}
 """
-        if is_ld_arch or enriched_data.get("store_key") == "loja_doce":
-            full_html = full_html.replace(
-                "<!-- BRK GROUP - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL SHOPIFY) -->",
-                "<!-- DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL VTEX) -->",
-            )
-            full_html = full_html.replace(
-                "/* Rodapé de Confiança e Garantia BRK */",
-                "/* Rodapé de Confiança e Procedência Oficial */",
-            )
-            full_html = full_html.replace(
-                "<!-- Selos de Confiança e Garantia BRK -->",
-                "<!-- Selos de Confiança e Procedência Oficial -->",
-            )
-            full_html = re.sub(
-                r"\s*\.brk-desc-block\.brk-desc-block-text-only\s*\{[^}]*\}",
-                "",
-                full_html,
-            )
-            full_html = full_html.replace("brk-", "vtex-").replace("brk360_", "vtex360_")
         return full_html.strip()
 
     def build_shopify_markdown(self, enriched_data: Dict[str, Any]) -> str:
         """
         Compila a descrição em Markdown limpo, sem tags HTML externas e sem Font Awesome.
         """
-        is_ld_md = str(enriched_data.get("archetype_id") or "").startswith("ld_") or enriched_data.get("store_key") == "loja_doce"
-        formatted_title = enriched_data.get("formatted_title") or enriched_data.get("title", "Produto Oficial" if is_ld_md else "Produto BRK")
+        formatted_title = enriched_data.get("formatted_title") or enriched_data.get("title", "Produto BRK")
         show_copyright = enriched_data.get("show_copyright", False)
         has_multiple_variations = enriched_data.get("has_multiple_variations", False)
         split_images = enriched_data.get("split_images")
@@ -3733,12 +3018,7 @@ class HTMLBuilder:
                 blocks = acts
 
         specs = enriched_data.get("specs", [])
-        default_md_care = (
-            "Conservar na embalagem original fechada, em local seco, fresco e arejado, ao abrigo da luz solar direta."
-            if is_ld_md
-            else "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar)."
-        )
-        care_tips = enriched_data.get("care_tips") or default_md_care
+        care_tips = enriched_data.get("care_tips", "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar).")
 
         md_parts = []
         md_parts.append(f"# {formatted_title}\n")
@@ -3777,7 +3057,7 @@ class HTMLBuilder:
         title_low = (formatted_title or "").lower()
 
         # Tabela de medidas inteligente em Markdown
-        if is_kids and not is_ld_md:
+        if is_kids:
             md_parts.append("### 📐 Guia de Tamanhos Infantil (1 a 13 Anos | PP ao G2)\n")
             md_parts.append("| Idade / Tamanho | Tórax | Altura | Manga |")
             md_parts.append("| :--- | :--- | :--- | :--- |")
@@ -3793,7 +3073,7 @@ class HTMLBuilder:
             for r in k_rows:
                 md_parts.append(f"| **{r[0]}** | {r[1]} | {r[2]} | {r[3]} |")
             md_parts.append("\n*Medidas tiradas com a peça plana em cm. Em dúvida entre dois tamanhos, escolha o maior.*\n")
-        elif not is_ld_md and (archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work") or any(w in title_low for w in ["camisa", "camiseta", "jersey", "baby look"])):
+        elif archetype_id in ("uv_performance", "agro_field", "motors_speed", "shirts_button_work") or any(w in title_low for w in ["camisa", "camiseta", "jersey", "baby look"]):
             md_parts.append("### 📐 Tabela de Medidas Adulto (P ao EXG)\n")
             m_header = "Manga Curta" if is_short_sleeve else "Manga Longa"
             md_parts.append(f"| Tamanho | Tórax / Peito | Comprimento | {m_header} |")
@@ -3811,7 +3091,7 @@ class HTMLBuilder:
             for r in a_rows:
                 md_parts.append(f"| **{r[0]}** | {r[1]} | {r[2]} | {r[3]} |")
             md_parts.append("\n*Medidas tiradas com a peça plana em cm. Em dúvida entre dois tamanhos, escolha o maior.*\n")
-        elif not is_ld_md and (archetype_id in ("pants_cargo_tactical", "overalls_workwear") or any(w in title_low for w in ["calça", "calca", "bermuda", "shorts"])):
+        elif archetype_id in ("pants_cargo_tactical", "overalls_workwear") or any(w in title_low for w in ["calça", "calca", "bermuda", "shorts"]):
             md_parts.append("### 📐 Tabela de Medidas - Calças & Bermudas (38 ao 52)\n")
             md_parts.append("| Tamanho | Cintura | Quadril | Comprimento |")
             md_parts.append("| :--- | :--- | :--- | :--- |")
@@ -3828,7 +3108,7 @@ class HTMLBuilder:
             for r in p_rows:
                 md_parts.append(f"| **{r[0]}** | {r[1]} | {r[2]} | {r[3]} |")
             md_parts.append("\n*Medidas tiradas com a peça plana em cm.*\n")
-        elif not is_ld_md and (archetype_id in ("footwear_sandals_boaonda", "closed_footwear_sneakers") or any(w in title_low for w in ["sandália", "sandalia", "babuche", "chinelo"])):
+        elif archetype_id in ("footwear_sandals_boaonda", "closed_footwear_sneakers") or any(w in title_low for w in ["sandália", "sandalia", "babuche", "chinelo"]):
             md_parts.append("### 📐 Guia de Tamanhos de Calçados (Palmilha)\n")
             md_parts.append("| Numeração BR | Palmilha (cm) |")
             md_parts.append("| :--- | :--- |")
@@ -3846,16 +3126,10 @@ class HTMLBuilder:
         md_parts.append(f"{care_tips}\n")
 
         md_parts.append("---")
-        if is_ld_md:
-            b_md = enriched_data.get("brand_name") or "Linha Oficial"
-            if str(b_md).upper() in ("BRK", "LOJA DOCE", "LOJA DOCE IMPORT"):
-                b_md = "Linha Oficial"
-            md_parts.append(f"- 🛡️ **Procedência 100% Original:** Curadoria Oficial • Marca {b_md}")
-        else:
-            md_parts.append("- 🛡️ **Qualidade Oficial BRK:** Matérias-primas nobres testadas")
+        md_parts.append("- 🛡️ **Qualidade Oficial BRK:** Matérias-primas nobres testadas")
         md_parts.append("- 🚚 **Envio Rápido & Seguro:** Rastreamento de ponta a ponta")
 
-        if show_copyright and not is_ld_md:
+        if show_copyright:
             md_parts.append("\n> **Aviso de Propriedade Intelectual:** Nossas estampas são protegidas pela Lei de Direitos Autorais (Lei 9.610/98) a Reprodução não autorizada está sujeita às penalidades legais. Copiar é crime !\n")
 
         return "\n".join(md_parts).strip()

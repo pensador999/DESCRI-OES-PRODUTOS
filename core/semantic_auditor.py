@@ -43,10 +43,6 @@ NON_TEXTILE = {
     "drinkware_thermo", "accessories_car_care", "accessories_general",
     "books_publications", "eyewear_sunglasses",
     "footwear_sandals_boaonda", "closed_footwear_sneakers",
-    "ld_confeitaria_ingredientes", "ld_confeitaria_formas_utensilios",
-    "ld_bomboniere_chocolates", "ld_bomboniere_balas_gomas",
-    "ld_embalagens_descartaveis", "ld_artigos_festa_decoracao",
-    "ld_presentes_caixas_sacolas", "ld_papelaria_artesanato",
 }
 
 TEXTILE_RE = re.compile(
@@ -62,7 +58,7 @@ UPPER_BODY_RE = re.compile(r"\bmangas?\b|\bgola\b|colarinho", re.IGNORECASE)
 ZIPPER_RE = re.compile(r"z[ií]per", re.IGNORECASE)
 NEGATED_ZIPPER_RE = re.compile(r"sem\s+z[ií]per(?:es)?", re.IGNORECASE)
 ROD_RE = re.compile(r"\bvaras?\b", re.IGNORECASE)
-BADGE_TITLE_RE = re.compile(r'(?:brk|vtex)-badge-title">([^<]+)<')
+BADGE_TITLE_RE = re.compile(r'brk-badge-title">([^<]+)<')
 
 GENERIC_BADGE_TITLES = {"Qualidade Oficial", "Acabamento Premium", "Envio Rápido & Seguro", "Garantia Oficial BRK"}
 
@@ -98,9 +94,8 @@ def _first(regex: "re.Pattern", text: str) -> Optional[str]:
 
 
 def _rule_textile_in_non_textile(arch: str, title: str, body: str) -> Optional[str]:
-    if arch == "accessories_general" or str(arch or "").startswith("ld_"):
-        # camping/chaveiros e produtos Loja Doce (ex: capa vampiro c/ gola, porta níquel poliéster, saco confeitar algodão)
-        # só acusam o que é inequivocamente de camisa técnica (Dry Fit, FPU 50, pesponto, manga longa/curta, quick dry)
+    if arch == "accessories_general":
+        # camping/chaveiros podem ter poliéster ou zíper (barraca): só acusa o que é inequivocamente de camisa
         return _first(TEXTILE_STRICT_RE, body)
     if arch in NON_TEXTILE:
         return _first(TEXTILE_RE, body)
@@ -120,7 +115,7 @@ def _rule_dryfit_in_cotton_shirt(arch: str, title: str, body: str) -> Optional[s
 
 
 def _rule_size_guide_in_non_wearable(arch: str, title: str, body: str) -> Optional[str]:
-    if arch not in SIZE_GUIDE_OK and ('<details class="brk-size-guide"' in body or '<details class="vtex-size-guide"' in body):
+    if arch not in SIZE_GUIDE_OK and '<details class="brk-size-guide"' in body:
         return "tabela de medidas <details class=brk-size-guide>"
     return None
 
@@ -166,17 +161,9 @@ def _rule_hand_glove_slot_and_caption(arch: str, title: str, body: str) -> Optio
                 return f"Foto humanizada de mãos/luva posicionada em {slot_name}: {u.split('/')[-1].split('?')[0]}"
     act3_urls = url_re.findall(act3_html)
     if any(TemplateEngine._is_hand_glove_photo(u) for u in act3_urls):
-        m_info = re.search(r'(?:brk|vtex)-media-info-left">.*?<span>([^<]+)</span>', act3_html, re.S)
+        m_info = re.search(r'brk-media-info-left">.*?<span>([^<]+)</span>', act3_html, re.S)
         if m_info and "gola" in m_info.group(1).lower():
             return f"Infobar do Ato 03 menciona 'Gola' em foto exclusiva de mãos/dedeira: {m_info.group(1)}"
-    return None
-
-
-def _rule_no_brk_or_store_name_in_lojadoce(arch: str, title: str, body: str) -> Optional[str]:
-    if str(arch or "").startswith("ld_"):
-        m = re.search(r"\b(?:brk|loja\s+doce)\b", body, re.IGNORECASE)
-        if m:
-            return f"Menção proibida em ambiente isolado VTEX: {m.group(0)}"
     return None
 
 
@@ -209,9 +196,6 @@ RULES: List[Dict[str, Any]] = [
     {"id": "foto_mao_dedeira_em_slot_ou_legenda_errada", "severity": "ERROR",
      "desc": "Foto humanizada de mãos/dedeira no Ato 01/02 ou com legenda mencionando Gola no Ato 03",
      "check": _rule_hand_glove_slot_and_caption},
-    {"id": "vazamento_brk_ou_nome_loja_em_vtex", "severity": "ERROR",
-     "desc": "Mencao a BRK ou ao nome da loja no HTML de produto do ambiente isolado VTEX",
-     "check": _rule_no_brk_or_store_name_in_lojadoce},
 ]
 
 
@@ -233,8 +217,7 @@ class SemanticAuditor:
         vendor = prod.get("vendor", "")
         sku_code = prod.get("master_sku") or prod.get("sku") or (prod.get("variants_skus") and prod.get("variants_skus")[0]) or ""
         arch = self.engine.detect_archetype(
-            title, str(prod.get("product_type", "")), str(prod.get("tags", "")),
-            vendor=vendor, sku=sku_code, store_key=store_key
+            title, str(prod.get("product_type", "")), str(prod.get("tags", "")), vendor=vendor, sku=sku_code
         ) or prod.get("archetype_id")
         raw_imgs = prod.get("cdn_images") or prod.get("gallery") or [
             (i.get("src", i) if isinstance(i, dict) else i) for i in prod.get("images", [])

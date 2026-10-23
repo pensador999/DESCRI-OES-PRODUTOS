@@ -79,17 +79,6 @@ STORES: Dict[str, Dict[str, Any]] = {
         "output_dir": "reports/brk_motors",
         "theme_color": "#dc2626"
     },
-    "loja_doce": {
-        "id": "loja_doce",
-        "name": "Loja Doce (VTEX)",
-        "platform": "vtex",
-        "domain": "www.lojadoce.com.br",
-        "base_url": "https://www.lojadoce.com.br",
-        "products_endpoint": "https://www.lojadoce.com.br/api/catalog_system/pub/products/search",
-        "category_focus": "confeitaria_festas_embalagens",
-        "output_dir": "reports/loja_doce",
-        "theme_color": "#db2777"
-    },
     # Alias de compatibilidade
     "brk": {
         "id": "brk_fishing",

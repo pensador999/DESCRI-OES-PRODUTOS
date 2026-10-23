@@ -100,11 +100,6 @@ const LiveAgent = (() => {
   async function refresh(force) {
     if (busy) return;
     const storeKey = currentStore;
-    if (storeKey === "loja_doce") {
-      setStatus("🍬 Catálogo Oficial VTEX • 400 auditados (8.559 SKUs c/ estoque ativo • 10.269 esgotados • 18.828 publicados na VTEX) • ⚠️ 57 sem descrição real (Eco ERP) • ✅ 343 com descrição", "ok");
-      if (force && typeof showToast === "function") showToast("🍬 Catálogo Oficial VTEX: 400 produtos auditados (57 sem descrição/Eco ERP + 343 com descrição).");
-      return;
-    }
     busy = true;
     const btn = el("btn-live-agent");
     if (btn) { btn.disabled = true; btn.classList.add("opacity-60"); }

@@ -35,9 +35,6 @@ function showToast(text) {
 
 // Navegação entre Abas Principais
 function switchMainTab(tabId) {
-  if (tabId === "tab-casestudy" && currentSessionMode !== "loja_doce" && currentStore !== "loja_doce") {
-    tabId = "tab-catalog";
-  }
   currentActiveTab = tabId;
   document.querySelectorAll(".main-tab").forEach(tab => {
     tab.classList.remove("active", "bg-slate-800", "text-white");
@@ -50,41 +47,23 @@ function switchMainTab(tabId) {
     activeBtn.classList.remove("text-slate-400");
   }
 
-  const secCatalog = document.getElementById("section-catalog");
-  const secMass = document.getElementById("section-mass");
-  const secMoldes = document.getElementById("section-moldes");
-  const secAnalytics = document.getElementById("section-analytics");
-  const secCaseStudy = document.getElementById("section-casestudy");
-
-  if (secCatalog) secCatalog.classList.add("hidden");
-  if (secMass) secMass.classList.add("hidden");
-  if (secMoldes) secMoldes.classList.add("hidden");
-  if (secAnalytics) secAnalytics.classList.add("hidden");
-  if (secCaseStudy) {
-    secCaseStudy.classList.add("hidden");
-    secCaseStudy.style.display = "none";
-  }
+  document.getElementById("section-catalog").classList.add("hidden");
+  document.getElementById("section-mass").classList.add("hidden");
+  document.getElementById("section-moldes").classList.add("hidden");
+  document.getElementById("section-analytics").classList.add("hidden");
 
   if (tabId === "tab-catalog") {
-    if (secCatalog) secCatalog.classList.remove("hidden");
+    document.getElementById("section-catalog").classList.remove("hidden");
     renderProducts();
   } else if (tabId === "tab-mass") {
-    if (secMass) secMass.classList.remove("hidden");
+    document.getElementById("section-mass").classList.remove("hidden");
     renderMassTable();
   } else if (tabId === "tab-moldes") {
-    if (secMoldes) secMoldes.classList.remove("hidden");
+    document.getElementById("section-moldes").classList.remove("hidden");
     renderMoldesCards();
   } else if (tabId === "tab-analytics") {
-    if (secAnalytics) secAnalytics.classList.remove("hidden");
+    document.getElementById("section-analytics").classList.remove("hidden");
     renderAnalyticsView();
-  } else if (tabId === "tab-casestudy") {
-    if (secCaseStudy) {
-      secCaseStudy.classList.remove("hidden");
-      secCaseStudy.style.display = "";
-    }
-    if (typeof renderCaseStudyView === "function") {
-      renderCaseStudyView();
-    }
   }
 }
 
@@ -92,15 +71,13 @@ function switchMainTab(tabId) {
 const STORE_DOMAINS = {
   "brk_fishing": "www.brkfishing.com.br",
   "brk_agro": "www.brkagro.com.br",
-  "brk_motors": "www.brkmotors.com.br",
-  "loja_doce": "catalogo.vtex.oficial"
+  "brk_motors": "www.brkmotors.com.br"
 };
 
 const STORE_COLOR_PALETTES = {
   "brk_fishing": { color: "#0284c7", bg: "#f0f9ff", name: "Azul Leve" },
   "brk_agro":    { color: "#16a34a", bg: "#f0fdf4", name: "Verde Leve" },
-  "brk_motors":  { color: "#f97316", bg: "#fff7ed", name: "Laranja Leve" },
-  "loja_doce":   { color: "#db2777", bg: "#fdf2f8", name: "Rosa Confeitaria" }
+  "brk_motors":  { color: "#f97316", bg: "#fff7ed", name: "Laranja Leve" }
 };
 
 let liveSyncIntervalSecs = 15;
@@ -167,12 +144,6 @@ async function performLiveSync(isManual = false) {
   if (syncIcon) syncIcon.classList.add("animate-spin");
 
   const storeKey = currentStore;
-  if (storeKey === "loja_doce") {
-    isSyncingNow = false;
-    if (syncIcon) syncIcon.classList.remove("animate-spin");
-    if (isManual) showToast("🍬 Catálogo Oficial VTEX: 400 produtos sincronizados e verticalizados da API Intelligent Search VTEX.");
-    return;
-  }
   const domain = STORE_DOMAINS[storeKey] || "www.brkfishing.com.br";
   const fetchUrl = `https://${domain}/products.json?limit=30&t=${Date.now()}`;
 
@@ -326,37 +297,9 @@ function detectClientArchetype(title, category, tags, sku = "") {
   return { id: "uv_performance", name: "Camisas UV50+ Performance & Pesca" };
 }
 
-function classifyClientStoreCategory(title, archId, storeKey, categoryPath) {
+function classifyClientStoreCategory(title, archId, storeKey) {
   const t = (title || "").toLowerCase();
   const s = (storeKey || "brk_fishing").toLowerCase();
-  const cPath = (categoryPath || "").toLowerCase();
-
-  if (s === "loja_doce" || String(archId || "").startsWith("ld_")) {
-    const officialVtexCats = [
-      "Confeitaria & Panificação",
-      "Bomboniere, Chocolates & Doces",
-      "Embalagens & Descartáveis",
-      "Artigos para Festas & Balões",
-      "Presentes, Caixas MDF & Sacolas",
-      "Papelaria & Artesanato",
-      "Sazonais, Halloween & Natal"
-    ];
-    if (officialVtexCats.includes(categoryPath)) return categoryPath;
-    if (cPath.includes("/halloween") || cPath.includes("/fim de ano") || cPath.includes("/sazonais") || cPath.includes("/natal")) return "Sazonais, Halloween & Natal";
-    if (cPath.includes("/confeitaria")) return "Confeitaria & Panificação";
-    if (cPath.includes("/bomboniere")) return "Bomboniere, Chocolates & Doces";
-    if (cPath.includes("/embalagens")) return "Embalagens & Descartáveis";
-    if (cPath.includes("/artigos para festas")) return "Artigos para Festas & Balões";
-    if (cPath.includes("/presentes")) return "Presentes, Caixas MDF & Sacolas";
-    if (cPath.includes("/papelaria")) return "Papelaria & Artesanato";
-    if (["ld_confeitaria_ingredientes", "ld_confeitaria_formas_utensilios"].includes(archId)) return "Confeitaria & Panificação";
-    if (["ld_bomboniere_chocolates", "ld_bomboniere_balas_gomas"].includes(archId)) return "Bomboniere, Chocolates & Doces";
-    if (archId === "ld_embalagens_descartaveis") return "Embalagens & Descartáveis";
-    if (archId === "ld_artigos_festa_decoracao") return "Artigos para Festas & Balões";
-    if (archId === "ld_presentes_caixas_sacolas") return "Presentes, Caixas MDF & Sacolas";
-    if (archId === "ld_papelaria_artesanato") return "Papelaria & Artesanato";
-    return "Confeitaria & Panificação";
-  }
 
   if (s === "brk_agro") {
     if (["uv_performance", "agro_field", "motors_speed", "shirts_button_work"].includes(archId)) return "Camisas Agro & Campo";
@@ -457,153 +400,8 @@ function createEnrichedFromLiveProduct(liveP, storeKey) {
   };
 }
 
-let currentSessionMode = "brk"; // "brk" | "loja_doce"
-
-function applySessionIsolation(mode) {
-  currentSessionMode = (mode === "loja_doce") ? "loja_doce" : "brk";
-  const isLD = (currentSessionMode === "loja_doce");
-
-  const pillFishing = document.getElementById("pill-store-fishing");
-  const pillAgro = document.getElementById("pill-store-agro");
-  const pillMotors = document.getElementById("pill-store-motors");
-  const pillLojaDoce = document.getElementById("pill-store-lojadoce");
-
-  if (pillFishing) pillFishing.style.display = isLD ? "none" : "";
-  if (pillAgro) pillAgro.style.display = isLD ? "none" : "";
-  if (pillMotors) pillMotors.style.display = isLD ? "none" : "";
-  if (pillLojaDoce) {
-    pillLojaDoce.classList.toggle("hidden", !isLD);
-    pillLojaDoce.style.display = isLD ? "inline-flex" : "none";
-    const skuBadgeLd = document.getElementById("header-skus-lojadoce");
-    if (skuBadgeLd) {
-      skuBadgeLd.innerText = "8.559 Ativos / 18.828 SKUs";
-      skuBadgeLd.title = "8.559 SKUs ativos com estoque disponível hoje • 10.269 SKUs esgotados • 18.828 SKUs publicados no índice VTEX";
-    }
-  }
-
-  document.title = isLD
-    ? "Portal de Catálogo VTEX — Gestão de Descrições & SEO"
-    : "Central Mestre BRK - Gestão de Descrições & Vigilante Diário Shopify";
-
-  const skuGlobalWrap = document.getElementById("sku-global-wrap");
-  if (skuGlobalWrap) skuGlobalWrap.style.display = isLD ? "none" : "";
-
-  const headerBadge = document.querySelector("#store-title-text")?.parentElement?.querySelector("span:nth-child(2)");
-  if (headerBadge) {
-    headerBadge.innerText = isLD ? "Auditoria VTEX Ativa" : "Vigilante Diário Ativo";
-  }
-
-  const btnSyncNow = document.getElementById("btn-sync-now");
-  if (btnSyncNow) {
-    btnSyncNow.title = isLD ? "Sincronizar catálogo VTEX agora" : "Verificar produtos novos na Shopify agora";
-  }
-
-  const headerSubText = document.getElementById("header-subtitle-text");
-  if (headerSubText) {
-    headerSubText.innerText = isLD
-      ? "Verticalização VTEX em 3 Atos • Calculadora de Rendimento & Medidas • SEO Limpo • ANVISA"
-      : "Padronização de Descrições • Duplo Modo por SKU • Vercel Ready";
-  }
-
-  if (searchInput) {
-    searchInput.placeholder = isLD
-      ? "Buscar por título, código SKU, marca, categoria ou termo do ERP..."
-      : "Buscar por título, SKU Mestre (ex: C02846BL), variantes ou tag...";
-  }
-
-  // Atualizar textos da Aba Geração em Massa (#section-mass) sem vazamento de S3/Shopify/BRK
-  const massSec = document.getElementById("section-mass");
-  if (massSec) {
-    const massPill = massSec.querySelector("span.bg-amber-500\\/20");
-    const massTitle = massSec.querySelector("h2");
-    const massDesc = massSec.querySelector("p.text-slate-300");
-    const massSubNote = massSec.querySelector(".p-4.border-b .text-xs.text-slate-500");
-    if (massPill) massPill.innerText = isLD ? "Motor de Exportação em Lote VTEX" : "Motor de Correção em Lote";
-    if (massTitle) massTitle.innerText = isLD ? "Fila de Exportação & Verticalização em Massa por SKU" : "Fila de Geração em Massa por SKU";
-    if (massDesc) {
-      massDesc.innerHTML = isLD
-        ? "Exporte planilhas CSV e códigos HTML/Markdown em lote para os produtos verticalizados nas <strong>4 Frentes VTEX</strong> (Calculadora de Rendimento/Medidas, SEO Title e Meta Description sem HTML, Alerta ANVISA e SpecificationFilters)."
-        : "Gere descrições em lote para todos os produtos sem texto ou com fotos quebradas da AWS S3. O motor aplica automaticamente o <strong>Molde Mestre da Categoria</strong>, vincula as fotos oficiais do CDN Shopify e envia diretamente para o Assistente Tampermonkey v4.0 no Shopify Admin.";
-    }
-    if (massSubNote) {
-      massSubNote.innerText = isLD
-        ? "Mostrando produtos verticalizados nas 4 Frentes VTEX prontos para exportação em lote"
-        : "Mostrando produtos com fotos quebradas ou sem descrição";
-    }
-  }
-
-  // Atualizar subtítulo da tabela na Aba Análises (#section-analytics)
-  const analyticsSec = document.getElementById("section-analytics");
-  if (analyticsSec) {
-    const auditTableSub = analyticsSec.querySelector("h3 + p.text-xs.text-slate-500");
-    if (auditTableSub) {
-      auditTableSub.innerText = isLD
-        ? "Auditoria 100% dos SKUs VTEX: verifica títulos ERP expandidos, MetaDescription sem HTML, Alerta ANVISA e SpecificationFilters."
-        : "Detecta fotos de produto quebradas no S3 antigo, produtos sem descrição, links proibidos e variantes sem código.";
-    }
-  }
-
-  // Esconder botões exclusivos de Shopify/Tampermonkey quando no ambiente VTEX isolado
-  const tmQueueBtn = document.getElementById("btn-tm-queue");
-  const tmSettingsBtn = document.getElementById("btn-tm-settings");
-  const liveAgentBtn = document.getElementById("btn-live-agent");
-  const liveAgentStatus = document.getElementById("live-agent-status");
-  if (tmQueueBtn) tmQueueBtn.style.display = isLD ? "none" : "";
-  if (tmSettingsBtn) tmSettingsBtn.style.display = isLD ? "none" : "";
-  if (liveAgentBtn) liveAgentBtn.style.display = isLD ? "none" : "";
-  if (liveAgentStatus && isLD) {
-    liveAgentStatus.innerText = "✅ Catálogo VTEX auditado nas 4 Frentes (100% Conforme)";
-  }
-
-  document.querySelectorAll('.filter-btn[data-filter="colado"], .filter-btn[data-filter="recolar"]').forEach(btn => {
-    btn.style.display = isLD ? "none" : "";
-  });
-
-  document.querySelectorAll('[onclick*="Tampermonkey"]').forEach(btn => {
-    btn.style.display = isLD ? "none" : "";
-  });
-
-  // Isolamento estrito da aba Estudo de Caso (#btn-tab-casestudy / #section-casestudy):
-  // Visível APENAS quando logado na loja VTEX (senha fgh369 -> currentSessionMode === "loja_doce")
-  const btnTabCaseStudy = document.getElementById("btn-tab-casestudy");
-  const secCaseStudy = document.getElementById("section-casestudy");
-  if (btnTabCaseStudy) {
-    btnTabCaseStudy.classList.toggle("hidden", !isLD);
-    btnTabCaseStudy.style.display = isLD ? "inline-flex" : "none";
-  }
-  if (!isLD) {
-    if (secCaseStudy) {
-      secCaseStudy.classList.add("hidden");
-      secCaseStudy.style.display = "none";
-    }
-    if (currentActiveTab === "tab-casestudy") {
-      switchMainTab("tab-catalog");
-    }
-  } else if (secCaseStudy && currentActiveTab !== "tab-casestudy") {
-    secCaseStudy.classList.add("hidden");
-    secCaseStudy.style.display = "none";
-  }
-}
-
 // Alternador de Loja Assíncrono com Cache Universal e Reatividade Multi-Abas
 async function switchStore(storeKey) {
-  if (storeKey === "loja_doce" && currentSessionMode !== "loja_doce") {
-    const saved = localStorage.getItem(BRK_AUTH_TOKEN_KEY);
-    if (saved !== LOJADOCE_AUTH_TOKEN_VAL) {
-      const pin = (typeof window !== "undefined" && window.prompt)
-        ? window.prompt("Digite a senha exclusiva de acesso ao Catálogo VTEX:")
-        : "";
-      if (!pin || pin.trim().toLowerCase() !== LOJADOCE_SYSTEM_PASSWORD) {
-        showToast("🔒 Acesso restrito: senha exclusiva necessária para este catálogo.");
-        return;
-      }
-      localStorage.setItem(BRK_AUTH_TOKEN_KEY, LOJADOCE_AUTH_TOKEN_VAL);
-    }
-    applySessionIsolation("loja_doce");
-  } else if (storeKey !== "loja_doce" && currentSessionMode === "loja_doce") {
-    applySessionIsolation("brk");
-  }
-
   currentStore = storeKey;
   currentFilter = "all";
   selectedCategory = "all";
@@ -612,27 +410,25 @@ async function switchStore(storeKey) {
 
   // Atualizar Pills
   document.querySelectorAll(".store-pill").forEach(p => {
-    p.classList.remove("active", "bg-blue-600", "bg-pink-600", "text-white");
+    p.classList.remove("active", "bg-blue-600", "text-white");
     p.classList.add("text-slate-400");
   });
   const pillMap = {
     "brk_fishing": "pill-store-fishing",
     "brk_agro": "pill-store-agro",
-    "brk_motors": "pill-store-motors",
-    "loja_doce": "pill-store-lojadoce"
+    "brk_motors": "pill-store-motors"
   };
   const activePill = document.getElementById(pillMap[storeKey]);
   if (activePill) {
-    activePill.classList.add("active", storeKey === "loja_doce" ? "bg-pink-600" : "bg-blue-600", "text-white");
+    activePill.classList.add("active", "bg-blue-600", "text-white");
     activePill.classList.remove("text-slate-400");
   }
 
-  // Título da Loja (Oculta nome da loja na VTEX)
+  // Título da Loja
   const storeTitles = {
     "brk_fishing": "BRK Fishing",
     "brk_agro": "BRK Agro",
-    "brk_motors": "BRK Motors",
-    "loja_doce": "Catálogo Oficial (VTEX)"
+    "brk_motors": "BRK Motors"
   };
   const titleElem = document.getElementById("store-title-text");
   if (titleElem) titleElem.innerText = storeTitles[storeKey];
@@ -644,7 +440,7 @@ async function switchStore(storeKey) {
         <tr>
           <td colspan="7" class="py-12 text-center text-slate-500">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent mb-3"></div>
-            <p class="text-sm font-bold text-slate-700">Carregando fila de produtos (${storeTitles[storeKey]})...</p>
+            <p class="text-sm font-bold text-slate-700">Carregando fila de produtos da ${storeTitles[storeKey]}...</p>
           </td>
         </tr>`;
     } else if (currentActiveTab === "tab-moldes") {
@@ -653,7 +449,7 @@ async function switchStore(storeKey) {
         moldesContainer.innerHTML = `
           <div class="col-span-full py-12 text-center text-slate-500">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent mb-3"></div>
-            <p class="text-sm font-bold text-slate-700">Carregando moldes (${storeTitles[storeKey]})...</p>
+            <p class="text-sm font-bold text-slate-700">Carregando moldes da ${storeTitles[storeKey]}...</p>
           </div>`;
       }
     } else if (currentActiveTab === "tab-analytics") {
@@ -663,7 +459,7 @@ async function switchStore(storeKey) {
           <tr>
             <td colspan="6" class="py-12 text-center text-slate-500">
               <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent mb-3"></div>
-              <p class="text-sm font-bold text-slate-700">Carregando análises (${storeTitles[storeKey]})...</p>
+              <p class="text-sm font-bold text-slate-700">Carregando análises da ${storeTitles[storeKey]}...</p>
             </td>
           </tr>`;
       }
@@ -672,7 +468,7 @@ async function switchStore(storeKey) {
         productsGrid.innerHTML = `
           <div class="col-span-full loading-overlay">
             <div class="spinner"></div>
-            <p class="text-xs font-bold text-slate-500">Carregando catálogo (${storeTitles[storeKey]})...</p>
+            <p class="text-xs font-bold text-slate-500">Carregando catálogo da ${storeTitles[storeKey]}...</p>
           </div>`;
       }
     }
@@ -683,11 +479,11 @@ async function switchStore(storeKey) {
     } catch (e) {
       const errMsg = `
         <div class="col-span-full text-center py-12 text-slate-500">
-          <p class="text-base font-bold text-red-500">Erro ao carregar dados (${storeTitles[storeKey]})</p>
-          <p class="text-xs mt-1">Verifique os arquivos em data/stores/.</p>
+          <p class="text-base font-bold text-red-500">Erro ao carregar dados da loja ${storeTitles[storeKey]}</p>
+          <p class="text-xs mt-1">Verifique os arquivos da loja em data/stores/.</p>
         </div>`;
       if (productsGrid) productsGrid.innerHTML = errMsg;
-      showToast(`❌ Falha ao carregar dados (${storeTitles[storeKey]})`);
+      showToast(`❌ Falha ao carregar dados da loja ${storeTitles[storeKey]}`);
       return;
     }
   }
@@ -707,12 +503,6 @@ async function switchStore(storeKey) {
     renderMoldesCards();
   } else if (currentActiveTab === "tab-analytics") {
     renderAnalyticsView();
-  } else if (currentActiveTab === "tab-casestudy") {
-    if (storeKey === "loja_doce") {
-      renderCaseStudyView();
-    } else {
-      switchMainTab("tab-catalog");
-    }
   }
 
   startLiveSync();
@@ -729,7 +519,7 @@ function updateCockpit() {
 
   const loadedBroken = products.filter(p => p.status === "IMAGENS_QUEBRADAS").length;
   const loadedEmpty = products.filter(p => p.status === "SEM_DESCRICAO").length;
-  const loadedHealthy = products.filter(p => p.status !== "IMAGENS_QUEBRADAS" && p.status !== "SEM_DESCRICAO").length;
+  const loadedHealthy = products.filter(p => p.status === "SAUDAVEL" || (!p.is_out_of_standard && p.status !== "IMAGENS_QUEBRADAS" && p.status !== "SEM_DESCRICAO")).length;
   const totalProds = products.length;
   const healthPct = totalProds > 0 ? Math.round((loadedHealthy / totalProds) * 100) : 100;
 
@@ -750,7 +540,7 @@ function updateCockpit() {
 
   const scopedBroken = scopedProducts.filter(p => p.status === "IMAGENS_QUEBRADAS").length;
   const scopedEmpty = scopedProducts.filter(p => p.status === "SEM_DESCRICAO").length;
-  const scopedHealthy = scopedProducts.filter(p => p.status !== "IMAGENS_QUEBRADAS" && p.status !== "SEM_DESCRICAO").length;
+  const scopedHealthy = scopedProducts.filter(p => p.status === "SAUDAVEL" || (!p.is_out_of_standard && p.status !== "IMAGENS_QUEBRADAS" && p.status !== "SEM_DESCRICAO")).length;
 
   const cAll = document.getElementById("count-all");
   if (cAll) cAll.innerText = scopedProducts.length;
@@ -847,10 +637,7 @@ function renderCategories() {
     
     const catCount = cat.count || products.filter(p => p.category === cat.name).length;
     const ringClass = cat.broken_count > 0 ? "category-ring has-broken" : "category-ring";
-    const fallbackPlaceholder = currentStore === "loja_doce" ? "https://placehold.co/100x100?text=VTEX" : "https://placehold.co/100x100?text=BRK";
-    const firstCatProd = products.find(p => p.category === cat.name && ((p.cdn_images && p.cdn_images[0]) || p.image));
-    const firstProdImg = firstCatProd ? ((firstCatProd.cdn_images && firstCatProd.cdn_images[0]) || firstCatProd.image) : "";
-    const imgUrl = cat.sample_image || cat.thumb || cat.image || firstProdImg || fallbackPlaceholder;
+    const imgUrl = cat.sample_image || cat.thumb || "https://placehold.co/100x100?text=BRK";
 
     div.innerHTML = `
       <div class="relative w-16 h-16 rounded-full p-[2px] ${ringClass} transition-all transform group-hover:scale-105 shadow-md">
@@ -875,7 +662,6 @@ function renderProducts() {
   if (!storeData) return;
   const products = storeData.products || [];
   productsGrid.innerHTML = "";
-  const isLojaDoce = (currentStore === "loja_doce");
 
   let filtered = products.filter(p => {
     if (selectedCategory !== "all" && p.category !== selectedCategory) return false;
@@ -892,7 +678,7 @@ function renderProducts() {
 
     if (searchQuery.trim() !== "") {
       const q = searchQuery.toLowerCase();
-      const matchTitle = (p.title || "").toLowerCase().includes(q) || (p.raw_erp_title || "").toLowerCase().includes(q);
+      const matchTitle = (p.title || "").toLowerCase().includes(q);
       const matchSku = (p.master_sku || "").toLowerCase().includes(q);
       const matchVariants = (p.variants_skus || []).some(v => v.toLowerCase().includes(q));
       if (!matchTitle && !matchSku && !matchVariants) return false;
@@ -911,22 +697,18 @@ function renderProducts() {
     const isBroken = p.status === "IMAGENS_QUEBRADAS";
     const isEmpty = p.status === "SEM_DESCRICAO";
 
-    let borderClass = isLojaDoce ? "border-slate-200 hover:border-pink-400" : "border-slate-200 hover:border-blue-400";
-    let statusBadge = isLojaDoce
-      ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1" title="Verticalizado VTEX: 3 Atos + Calculadora + ANVISA + SEO Limpo">${getSvgIcon('check', '#065f46', 10)} VTEX 100/100</span>`
-      : `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1" title="Status na Loja Shopify: Sem fotos quebradas e com texto existente">${getSvgIcon('check', '#065f46', 10)} Na Loja: Sem Erro Crítico</span>`;
+    let borderClass = "border-slate-200 hover:border-blue-400";
+    let statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 flex items-center gap-1" title="Status na Loja Shopify: Sem fotos quebradas e com texto existente">${getSvgIcon('check', '#065f46', 10)} Na Loja: Sem Erro Crítico</span>`;
 
     if (isBroken) {
       borderClass = "border-red-300 hover:border-red-500 bg-red-50/20";
-      statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800 flex items-center gap-1" title="Contém imagens quebradas">❌ Fotos Quebradas</span>`;
+      statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800 flex items-center gap-1" title="Status na Loja Shopify: Contém imagens da AWS S3 com erro 404">❌ Fotos Quebradas AWS</span>`;
     } else if (isEmpty) {
       borderClass = "border-amber-300 hover:border-amber-500 bg-amber-50/20";
-      statusBadge = isLojaDoce
-        ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 flex items-center gap-1" title="Na VTEX: Sem descrição comercial (vazia ou apenas eco do título ERP + 'UN'). Modo B 100% gerado e pronto para uso!">⚠️ Sem Descrição / Eco ERP</span>`
-        : `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 flex items-center gap-1" title="Produto sem descrição cadastrada">⚠️ Sem Descrição</span>`;
+      statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 flex items-center gap-1" title="Status na Loja Shopify: Produto sem descrição cadastrada">⚠️ Sem Descrição</span>`;
     }
 
-    if (!isBroken && !isEmpty && !isLojaDoce && typeof LiveAgent !== "undefined") {
+    if (!isBroken && !isEmpty && typeof LiveAgent !== "undefined") {
       const lb = LiveAgent.badgeFor(p.live);
       if (lb) {
         statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${lb.cls} flex items-center gap-1" title="${lb.title}">${lb.text}</span>`;
@@ -941,9 +723,6 @@ function renderProducts() {
     const imgSrc = allImages[0] || "https://placehold.co/400x300?text=Sem+Foto";
     const fallbacksJson = JSON.stringify(allImages.slice(1)).replace(/"/g, '&quot;');
     const safeTitle = (p.title || '').replace(/"/g, '&quot;');
-    const copyBtnTitle = isLojaDoce
-      ? "Copia o Novo Padrão Oficial Modo B (3 Atos + Calculadora + ANVISA + Schema SEO) pronto para colar no Admin VTEX"
-      : "Copia o Novo Padrão Oficial Modo B (3 Atos + Badges + Tabela de Medidas + Schema SEO) pronto para colar no Admin da Shopify";
 
     card.innerHTML = `
       <div>
@@ -972,15 +751,14 @@ function renderProducts() {
           <h3 class="text-xs font-bold text-slate-900 line-clamp-2 leading-snug group-hover:text-blue-600 transition-colors">
             ${p.title}
           </h3>
-          ${p.raw_erp_title && p.raw_erp_title !== p.title ? `<p class="text-[10px] text-slate-400 font-mono truncate" title="Título ERP original na VTEX: ${p.raw_erp_title.replace(/"/g, '&quot;')}">ERP: ${p.raw_erp_title}</p>` : ''}
         </div>
       </div>
 
       <div class="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-        <span class="text-[10px] font-extrabold ${isLojaDoce ? 'text-pink-700 bg-pink-50' : 'text-blue-700 bg-blue-50'} px-2 py-0.5 rounded-md flex items-center gap-1" title="Molde de alta conversão pronto para este produto">
+        <span class="text-[10px] font-extrabold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md flex items-center gap-1" title="Molde de alta conversão pronto para este produto">
           <span>✨</span> ${p.archetype_name || 'Modo B Oficial'}
         </span>
-        <button onclick="quickCopyProductHTML(event, '${p.master_sku}')" title="${copyBtnTitle}" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 border border-emerald-300 rounded-lg text-[10px] font-extrabold transition-all flex items-center gap-1 active:scale-95 shadow-sm">
+        <button onclick="quickCopyProductHTML(event, '${p.master_sku}')" title="Copia o Novo Padrão Oficial Modo B (3 Atos + Badges + Tabela de Medidas + Schema SEO) pronto para colar no Admin da Shopify" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 border border-emerald-300 rounded-lg text-[10px] font-extrabold transition-all flex items-center gap-1 active:scale-95 shadow-sm">
           <span>📋 Copiar Modo B</span>
         </button>
       </div>
@@ -1007,9 +785,7 @@ function quickCopyProductHTML(event, sku) {
   }
 
   navigator.clipboard.writeText(htmlToCopy).then(() => {
-    showToast(currentStore === "loja_doce"
-      ? `✅ Modo B (Padrão Oficial VTEX) copiado! Cole no Admin VTEX.`
-      : `✅ Modo B (Novo Padrão Oficial) copiado! Cole no Admin da Shopify.`);
+    showToast(`✅ Modo B (Novo Padrão Oficial) copiado! Cole no Admin da Shopify.`);
     if (event && event.currentTarget) {
       const btn = event.currentTarget;
       const orig = btn.innerHTML;
@@ -1029,21 +805,15 @@ function quickCopyProductHTML(event, sku) {
 function updateMassCountBadge() {
   const storeData = MASTER_PAYLOAD.stores[currentStore];
   if (!storeData) return;
-  const isLD = (currentStore === "loja_doce");
-  const targetList = isLD
-    ? (storeData.products || [])
-    : storeData.products.filter(p => p.status === "IMAGENS_QUEBRADAS" || p.status === "SEM_DESCRICAO");
+  const brokenOrEmpty = storeData.products.filter(p => p.status === "IMAGENS_QUEBRADAS" || p.status === "SEM_DESCRICAO");
   const badge = document.getElementById("badge-mass-count");
-  if (badge) badge.innerText = targetList.length;
+  if (badge) badge.innerText = brokenOrEmpty.length;
 }
 
 function renderMassTable() {
   const storeData = MASTER_PAYLOAD.stores[currentStore];
   if (!storeData) return;
-  const isLD = (currentStore === "loja_doce");
-  const targetItems = isLD
-    ? (storeData.products || [])
-    : storeData.products.filter(p => p.status === "IMAGENS_QUEBRADAS" || p.status === "SEM_DESCRICAO");
+  const targetItems = storeData.products.filter(p => p.status === "IMAGENS_QUEBRADAS" || p.status === "SEM_DESCRICAO");
   massTableBody.innerHTML = "";
   selectedMassProductIds.clear();
 
@@ -1053,11 +823,9 @@ function renderMassTable() {
     tr.className = "hover:bg-slate-50 transition-colors";
     
     const isBroken = p.status === "IMAGENS_QUEBRADAS";
-    const diagBadge = isLD
-      ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800">✅ 4 Frentes VTEX</span>`
-      : (isBroken 
-        ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800">❌ Fotos Quebradas</span>`
-        : `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">⚠️ Sem Descrição</span>`);
+    const diagBadge = isBroken 
+      ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800">❌ Fotos Quebradas AWS</span>`
+      : `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">⚠️ Sem Descrição</span>`;
 
     tr.innerHTML = `
       <td class="p-3.5 text-center">
@@ -1076,8 +844,8 @@ function renderMassTable() {
         </span>
       </td>
       <td class="p-3.5">
-        <span class="px-2 py-0.5 rounded-full ${isLD ? 'bg-pink-50 text-pink-700 border-pink-200' : 'bg-blue-50 text-blue-700 border-blue-200'} font-bold text-[10px] border">
-          ${p.archetype_name || 'Molde Padrão'}
+        <span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-bold text-[10px] border border-blue-200">
+          ${p.archetype_name || 'UV50+ Pesca'}
         </span>
       </td>
       <td class="p-3.5">${diagBadge}</td>
@@ -1145,8 +913,7 @@ function downloadShopifyCSVBatch() {
     return;
   }
 
-  const isLojaDoce = (currentStore === "loja_doce");
-  const rows = [isLojaDoce ? "SKU,Handle,Title,SEO_Title,SEO_Meta_Description,B2B_Unit_Economics,Body (HTML)" : "Handle,Title,Body (HTML)"];
+  const rows = ["Handle,Title,Body (HTML)"];
   selected.forEach(p => {
     let html = "";
     if (currentMassBatchMode === "mode_b_html") {
@@ -1157,12 +924,7 @@ function downloadShopifyCSVBatch() {
     } else {
       html = p.mode_a_html || p.original_body_html || "";
     }
-    if (isLojaDoce) {
-      const b2bVal = (p.b2b_economics && (p.b2b_economics.resumo_economia_b2b || p.b2b_economics.value)) || (p.vtex_specifications && p.vtex_specifications["Economia & Custo Unitário (B2B)"]) || "";
-      rows.push(`"${p.master_sku || p.id}","${p.handle}","${(p.title || '').replace(/"/g, '""')}","${(p.seo_title || '').replace(/"/g, '""')}","${(p.seo_meta_description || '').replace(/"/g, '""')}","${String(b2bVal).replace(/"/g, '""')}","${html.replace(/"/g, '""')}"`);
-    } else {
-      rows.push(`"${p.handle}","${p.title.replace(/"/g, '""')}","${html.replace(/"/g, '""')}"`);
-    }
+    rows.push(`"${p.handle}","${p.title.replace(/"/g, '""')}","${html.replace(/"/g, '""')}"`);
   });
 
   const csvContent = "\uFEFF" + rows.join("\n");
@@ -1171,9 +933,7 @@ function downloadShopifyCSVBatch() {
   const link = document.createElement("a");
   link.href = url;
   const modeLabel = currentMassBatchMode === "mode_b_html" ? "modo_b" : "modo_a";
-  const prefix = isLojaDoce ? "vtex_lote" : "shopify_lote";
-  const storeLabel = isLojaDoce ? "catalogo_vtex" : currentStore;
-  link.download = `${prefix}_${modeLabel}_${storeLabel}_${new Date().toISOString().slice(0,10)}.csv`;
+  link.download = `shopify_lote_${modeLabel}_${currentStore}_${new Date().toISOString().slice(0,10)}.csv`;
   link.click();
   URL.revokeObjectURL(url);
   showToast(`Planilha CSV com ${selected.length} produtos gerada e baixada com sucesso (${modeLabel.toUpperCase()})!`);
@@ -1191,13 +951,7 @@ async function renderMoldesCards() {
     MASTER_PAYLOAD.moldes = moldes;
   }
 
-  const isLojaDoce = (currentStore === "loja_doce");
-
   for (const [key, m] of Object.entries(moldes)) {
-    const isLdArchetype = key.startsWith("ld_");
-    if (isLojaDoce && !isLdArchetype) continue;
-    if (!isLojaDoce && isLdArchetype) continue;
-
     const card = document.createElement("div");
     card.className = "bg-white rounded-3xl border border-slate-200 p-6 product-shadow flex flex-col justify-between";
 
@@ -1207,11 +961,9 @@ async function renderMoldesCards() {
     });
 
     const isD2C = m.layout_format === "d2c_headwear" || (m.details_grid && m.details_grid.length > 0);
-    const badgeHtml = isLdArchetype
-      ? `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-pink-50 text-pink-700 border border-pink-200">Arquétipo Vertical VTEX</span>`
-      : (isD2C 
-        ? `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-300">Novo Formato D2C Oficial</span>`
-        : `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">Molde Mestre</span>`);
+    const badgeHtml = isD2C 
+      ? `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-300">Novo Formato D2C Oficial</span>`
+      : `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">Molde Mestre</span>`;
 
     let structureBlockHtml = "";
     if (isD2C && m.details_grid) {
@@ -1245,7 +997,7 @@ async function renderMoldesCards() {
           <span class="text-xs text-slate-400 font-mono">ID: ${m.id}</span>
         </div>
         <h3 class="text-base font-extrabold text-slate-900 font-heading mb-1">${m.name}</h3>
-        <p class="text-xs font-semibold ${isLdArchetype ? 'text-pink-700' : (isD2C ? 'text-emerald-700' : 'text-blue-600')} mb-4">${m.default_tagline || ''}</p>
+        <p class="text-xs font-semibold ${isD2C ? 'text-emerald-700' : 'text-blue-600'} mb-4">${m.default_tagline || ''}</p>
 
         ${structureBlockHtml}
 
@@ -1268,166 +1020,12 @@ async function renderMoldesCards() {
 
 // Aba Análises & Auditoria 360
 async function renderAnalyticsView() {
-  const isLojaDoce = (currentStore === "loja_doce");
-
-  if (isLojaDoce) {
-    if (!MASTER_PAYLOAD.stores["loja_doce"]) {
-      try {
-        MASTER_PAYLOAD.stores["loja_doce"] = await StoreLoader.loadStore("loja_doce");
-      } catch (e) {}
-    }
-    const ldData = MASTER_PAYLOAD.stores["loja_doce"];
-    const prods = (ldData && ldData.products) || [];
-    const totalP = prods.length;
-    const totalSkus = (ldData && ldData.store && ldData.store.total_skus) || 18828;
-
-    const sentinelRun = document.getElementById("sentinel-last-run");
-    if (sentinelRun) sentinelRun.innerText = `18.828 SKUs Publicados • 8.559 em Estoque • ${totalP} Auditados`;
-
-    const analyticsSec = document.getElementById("section-analytics");
-    if (analyticsSec) {
-      const topBannerTitle = analyticsSec.querySelector("h2");
-      const topBannerDesc = analyticsSec.querySelector("p.text-slate-300");
-      const topBannerPill = analyticsSec.querySelector("span.bg-emerald-500\\/20");
-      if (topBannerPill) topBannerPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Auditoria VTEX 360° • 18.828 SKUs Publicados • 8.559 em Estoque • 400 Auditados`;
-      if (topBannerTitle) topBannerTitle.innerText = "Painel de Auditoria Técnica & Verticalização VTEX";
-      if (topBannerDesc) {
-        topBannerDesc.innerText = "Diagnóstico completo do catálogo VTEX: Expansão Semântica de Títulos ERP, Sanitização de MetaDescription (100% Plain Text sem HTML), Calculadora Automática de Rendimento/Equivalência, Alerta ANVISA de Alergênicos e SpecificationFilters.";
-      }
-    }
-
-    // Atualizar os 3 cards de estatística com as métricas VTEX (sem nenhuma menção a outras lojas)
-    const cardFishingTitle = document.querySelector("#stat-fishing-health")?.parentElement?.querySelector("span:first-child");
-    if (cardFishingTitle) {
-      cardFishingTitle.className = "text-xs font-extrabold text-pink-700 bg-pink-50 px-2.5 py-1 rounded-xl";
-      cardFishingTitle.innerText = "📐 Gargalos do Catálogo VTEX (ERP / 1 Foto / SEO)";
-    }
-    const elHealth1 = document.getElementById("stat-fishing-health");
-    if (elHealth1) elHealth1.innerText = "100%";
-    const elSkus1 = document.getElementById("stat-fishing-skus");
-    if (elSkus1) {
-      if (elSkus1.previousElementSibling) elSkus1.previousElementSibling.innerText = "Censo Global VTEX:";
-      elSkus1.innerText = `18.828 SKUs Publicados • 8.559 em Estoque • ${totalP} Auditados`;
-    }
-    const elBroken1 = document.getElementById("stat-fishing-broken");
-    if (elBroken1) {
-      if (elBroken1.previousElementSibling) elBroken1.previousElementSibling.innerText = "Títulos ERP / 1 Foto:";
-      elBroken1.innerText = "99,2% CAIXA ALTA • 82,8% com 1 foto";
-    }
-    const elEmpty1 = document.getElementById("stat-fishing-empty");
-    if (elEmpty1) {
-      if (elEmpty1.previousElementSibling) elEmpty1.previousElementSibling.innerText = "Descrições Eco de ERP:";
-      elEmpty1.innerText = "14,2% (57/400) corrigidos";
-    }
-    const elFixes1 = document.getElementById("stat-fishing-fixes");
-    if (elFixes1) {
-      if (elFixes1.previousElementSibling) elFixes1.previousElementSibling.innerText = "Verticalização Aplicada:";
-      elFixes1.innerText = `${totalP} com Calculadora & Título Expandido`;
-    }
-    const elBar1 = document.getElementById("bar-fishing-health");
-    if (elBar1) elBar1.style.width = "100%";
-
-    const cardAgroTitle = document.querySelector("#stat-agro-health")?.parentElement?.querySelector("span:first-child");
-    if (cardAgroTitle) {
-      cardAgroTitle.className = "text-xs font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-xl";
-      cardAgroTitle.innerText = "🔍 Frente 2: SEO Anti-Bug VTEX";
-    }
-    const elHealth2 = document.getElementById("stat-agro-health");
-    if (elHealth2) elHealth2.innerText = "100%";
-    const elSkus2 = document.getElementById("stat-agro-skus");
-    if (elSkus2) {
-      if (elSkus2.previousElementSibling) elSkus2.previousElementSibling.innerText = "Títulos SEO Gerados:";
-      elSkus2.innerText = `${totalP} SEO Titles (≤ 60 chars)`;
-    }
-    const elBroken2 = document.getElementById("stat-agro-broken");
-    if (elBroken2) {
-      if (elBroken2.previousElementSibling) elBroken2.previousElementSibling.innerText = "Vazamento HTML MetaSEO:";
-      elBroken2.innerText = "0 tags HTML na MetaDescription (98,8% corrigidos)";
-    }
-    const elEmpty2 = document.getElementById("stat-agro-empty");
-    if (elEmpty2) {
-      if (elEmpty2.previousElementSibling) elEmpty2.previousElementSibling.innerText = "Entidades HTML Cruas:";
-      elEmpty2.innerText = "0 entidades HTML cruas";
-    }
-    const elFixes2 = document.getElementById("stat-agro-fixes");
-    if (elFixes2) {
-      if (elFixes2.previousElementSibling) elFixes2.previousElementSibling.innerText = "Snippets UTF-8 Puros:";
-      elFixes2.innerText = `${totalP} Meta Descriptions 100% Plain UTF-8`;
-    }
-    const elBar2 = document.getElementById("bar-agro-health");
-    if (elBar2) elBar2.style.width = "100%";
-
-    const cardMotorsTitle = document.querySelector("#stat-motors-health")?.parentElement?.querySelector("span:first-child");
-    if (cardMotorsTitle) {
-      cardMotorsTitle.className = "text-xs font-extrabold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-xl";
-      cardMotorsTitle.innerText = "🛡️ Padronização 3 Atos + Infográficos + B2B + ANVISA";
-    }
-    const elHealth3 = document.getElementById("stat-motors-health");
-    if (elHealth3) elHealth3.innerText = "100%";
-    const elSkus3 = document.getElementById("stat-motors-skus");
-    if (elSkus3) {
-      if (elSkus3.previousElementSibling) elSkus3.previousElementSibling.innerText = "Arquitetura Semântica:";
-      elSkus3.innerText = "8 Arquétipos Verticais VTEX + Economia B2B";
-    }
-    const elBroken3 = document.getElementById("stat-motors-broken");
-    if (elBroken3) {
-      if (elBroken3.previousElementSibling) elBroken3.previousElementSibling.innerText = "Conformidade ANVISA:";
-      elBroken3.innerText = "0 sem Alerta ANVISA RDC 26/2015 / Grau Alimentício";
-    }
-    const elEmpty3 = document.getElementById("stat-motors-empty");
-    if (elEmpty3) {
-      if (elEmpty3.previousElementSibling) elEmpty3.previousElementSibling.innerText = "Filtros VTEX:";
-      elEmpty3.innerText = "0 sem SpecificationFilters";
-    }
-    const elFixes3 = document.getElementById("stat-motors-fixes");
-    if (elFixes3) {
-      if (elFixes3.previousElementSibling) elFixes3.previousElementSibling.innerText = "Fichas Técnicas VTEX:";
-      elFixes3.innerText = `${totalP} fichas estruturadas VTEX prontas`;
-    }
-    const elBar3 = document.getElementById("bar-motors-health");
-    if (elBar3) elBar3.style.width = "100%";
-
-    renderAuditTable();
-    return;
-  }
-
   for (const sk of ["brk_fishing", "brk_agro", "brk_motors"]) {
     if (!MASTER_PAYLOAD.stores[sk]) {
       try {
         MASTER_PAYLOAD.stores[sk] = await StoreLoader.loadStore(sk);
       } catch (e) {}
     }
-  }
-
-  const sentinelRun = document.getElementById("sentinel-last-run");
-  if (sentinelRun) sentinelRun.innerText = "Catálogo Oficial Auditado (6.242 Produtos)";
-
-  const analyticsSec = document.getElementById("section-analytics");
-  if (analyticsSec) {
-    const topBannerTitle = analyticsSec.querySelector("h2");
-    const topBannerDesc = analyticsSec.querySelector("p.text-slate-300");
-    const topBannerPill = analyticsSec.querySelector("span.bg-emerald-500\\/20");
-    if (topBannerPill) topBannerPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Auditoria 360° em Tempo Real • 3 Lojas`;
-    if (topBannerTitle) topBannerTitle.innerText = "Painel de Auditoria & Conformidade";
-    if (topBannerDesc) {
-      topBannerDesc.innerText = "Diagnóstico preciso das 3 lojas Shopify (Fishing, Agro e Motors). Separa fotos reais de produto quebradas no S3 antigo (excluindo falsos-positivos de ícones SVG), produtos sem descrição, links externos proibidos e variantes órfãs.";
-    }
-  }
-
-  const cardFishingTitle = document.querySelector("#stat-fishing-health")?.parentElement?.querySelector("span:first-child");
-  if (cardFishingTitle) {
-    cardFishingTitle.className = "text-xs font-extrabold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-xl";
-    cardFishingTitle.innerText = "🎣 BRK Fishing";
-  }
-  const cardAgroTitle = document.querySelector("#stat-agro-health")?.parentElement?.querySelector("span:first-child");
-  if (cardAgroTitle) {
-    cardAgroTitle.className = "text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-xl";
-    cardAgroTitle.innerText = "🚜 BRK Agro";
-  }
-  const cardMotorsTitle = document.querySelector("#stat-motors-health")?.parentElement?.querySelector("span:first-child");
-  if (cardMotorsTitle) {
-    cardMotorsTitle.className = "text-xs font-extrabold text-orange-600 bg-orange-50 px-2.5 py-1 rounded-xl";
-    cardMotorsTitle.innerText = "🏁 BRK Motors";
   }
 
   const mapIds = [
@@ -1485,18 +1083,9 @@ function renderAuditTable() {
   tbody.innerHTML = "";
 
   let auditItems = [];
-  const isLojaDoce = (currentStore === "loja_doce");
-  const storeTitles = {
-    "brk_fishing": "Fishing",
-    "brk_agro": "Agro",
-    "brk_motors": "Motors",
-    "loja_doce": "Catálogo VTEX"
-  };
+  const storeTitles = { "brk_fishing": "Fishing", "brk_agro": "Agro", "brk_motors": "Motors" };
 
-  const targetStores = isLojaDoce ? ["loja_doce"] : ["brk_fishing", "brk_agro", "brk_motors"];
-
-  for (const storeKey of targetStores) {
-    const sData = MASTER_PAYLOAD.stores[storeKey];
+  for (const [storeKey, sData] of Object.entries(MASTER_PAYLOAD.stores)) {
     if (!sData || !sData.products) continue;
     sData.products.forEach(p => {
       const hasProhib = (p.prohibited_links && p.prohibited_links.length > 0);
@@ -1525,7 +1114,7 @@ function renderAuditTable() {
   }
 
   if (auditItems.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-emerald-700 font-bold">✓ 100% dos produtos em conformidade absoluta (Zero imagens quebradas, zero descrições vazias, zero vazamentos).</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">Nenhum item com inconformidade encontrado para o filtro selecionado.</td></tr>`;
     return;
   }
 
@@ -1534,7 +1123,7 @@ function renderAuditTable() {
     const tr = document.createElement("tr");
     tr.className = "hover:bg-slate-50 transition-colors";
 
-    let riskBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800">Fotos Quebradas</span>`;
+    let riskBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800">Fotos Quebradas AWS S3</span>`;
     let detailText = p.affected_skus_count ? `${p.affected_skus_count} SKUs afetados` : "Imagem com erro 404";
 
     if (item.hasProhib) {
@@ -1975,15 +1564,12 @@ function copyTampermonkeyQueueJson() {
   });
 }
 
-// Autenticação por Senha com Isolamento de Ambiente (rex123 -> Lojas BRK | fgh369 -> Catálogo Exclusivo VTEX)
+// Autenticação por Senha do Sistema BRK (acesso liberado para qualquer IP mediante senha)
 const BRK_AUTH_TOKEN_KEY = "BRK_PORTAL_PASSWORD_AUTH_V2";
 const BRK_AUTH_TOKEN_VAL = "BRK_REX123_AUTHORIZED";
-const LOJADOCE_AUTH_TOKEN_VAL = "VTEX_FGH369_AUTHORIZED";
 const BRK_SYSTEM_PASSWORD = "rex123";
-const LOJADOCE_SYSTEM_PASSWORD = "fgh369";
 
 function renderPasswordLoginScreen() {
-  document.title = "Portal de Catálogo & SEO — Acesso Autorizado";
   Array.from(document.body.children).forEach(el => {
     if (el.id !== "brk-ip-lock-overlay") el.style.display = "none";
   });
@@ -2003,11 +1589,11 @@ function renderPasswordLoginScreen() {
       </div>
       <div class="space-y-1.5">
         <span class="px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/30 text-[10px] font-extrabold uppercase tracking-wider">
-          Portal de Catálogo &amp; SEO
+          Central Mestre BRK
         </span>
         <h1 class="text-lg font-extrabold text-white pt-1">Acesso ao Sistema de Descrições</h1>
         <p class="text-xs text-slate-400 leading-relaxed">
-          Digite sua credencial de acesso para carregar o ambiente autorizado.
+          Digite a senha de acesso da equipe BRK para entrar no portal.
         </p>
       </div>
       <div class="pt-2 border-t border-slate-800/80 space-y-3 text-left">
@@ -2034,198 +1620,30 @@ function renderPasswordLoginScreen() {
 function unlockCurrentMachineByPin() {
   const inp = document.getElementById("brk-ip-unlock-input");
   const err = document.getElementById("brk-ip-unlock-err");
-  const val = (inp ? inp.value : "").trim().toLowerCase();
-  if (val === BRK_SYSTEM_PASSWORD) {
+  const val = (inp ? inp.value : "").trim();
+  if (val.toLowerCase() === BRK_SYSTEM_PASSWORD) {
     localStorage.setItem(BRK_AUTH_TOKEN_KEY, BRK_AUTH_TOKEN_VAL);
     const overlay = document.getElementById("brk-ip-lock-overlay");
     if (overlay) overlay.remove();
     Array.from(document.body.children).forEach(el => {
       el.style.display = "";
     });
-    applySessionIsolation("brk");
     switchStore("brk_fishing");
-  } else if (val === LOJADOCE_SYSTEM_PASSWORD) {
-    localStorage.setItem(BRK_AUTH_TOKEN_KEY, LOJADOCE_AUTH_TOKEN_VAL);
-    const overlay = document.getElementById("brk-ip-lock-overlay");
-    if (overlay) overlay.remove();
-    Array.from(document.body.children).forEach(el => {
-      el.style.display = "";
-    });
-    applySessionIsolation("loja_doce");
-    switchStore("loja_doce");
   } else if (err) {
     err.classList.remove("hidden");
   }
 }
 
 function logoutBrkPortal() {
-  if (currentActiveTab === "tab-casestudy") {
-    switchMainTab("tab-catalog");
-  }
-  const btnTabCaseStudy = document.getElementById("btn-tab-casestudy");
-  const secCaseStudy = document.getElementById("section-casestudy");
-  if (btnTabCaseStudy) {
-    btnTabCaseStudy.classList.add("hidden");
-    btnTabCaseStudy.style.display = "none";
-  }
-  if (secCaseStudy) {
-    secCaseStudy.classList.add("hidden");
-    secCaseStudy.style.display = "none";
-  }
   localStorage.removeItem(BRK_AUTH_TOKEN_KEY);
   localStorage.removeItem("BRK_MACHINE_AUTHORIZED_TOKEN");
   renderPasswordLoginScreen();
 }
 
-// =========================================================================
-// ABA ESTUDO DE CASO (EXCLUSIVA SESSÃO VTEX fgh369)
-// =========================================================================
-async function renderCaseStudyView() {
-  if (currentSessionMode !== "loja_doce" && currentStore !== "loja_doce") {
-    switchMainTab("tab-catalog");
-    return;
-  }
-  if (!MASTER_PAYLOAD.stores["loja_doce"]) {
-    try {
-      MASTER_PAYLOAD.stores["loja_doce"] = await StoreLoader.loadStore("loja_doce");
-    } catch (e) {}
-  }
-  const ldStore = MASTER_PAYLOAD.stores["loja_doce"];
-  const prods = (ldStore && ldStore.products) || [];
-  const container = document.getElementById("casestudy-live-examples");
-  if (!container || prods.length === 0) return;
-
-  // Selecionar 4 exemplos reais emblemáticos do catálogo VTEX
-  const pEco = prods.find(p => String(p.sku || p.master_sku) === "776793")
-    || prods.find(p => p.status === "SEM_DESCRICAO")
-    || prods[0];
-  const pChantilly = prods.find(p => String(p.sku || p.master_sku) === "635898")
-    || prods.find(p => /chantilly|creme|cobertura|chocolate/i.test(p.title || "") && p !== pEco)
-    || prods[1];
-  const pChoc = prods.find(p => String(p.sku || p.master_sku) === "930249")
-    || prods.find(p => /cobertura|chocolate|avel/i.test(p.title || "") && p !== pEco && p !== pChantilly)
-    || prods.find(p => p.category === "Confeitaria & Panificação" && p !== pEco && p !== pChantilly)
-    || prods[2];
-  const pFesta = prods.find(p => String(p.sku || p.master_sku) === "866559")
-    || prods.find(p => p.category === "Artigos para Festas & Balões" && /\bbal[aã]o\b/i.test(p.title || "") && p !== pEco && p !== pChantilly && p !== pChoc)
-    || prods.find(p => p.category === "Artigos para Festas & Balões" && p !== pEco && p !== pChantilly && p !== pChoc)
-    || prods[3];
-
-  const cases = [
-    {
-      badge: "Caso 1 • Eco de ERP (14,2% da Loja)",
-      badgeCls: "bg-amber-100 text-amber-800",
-      prod: pEco,
-      note: "Na loja hoje possui apenas repetição do código ERP + 'UN'. Veja como recebe 3 Atos, infográficos e ficha técnica."
-    },
-    {
-      badge: "Caso 2 • Confeitaria & Rendimento",
-      badgeCls: "bg-pink-100 text-pink-800",
-      prod: pChantilly,
-      note: "Orientação técnica de temperatura/aplicação, calculadora de rendimento de porções e custo por 100g/100ml."
-    },
-    {
-      badge: "Caso 3 • Correção Bug SEO (98,8%)",
-      badgeCls: "bg-indigo-100 text-indigo-800",
-      prod: pChoc,
-      note: "Elimina tags HTML vazando na MetaTagDescription e adiciona alerta regulatório ANVISA RDC 26/2015."
-    },
-    {
-      badge: "Caso 4 • Festas & Custo Unitário B2B",
-      badgeCls: "bg-emerald-100 text-emerald-800",
-      prod: pFesta,
-      note: "Conversão de polegadas/mm para centímetros, metragem de decoração e cálculo de custo unitário no pacote."
-    }
-  ];
-
-  container.innerHTML = "";
-  cases.forEach(item => {
-    const p = item.prod;
-    if (!p) return;
-    const skuCode = String(p.master_sku || p.sku || "");
-    const imgUrl = (p.cdn_images && p.cdn_images[0]) || p.image || "https://placehold.co/200x200?text=VTEX";
-    const erpRaw = p.raw_erp_title || p.title || "";
-    const b2bSummary = (p.b2b_economics && (p.b2b_economics.resumo_economia_b2b || p.b2b_economics.value || p.b2b_economics.cost_per_unit || p.b2b_economics.cost_per_100g_ml || p.b2b_economics.unit_price_formatted)) || "Custo B2B Calculado";
-
-    const card = document.createElement("div");
-    card.className = "bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between space-y-3 hover:border-pink-400 transition-all";
-    card.innerHTML = `
-      <div class="space-y-2">
-        <div class="flex items-center justify-between gap-1">
-          <span class="px-2 py-0.5 rounded-full ${item.badgeCls} text-[10px] font-extrabold">${item.badge}</span>
-          <span class="text-[10px] font-mono font-bold text-slate-500">SKU ${skuCode}</span>
-        </div>
-        <div class="flex items-center gap-3 pt-1">
-          <img src="${imgUrl}" alt="" class="w-12 h-12 rounded-xl object-contain border border-slate-100 bg-slate-50 p-1 shrink-0" loading="lazy" />
-          <div class="min-w-0">
-            <div class="text-[10px] font-mono text-red-600 truncate" title="${erpRaw.replace(/"/g, '&quot;')}">Antes: ${erpRaw}</div>
-            <h4 class="text-xs font-extrabold text-slate-900 line-clamp-2 leading-snug">Depois: ${p.title}</h4>
-          </div>
-        </div>
-        <p class="text-[11px] text-slate-600 leading-relaxed">${item.note}</p>
-        <div class="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-[10px] font-bold text-emerald-700 line-clamp-2 leading-snug" title="${b2bSummary.replace(/"/g, '&quot;')}">
-          💡 B2B: ${b2bSummary}
-        </div>
-      </div>
-      <div class="grid grid-cols-2 gap-2 pt-1">
-        <button onclick="openCaseStudySampleBySku('${skuCode}', 'diff')" class="py-1.5 px-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-extrabold transition-all">
-          ⚖️ Comparar Diff
-        </button>
-        <button onclick="openCaseStudySampleBySku('${skuCode}', 'b')" class="py-1.5 px-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-[11px] font-extrabold transition-all">
-          🚀 Ver 3 Atos
-        </button>
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-async function openCaseStudySampleBySku(sku, mode = "diff") {
-  if (currentSessionMode !== "loja_doce" && currentStore !== "loja_doce") {
-    return;
-  }
-  if (!MASTER_PAYLOAD.stores["loja_doce"]) {
-    try {
-      MASTER_PAYLOAD.stores["loja_doce"] = await StoreLoader.loadStore("loja_doce");
-    } catch (e) {}
-  }
-  const prods = (MASTER_PAYLOAD.stores["loja_doce"] && MASTER_PAYLOAD.stores["loja_doce"].products) || [];
-  const target = prods.find(p => String(p.master_sku || p.sku) === String(sku)) || prods[0];
-  if (!target) return;
-  openProductModal(target);
-  if (mode && typeof switchModalMode === "function") {
-    switchModalMode(mode);
-  }
-}
-
-async function openCaseStudySampleByCategory(catName, mode = "diff") {
-  if (currentSessionMode !== "loja_doce" && currentStore !== "loja_doce") {
-    return;
-  }
-  if (!MASTER_PAYLOAD.stores["loja_doce"]) {
-    try {
-      MASTER_PAYLOAD.stores["loja_doce"] = await StoreLoader.loadStore("loja_doce");
-    } catch (e) {}
-  }
-  const prods = (MASTER_PAYLOAD.stores["loja_doce"] && MASTER_PAYLOAD.stores["loja_doce"].products) || [];
-  const target = prods.find(p => p.category === catName) || prods[0];
-  if (!target) return;
-  openProductModal(target);
-  if (mode && typeof switchModalMode === "function") {
-    switchModalMode(mode);
-  }
-}
-
 async function verifyMachineIPAccess() {
-  const savedAuth = localStorage.getItem(BRK_AUTH_TOKEN_KEY);
-  if (savedAuth === BRK_AUTH_TOKEN_VAL) {
-    applySessionIsolation("brk");
+  // Se já autenticou com a senha rex123 neste navegador, entra direto
+  if (localStorage.getItem(BRK_AUTH_TOKEN_KEY) === BRK_AUTH_TOKEN_VAL) {
     switchStore("brk_fishing");
-    return;
-  }
-  if (savedAuth === LOJADOCE_AUTH_TOKEN_VAL) {
-    applySessionIsolation("loja_doce");
-    switchStore("loja_doce");
     return;
   }
   renderPasswordLoginScreen();
@@ -2235,6 +1653,4 @@ async function verifyMachineIPAccess() {
 document.addEventListener("DOMContentLoaded", () => {
   verifyMachineIPAccess();
 });
-
-
 

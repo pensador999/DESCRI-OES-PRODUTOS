@@ -7,127 +7,9 @@
 let currentModalProduct = null;
 let currentModalMode = "b"; // 'b', 'a', 'orig'
 
-function isLojaDoceProduct(product) {
-  if (!product) return (typeof currentStore !== "undefined" && currentStore === "loja_doce");
-  return (
-    product.store_key === "loja_doce" ||
-    (typeof currentStore !== "undefined" && currentStore === "loja_doce") ||
-    String(product.archetype_id || "").startsWith("ld_")
-  );
-}
-
-function copyTextHelper(text, labelMsg) {
-  if (!text) return;
-  navigator.clipboard.writeText(text).then(() => {
-    if (typeof showToast === "function") {
-      showToast(`✅ ${labelMsg || "Texto"} copiado para a área de transferência!`);
-    }
-  }).catch(() => {});
-}
-
-function renderVtexSeoAndSpecsPanel(product, isLojaDoce) {
-  let panel = document.getElementById("modal-vtex-seo-specs-panel");
-  if (!isLojaDoce || !product) {
-    if (panel) panel.classList.add("hidden");
-    return;
-  }
-  if (!panel) {
-    const banner = document.getElementById("modal-mode-banner");
-    if (banner && banner.parentNode) {
-      panel = document.createElement("div");
-      panel.id = "modal-vtex-seo-specs-panel";
-      banner.parentNode.insertBefore(panel, banner.nextSibling);
-    }
-  }
-  if (!panel) return;
-  panel.classList.remove("hidden");
-
-  const rawErp = product.raw_erp_title || product.title || "";
-  const cleanTitle = product.title || "";
-  const seoTitle = product.seo_title || cleanTitle.slice(0, 60);
-  const seoDesc = product.seo_meta_description || "";
-  const vtexSpecs = product.vtex_specifications || {};
-  const yieldInfo = product.yield_info || {};
-  const b2bEconomics = product.b2b_economics || {};
-  const allergenInfo = product.allergen_info || {};
-  const b2bSummary = b2bEconomics.resumo_economia_b2b || b2bEconomics.value || vtexSpecs["Economia & Custo Unitário (B2B)"] || "";
-
-  const specEntries = Object.entries(vtexSpecs);
-  const specsHtml = specEntries.map(([k, v]) => `
-    <div class="bg-white border border-pink-100 rounded-lg px-2.5 py-1.5 flex flex-col justify-between">
-      <span class="text-[9px] uppercase font-extrabold text-pink-700 tracking-wider">${String(k).replace(/</g, "&lt;")}</span>
-      <span class="text-[11px] font-bold text-slate-800 truncate" title="${String(v).replace(/"/g, "&quot;")}">${String(v).replace(/</g, "&lt;")}</span>
-    </div>
-  `).join("");
-
-  const safeSeoTitleAttr = String(seoTitle).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-  const safeSeoDescAttr = String(seoDesc).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-  const vtexExportJson = Object.assign({}, vtexSpecs, b2bSummary ? { B2B_Unit_Economics: b2bSummary } : {});
-  const safeSpecsJsonAttr = JSON.stringify(vtexExportJson).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-
-  panel.className = "rounded-2xl border border-pink-200 bg-gradient-to-br from-pink-50/70 via-white to-rose-50/50 p-4 shadow-sm space-y-3 text-xs";
-  panel.innerHTML = `
-    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-pink-200/70 pb-2.5">
-      <div class="flex items-center gap-2">
-        <span class="px-2 py-0.5 rounded-md bg-pink-600 text-white font-extrabold text-[10px] uppercase tracking-wider">Auditoria VTEX 4 Frentes</span>
-        <span class="font-extrabold text-slate-900 text-xs">SEO Limpo (Anti-Bug VTEX), Calculadora de Rendimento, Economia B2B, ANVISA & SpecificationFilters</span>
-      </div>
-      <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full">✓ 100% Plain Text UTF-8</span>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-      <!-- Frente 2: SEO Title & Meta Description -->
-      <div class="bg-white rounded-xl border border-slate-200 p-3 space-y-2">
-        <div class="flex items-center justify-between">
-          <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">1. Expansão de Título ERP → Vitrine</span>
-          <span class="text-[10px] font-mono text-pink-700 font-bold">Title Case Acentuado</span>
-        </div>
-        <div class="text-[11px] text-slate-500 line-through truncate" title="${String(rawErp).replace(/"/g, "&quot;")}">ERP Bruto: ${String(rawErp).replace(/</g, "&lt;")}</div>
-        <div class="text-xs font-extrabold text-slate-900">${String(cleanTitle).replace(/</g, "&lt;")}</div>
-
-        <div class="pt-1.5 border-t border-slate-100 space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] font-extrabold uppercase text-slate-600">SEO Title (&lt;title&gt; VTEX): <span class="text-emerald-700">${seoTitle.length}/60 chars</span></span>
-            <button type="button" onclick="copyTextHelper('${safeSeoTitleAttr}', 'SEO Title VTEX')" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[10px]">📋 Copiar</button>
-          </div>
-          <div class="p-1.5 rounded bg-slate-50 border border-slate-200 font-mono text-[11px] text-slate-800">${String(seoTitle).replace(/</g, "&lt;")}</div>
-        </div>
-
-        <div class="pt-1 border-t border-slate-100 space-y-1">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] font-extrabold uppercase text-slate-600">Meta Description (Sem HTML): <span class="text-emerald-700">${seoDesc.length} chars</span></span>
-            <button type="button" onclick="copyTextHelper('${safeSeoDescAttr}', 'Meta Description VTEX')" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[10px]">📋 Copiar</button>
-          </div>
-          <div class="p-1.5 rounded bg-slate-50 border border-slate-200 text-[11px] text-slate-700 leading-snug">${String(seoDesc).replace(/</g, "&lt;")}</div>
-        </div>
-      </div>
-
-      <!-- Frentes 1, 3, 4 e Plano 2: Rendimento, Economia B2B, ANVISA e VTEX Specifications -->
-      <div class="bg-white rounded-xl border border-slate-200 p-3 space-y-2 flex flex-col justify-between">
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">2. Especificações Estruturadas VTEX (${specEntries.length} campos)</span>
-            <button type="button" onclick="copyTextHelper('${safeSpecsJsonAttr}', 'JSON de Especificações VTEX')" class="px-2 py-0.5 rounded bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-200 font-bold text-[10px]">📋 Copiar JSON VTEX</button>
-          </div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-36 overflow-y-auto pr-1">
-            ${specsHtml}
-          </div>
-        </div>
-
-        <div class="pt-2 border-t border-slate-100 space-y-1 text-[11px]">
-          ${b2bSummary ? `<div class="text-slate-700"><strong class="text-emerald-700">💰 Economia & Custo Unitário (B2B):</strong> ${String(b2bSummary).replace(/</g, "&lt;")}</div>` : ""}
-          ${(yieldInfo.resumo_rendimento || yieldInfo.yield_estimate || yieldInfo.dimensional_equiv) ? `<div class="text-slate-700"><strong class="text-pink-700">📐 Rendimento / Equivalência:</strong> ${String(yieldInfo.resumo_rendimento || yieldInfo.yield_estimate || yieldInfo.dimensional_equiv).replace(/</g, "&lt;")}</div>` : ""}
-          ${(allergenInfo.alerta_alergenicos || allergenInfo.value) ? `<div class="text-slate-700"><strong class="text-amber-700">🛡️ Segurança / Alergênicos:</strong> ${String(allergenInfo.alerta_alergenicos || allergenInfo.value).replace(/</g, "&lt;")}</div>` : ""}
-        </div>
-      </div>
-    </div>
-  `;
-}
-
 function openProductModal(product) {
   currentModalProduct = product;
   currentModalMode = "b";
-  const isLojaDoce = isLojaDoceProduct(product);
 
   if (!product.mode_b_html && typeof getProductModeBHTML === "function") {
     product.mode_b_html = getProductModeBHTML(product);
@@ -137,65 +19,20 @@ function openProductModal(product) {
   }
 
   document.getElementById("modal-title").innerText = product.title;
-  const storeBadge = document.getElementById("modal-store-badge");
-  if (storeBadge) {
-    if (isLojaDoce) {
-      storeBadge.innerText = "CATÁLOGO VTEX";
-      storeBadge.className = "px-2 py-0.5 rounded-md bg-pink-600 text-white font-bold text-[10px] uppercase tracking-wider";
-    } else {
-      storeBadge.innerText = product.store_key ? product.store_key.replace('_', ' ').toUpperCase() : "BRK";
-      storeBadge.className = "px-2 py-0.5 rounded-md bg-blue-600 text-white font-bold text-[10px] uppercase tracking-wider";
-    }
-  }
+  document.getElementById("modal-store-badge").innerText = product.store_key ? product.store_key.replace('_', ' ').toUpperCase() : "BRK";
   document.getElementById("modal-sku-badge").innerText = "SKU: " + (product.master_sku || product.id);
   document.getElementById("modal-variants-badge").innerText = (product.variants_skus ? product.variants_skus.length : 1) + " Variantes Agrupadas";
   document.getElementById("modal-archetype-badge").innerText = product.archetype_name || "Molde Padrão";
 
-  const btnModeOrig = document.getElementById("btn-mode-orig");
-  if (btnModeOrig) {
-    btnModeOrig.innerHTML = isLojaDoce ? "<span>📋 Original (ERP VTEX)</span>" : "<span>❌ Original (Quebrado)</span>";
-  }
-
   const openAdminBtn = document.getElementById("modal-open-admin-btn");
   if (openAdminBtn) {
-    const activeStore = product.store_key || currentStore;
-    if (isLojaDoce || activeStore === "loja_doce") {
-      openAdminBtn.style.display = "none";
-      openAdminBtn.href = "#";
-    } else {
-      openAdminBtn.style.display = "inline-flex";
-      const storeMap = {
-        "brk_fishing": "use-brk-fishing.myshopify.com",
-        "brk_agro": "use-brk-agro.myshopify.com",
-        "brk_motors": "use-brk-motors.myshopify.com"
-      };
-      const domain = storeMap[activeStore] || "use-brk-fishing.myshopify.com";
-      openAdminBtn.href = `https://${domain}/admin/products/${product.id}`;
-      openAdminBtn.innerHTML = `<span>Abrir no Admin Shopify ↗</span>`;
-      openAdminBtn.title = "Abrir produto diretamente no Admin da Shopify desta loja específica";
-    }
-  }
-
-  const saveDirectBtn = document.getElementById("modal-save-shopify-direct-btn");
-  if (saveDirectBtn) saveDirectBtn.style.display = isLojaDoce ? "none" : "inline-flex";
-
-  const syncPhotosBtn = document.getElementById("btn-sync-live-photos");
-  if (syncPhotosBtn) syncPhotosBtn.style.display = isLojaDoce ? "none" : "inline-flex";
-
-  const bunkerDetails = document.getElementById("bunker-linker-details");
-  if (bunkerDetails) bunkerDetails.style.display = isLojaDoce ? "none" : "";
-
-  const footerSkuInfo = document.getElementById("modal-footer-sku-info");
-  if (footerSkuInfo) {
-    footerSkuInfo.innerText = isLojaDoce
-      ? `SKU Mestre: ${product.master_sku || product.id} • Pronto para VTEX`
-      : `SKU Mestre: ${product.master_sku || product.id} • Pronto para Shopify`;
-  }
-
-  const footerCopyBtn = document.getElementById("modal-footer-copy-btn");
-  if (footerCopyBtn) {
-    const lbl = footerCopyBtn.querySelector(".copy-label");
-    if (lbl) lbl.innerText = isLojaDoce ? "Copiar Código HTML VTEX" : "Copiar Código HTML Shopify";
+    const storeMap = {
+      "brk_fishing": "use-brk-fishing.myshopify.com",
+      "brk_agro": "use-brk-agro.myshopify.com",
+      "brk_motors": "use-brk-motors.myshopify.com"
+    };
+    const domain = storeMap[product.store_key || currentStore] || "use-brk-fishing.myshopify.com";
+    openAdminBtn.href = `https://${domain}/admin/products/${product.id}`;
   }
 
   const sourceBadge = document.getElementById("modal-source-badge");
@@ -220,7 +57,7 @@ function openProductModal(product) {
     const rawImgs = (product.images && product.images.length > 0) ? product.images : (product.cdn_images || product.gallery || []);
     const imgs = sanitizeAndDedupClientImages(rawImgs, product.archetype_id, product.title);
     const countBadge = document.getElementById("modal-photos-count-badge");
-    if (countBadge) countBadge.innerText = imgs.length + (isLojaDoce ? " Foto(s) CDN VTEX" : " Foto(s) Oficiais");
+    if (countBadge) countBadge.innerText = imgs.length + " Foto(s) Oficiais";
     imgs.forEach((url, idx) => {
       const thumb = document.createElement("img");
       thumb.src = url;
@@ -232,7 +69,6 @@ function openProductModal(product) {
     });
   }
 
-  renderVtexSeoAndSpecsPanel(product, isLojaDoce);
   updateModalView();
   document.getElementById("product-modal").classList.remove("hidden");
 }
@@ -385,30 +221,18 @@ function updateModalView() {
   const sourceElem = document.getElementById("modal-source-code");
   const bannerDesc = document.getElementById("modal-mode-desc");
   const banner = document.getElementById("modal-mode-banner");
-  const isLojaDoce = isLojaDoceProduct(currentModalProduct);
-
-  if (banner) {
-    const rightPill = banner.querySelector("span:last-child");
-    if (rightPill && rightPill !== bannerDesc) {
-      rightPill.innerText = isLojaDoce ? "Pronto para VTEX" : "Pronto para Shopify";
-    }
-  }
 
   let htmlToShow = "";
   if (currentModalMode === "b") {
     if (typeof getProductModeBHTML === "function") {
-      if (!isLojaDoce || !currentModalProduct.mode_b_html || currentModalProduct.__bunkerOverride) {
-        currentModalProduct.mode_b_html = getProductModeBHTML(currentModalProduct);
-      }
+      currentModalProduct.mode_b_html = getProductModeBHTML(currentModalProduct);
     }
     htmlToShow = currentModalProduct.mode_b_html || "<p>HTML Modo B não disponível</p>";
     if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-emerald-50 border-emerald-200 text-emerald-800";
     if (bannerDesc) {
       const arch = currentModalProduct.archetype_id || "";
       const isHeadwear = ["caps_trucker_snapback", "hats_safari_outdoor", "hats_country_cowboy"].includes(arch);
-      if (isLojaDoce) {
-        bannerDesc.innerHTML = "<strong>⭐ Modo B Oficial (Verticalização VTEX 100/100):</strong> Estrutura persuasiva em 3 Atos com Calculadora Automática de Rendimento/Medidas, Alerta ANVISA de Alergênicos, SEO Meta Tags limpas e Schema.org.";
-      } else if (isHeadwear) {
+      if (isHeadwear) {
         bannerDesc.innerHTML = "<strong>⭐ Modo B Oficial (Novo Formato D2C Bonés & Chapéus):</strong> Grid de Detalhes 4x, Características & Cuidados, Seções Split (Produto Premium e Entrega Segura na Caixa BRK anti-deformação) e Schema.org SEO.";
       } else {
         bannerDesc.innerHTML = "<strong>⭐ Modo B Oficial (Novo Padrão BRK 100/100):</strong> Recomendado para colar na Shopify! Estrutura persuasiva em 3 Atos narrativos com Badges Rápidos no topo, Tabela de Medidas Expansível, Schema.org SEO e SVGs embutidos.";
@@ -417,36 +241,20 @@ function updateModalView() {
   } else if (currentModalMode === "a") {
     htmlToShow = currentModalProduct.mode_a_html || currentModalProduct.original_body_html || "<p>Sem HTML original</p>";
     if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-blue-50 border-blue-200 text-blue-800";
-    if (bannerDesc) {
-      bannerDesc.innerHTML = isLojaDoce
-        ? "<strong>Modo A Ativo (Preservação):</strong> Texto original preservado com fotos vinculadas ao CDN VTEX oficial."
-        : "<strong>Modo A Ativo (Preservação):</strong> 100% do texto e tabelas originais preservados com fotos trocadas por CDN Shopify oficial.";
-    }
+    if (bannerDesc) bannerDesc.innerHTML = "<strong>Modo A Ativo (Preservação):</strong> 100% do texto e tabelas originais preservados com fotos trocadas por CDN Shopify oficial.";
   } else if (currentModalMode === "orig") {
     htmlToShow = currentModalProduct.original_body_html || "<p class='text-slate-400 italic'>Este produto não continha descrição original cadastrada.</p>";
     if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-amber-50 border-amber-200 text-amber-900";
-    if (bannerDesc) {
-      bannerDesc.innerHTML = isLojaDoce
-        ? "<strong>⚠️ Conteúdo Legado Atual na VTEX:</strong> Exibe como a descrição bruta do ERP está gravada hoje (curta, sem 3 Atos, sem calculadora de rendimento, sem alerta ANVISA ou schema)."
-        : "<strong>⚠️ Conteúdo Legado Atual na Shopify:</strong> Exibe como a descrição está gravada hoje na loja (antiga, sem os novos badges, tabela expansível ou schema).";
-    }
+    if (bannerDesc) bannerDesc.innerHTML = "<strong>⚠️ Conteúdo Legado Atual na Shopify:</strong> Exibe como a descrição está gravada hoje na loja (antiga, sem os novos badges, tabela expansível ou schema).";
   } else if (currentModalMode === "diff") {
     if (typeof getProductModeBHTML === "function") {
-      if (!isLojaDoce || !currentModalProduct.mode_b_html || currentModalProduct.__bunkerOverride) {
-        currentModalProduct.mode_b_html = getProductModeBHTML(currentModalProduct);
-      }
+      currentModalProduct.mode_b_html = getProductModeBHTML(currentModalProduct);
     }
     const htmlB = currentModalProduct.mode_b_html || "<p>HTML Modo B não disponível</p>";
     const htmlA = currentModalProduct.mode_a_html || currentModalProduct.original_body_html || "<p class='text-slate-400 italic'>Sem descrição original prévia cadastrada.</p>";
 
     if (banner) banner.className = "p-3.5 rounded-xl border text-xs flex items-center justify-between bg-indigo-50 border-indigo-200 text-indigo-900";
-    if (bannerDesc) {
-      bannerDesc.innerHTML = isLojaDoce
-        ? "<strong>Comparador Lado a Lado (Diff VTEX):</strong> Compare o cadastro bruto do ERP com a nova versão verticalizada 100/100 (3 Atos, Calculadora de Rendimento, Alerta ANVISA e Schema SEO)."
-        : "<strong>Comparador Lado a Lado (Diff):</strong> Compare a versão original com a nova versão blindada 100/100 (com Badges Rápidos, 3 Atos, Tabela de Medidas e Schema SEO).";
-    }
-
-    const rightBadgeLabel = isLojaDoce ? "Novo Padrão Oficial VTEX" : "Novo Padrão Oficial BRK";
+    if (bannerDesc) bannerDesc.innerHTML = "<strong>Comparador Lado a Lado (Diff):</strong> Compare a versão original com a nova versão blindada 100/100 (com Badges Rápidos, 3 Atos, Tabela de Medidas e Schema SEO).";
 
     htmlToShow = `
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
@@ -464,11 +272,11 @@ function updateModalView() {
         </div>
       </div>
 
-      <!-- Coluna Direita: Modo B Otimizado -->
+      <!-- Coluna Direita: Modo B Otimizado BRK -->
       <div class="border-2 border-emerald-300 rounded-2xl p-4 bg-emerald-50/30 shadow-sm flex flex-col">
         <div class="flex items-center justify-between pb-3 mb-4 border-b border-emerald-200">
           <div class="flex items-center gap-2">
-            <span class="px-2.5 py-1 rounded-md bg-emerald-600 text-white text-[11px] font-extrabold uppercase tracking-wider">${rightBadgeLabel}</span>
+            <span class="px-2.5 py-1 rounded-md bg-emerald-600 text-white text-[11px] font-extrabold uppercase tracking-wider">Novo Padrão Oficial BRK</span>
             <span class="text-xs text-emerald-800 font-bold">Modo B Blindado</span>
           </div>
           <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
@@ -615,7 +423,6 @@ function applyBunkerLinksToModal() {
 
   currentModalProduct.cdn_images = finalImgs;
   currentModalProduct.gallery = finalImgs;
-  currentModalProduct.__bunkerOverride = true;
   delete currentModalProduct.split_images;
   delete currentModalProduct.narrative_blocks;
   delete currentModalProduct.mode_b_markdown;
@@ -651,7 +458,6 @@ function applyBunkerLinksToModal() {
 function copyCurrentModalMarkdown(btnTrigger) {
   if (!currentModalProduct) return;
   const p = currentModalProduct;
-  const isLojaDoce = isLojaDoceProduct(p);
   const mdText = p.mode_b_markdown || buildClientModeBMarkdown(p);
   if (!mdText) {
     showToast("⚠️ Nenhum texto Markdown disponível.");
@@ -659,7 +465,7 @@ function copyCurrentModalMarkdown(btnTrigger) {
   }
 
   navigator.clipboard.writeText(mdText).then(() => {
-    showToast(isLojaDoce ? "Markdown copiado com sucesso! Pronto para documentação ou VTEX." : "Markdown copiado com sucesso! Pronto para documentação ou Shopify.");
+    showToast("Markdown copiado com sucesso! Pronto para documentação ou Shopify.");
 
     const buttons = [
       btnTrigger,
@@ -699,10 +505,9 @@ function copyCurrentModalHTML(btnTrigger) {
     showToast("⚠️ Nenhum código HTML encontrado para copiar.");
     return;
   }
-  const isLojaDoce = isLojaDoceProduct(currentModalProduct);
 
   navigator.clipboard.writeText(text).then(() => {
-    showToast(isLojaDoce ? "HTML copiado com sucesso! Pronto para colar no Admin VTEX." : "HTML copiado com sucesso! Pronto para colar no Shopify.");
+    showToast("HTML copiado com sucesso! Pronto para colar no Shopify.");
 
     const buttons = [
       btnTrigger,
@@ -734,28 +539,20 @@ function copyCurrentModalHTML(btnTrigger) {
   });
 }
 
-// Baixar CSV Individual
+// Baixar CSV Individual Shopify
 function downloadCurrentProductCSV() {
   if (!currentModalProduct) return;
-  const isLojaDoce = isLojaDoceProduct(currentModalProduct);
   const html = document.getElementById("modal-source-code").textContent;
-  const b2bVal = (currentModalProduct.b2b_economics && (currentModalProduct.b2b_economics.resumo_economia_b2b || currentModalProduct.b2b_economics.value)) || (currentModalProduct.vtex_specifications && currentModalProduct.vtex_specifications["Economia & Custo Unitário (B2B)"]) || "";
-  const row = isLojaDoce
-    ? [
-        "SKU,Handle,Title,SEO_Title,SEO_Meta_Description,B2B_Unit_Economics,Body (HTML)",
-        `"${currentModalProduct.master_sku || currentModalProduct.id}","${currentModalProduct.handle}","${(currentModalProduct.title || '').replace(/"/g, '""')}","${(currentModalProduct.seo_title || '').replace(/"/g, '""')}","${(currentModalProduct.seo_meta_description || '').replace(/"/g, '""')}","${String(b2bVal).replace(/"/g, '""')}","${html.replace(/"/g, '""')}"`
-      ].join("\n")
-    : [
-        "Handle,Title,Body (HTML)",
-        `"${currentModalProduct.handle}","${currentModalProduct.title.replace(/"/g, '""')}","${html.replace(/"/g, '""')}"`
-      ].join("\n");
+  const row = [
+    "Handle,Title,Body (HTML)",
+    `"${currentModalProduct.handle}","${currentModalProduct.title.replace(/"/g, '""')}","${html.replace(/"/g, '""')}"`
+  ].join("\n");
 
   const blob = new Blob(["\uFEFF" + row], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  const pfx = isLojaDoce ? "vtex" : "shopify";
-  link.download = `${pfx}_${currentModalProduct.handle}_desc_${currentModalMode}.csv`;
+  link.download = `shopify_${currentModalProduct.handle}_desc_${currentModalMode}.csv`;
   link.click();
   URL.revokeObjectURL(url);
   showToast("Planilha CSV individual baixada com sucesso!");
@@ -763,19 +560,6 @@ function downloadCurrentProductCSV() {
 
 // Helpers de Geração Dinâmica de Markdown e HTML no Cliente
 function resolveClientOriginAndTitle(liveP) {
-  if (isLojaDoceProduct(liveP)) {
-    const cleanTitle = String(liveP.formatted_title || liveP.title || "Produto Oficial")
-      .replace(/\b(?:BRK|Loja\s+Doce(?:\s+Import)?)\b/gi, "")
-      .replace(/\s{2,}/g, " ")
-      .trim();
-    let bName = String(liveP.brand_name || liveP.vendor || "Linha Oficial").trim();
-    if (!bName || /^(?:brk|loja\s+doce(?:\s+import)?)$/i.test(bName)) {
-      bName = "Linha Oficial";
-    }
-    const oType = bName.toLowerCase() === "linha oficial" ? "producao_propria" : "revenda";
-    return { formattedTitle: cleanTitle, brandName: bName, originType: oType, showCopyright: false };
-  }
-
   const KNOWN_BRANDS = [
     'Rapala', 'Deyu', 'Marine Sports', 'Marine', 'Daisen', 'Albatroz', 
     'Boaonda', 'American Hat', 'Elber', 'Maruri', 'Daiwa', 'Shimano', 
@@ -849,10 +633,6 @@ function anyShirtWord(text) {
 }
 
 function buildClientModeBMarkdown(liveP) {
-  const isLojaDoce = isLojaDoceProduct(liveP);
-  if (isLojaDoce && liveP.mode_b_markdown && !liveP.__bunkerOverride) {
-    return liveP.mode_b_markdown;
-  }
   const originInfo = resolveClientOriginAndTitle(liveP);
   const formattedTitle = originInfo.formattedTitle;
   const brandName = originInfo.brandName;
@@ -874,16 +654,9 @@ function buildClientModeBMarkdown(liveP) {
     lines.push(`> **PRODUTO ORIGINAL**\n`);
   }
 
-  lines.push(isLojaDoce ? `### Apresentação & Rendimento` : `### Performance & Conforto`);
+  lines.push(`### Performance & Conforto`);
   if (img1) lines.push(`![${formattedTitle}](${img1})\n`);
-  if (isLojaDoce && liveP.narrative_blocks && liveP.narrative_blocks.length > 0) {
-    liveP.narrative_blocks.forEach((b, i) => {
-      if (i > 0) lines.push(`### ${b.title || b.tag || 'Destaque'}`);
-      lines.push(`${b.description || ''}\n`);
-    });
-  } else {
-    lines.push(`Desenvolvido para oferecer máxima durabilidade e conforto térmico, o(a) ${formattedTitle} garante total liberdade de movimentos e proteção contínua.\n`);
-  }
+  lines.push(`Desenvolvido para oferecer máxima durabilidade e conforto térmico, o(a) ${formattedTitle} garante total liberdade de movimentos e proteção contínua.\n`);
 
   if (liveP.specs && liveP.specs.length > 0) {
     lines.push(`### Ficha Técnica & Especificações`);
@@ -895,18 +668,11 @@ function buildClientModeBMarkdown(liveP) {
     lines.push(``);
   }
 
-  const defaultMdCare = isLojaDoce
-    ? "Conservar na embalagem original fechada, em local seco, fresco e arejado, ao abrigo da luz solar direta."
-    : "Lavar à mão ou em ciclo suave com sabão neutro. Secar à sombra (dispensa uso de ferro).";
   lines.push(`### Guia de Cuidados & Conservação`);
-  lines.push(`${liveP.care_tips || defaultMdCare}\n`);
+  lines.push(`Lavar à mão ou em ciclo suave com sabão neutro. Secar à sombra (dispensa uso de ferro).\n`);
 
   lines.push(`---`);
-  if (isLojaDoce) {
-    lines.push(`- **Procedência 100% Original:** Curadoria Oficial • Marca ${brandName}`);
-  } else {
-    lines.push(`- **Qualidade Oficial BRK:** Matérias-primas nobres testadas`);
-  }
+  lines.push(`- **Qualidade Oficial BRK:** Matérias-primas nobres testadas`);
   lines.push(`- **Envio Rápido & Seguro:** Rastreamento de ponta a ponta`);
 
   if (showCopyright) {
@@ -1426,54 +1192,6 @@ const QUICK_BADGES_BY_ARCHETYPE = {
       "title": "Envio Rápido & Seguro",
       "sub": "Rastreamento Completo"
     }
-  ],
-  "ld_confeitaria_ingredientes": [
-    { "icon": "sparkle", "title": "Padrão Confeitaria Pro", "sub": "Estabilidade & Rendimento" },
-    { "icon": "shield", "title": "Textura Homogênea", "sub": "Fácil Incorporação" },
-    { "icon": "box", "title": "Embalagem Lacrada", "sub": "Lote Fresco de Fábrica" },
-    { "icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata" }
-  ],
-  "ld_confeitaria_formas_utensilios": [
-    { "icon": "shield", "title": "Padrão Profissional", "sub": "Acabamento de Precisão" },
-    { "icon": "bolt", "title": "Alta Estabilidade", "sub": "Padronização de Produção" },
-    { "icon": "sparkle", "title": "Apresentação Impecável", "sub": "Valoriza suas Receitas" },
-    { "icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata" }
-  ],
-  "ld_bomboniere_chocolates": [
-    { "icon": "sparkle", "title": "Sabor & Cremosidade", "sub": "Marca Original Consagrada" },
-    { "icon": "box", "title": "Lote Fresco & Lacrado", "sub": "Conservação Garantida" },
-    { "icon": "bolt", "title": "Alto Giro Comercial", "sub": "Ideal p/ Festas e Revenda" },
-    { "icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata" }
-  ],
-  "ld_bomboniere_balas_gomas": [
-    { "icon": "sparkle", "title": "Cores & Sabores Vivos", "sub": "Sucesso em Lembrancinhas" },
-    { "icon": "box", "title": "Pacote Econômico", "sub": "Alto Rendimento por Embalagem" },
-    { "icon": "shield", "title": "100% Original", "sub": "Procedência Direta da Marca" },
-    { "icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata" }
-  ],
-  "ld_embalagens_descartaveis": [
-    { "icon": "shield", "title": "Estrutura Firme", "sub": "Transporte e Exposição Seguros" },
-    { "icon": "box", "title": "Praticidade & Higiene", "sub": "Ideal para Delivery e Eventos" },
-    { "icon": "sparkle", "title": "Acabamento Limpo", "sub": "Valoriza seu Produto" },
-    { "icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata" }
-  ],
-  "ld_artigos_festa_decoracao": [
-    { "icon": "palette", "title": "Visual Vibrante", "sub": "Destaque na Decoração" },
-    { "icon": "sparkle", "title": "Acabamento Festivo", "sub": "Fácil Composição de Cenário" },
-    { "icon": "shield", "title": "Material Selecionado", "sub": "Durabilidade Durante o Evento" },
-    { "icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata" }
-  ],
-  "ld_presentes_caixas_sacolas": [
-    { "icon": "box", "title": "Estrutura Reforçada", "sub": "Proteção e Elegância" },
-    { "icon": "sparkle", "title": "Pronta para Presentear", "sub": "Valoriza Cestas e Kits" },
-    { "icon": "palette", "title": "Acabamento Premium", "sub": "Apresentação Sofisticada" },
-    { "icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata" }
-  ],
-  "ld_papelaria_artesanato": [
-    { "icon": "gear", "title": "Praticidade no Uso", "sub": "Rotina Escolar, Loja e Ateliê" },
-    { "icon": "shield", "title": "Qualidade Comprovada", "sub": "Desempenho Consistente" },
-    { "icon": "sparkle", "title": "Acabamento Preciso", "sub": "Ideal para Personalizados" },
-    { "icon": "truck", "title": "Envio Rápido & Seguro", "sub": "Pronta Entrega Imediata" }
   ]
 };
 
@@ -1598,7 +1316,6 @@ ${itemsHtml}
 }
 
 function buildClientSizeGuide(themeColor, themeBg, archetypeId, isKids, isShortSleeve, liveP) {
-  if (String(archetypeId || "").startsWith("ld_")) return "";
   const tLow = (liveP.formatted_title || liveP.title || "").toLowerCase();
   const skuLow = (liveP.sku || liveP.master_sku || "").toLowerCase();
 
@@ -2245,14 +1962,11 @@ function buildClientSchemaJsonLd(liveP) {
       : (liveP.images || []);
   const images = sanitizeAndDedupClientImages(rawImgs, liveP.archetype_id, liveP.title).slice(0, 3);
 
-  const isLdSchema = isLojaDoceProduct(liveP);
   const schemaObj = {
     "@context": "https://schema.org/",
     "@type": "Product",
     "name": formattedTitle,
-    "description": isLdSchema
-      ? `${formattedTitle} original com procedência garantida e envio seguro.`
-      : `${formattedTitle} oficial com garantia e qualidade oficial BRK.`,
+    "description": `${formattedTitle} oficial com garantia e qualidade oficial BRK.`,
     "sku": String(sku),
     "brand": {
       "@type": "Brand",
@@ -3593,10 +3307,6 @@ function selectClientCutleryActImages(cdnImages, title = "") {
 
 function getProductModeBHTML(liveP) {
   if (!liveP) return "";
-  const isLojaDoce = isLojaDoceProduct(liveP);
-  if (isLojaDoce && liveP.mode_b_html && !liveP.__bunkerOverride) {
-    return liveP.mode_b_html;
-  }
   const originInfo = resolveClientOriginAndTitle(liveP);
   const formattedTitle = liveP.formatted_title || originInfo.formattedTitle;
   const brandName = liveP.brand_name || originInfo.brandName;
@@ -3623,9 +3333,7 @@ function getProductModeBHTML(liveP) {
     const tLowStore = (liveP.title || "").toLowerCase();
     const vendorLowStore = (liveP.vendor || "").toLowerCase();
     const catLowStore = (liveP.category || "").toLowerCase();
-    if (isLojaDoce) {
-      resolvedStoreKey = "loja_doce";
-    } else if (
+    if (
       vendorLowStore.includes("agro") || catLowStore.includes("agro") || archetypeId === "agro_field" ||
       imgsStrStore.includes("0887/2083/4857") || imgsStrStore.includes("0798/6462/7495") ||
       /\b(agro|botina|fazenda|pecuaria|pecuária|nelore)\b/i.test(tLowStore)
@@ -3643,8 +3351,8 @@ function getProductModeBHTML(liveP) {
     }
   }
 
-  const themeColor = liveP.theme_color || (resolvedStoreKey === "loja_doce" ? "#db2777" : resolvedStoreKey === "brk_agro" ? "#16a34a" : resolvedStoreKey === "brk_motors" ? "#f97316" : "#0284c7");
-  const themeBg = liveP.theme_bg || (resolvedStoreKey === "loja_doce" ? "#fdf2f8" : resolvedStoreKey === "brk_agro" ? "#f0fdf4" : resolvedStoreKey === "brk_motors" ? "#fff7ed" : "#f0f9ff");
+  const themeColor = liveP.theme_color || (resolvedStoreKey === "brk_agro" ? "#16a34a" : resolvedStoreKey === "brk_motors" ? "#f97316" : "#0284c7");
+  const themeBg = liveP.theme_bg || (resolvedStoreKey === "brk_agro" ? "#f0fdf4" : resolvedStoreKey === "brk_motors" ? "#fff7ed" : "#f0f9ff");
 
   const isApparel = ["uv_performance", "agro_field", "motors_speed", "shirts_button_work", "pants_cargo_tactical"].includes(archetypeId);
   const isLure = (archetypeId === "fishing_lures");
@@ -3705,14 +3413,6 @@ function getProductModeBHTML(liveP) {
   }
 
   let blocks = liveP.narrative_blocks ? liveP.narrative_blocks.map(b => ({ ...b })) : null;
-  if (!blocks || blocks.length === 0) {
-    const directActs = ["act1", "act2", "act3"]
-      .map(k => (liveP[k] && typeof liveP[k] === "object") ? { ...liveP[k] } : null)
-      .filter(Boolean);
-    if (directActs.length > 0) {
-      blocks = directActs;
-    }
-  }
   if (!blocks || blocks.length === 0) {
     const moldes = window.__STORE_MOLDES || {};
     let archKey = archetypeId;
@@ -3903,12 +3603,6 @@ function getProductModeBHTML(liveP) {
       specs = tmpl.base_specs.map(s => ({ label: s.label, value: s.default }));
     }
   }
-  if (isLojaDoce) {
-    const b2bClientVal = (liveP.b2b_economics && (liveP.b2b_economics.resumo_economia_b2b || liveP.b2b_economics.value)) || (liveP.vtex_specifications && liveP.vtex_specifications["Economia & Custo Unitário (B2B)"]) || "";
-    if (b2bClientVal && !specs.some(s => s && s.label === "Economia & Custo Unitário (B2B)")) {
-      specs.push({ label: "Economia & Custo Unitário (B2B)", value: b2bClientVal });
-    }
-  }
 
   // Ajuste inteligente do Prazo de Produção para Camisas C0 (Pronta entrega para _FULL e _OUT, 10 dias úteis para padrão)
   const isC0Shirt = (archetypeId === "uv_performance") ||
@@ -3994,9 +3688,7 @@ function getProductModeBHTML(liveP) {
     careTips = window.__STORE_MOLDES[archKey]?.care_tips;
   }
   if (!careTips) {
-    careTips = isLojaDoce
-      ? "Conservar na embalagem original fechada, em local seco, fresco e arejado, ao abrigo da luz solar direta."
-      : "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar).";
+    careTips = "Lavar à mão ou em ciclo suave com sabão neutro. Não usar amaciante nem alvejante à base de cloro. Secar à sombra (dispensa uso de ferro de passar).";
   }
 
   if (isKitShirtBootModal) {
@@ -4063,34 +3755,6 @@ function getProductModeBHTML(liveP) {
         return { view_tag: "ITEM 02 DO KIT • ATO 02", icon: "shield", label: "Item 02 do Kit: Botina em Couro Bovino Legítimo", pill: "Solado Antiderrapante", zoom_act3: false };
       }
       return { view_tag: "CONJUNTO COMPLETO • ATO 03", icon: "sparkle", label: "Conjunto Completo: Proteção do Tronco aos Pés", pill: "Kit 2 em 1", zoom_act3: false };
-    }
-
-    if (String(archetypeId || "").startsWith("ld_") || isLojaDoce) {
-      if (idx === 0) {
-        return {
-          view_tag: "APRESENTAÇÃO • ATO 01",
-          icon: "sparkle",
-          label: "Apresentação Comercial & Embalagem Original",
-          pill: "Curadoria Oficial",
-          zoom_act3: false,
-        };
-      }
-      if (idx === 1) {
-        return {
-          view_tag: "ESPECIFICAÇÃO • ATO 02",
-          icon: "bolt",
-          label: "Rendimento, Composição & Padrão Profissional",
-          pill: "Alto Desempenho",
-          zoom_act3: false,
-        };
-      }
-      return {
-        view_tag: "APLICAÇÃO • ATO 03",
-        icon: "shield",
-        label: "Acabamento & Praticidade na Rotina",
-        pill: "Procedência Original",
-        zoom_act3: false,
-      };
     }
 
     if (idx === 0) {
@@ -4168,374 +3832,6 @@ function getProductModeBHTML(liveP) {
     }
 
     return { view_tag: "DETALHE TÉCNICO • ATO 03", icon: "shield", label: "Acabamento de Precisão & Componentes", pill: "Rigor Oficial BRK", zoom_act3: false };
-  }
-
-  function buildClientLojaDoceInfographicCard(idx, archetypeId, themeColor, themeBg, prodObj, primaryImg, safeTitleAlt, mlTrackAttrsStr) {
-    const yieldInfo = (prodObj && typeof prodObj.yield_info === "object" && prodObj.yield_info) ? prodObj.yield_info : {};
-    const b2bEconomics = (prodObj && typeof prodObj.b2b_economics === "object" && prodObj.b2b_economics) ? prodObj.b2b_economics : {};
-    const allergenInfo = (prodObj && typeof prodObj.allergen_info === "object" && prodObj.allergen_info) ? prodObj.allergen_info : {};
-    const vtexSpecs = (prodObj && typeof prodObj.vtex_specifications === "object" && prodObj.vtex_specifications) ? prodObj.vtex_specifications : {};
-    const specsList = Array.isArray(specs) ? specs : [];
-    const specsMap = {};
-    specsList.forEach(s => {
-      if (s && s.label) specsMap[String(s.label).trim()] = String(s.value || "").trim();
-    });
-
-    const brandLabel = String(
-      prodObj.brand_name || vtexSpecs["Marca"] || specsMap["Marca / Fabricante"] || brandName || "Original"
-    ).trim();
-    const skuCode = String(
-      prodObj.sku || prodObj.master_sku || vtexSpecs["Código de Referência (SKU)"] || vtexSpecs["Código SKU"] || specsMap["Código de Referência (SKU)"] || specsMap["Código SKU"] || ""
-    ).trim();
-    const careTipsVal = String(
-      careTips || "Conservar na embalagem original fechada, em local seco, fresco e arejado, ao abrigo da luz solar direta."
-    ).trim();
-
-    const pesoMedida = (
-      vtexSpecs["Peso Líquido / Volume"] ||
-      vtexSpecs["Peso / Volume"] ||
-      vtexSpecs["Dimensões / Medidas"] ||
-      specsMap["Peso Líquido / Volume"] ||
-      specsMap["Peso / Volume Líquido"] ||
-      specsMap["Dimensões / Medidas"] ||
-      "Padrão Oficial de Fábrica"
-    );
-    const qtdEmb = (
-      vtexSpecs["Apresentação / Quantidade"] ||
-      vtexSpecs["Quantidade por Embalagem"] ||
-      specsMap["Apresentação / Quantidade"] ||
-      specsMap["Conteúdo da Embalagem"] ||
-      "Embalagem Comercial"
-    );
-    const dimSummary = (pesoMedida !== qtdEmb) ? `${pesoMedida} • ${qtdEmb}` : pesoMedida;
-    const pillCode = skuCode ? `SKU ${skuCode}` : `Marca ${brandLabel}`;
-
-    if (idx === 0) {
-      const catVal = (
-        vtexSpecs["Categoria VTEX"] ||
-        specsMap["Departamento / Linha"] ||
-        specsMap["Categoria Técnica"] ||
-        "Confeitaria, Festas & Embalagens"
-      );
-      const usoVal = (
-        specsMap["Uso Recomendado"] ||
-        specsMap["Modo de Aplicação Técnica"] ||
-        vtexSpecs["Uso Recomendado"] ||
-        "Pronto para uso profissional e doméstico com padrão de fábrica."
-      );
-      return `<div class="brk-desc-media brk-media-card brk-infographic-card">
-        <div class="brk-infog-header">
-          <span class="brk-infog-head-left">${getSvgIcon('sparkle', themeColor, 14)} <span>APRESENTAÇÃO • FICHA COMERCIAL & ORIGEM</span></span>
-          <span class="brk-infog-head-pill">${pillCode}</span>
-        </div>
-        <div class="brk-infog-stage">
-          <div class="brk-infog-hero">
-            <div class="brk-infog-diagram">
-              <div class="brk-infog-svg-badge">
-                <svg width="38" height="38" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <rect x="6" y="8" width="36" height="32" rx="6" fill="${themeBg}" stroke="${themeColor}" stroke-width="2.5"/>
-                  <path d="M14 18H34M14 25H28M14 32H22" stroke="${themeColor}" stroke-width="2.5" stroke-linecap="round"/>
-                </svg>
-              </div>
-              <div class="brk-infog-hero-copy">
-                <span class="brk-infog-kicker">IDENTIFICAÇÃO OFICIAL DO ITEM</span>
-                <strong class="brk-infog-headline">Marca ${brandLabel} • ${pesoMedida}</strong>
-                <span class="brk-infog-subline">${qtdEmb} • ${pillCode}</span>
-              </div>
-            </div>
-          </div>
-          <div class="brk-infog-metrics">
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">${getSvgIcon('box', themeColor, 13)}</span>
-                <span class="brk-infog-metric-label">Apresentação Comercial & Embalagem</span>
-              </div>
-              <div class="brk-infog-metric-val">${dimSummary}</div>
-            </div>
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">${getSvgIcon('sparkle', themeColor, 13)}</span>
-                <span class="brk-infog-metric-label">Departamento & Linha Oficial</span>
-              </div>
-              <div class="brk-infog-metric-val">${catVal}</div>
-            </div>
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">${getSvgIcon('check', themeColor, 13)}</span>
-                <span class="brk-infog-metric-label">Aplicação & Indicação Principal</span>
-              </div>
-              <div class="brk-infog-metric-val">${usoVal}</div>
-            </div>
-          </div>
-        </div>
-        <div class="brk-media-infobar">
-          <span class="brk-media-info-left">${getSvgIcon('sparkle', themeColor, 14)} <span>Apresentação Comercial & Embalagem Original</span></span>
-          <span class="brk-media-info-pill">Curadoria Oficial</span>
-        </div>
-      </div>`;
-    }
-
-    if (idx === 1) {
-      const yieldVal = (
-        yieldInfo.yield_estimate ||
-        yieldInfo.dimensional_equiv ||
-        vtexSpecs["Rendimento Prático Estimado"] ||
-        vtexSpecs["Rendimento Estimado"] ||
-        vtexSpecs["Equivalência Dimensional / Capacidade"] ||
-        vtexSpecs["Equivalência Dimensional"] ||
-        specsMap["Rendimento Prático Estimado"] ||
-        specsMap["Rendimento Estimado"] ||
-        specsMap["Equivalência Dimensional / Capacidade"] ||
-        specsMap["Equivalência Dimensional"] ||
-        yieldInfo.resumo_rendimento ||
-        "Dimensionamento otimizado para padronização de receitas, montagem e controle exato de custo por unidade produzida."
-      );
-      const dimEquivExtra = (
-        yieldInfo.dimensional_equiv ||
-        vtexSpecs["Equivalência Dimensional / Capacidade"] ||
-        specsMap["Equivalência Dimensional / Capacidade"] ||
-        ""
-      );
-      const supplyFormatVal = (dimEquivExtra && dimEquivExtra !== yieldVal && !dimSummary.includes(dimEquivExtra))
-        ? `${dimSummary} (${dimEquivExtra})`
-        : dimSummary;
-      const heroHeadline = (pesoMedida !== "Padrão Oficial de Fábrica") ? pesoMedida : dimSummary;
-      const heroSubline = (pesoMedida !== qtdEmb) ? `${qtdEmb} • Marca ${brandLabel}` : `Marca ${brandLabel} • Medição Padronizada`;
-
-      let techParamLabel = "Parâmetro Técnico de Aplicação";
-      let techParamVal = "";
-      const candLabels = [
-        "Classificação Técnica",
-        "Necessita Temperagem?",
-        "Modo de Aplicação Técnica",
-        "Tipo de Inflagem Recomendada",
-        "Inflagem / Aplicação",
-        "Estabilidade Térmica",
-        "Solubilidade / Base Técnica",
-        "Material Principal",
-        "Uso Recomendado",
-        "Sabor / Tonalidade",
-        "Sabor / Cor / Tonalidade",
-        "Categoria Técnica",
-        "Departamento / Linha",
-        "Categoria VTEX"
-      ];
-      for (let i = 0; i < candLabels.length; i++) {
-        const cLbl = candLabels[i];
-        if (specsMap[cLbl]) {
-          techParamLabel = cLbl;
-          techParamVal = specsMap[cLbl];
-          break;
-        }
-      }
-      if (!techParamVal) {
-        if (yieldInfo.gas_and_arch) {
-          techParamLabel = "Tipo de Inflagem Recomendada";
-          techParamVal = String(yieldInfo.gas_and_arch);
-        } else {
-          const vtexCandLabels = [
-            "Modo de Aplicação Técnica",
-            "Tipo de Inflagem Recomendada",
-            "Inflagem / Aplicação",
-            "Uso Recomendado",
-            "Sabor / Cor / Tonalidade",
-            "Sabor / Tonalidade",
-            "Material",
-            "Categoria VTEX"
-          ];
-          for (let i = 0; i < vtexCandLabels.length; i++) {
-            const vLbl = vtexCandLabels[i];
-            if (vtexSpecs[vLbl]) {
-              techParamLabel = vLbl;
-              techParamVal = String(vtexSpecs[vLbl]);
-              break;
-            }
-          }
-        }
-      }
-      if (!techParamVal) {
-        techParamVal = "Desempenho calibrado para uso profissional e doméstico com alta estabilidade.";
-      }
-
-      const b2bEconVal = (
-        b2bEconomics.resumo_economia_b2b ||
-        b2bEconomics.value ||
-        vtexSpecs["Economia & Custo Unitário (B2B)"] ||
-        specsMap["Economia & Custo Unitário (B2B)"] ||
-        ""
-      );
-      const b2bMetricHtml = b2bEconVal ? `
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">${getSvgIcon('bolt', themeColor, 13)}</span>
-                <span class="brk-infog-metric-label">Economia & Custo Unitário (B2B)</span>
-              </div>
-              <div class="brk-infog-metric-val">${b2bEconVal}</div>
-            </div>` : "";
-
-      const thumbHtml = primaryImg ? `
-            <div class="brk-infog-thumb brk-stage-loupe" ${mlTrackAttrsStr}>
-              <img src="${primaryImg}" alt="${safeTitleAlt} - Zoom de Especificação" class="brk-infog-crop-zoom" loading="lazy" referrerpolicy="no-referrer" />
-              <div class="brk-ml-zoom-layer" style="background-image: url('${primaryImg}');"></div>
-              <span class="brk-infog-thumb-badge">Zoom 2.4x</span>
-            </div>` : "";
-
-      return `<div class="brk-desc-media brk-media-card brk-infographic-card">
-        <div class="brk-infog-header">
-          <span class="brk-infog-head-left">${getSvgIcon('ruler', themeColor, 14)} <span>INFOGRÁFICO • RENDIMENTO & MEDIDAS</span></span>
-          <span class="brk-infog-head-pill">${pillCode}</span>
-        </div>
-        <div class="brk-infog-stage">
-          <div class="brk-infog-hero">${thumbHtml}
-            <div class="brk-infog-diagram">
-              <div class="brk-infog-svg-badge">
-                <svg width="38" height="38" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <rect x="4" y="10" width="40" height="28" rx="6" fill="${themeBg}" stroke="${themeColor}" stroke-width="2.5"/>
-                  <path d="M12 18V26M18 18V23M24 18V28M30 18V23M36 18V26" stroke="${themeColor}" stroke-width="2.5" stroke-linecap="round"/>
-                  <circle cx="24" cy="31" r="2.5" fill="${themeColor}"/>
-                </svg>
-              </div>
-              <div class="brk-infog-hero-copy">
-                <span class="brk-infog-kicker">ESPECIFICAÇÃO COMERCIAL</span>
-                <strong class="brk-infog-headline">${heroHeadline}</strong>
-                <span class="brk-infog-subline">${heroSubline}</span>
-              </div>
-            </div>
-          </div>
-          <div class="brk-infog-metrics">
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">${getSvgIcon('ruler', themeColor, 13)}</span>
-                <span class="brk-infog-metric-label">Rendimento & Equivalência Prática</span>
-              </div>
-              <div class="brk-infog-metric-val">${yieldVal}</div>
-            </div>${b2bMetricHtml}
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">${getSvgIcon('box', themeColor, 13)}</span>
-                <span class="brk-infog-metric-label">Formato de Fornecimento & Medidas</span>
-              </div>
-              <div class="brk-infog-metric-val">${supplyFormatVal}</div>
-            </div>
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">${getSvgIcon('gear', themeColor, 13)}</span>
-                <span class="brk-infog-metric-label">${techParamLabel}</span>
-              </div>
-              <div class="brk-infog-metric-val">${techParamVal}</div>
-            </div>
-          </div>
-        </div>
-        <div class="brk-media-infobar">
-          <span class="brk-media-info-left">${getSvgIcon('ruler', themeColor, 14)} <span>Infográfico de Rendimento & Dimensionamento</span></span>
-          <span class="brk-media-info-pill">Ficha Dimensional</span>
-        </div>
-      </div>`;
-    }
-
-    const allergenSpecKeys = [
-      "Informação de Alergênicos (ANVISA)",
-      "Alerta de Alergênicos & Lactose (ANVISA)",
-      "Alerta de Alergênicos & Glúten (ANVISA)",
-      "Segurança Alimentar & Alergênicos (ANVISA)",
-      "Orientação de Alergênicos (ANVISA)",
-      "Segurança & Grau Alimentício",
-      "Segurança & Certificação",
-      "Segurança & Conformidade",
-      "Segurança & Material"
-    ];
-    let matchedAllergenKey = "";
-    let matchedAllergenVal = "";
-    for (let i = 0; i < allergenSpecKeys.length; i++) {
-      const aKey = allergenSpecKeys[i];
-      if (specsMap[aKey]) {
-        matchedAllergenKey = aKey;
-        matchedAllergenVal = specsMap[aKey];
-        break;
-      }
-      if (vtexSpecs[aKey]) {
-        matchedAllergenKey = aKey;
-        matchedAllergenVal = String(vtexSpecs[aKey]);
-        break;
-      }
-    }
-
-    const allergenLabel = String(
-      allergenInfo.label || matchedAllergenKey || "Orientação de Alergênicos & Segurança (ANVISA)"
-    ).trim();
-    const allergenVal = String(
-      allergenInfo.value ||
-      allergenInfo.alerta_alergenicos ||
-      matchedAllergenVal ||
-      "Consulte sempre a listagem oficial de ingredientes, tabela nutricional e alérgenos impressa pelo fabricante no rótulo da embalagem original."
-    ).trim();
-    const isAnvisaFood = (
-      allergenLabel.toLowerCase().includes("anvisa") ||
-      allergenLabel.toLowerCase().includes("alerg") ||
-      archetypeId === "ld_chocolates_coberturas" ||
-      archetypeId === "ld_confeitaria_ingredientes"
-    );
-    const sealKicker = isAnvisaFood ? "CONFORMIDADE REGULATÓRIA • RDC 26/2015" : "CONFORMIDADE TÉCNICA • USO SEGURO";
-    const sealHeadline = isAnvisaFood ? "Padrão ANVISA & Rotulagem Oficial" : "Grau Alimentício & Atóxico Certificado";
-    const sealPill = isAnvisaFood ? "Padrão ANVISA" : "Grau Alimentício";
-
-    const thumbHtmlAct3 = primaryImg ? `
-            <div class="brk-infog-thumb brk-stage-loupe" ${mlTrackAttrsStr}>
-              <img src="${primaryImg}" alt="${safeTitleAlt} - Inspeção de Embalagem e Lote" class="brk-infog-crop-macro" loading="lazy" referrerpolicy="no-referrer" />
-              <div class="brk-ml-zoom-layer" style="background-image: url('${primaryImg}');"></div>
-              <span class="brk-infog-thumb-badge">Inspeção 2.4x</span>
-            </div>` : "";
-
-    return `<div class="brk-desc-media brk-media-card brk-infographic-card">
-        <div class="brk-infog-header">
-          <span class="brk-infog-head-left">${getSvgIcon('shield', themeColor, 14)} <span>SEGURANÇA, CONSERVAÇÃO & PROCEDÊNCIA</span></span>
-          <span class="brk-infog-head-pill">${sealPill}</span>
-        </div>
-        <div class="brk-infog-stage">
-          <div class="brk-infog-hero">${thumbHtmlAct3}
-            <div class="brk-infog-diagram">
-              <div class="brk-infog-svg-badge">
-                <svg width="38" height="38" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <path d="M24 4L40 11V23C40 33.4 33.1 41.9 24 45C14.9 41.9 8 33.4 8 23V11L24 4Z" fill="${themeBg}" stroke="${themeColor}" stroke-width="2.5" stroke-linejoin="round"/>
-                  <path d="M17.5 24.5L22 29L31 19.5" stroke="${themeColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </div>
-              <div class="brk-infog-hero-copy">
-                <span class="brk-infog-kicker">${sealKicker}</span>
-                <strong class="brk-infog-headline">${sealHeadline}</strong>
-                <span class="brk-infog-subline">Marca ${brandLabel} • Lote Original Lacrado</span>
-              </div>
-            </div>
-          </div>
-          <div class="brk-infog-metrics">
-            <div class="brk-infog-metric-card brk-infog-metric-alert">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">${getSvgIcon('shield', '#b45309', 13)}</span>
-                <span class="brk-infog-metric-label">${allergenLabel}</span>
-              </div>
-              <div class="brk-infog-metric-val">${allergenVal}</div>
-            </div>
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">${getSvgIcon('care', themeColor, 13)}</span>
-                <span class="brk-infog-metric-label">Protocolo de Conservação & Armazenamento</span>
-              </div>
-              <div class="brk-infog-metric-val">${careTipsVal}</div>
-            </div>
-            <div class="brk-infog-metric-card">
-              <div class="brk-infog-metric-top">
-                <span class="brk-infog-metric-icon">${getSvgIcon('check', themeColor, 13)}</span>
-                <span class="brk-infog-metric-label">Garantia de Procedência & Integridade</span>
-              </div>
-              <div class="brk-infog-metric-val">Fornecido em embalagem primária original ${brandLabel}, lacrada de fábrica com identificação visível de lote e validade.</div>
-            </div>
-          </div>
-        </div>
-        <div class="brk-media-infobar">
-          <span class="brk-media-info-left">${getSvgIcon('shield', themeColor, 14)} <span>Conformidade ANVISA & Protocolo de Conservação</span></span>
-          <span class="brk-media-info-pill">Procedência Original</span>
-        </div>
-      </div>`;
   }
 
   const rawUid = String(liveP.id || liveP.master_sku || liveP.sku || "brk");
@@ -4638,8 +3934,6 @@ function getProductModeBHTML(liveP) {
           <span class="brk-media-info-pill">${infoMeta.pill}</span>
         </div>
       </div>`;
-    } else if (isLojaDoce) {
-      mediaHtml = buildClientLojaDoceInfographicCard(idx, archetypeId, themeColor, themeBg, liveP, img1 || "", safeTitleAlt, mlTrackAttrs);
     }
 
     let varNoticeHtml = "";
@@ -4724,9 +4018,7 @@ function getProductModeBHTML(liveP) {
   }
 
   // 5. Estrutura HTML Completa com CSS Embutido Responsivo
-  const trustTitle1 = isLojaDoce ? "Procedência 100% Original" : "Qualidade Oficial BRK";
-  const trustDesc1 = isLojaDoce ? `Curadoria Oficial • Marca ${brandName}` : "Matérias-primas nobres testadas";
-  let rawOutHtml = `${buildClientTrackingMarker(liveP.master_sku || liveP.sku || liveP.id, archetypeId)}
+  return `${buildClientTrackingMarker(liveP.master_sku || liveP.sku || liveP.id, archetypeId)}
 <!-- BRK GROUP - DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL SHOPIFY) -->
 <div class="brk-desc-wrapper">
   <style>
@@ -5100,197 +4392,6 @@ function getProductModeBHTML(liveP) {
     .brk-desc-media-split .brk-split-item img {
       max-height: 380px;
     }
-    .brk-infographic-card {
-      display: flex;
-      flex-direction: column;
-      background: #ffffff;
-    }
-    .brk-infog-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding: 10px 14px;
-      background: ${themeBg};
-      border-bottom: 1px solid ${themeColor}28;
-    }
-    .brk-infog-head-left {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 10.5px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      color: #0f172a;
-      min-width: 0;
-    }
-    .brk-infog-head-left span {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .brk-infog-head-pill {
-      flex-shrink: 0;
-      font-size: 10px;
-      font-weight: 800;
-      color: ${themeColor};
-      background: #ffffff;
-      border: 1px solid ${themeColor}38;
-      padding: 2px 8px;
-      border-radius: 9999px;
-      text-transform: uppercase;
-    }
-    .brk-infog-stage {
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-    }
-    .brk-infog-hero {
-      display: flex;
-      align-items: stretch;
-      gap: 12px;
-    }
-    .brk-infog-thumb {
-      position: relative;
-      width: 112px;
-      min-height: 104px;
-      flex-shrink: 0;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 4px;
-    }
-    .brk-infog-thumb img {
-      width: 100%;
-      height: 96px;
-      object-fit: contain;
-      border-radius: 8px;
-      transition: transform 0.3s ease;
-    }
-    .brk-infog-thumb img.brk-infog-crop-zoom {
-      transform: scale(1.22);
-      transform-origin: 50% 45%;
-    }
-    .brk-infog-thumb img.brk-infog-crop-macro {
-      transform: scale(1.28);
-      transform-origin: 50% 60%;
-    }
-    .brk-infog-thumb-badge {
-      position: absolute;
-      bottom: 5px;
-      right: 5px;
-      z-index: 3;
-      background: rgba(15, 23, 42, 0.82);
-      color: #ffffff;
-      font-size: 9px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 9999px;
-      pointer-events: none;
-    }
-    .brk-infog-diagram {
-      flex: 1;
-      min-width: 0;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 10px 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
-    }
-    .brk-infog-svg-badge {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      background: ${themeBg};
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .brk-infog-hero-copy {
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      gap: 2px;
-    }
-    .brk-infog-kicker {
-      font-size: 9.5px;
-      font-weight: 800;
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
-      color: ${themeColor};
-    }
-    .brk-infog-headline {
-      font-size: 13px;
-      font-weight: 800;
-      color: #0f172a;
-      line-height: 1.25;
-    }
-    .brk-infog-subline {
-      font-size: 11px;
-      color: #64748b;
-      line-height: 1.25;
-    }
-    .brk-infog-metrics {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .brk-infog-metric-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-left: 3px solid ${themeColor};
-      border-radius: 10px;
-      padding: 9px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .brk-infog-metric-card.brk-infog-metric-alert {
-      background: #fffbeb;
-      border-color: #fde68a;
-      border-left: 3px solid #d97706;
-    }
-    .brk-infog-metric-top {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .brk-infog-metric-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .brk-infog-metric-label {
-      font-size: 10.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      color: #334155;
-    }
-    .brk-infog-metric-card.brk-infog-metric-alert .brk-infog-metric-label {
-      color: #92400e;
-    }
-    .brk-infog-metric-val {
-      font-size: 12px;
-      line-height: 1.45;
-      color: #1e293b;
-      font-weight: 600;
-    }
-    .brk-infog-metric-card.brk-infog-metric-alert .brk-infog-metric-val {
-      color: #78350f;
-    }
     .brk-desc-text {
       flex: 1.15;
       min-width: 0;
@@ -5597,17 +4698,6 @@ function getProductModeBHTML(liveP) {
         flex-direction: row;
         gap: 8px;
       }
-      .brk-infog-hero {
-        flex-direction: column;
-        gap: 8px;
-      }
-      .brk-infog-thumb {
-        width: 100%;
-        min-height: 120px;
-      }
-      .brk-infog-thumb img {
-        height: 110px;
-      }
       .brk-media-infobar {
         padding: 8px 10px;
         font-size: 10.5px;
@@ -5680,13 +4770,13 @@ ${specsSection}
 
 ${sizeGuideHtml}
 
-  <!-- Selos de Confiança e Garantia -->
+  <!-- Selos de Confiança e Garantia BRK -->
   <div class="brk-desc-trust-bar">
     <div class="brk-trust-item">
       <span class="brk-trust-svg">${getSvgIcon('shield', themeColor, 24)}</span>
       <div>
-        <div class="brk-trust-title">${trustTitle1}</div>
-        <div class="brk-trust-desc">${trustDesc1}</div>
+        <div class="brk-trust-title">Qualidade Oficial BRK</div>
+        <div class="brk-trust-desc">Matérias-primas nobres testadas</div>
       </div>
     </div>
     <div class="brk-trust-item">
@@ -5703,36 +4793,23 @@ ${copyrightHtml}
 </div>
 
 ${schemaJsonLd}`;
-
-  if (isLojaDoce) {
-    rawOutHtml = rawOutHtml
-      .replace(/\s*\.brk-desc-block\.brk-desc-block-text-only\s*\{[^}]*\}/g, "")
-      .replace(/<!--\s*BRK-MODO-B/g, "<!-- VTEX-MODO-B")
-      .replace(/<!--\s*BRK GROUP[^>]*-->/g, "<!-- DESCRICAO VERTICALIZADA EM 3 ATOS (PADRAO OFICIAL VTEX) -->")
-      .replace(/brk-/g, "vtex-")
-      .replace(/brk360_/g, "vtex360_")
-      .replace(/\b(?:BRK|Loja\s+Doce(?:\s+Import)?)\b/gi, "");
-  }
-  return rawOutHtml;
 }
 
 // Delegação global para Lupa Dinâmica Estilo Mercado Livre (acompanha o mouse em tempo real nos 3 Atos sem travar)
 if (typeof document !== "undefined" && !window.__BRK_ML_LOUPE_BOUND) {
   window.__BRK_ML_LOUPE_BOUND = true;
   const updateBrkStageCoords = (e, clientX, clientY) => {
-    const stage = e.target && e.target.closest
-      ? e.target.closest(".brk-stage-loupe, .brk-stage-360, .brk-media-stage, .vtex-stage-loupe, .vtex-stage-360, .vtex-media-stage")
-      : null;
+    const stage = e.target && e.target.closest ? e.target.closest(".brk-stage-loupe, .brk-stage-360, .brk-media-stage") : null;
     if (!stage) return;
     const r = stage.getBoundingClientRect();
     if (!r.width || !r.height) return;
     const x = Math.max(0, Math.min(100, ((clientX - r.left) / r.width) * 100)).toFixed(2) + "%";
     const y = Math.max(0, Math.min(100, ((clientY - r.top) / r.height) * 100)).toFixed(2) + "%";
-    const layers = stage.querySelectorAll(".brk-ml-zoom-layer, .vtex-ml-zoom-layer");
+    const layers = stage.querySelectorAll(".brk-ml-zoom-layer");
     for (let i = 0; i < layers.length; i++) {
       layers[i].style.backgroundPosition = x + " " + y;
     }
-    const cursor = stage.querySelector(".brk-ml-cursor, .vtex-ml-cursor");
+    const cursor = stage.querySelector(".brk-ml-cursor");
     if (cursor) {
       cursor.style.left = x;
       cursor.style.top = y;
